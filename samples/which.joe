@@ -1,0 +1,66 @@
+:args.
+
+ALLMATCHES := 0.
+nArgs := args length.
+OPTIND := 1.
+
+!while { (OPTIND < nArgs) and {args get OPTIND startsWith "-"} },{
+   opt := args get OPTIND.
+   !switch opt
+   case "-a",{
+      ALLMATCHES := 1.
+   }
+   default {
+      !println "Usage: ", (args get 0), " [-a] args".
+      !systemExit 2.
+   }
+   endSwitch.
+   OPTIND := OPTIND + 1.
+}.
+
+
+ALLRET:=0.
+
+!if (OPTIND = nArgs),{
+   ALLRET := 1.
+}.
+
+PATH := !systemGetenv "PATH".
+LIST := PATH split ":".
+
+!while { (OPTIND < nArgs) },{
+   RET:=1.
+   PROGRAM := args get OPTIND.
+   ! if (PROGRAM contains "/"),{
+      !if ((!exec "test","-f",PROGRAM = 0) and
+           {!exec "test","-x",PROGRAM = 0 }),{
+         !println PROGRAM.
+         RET:=0.
+      }
+   },{
+      idx := 0.
+      !while {idx < (LIST length)} , {
+         ELEMENT := (LIST get idx).
+         !if (0 = (ELEMENT length)), {
+            ELEMENT := ".".
+         }.
+         !if ((!exec "test","-f",(ELEMENT+"/"+PROGRAM) = 0) and
+              {!exec "test","-x",(ELEMENT+"/"+PROGRAM) = 0 }),{
+            !println ELEMENT,"/",PROGRAM.
+            RET:=0.
+            !if (ALLMATCHES <> 1), {
+               idx := LIST length.
+            }.
+         }.
+
+         idx := idx + 1
+      }.
+   }.
+
+   OPTIND := OPTIND + 1.
+   !if (RET <> 0),{
+      ALLRET:=1.
+   }.
+}.
+   
+!systemExit ALLRET.
