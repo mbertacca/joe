@@ -1,0 +1,66 @@
+#! /usr/bin/java JavaObjectsExecutor
+JDBC_DRIVER := "org.apache.derby.jdbc.EmbeddedDriver".
+JDBC_URL := "jdbc:derby:memory:testdb;create=true".
+USER := "".
+PASS := "".
+
+conn := conn.
+stmt := stmt.
+rs := rs.
+
+exc := !try {
+   !getClass JDBC_DRIVER.
+
+   conn := !getClassRef "java.sql.DriverManager"
+             getConnection JDBC_URL,USER,PASS.
+
+   stmt := conn createStatement.
+
+   stmt execute ("CREATE TABLE DBUSER("
+               + "USER_ID DECIMAL(5) NOT NULL, "
+               + "FIRSTNAME VARCHAR(20) NOT NULL, "
+               + "LASTNAME VARCHAR(20) NOT NULL, "
+               + "AGE DECIMAL(3) NOT NULL, "
+               + "PRIMARY KEY (USER_ID) "
+               + ")").
+
+   stmt executeUpdate ("INSERT INTO DBUSER VALUES ("
+               + "1,'John','Doe', 31"
+               + ")").
+   stmt executeUpdate ("INSERT INTO DBUSER VALUES ("
+               + "2,'Jane','Doe', 29"
+               + ")").
+   stmt executeUpdate ("INSERT INTO DBUSER VALUES ("
+               + "3,'Mary','Johnson', 36"
+               + ")").
+   stmt executeUpdate ("INSERT INTO DBUSER VALUES ("
+               + "4,'Bill','Smith', 34"
+               + ")").
+
+   rs := stmt executeQuery "SELECT * FROM DBUSER where user_id > 0".
+
+   !while {rs next},{
+      !println "USER_ID=",(rs getObject("USER_ID")),
+             ", FIRSTNAME=",(rs getObject("FIRSTNAME")),
+             ", LASTNAME=",(rs getObject("LASTNAME")),
+             ", AGE=",(rs getObject("AGE")),
+             .
+   }.
+   rs close.
+   stmt close.
+   conn close.
+}, {:exc.
+   !println exc.
+   !if ((!isNull rs) not),{
+      !println "Closing rs".
+      rs close.
+   }.
+   !if ((!isNull stmt) not),{
+      !println "Closing stmt".
+      stmt close.
+   }.
+   !if ((!isNull conn) not),{
+      !println "Closing conn".
+      conn close.
+   }.
+}.
