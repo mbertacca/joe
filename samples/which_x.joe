@@ -2,16 +2,6 @@
 
 :args.
 
-fileExists := {:fileName.
-   !try {
-      f := !newInstance "java.io.File",fileName.
-      f canExecute.
-   },{:exc.
-      !println exc.
-      1 = 0.
-   }.
-}.
-
 ALLMATCHES := 0.
 nArgs := args length.
 OPTIND := 1.
@@ -37,17 +27,15 @@ ALLRET:=0.
    ALLRET := 1.
 }.
 
-FILE_SEPARATOR := !getStaticField "java.io.File","separator".
-PATH_SEPARATOR := !getStaticField "java.io.File","pathSeparator".
-
 PATH := !systemGetenv "PATH".
-LIST := PATH split PATH_SEPARATOR.
+LIST := PATH split ":".
 
 !while { (OPTIND < nArgs) },{
    RET:=1.
    PROGRAM := args get OPTIND.
-   ! if (PROGRAM contains FILE_SEPARATOR),{
-      !if (fileExists exec PROGRAM), {
+   ! if (PROGRAM contains "/"),{
+      !if ((!exec "test","-f",PROGRAM = 0) and
+           {!exec "test","-x",PROGRAM = 0 }),{
          !println PROGRAM.
          RET:=0.
       }
@@ -58,8 +46,9 @@ LIST := PATH split PATH_SEPARATOR.
          !if (0 = (ELEMENT length)), {
             ELEMENT := ".".
          }.
-         !if (fileExists exec (ELEMENT+FILE_SEPARATOR+PROGRAM)),{
-            !println ELEMENT,FILE_SEPARATOR,PROGRAM.
+         !if ((!exec "test","-f",(ELEMENT+"/"+PROGRAM) = 0) and
+              {!exec "test","-x",(ELEMENT+"/"+PROGRAM) = 0 }),{
+            !println ELEMENT,"/",PROGRAM.
             RET:=0.
             !if (ALLMATCHES <> 1), {
                idx := LIST length.
