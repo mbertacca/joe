@@ -1,3 +1,5 @@
+#! /usr/bin/java JavaObjectsExecutor
+
 :args.
 
 ALLMATCHES := 0.
