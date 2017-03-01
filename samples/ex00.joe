@@ -1,0 +1,3 @@
+sysout := !getStaticField "java.lang.System","out".
+
+sysout println "Hello, World!".

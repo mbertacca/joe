@@ -1,0 +1,22 @@
+pkg_util := "java.util.".
+now :=  !newInstance (pkg_util + "Date") toString.
+
+!println (now substring 0,10).
+!while {now > "A"},{ !println now ; now := "0" }.
+
+sysout := !getStaticField "java.lang.System","out".
+sysout println (">>" + (sysout toString) + "<<").
+
+*> invocation of a static method, System.getProperty
+
+system_cls := !getClass "java.lang.System".
+string_cls := !getClass "java.lang.String".
+method := system_cls getMethod "getProperty",string_cls.
+res := method invoke system_cls,"java.class.path".
+sysout println (">>" + res + "<<").
+
+res := !getClassRef "java.lang.System" getProperty "java.vendor".
+sysout println ("<<" + res + ">>").
+
+system := !newInstance "com.veryant.joe.ClassReference",system_cls.
+sysout println (system getProperty "user.home").

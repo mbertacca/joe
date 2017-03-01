@@ -1,0 +1,7 @@
+a := !execGetOut "sh","-c","ls *".
+!println "[",a,"]".
+
+a := !execGetOut "id","-gn".
+!println "[",a,"]".
+
+!run "ex01.joe".
