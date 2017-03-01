@@ -1,0 +1,12 @@
+#! /usr/bin/java com.veryant.joe.JavaObjectsExecutor
+
+:args.
+logo := !newInstance "Logo".
+logo setTitle (args get 0).
+
+logo setDelay 10.
+len := 2.
+!while {len < 450},{
+   logo forward len right 137.5.
+   len := (len + 1.2).
+}.

@@ -1,0 +1,43 @@
+
+:args.
+logo := !newInstance "Logo".
+logo setTitle (args get 0).
+
+dim := 224.0.
+pensize := dim / 32.
+logo setpensize 1.
+
+inyan := {inyan:size.
+   !if (size < 3),{ !break "inyan". }.
+   green := 255 - ((size/dim) * 255) intValue.
+   blue := ((size/dim) * 255) intValue.
+   logo setpencolor 0,green, blue
+        penup ;
+        left 90
+        forward (size / 2)
+        pendown ;
+        arc 180,(size / 2)
+        right 90
+   .
+   inyan exec (size / 2).
+   logo setpencolor 0,green,blue
+        penup ;
+        right 90
+        forward size
+        pendown ;
+        arc 180,(size / 2)
+        right 90
+   .
+   inyan exec (size / 2).
+   logo setpencolor 0,green,blue
+        left 90
+        penup ;
+        back (size / 2)
+        left 90
+   .
+   *>inyan exec (size / 1.2).
+}.
+
+logo arc 360,dim.
+inyan exec dim.
+logo hideturtle.

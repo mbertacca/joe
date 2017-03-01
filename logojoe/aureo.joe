@@ -1,0 +1,36 @@
+#! /usr/bin/java com.veryant.joe.JavaObjectsExecutor
+
+:args.
+logo := !newInstance "Logo".
+logo setTitle (args get 0).
+
+math := !getClassRef "java.lang.Math".
+
+phi := (1 + (math sqrt 5.0)) / 2.
+
+rect := {rect:width.
+   !if (width > 400),{!break "rect".}.
+   lside := width * phi.
+   logo 
+        forward (lside - width)
+
+        setpensize 2
+        arc 90, width
+        setpensize 1
+
+        forward width
+        right 90
+        forward width
+        right 90
+        forward lside
+        right 90
+   .
+   rect exec lside.
+}.
+
+logo penup ;
+     setxy 140,-100
+     setDelay 50
+     pendown .
+
+rect exec 5.

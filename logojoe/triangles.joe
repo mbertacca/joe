@@ -1,0 +1,36 @@
+
+:args.
+logo := !newInstance "Logo".
+logo setDelay 9 setTitle (args get 0).
+
+dim := 384.
+pensize := dim / 32.
+logo setpensize pensize.
+
+triangle := {triangle:size.
+   !if (size < pensize),{ !break "triangle". }.
+   here := logo pos.
+   logo setpencolor 0,(255 -((size/dim) * 255) intValue),
+                            ((size/dim) * 255 intValue)
+        penup ;
+        back (size * 0.289)
+        left 90
+        back (size / 2)
+        pendown ;
+        forward size
+        right 120
+        forward size
+        right 120
+        forward size
+        right 120
+        penup ;
+        forward (size/2)
+        right 90
+        forward (size * 0.289)
+        left 6
+   .
+   triangle exec (size / 1.2).
+}.
+
+triangle exec dim.
+logo hideturtle.

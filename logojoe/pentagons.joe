@@ -1,0 +1,39 @@
+:args.
+logo := !newInstance "Logo".
+logo setDelay 9 setTitle (args get 0).
+
+dim := 128.
+pensize := dim / 32.
+logo setpensize pensize.
+
+pentagon := {pentagon:size.
+   !if (size < pensize),{ !break "pentagon". }.
+   here := logo pos.
+   logo setpencolor 0,(255 -((size/dim) * 255) intValue),
+                            ((size/dim) * 255 intValue)
+        penup ;
+        back (size * 0.688)
+        left 90
+        back (size / 2)
+        pendown ;
+        forward size
+        right 72
+        forward size
+        right 72
+        forward size
+        right 72
+        forward size
+        right 72
+        forward size
+        penup ;
+        right 72
+        forward (size / 2)
+        right 90
+        forward (size * 0.688)
+        left 9
+   .
+   pentagon exec (size / 1.1).
+}.
+
+pentagon exec dim.
+logo hideturtle.

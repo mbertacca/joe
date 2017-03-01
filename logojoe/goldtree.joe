@@ -1,0 +1,34 @@
+#! /usr/bin/java com.veryant.joe.JavaObjectsExecutor
+
+:args.
+logo := !newInstance "Logo".
+logo setTitle (args get 0).
+math := !getClassRef "java.lang.Math".
+
+phi := (1 + (math sqrt 5.0)) / 2.
+angle := 90 / (1 + phi).
+
+*>logo setDelay 900.
+
+tree := {:size.
+   !if (size > 5),{
+      currPen := logo getpencolor.
+      logo setpencolor ((30 + size) intValue),((250 - size)intValue),0.
+      bl := size / phi.
+      logo forward size
+           left angle.
+      tree exec bl.
+      logo right angle.
+      tree exec bl.
+      logo forward (bl / phi).
+      logo right angle.
+      tree exec bl.
+      logo left angle.
+      logo back (bl / phi).
+      logo back size.
+      logo setpencolor currPen.
+   }
+}.
+
+logo clearscreen ; setxy 0,-220. 
+tree exec 150.

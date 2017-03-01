@@ -1,0 +1,27 @@
+:args.
+logo := !newInstance "Logo".
+logo setDelay 9 setTitle (args get 0).
+
+bam1 := {
+  l := 15.
+  w := 15.
+  r := 120.
+  n := 1.
+  repcount := 0.
+  !while {repcount := repcount + 1. repcount <= 100},{
+     logo setpencolor (logo random 192 intValue),
+                      (logo random 192 intValue),
+                      (logo random 192 intValue)
+          forward l
+          right 90
+          forward w
+          right 90
+          right r
+     .
+     l := l + n.
+     w := w + n.
+   }.
+   logo penup ; home ; pendown.
+}.
+
+bam1 exec.

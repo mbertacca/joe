@@ -1,0 +1,38 @@
+
+:args.
+logo := !newInstance "Logo".
+logo setDelay 9 setTitle (args get 0).
+
+dim := 384.
+pensize := dim / 32.
+logo setpensize pensize.
+
+square := {square:size.
+   !if (size < pensize),{ !break "square". }.
+   here := logo pos.
+   logo setpencolor 0,(255 -((size/dim) * 255) intValue),
+                            ((size/dim) * 255 intValue)
+        penup ;
+        back (size / 2)
+        left 90
+        back (size / 2)
+        pendown ;
+        forward size
+        right 90
+        forward size
+        right 90
+        forward size
+        right 90
+        forward size
+        right 90
+        penup ;
+        forward (size / 2)
+        right 90
+        forward (size / 2)
+        left 12.5
+   .
+   square exec (size / 1.2).
+}.
+
+square exec dim.
+logo hideturtle.

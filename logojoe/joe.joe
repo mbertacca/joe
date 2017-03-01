@@ -1,0 +1,92 @@
+:args.
+logo := !newInstance "Logo".
+logo setDelay 50 setTitle (args get 0).
+
+dim := 128.
+pensize := dim / 16.
+logo setpensize pensize.
+
+
+/*
+logo penup ;
+     back ((dim / 2) - 1)
+     left 90
+     back (dim / 2)
+     pendown ;
+     forward dim
+     right 90
+     forward (dim - 1)
+     right 90
+     forward (dim - 1)
+     right 90
+     forward (dim - 1)
+     right 90
+     penup ;
+     home ;
+   .
+*/
+
+step := dim / 16.
+
+
+logo penup ;
+     setpencolor 0,64,128
+     forward (step * 3)
+     left 90
+     forward (step * 4)
+     pendown ;
+     left 108
+     arc 320, (step * 3)
+     right 18
+     penup ;
+     forward (step * 3)
+     pendown ;
+     forward (step * 3)
+     penup ;
+     forward step
+     pendown ;
+     arc 180,step
+     penup ;
+     forward step
+     left 90
+     pendown ;
+     forward (step * 2)
+     left 90
+     forward (step * 3)
+     back (step)
+     right 90
+     forward (step * 3)
+     left 72
+     forward (step)
+     left 180
+     forward (step * 3)
+     left 108
+     forward (step * 4)
+     penup ;
+     forward step
+     pendown ;
+     arc 180,step
+     penup ;
+     forward step
+     left 90
+     pendown ;
+     forward (step * 2)
+     left 90
+     forward (step * 3)
+     right 108
+     forward (step * 2)
+     penup ;
+     left 72
+     forward (step * 2)
+     right 72
+     pendown ;
+     arc 98,(step * 2)
+     penup ;
+     forward (step * 2)
+     left 108
+     pendown ;
+     forward (step * 4)
+
+     hideturtle ;
+.
+

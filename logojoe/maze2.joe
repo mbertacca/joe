@@ -1,0 +1,111 @@
+#! /usr/bin/java com.veryant.joe.JavaObjectsExecutor
+
+:args.
+logo := !newInstance "Logo".
+logo setantialiasingoff ; setTitle (args get 0).
+
+empty := logo colorunder.
+
+dimx := 30.
+dimy := 24.
+
+step := 16.
+startx := (dimx / -2) * step.
+starty := (dimy / -2) * step.
+endx :=   (dimx /  2) * step.
+endy :=   (dimy /  2) * step.
+
+logo setpensize (step / 4).
+logo setDelay 0.
+
+logo penup ;
+     setxy startx,starty
+     pendown ;
+     forward (endy - starty)
+     right 90
+     forward (endx - startx)
+     right 90
+     forward (endy - starty)
+     right 90
+     forward (endx - startx)
+     right 90
+.
+
+
+line := {line:x,y.
+  !if (x < 2 or (y < 2)),{ !break "line". }.
+  my := logo random (y - 1) + 1 intValue.
+  hx := logo random (x - 1) intValue.
+
+  logo penup ;
+       forward (step * my)
+       right 90
+       pendown ;
+
+       forward (step * hx)
+       penup ;
+       forward step
+       pendown ;
+       forward (step * (x - hx - 1))
+       penup ;
+       back (step * x)
+       .
+
+  line exec my,x.
+
+  logo penup ;
+       left 90
+       forward (step * (y - my))
+       right 90.
+
+  line exec (y - my),x.
+
+  logo penup ;
+       left 90
+       back (step * y)
+       .
+}.
+
+solve := {
+   here := null.
+   green := !newInstance "java.awt.Color",0,192,0.
+   ! while {
+      here := logo pos.
+      ((here get 0) = exitx) and ((here get 1) = exity) not.
+   },{
+      logo left 90
+           penup ;
+           forward (step / 2).
+      under := logo colorunder.
+      logo back (step / 2)
+           pendown.
+      !switch under
+      case empty,{
+         logo setpencolor green
+              forward step.
+      }
+      case green,{
+         logo setpencolor empty
+              forward step.
+      } default {
+         logo left 180.
+      }.
+   }.
+}.
+
+logo penup ;
+     setxy startx, starty
+     seth 0.
+logo setDelay 0.
+line exec dimx,dimy.
+
+
+exitx := endx - (step/2).
+exity := endy - (step/2).
+
+logo penup ;
+     setpencolor 0,128,0
+     setxy (startx + (step / 2) ), (starty + (step / 2) )
+     seth 0.
+solve exec.
+
