@@ -1,5 +1,5 @@
 # Java Objects Executor: a polymorphic script environment.
-(PRELIMINARY DRAFT: this project is in its early stage, we still have decisions to take (among which the license type), therefore no source code is released yet)
+(PRELIMINARY DRAFT: this project is in its early stage)
 
 Many applications in the real world are constituted by a mix of programs and scripts: programs communicate with the user and make the calculations while the scripts do the administrative tasks communicating mainly with the OS.
 
