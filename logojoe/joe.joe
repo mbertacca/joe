@@ -1,5 +1,5 @@
 :args.
-logo := !newInstance "Logo".
+logo := !newInstance "Logo",128,128.
 logo setDelay 50 setTitle (args get 0).
 
 dim := 128.
@@ -76,17 +76,18 @@ logo penup ;
      right 108
      forward (step * 2)
      penup ;
-     left 72
+     left 90
      forward (step * 2)
      right 72
      pendown ;
-     arc 98,(step * 2)
+     arc 108,(step * 2)
      penup ;
      forward (step * 2)
-     left 108
+     left 90
      pendown ;
-     forward (step * 4)
+     forward (step * 3)
 
      hideturtle ;
+     saveImage "joe" ;
 .
 
