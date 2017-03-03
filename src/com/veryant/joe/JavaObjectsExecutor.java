@@ -118,6 +118,8 @@ public class JavaObjectsExecutor {
             }
             fr.close();
             parser.compile (tokens).exec(new WArray(argv));
+         } catch (BreakEndException ex) {
+            Return = 0;
          } catch (ExecException ex) {
             throw ex;
          } catch (BreakCmdException ex) {
