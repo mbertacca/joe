@@ -1,0 +1,103 @@
+:args.
+logo := !newInstance "Logo".
+logo setDelay 00 setTitle (args get 0).
+
+dim := 256.
+pensize := dim / 32.
+
+circle := {:size.
+   logo pendown ; arc 360, size penup.
+}.
+square := {:size.
+   logo penup ;
+        forward (size / 2)
+        right 90
+        pendown ;
+        forward (size / 2)
+        right 90
+        forward size
+        right 90
+        forward size
+        right 90
+        forward size
+        right 90
+        forward (size / 2)
+
+        penup ;
+        left 90
+        back (size / 2)
+    .
+}.
+
+pentagon := {:size.
+   seglen := size * 1.618.
+   logo penup ;
+        forward (size * 0.794)
+        pendown ;
+        right 126
+        forward size
+        right 72
+        forward size
+        right 72
+        forward size
+        right 72
+        forward size
+        right 72
+        forward size
+        penup ;
+        left 54
+        back (size * 0.794)
+}.
+star := {:size.
+   seglen := size * 1.618.
+   logo penup ;
+        forward (size * 0.794)
+        pendown ;
+        right 162
+        pendown ;
+        forward seglen
+        right 144
+        forward seglen
+        right 144
+        forward seglen
+        right 144
+        forward seglen
+        right 144
+        forward seglen
+        left 18
+        penup ;
+        back (size * 0.794)
+   .
+}.
+
+shapes := !array circle,square,pentagon,star.
+
+draw := {:size.
+   logo repeat 16,{
+      shape := logo random (shapes length) intValue.
+      dist := logo random size.
+      heading := logo random 60.
+      logo seth heading
+           setpencolor (logo random 192 intValue),
+                       (logo random 192 intValue),
+                       (logo random 192 intValue).
+      logo repeat 3,{
+         logo penup ; forward dist .
+         shapes get shape exec (dist / 6).
+         logo penup ;
+            back dist
+            right (heading).
+         logo penup ; forward dist .
+         shapes get shape exec (dist / 6)
+            back dist
+            right (120 - heading).
+      }.
+      logo left heading penup.
+   }.
+}.
+
+logo repeat 1,{
+   logo clearscreen ; setpensize pensize.
+   draw exec dim.
+   logo setDelay 1000 forward 0 setDelay 0.
+}
