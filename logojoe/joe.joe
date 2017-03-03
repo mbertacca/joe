@@ -88,6 +88,6 @@ logo penup ;
      forward (step * 3)
 
      hideturtle ;
-     saveImage "joe" ;
+     *>saveImage "joe" ;
 .
 

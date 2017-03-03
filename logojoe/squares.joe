@@ -7,8 +7,8 @@ dim := 384.
 pensize := dim / 32.
 logo setpensize pensize.
 
-square := {square:size.
-   !if (size < pensize),{ !break "square". }.
+square := {:size.
+   !if (size < pensize),{ logo hideturtle ; stop. }.
    here := logo pos.
    logo setpencolor 0,(255 -((size/dim) * 255) intValue),
                             ((size/dim) * 255 intValue)

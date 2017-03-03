@@ -8,8 +8,8 @@ math := !getClassRef "java.lang.Math".
 
 phi := (1 + (math sqrt 5.0)) / 2.
 
-rect := {rect:width.
-   !if (width > 400),{!break "rect".}.
+rect := {:width.
+   !if (width > 400),{logo stop.}.
    lside := width * phi.
    logo 
         forward (lside - width)

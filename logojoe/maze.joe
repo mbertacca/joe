@@ -77,9 +77,8 @@ comb := !array
    
 go := {
    ord := comb get ((logo random 24) intValue).
-   i := -1.
-   !while {i := i + 1. i < 4 },{
-      logo seth ((ord get i) * 90)
+   logo repeat 4,{:repcount.
+      logo seth ((ord get (repcount - 1)) * 90)
            penup ;
            forward step.
       under := logo colorunder.
@@ -88,21 +87,20 @@ go := {
       !if (under = empty), {
          logo forward step.
          go exec.
-         logo seth ((ord get i) * 90) back step.
+         logo seth ((ord get (repcount - 1)) * 90) back step.
       }.
    }.
 }.
 
 go exec.
 
-solve := {solve:dir.
+solve := {:dir.
    here := logo pos.
    !if (((here get 0) = exitx) and ((here get 1) = exity)),{
-       null.
-       !break "solve".
+       logo stop.
    }.
-   i := -90.
-   !while {i := i + 90. i < 360 },{wnext:.
+   logo repeat 4, {wnext:repcount.
+      i := (repcount - 1) * 90.
       !if (i = dir),{
          !break "wnext".
       }.

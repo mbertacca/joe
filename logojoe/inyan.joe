@@ -35,7 +35,6 @@ inyan := {inyan:size.
         back (size / 2)
         left 90
    .
-   *>inyan exec (size / 1.2).
 }.
 
 logo arc 360,dim.

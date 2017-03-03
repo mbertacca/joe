@@ -6,7 +6,7 @@ logo setTitle (args get 0).
 
 logo setDelay 10.
 len := 2.
-!while {len < 450},{
+logo repeat 450,{
    logo forward len right 137.5.
    len := (len + 1.2).
 }.

@@ -11,7 +11,7 @@ logo penup ;
      setpensize 2
      pendown.
 repcount := 1.
-!while { repcount <= 1800},{
+logo repeat 1800,{:repcount.
  logo right repcount
       forward 6
       left repcount

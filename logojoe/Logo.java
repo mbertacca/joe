@@ -19,6 +19,11 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import com.veryant.joe.Block;
+import com.veryant.joe.BreakEndException;
+import com.veryant.joe.BreakLoopException;
+import com.veryant.joe.WInteger;
+
 public class Logo extends JFrame {
    private static class Turtle extends Point2D.Double {
       private boolean show;
@@ -471,6 +476,19 @@ public class Logo extends JFrame {
    public Logo saveImage (String name, String ext) throws IOException {
       canvas.saveImage (name, ext);
       return this;
+   }
+   public Logo repeat (int n, Block blk) throws Exception {
+      for (int repcount = 1; repcount <= n; repcount++) {
+         try {
+            blk.exec (new WInteger (repcount));
+         } catch (BreakLoopException _ex) {
+            break;
+         }
+      }
+      return this;
+   }
+   public Logo stop () throws Exception {
+      throw new BreakEndException ();
    }
    public Logo exit () {
       setVisible (false);

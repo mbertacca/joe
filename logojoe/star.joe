@@ -7,8 +7,7 @@ bam1 := {
   w := 15.
   r := 120.
   n := 1.
-  repcount := 0.
-  !while {repcount := repcount + 1. repcount <= 100},{
+  logo repeat 100,{:repcount.
      logo setpencolor (logo random 192 intValue),
                       (logo random 192 intValue),
                       (logo random 192 intValue)

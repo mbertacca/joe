@@ -6,8 +6,8 @@ dim := 128.
 pensize := dim / 32.
 logo setpensize pensize.
 
-pentagon := {pentagon:size.
-   !if (size < pensize),{ !break "pentagon". }.
+pentagon := {:size.
+   !if (size < pensize),{ logo hideturtle ; stop. }.
    here := logo pos.
    logo setpencolor 0,(255 -((size/dim) * 255) intValue),
                             ((size/dim) * 255 intValue)
@@ -36,4 +36,3 @@ pentagon := {pentagon:size.
 }.
 
 pentagon exec dim.
-logo hideturtle.
