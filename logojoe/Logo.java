@@ -1,6 +1,22 @@
-// import java.awt.*;       // Using AWT's Graphics and Color
-// import java.awt.event.*; // Using AWT event classes and listener interfaces
-// import javax.swing.*;    // Using Swing's components and containers
+/*
+ *
+ * This source file is part of the "Java Objects Executor" open source project
+ *
+ * Copyright 2017 Veryant and Marco Bertacca
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -43,6 +59,7 @@ public class Logo extends JFrame {
       private double direction;
       private int delay = 0;
       private int penSize = 1;
+      private boolean xormode;
 
       Canvas (int width, int height) {
          this.width = width;
@@ -53,6 +70,14 @@ public class Logo extends JFrame {
       Turtle newturtle () {
          return new Turtle (width / 2, height / 2);
       }
+      void setXORMode () {
+         xormode = true;
+         imgG2.setXORMode(currBg);
+      }
+      void setPaintMode () {
+         xormode = false;
+         imgG2.setPaintMode();
+      }
       void home () {
          Turtle t = newturtle();
          movePenTo (t);
@@ -61,19 +86,25 @@ public class Logo extends JFrame {
          direction = 0;
       }
       void clearScreen () {
-         image = new BufferedImage (width,height,BufferedImage.TYPE_INT_ARGB);
-         imgG2 = image.createGraphics();
-         imgG2.setColor (currPen);
-         imgG2.setColor (currBg);
-         imgG2.fillRect (0, 0, width, height);
-         imgG2.setColor (currPen);
-         imgG2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                                RenderingHints.VALUE_ANTIALIAS_ON);
+         xormode = false;
+         setbackground (Color.white);
+         imgG2.setColor (Color.black);
          currTurtle = newturtle();
          currTurtle.show = true;
          direction = 0;
          penDown = true;
          penSize = 1;
+      }
+      void setbackground (Color bc) {
+         currBg = bc;
+         image = new BufferedImage (width,height,BufferedImage.TYPE_INT_ARGB);
+         imgG2 = image.createGraphics();
+         imgG2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                                RenderingHints.VALUE_ANTIALIAS_ON);
+         imgG2.setColor (currBg);
+         imgG2.fillRect (0, 0, width, height);
+         if (xormode)
+            setXORMode();
       }
       void drawTurtle (Graphics g) {
          if (currTurtle.show) {
@@ -453,6 +484,21 @@ public class Logo extends JFrame {
       canvas.clearScreen ();
       return this;
    }
+   public Logo setPaintMode () {
+      canvas.setPaintMode ();
+      return this;
+   }
+   public Logo setXORMode () {
+      canvas.setXORMode ();
+      return this;
+   }
+   public Logo setbackground (Color c) {
+      canvas.setbackground (c);
+      return this;
+   }
+   public Logo setbackground (int r, int g, int b) {
+      return setbackground (new Color (r, g, b));
+   }
    public Logo home () {
       canvas.home ();
       return this;
@@ -479,6 +525,16 @@ public class Logo extends JFrame {
    }
    public Logo repeat (int n, Block blk) throws Exception {
       for (int repcount = 1; repcount <= n; repcount++) {
+         try {
+            blk.exec (new WInteger (repcount));
+         } catch (BreakLoopException _ex) {
+            break;
+         }
+      }
+      return this;
+   }
+   public Logo forever (Block blk) throws Exception {
+      for (int repcount = 1; ; repcount++) {
          try {
             blk.exec (new WInteger (repcount));
          } catch (BreakLoopException _ex) {

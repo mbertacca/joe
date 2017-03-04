@@ -1,6 +1,6 @@
 :args.
-logo := !newInstance "Logo".
-logo setDelay 00 setTitle (args get 0).
+logo := !newInstance "Logo",800,600.
+logo setDelay 0 setXORMode ; setTitle (args get 0).
 
 dim := 256.
 pensize := dim / 32.
@@ -8,25 +8,34 @@ pensize := dim / 32.
 circle := {:size.
    logo pendown ; arc 360, size penup.
 }.
-square := {:size.
+   
+pargram := {:size, angle.
    logo penup ;
         forward (size / 2)
         right 90
         pendown ;
         forward (size / 2)
-        right 90
+        right (angle)
         forward size
-        right 90
+        right (180 - angle)
         forward size
-        right 90
+        right (angle)
         forward size
-        right 90
+        right (180 - angle)
         forward (size / 2)
 
         penup ;
         left 90
         back (size / 2)
     .
+}.
+
+square := {:size.
+   pargram exec size,90.
+}.
+
+rombus := {:size.
+   pargram exec size,45.
 }.
 
 pentagon := {:size.
@@ -70,7 +79,7 @@ star := {:size.
    .
 }.
 
-shapes := !array circle,square,pentagon,star.
+shapes := !array circle,square,rombus,pentagon,star.
 
 draw := {:size.
    logo repeat 16,{
@@ -96,8 +105,9 @@ draw := {:size.
    }.
 }.
 
-logo repeat 1,{
-   logo clearscreen ; setpensize pensize.
+logo repeat 3, {
+   logo setbackground 0,0,0
+        setpensize pensize setXORMode.
    draw exec dim.
-   logo setDelay 1000 forward 0 setDelay 0.
+   logo setDelay 3000 forward 0 setDelay 0.
 }
