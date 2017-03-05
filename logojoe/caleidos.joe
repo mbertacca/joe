@@ -89,9 +89,9 @@ draw := {:size.
       dist := logo random size.
       heading := logo random angle.
       logo seth heading
-           setpencolor (logo random 192 intValue),
-                       (logo random 192 intValue),
-                       (logo random 192 intValue).
+           setpencolor (logo random 255 intValue),
+                       (logo random 255 intValue),
+                       (logo random 255 intValue).
       logo repeat simm,{
          logo penup ; forward dist .
          shapes get shape exec (dist / 6).
