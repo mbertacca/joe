@@ -82,15 +82,17 @@ star := {:size.
 shapes := !array circle,square,rombus,pentagon,star.
 
 draw := {:size.
+   simm := 3 + (logo random 4 intValue).
+   angle := 180 / simm.
    logo repeat 16,{
       shape := logo random (shapes length) intValue.
       dist := logo random size.
-      heading := logo random 60.
+      heading := logo random angle.
       logo seth heading
            setpencolor (logo random 192 intValue),
                        (logo random 192 intValue),
                        (logo random 192 intValue).
-      logo repeat 3,{
+      logo repeat simm,{
          logo penup ; forward dist .
          shapes get shape exec (dist / 6).
          logo penup ;
@@ -99,7 +101,7 @@ draw := {:size.
          logo penup ; forward dist .
          shapes get shape exec (dist / 6)
             back dist
-            right (120 - heading).
+            right ((angle * 2) - heading).
       }.
       logo left heading penup.
    }.
