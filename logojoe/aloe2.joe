@@ -1,0 +1,36 @@
+:args.
+logo := !newInstance "Logo",1024,768.
+logo setpensize 2 setTitle (args get 0).
+
+leaf := {:size.
+   angle := 137.508.
+   logo 
+        penup ;
+        forward (size * 0.233)
+        pendown ;
+        forward (size * 0.4)
+        penup ;
+        forward (size * 0.233)
+        right angle
+        pendown ;
+        forward (size * 1.55)
+        penup ;
+        back  (size * 1.55)
+        right (360 -(angle *2))
+        pendown ;
+        forward (size * 1.4)
+        penup ;
+        back (size * 1.4)
+        right angle
+        back (size * 0.866)
+   .
+}.
+
+size := 5.
+logo repeat 60,{:repcount.
+   size := size * 1.08.
+   logo setpencolor 0,(255 - (repcount * 3)),0 penup ; forward size pendown.
+   leaf exec size.
+   logo penup ; back size pendown.
+   logo right 75.
+}.
