@@ -3,20 +3,21 @@ logo := !newInstance "Logo",1024,768.
 logo setpensize 2 setTitle (args get 0).
 
 leaf := {:size.
+   angle := 148.5.
    logo forward (size * 0.633)
         penup ;
         forward (size * 0.233)
-        right 150
+        right angle
         pendown ;
-        forward (size / 1.08)
+        forward (size / 1.07)
         penup ;
-        back  (size / 1.08)
-        right 60
+        back  (size / 1.07)
+        right (360 - (angle * 2))
         pendown ;
-        forward (size * 1.08)
+        forward (size * 1.09)
         penup ;
-        back (size * 1.08)
-        right 150
+        back (size * 1.09)
+        right angle
         back (size * 0.866)
    .
 }.
