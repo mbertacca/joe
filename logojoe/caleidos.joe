@@ -35,8 +35,15 @@ square := {:size.
    pargram exec size,90.
 }.
 
-rhombus := {:size.
-   pargram exec size,45.
+rhombus1 := {:size.
+   logo left 110.
+   pargram exec size,40.
+   logo right 110.
+}.
+rhombus2 := {:size.
+   logo left 20.
+   pargram exec size,40.
+   logo right 20.
 }.
 
 pentagon := {:size.
@@ -80,7 +87,7 @@ star := {:size.
    .
 }.
 
-shapes := !array circle,square,rhombus,pentagon,star.
+shapes := !array circle,square,rhombus1,rhombus2,pentagon,star.
 
 draw1 := {:size.
    simm := 2 + (logo random 11 intValue).
