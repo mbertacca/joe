@@ -64,13 +64,15 @@ public class Parser {
 
    private Object command;
    final Block block;
+   final String fName;
 
-   public Parser (Object cmds, Executor exec) {
-      this (cmds, exec, null);
+   public Parser (Object cmds, Executor exec, String fn) {
+      this (cmds, exec, null, fn);
    }
-   public Parser (Object cmds, Executor exec, Block par) {
+   public Parser (Object cmds, Executor exec, Block par, String fn) {
       command = cmds;
       block = new Block (exec, par);
+      fName = fn;
    }
    public Object getCommand() {
       return command;
@@ -231,7 +233,7 @@ public class Parser {
    }
 
    private Block block (Token tk, TkStack tokens) throws JOEException {
-      Parser parser = new Parser(command, block.executor, block);
+      Parser parser = new Parser(command, block.executor, block, fName);
       Block Return = parser.compile (tokens);
       return Return;
    }
@@ -280,10 +282,10 @@ public class Parser {
          }
       }
       if (args.size() == 0) {
-         Return = new ExecMessage (receiver, selector, null);
+         Return = new ExecMessage (receiver, selector, null, fName);
       } else {
          Object argsAr[] = args.toArray();
-         Return = new ExecMessage (receiver, selector, argsAr);
+         Return = new ExecMessage (receiver, selector, argsAr, fName);
       }
       switch ((tk = tokens.pop()).type) {
       case _WORD:
@@ -338,15 +340,15 @@ public class Parser {
       Token tk = tokens.pop();
       if (tk.type != TokenType._PAR_CLOSE_)
          throw new JOEException (
-                           "Expected close parenthesis, found " + tk.word, tk);
+                     "Expected close parenthesis, found " + tk.word, tk, fName);
    }
    private void braceClose (TkStack tokens) throws JOEException {
       Token tk = tokens.pop();
       if (tk.type != TokenType._BRACE_CLOSE_)
          throw new JOEException (
-                            "Expected close brace, found " + tk.word, tk);
+                      "Expected close brace, found " + tk.word, tk, fName);
    }
    private void unexpectedToken (Token tk) throws JOEException {
-      throw new JOEException ("Unexpected token `" + tk.word + "`", tk);
+      throw new JOEException ("Unexpected token `" + tk.word + "`", tk, fName);
    }
 }

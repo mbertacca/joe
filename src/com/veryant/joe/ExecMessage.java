@@ -29,11 +29,27 @@ import java.util.HashSet;
 
 public class ExecMessage implements Message {
    private static class MethodWArgs {
-      final Method method;
-      final Object[] args;
+      final private Method _method;
+      final private Block _block;
+      final private Object[] _args;
       MethodWArgs (Method m, Object[] a) {
-         method = m;
-         args = a;
+         _method = m;
+         _block = null;
+         _args = a;
+      }
+      MethodWArgs (Block b, Object[] a) {
+         _method = null;
+         _block = b;
+         _args = a;
+      }
+      Object invoke (Object obj) throws JOEException,
+                                        IllegalAccessException,
+                                        InvocationTargetException {
+         if (_block != null) {
+            return _block.exec (_args);
+         } else {
+            return _method.invoke (obj, _args);
+         }
       }
    };
    static final HashMap<Class,Class> primitiveClasses;
@@ -44,6 +60,7 @@ public class ExecMessage implements Message {
    private final String selector;
    private Class clazz;
    private final Object origArgs[];
+   private final String fName;
    private final int row, col;
 
    static {
@@ -116,11 +133,12 @@ public class ExecMessage implements Message {
          return s;
    }
 
-   ExecMessage (Object obj, Token sel, Object args[])
+   ExecMessage (Object obj, Token sel, Object args[], String fn)
                                               throws JOEException {
       selector = getSelector (sel.word);
       row = sel.row;
       col = sel.col;
+      fName = fn;
       origArgs = args;
       if (obj instanceof Message) {
          receiver = (Message) obj;
@@ -135,8 +153,27 @@ public class ExecMessage implements Message {
    public int getCol() {
       return col;
    }
-
-   MethodWArgs check (Object actObj) throws JOEException {
+   private Object[] argsExec () throws JOEException {
+      Object[] Return = new Object[origArgs.length];
+      for (int i = 0; i < origArgs.length; i++)
+         if (origArgs[i] instanceof Message)
+            Return[i] = ((Message) origArgs[i]).exec();
+         else
+            Return[i] = origArgs[i];
+      return Return;
+   }
+   private MethodWArgs checkJO (JOEObject jo) throws JOEException {
+      Object[] argArray = null;
+      if (origArgs != null) 
+         argArray = argsExec();
+      Block b = jo.getMethod (selector);
+      if (b == null)
+         throw new JOEException (
+            new NoSuchMethodException (selector + " in " + jo),row,col,fName);
+      return new MethodWArgs (b, argArray);
+   }
+ 
+   private MethodWArgs check (Object actObj) throws JOEException {
       MethodWArgs Return;
       Object[] argArray = null;
       if (actObj instanceof ClassReference)
@@ -144,12 +181,7 @@ public class ExecMessage implements Message {
       else
          clazz = actObj.getClass();
       if (origArgs != null) {
-         argArray = new Object[origArgs.length];
-         for (int i = 0; i < origArgs.length; i++)
-            if (origArgs[i] instanceof Message)
-               argArray[i] = ((Message) origArgs[i]).exec();
-            else
-               argArray[i] = origArgs[i];
+         argArray = argsExec();
          if (! (actObj instanceof InternalObject))
             for (int i = 0; i < argArray.length; i++)
                if (argArray[i] instanceof Wrapper)
@@ -170,7 +202,7 @@ public class ExecMessage implements Message {
          try {
             Return = new MethodWArgs (clazz.getMethod (selector), argArray);
          } catch (NoSuchMethodException ex) {
-            throw new JOEException (ex, row, col);
+            throw new JOEException (ex, row, col, fName);
          }
       }
       return Return;
@@ -249,7 +281,7 @@ public class ExecMessage implements Message {
          }
       }
       if (method == null)
-         throw new JOEException (ex, row, col);
+         throw new JOEException (ex, row, col, fName);
       if (bVarargs) {
          Object newArgs[] = new Object[bTypes.length];
          Class arCls = bTypes[bTypes.length - 1].getComponentType();
@@ -278,21 +310,25 @@ public class ExecMessage implements Message {
             actObj = object;
          }
          if (actObj == null)
-            throw new JOEException ("null receiver", row, col);
-         MethodWArgs mwa = check(actObj);
-         Return = mwa.method.invoke(actObj, mwa.args);
+            throw new JOEException ("null receiver", row, col, fName);
+         MethodWArgs mwa;
+         if (actObj instanceof JOEObject)
+            mwa = checkJO((JOEObject) actObj);
+         else
+            mwa = check(actObj);
+         Return = mwa.invoke(actObj);
          if ((wobj = Wrapper.newInstance (Return)) != null)
             Return = wobj;
       } catch (IllegalAccessException ex) {
-         throw new JOEException (ex, row, col);
+         throw new JOEException (ex, row, col, fName);
       } catch (InvocationTargetException ex) {
          Throwable ilex = ex.getCause();
          if (ilex instanceof JOEException)
             throw (JOEException) ilex;
          else
-            throw new JOEException (ilex, row, col);
+            throw new JOEException (ilex, row, col, fName);
       } catch (IllegalArgumentException ex) {
-         throw new JOEException (ex, row, col);
+         throw new JOEException (ex, row, col, fName);
       }
       return Return;
    }
@@ -314,16 +350,5 @@ public class ExecMessage implements Message {
       Return.append (selector);
 
       return Return.toString();
-   }
-   public static void main (String argv[]) throws Exception {
-      WLong a = new WLong ("7");
-      WLong b = new WLong ("5");
-      CommandBase c = new CommandBase();
-      ExecMessage x, y;
-      x = new ExecMessage (a, new Token("add",TokenType._WORD,0,0),
-                                   new Object[] { b } );
-      y = new ExecMessage (c, new Token("display",TokenType._WORD,0,0),
-                                   new Object[] { "Hello ", x , " World!"} );
-      y.exec();
    }
 }

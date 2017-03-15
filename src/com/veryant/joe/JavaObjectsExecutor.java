@@ -43,7 +43,7 @@ public class JavaObjectsExecutor {
       }
       fr.close();
       Executor exec = new StandardExecutor();
-      Parser parser = new Parser(defcmd, exec);
+      Parser parser = new Parser(defcmd, exec, fileName);
       block = parser.compile (tokens);
    }
    public Object exec () throws Exception {
@@ -74,9 +74,8 @@ public class JavaObjectsExecutor {
       return Return;
    }
 
-   public static void showException (String fileName,
-                                    DefaultCommand cmd, Throwable ex) {
-      cmd.println(fileName + ": " + ex.getMessage());
+   public static void showException (DefaultCommand cmd, Throwable ex) {
+      cmd.println(ex.getMessage());
       Throwable cause = ex;
       while ((cause = cause.getCause()) != null) {
          cmd.println ("Caused by: " + cause.toString());
@@ -103,7 +102,7 @@ public class JavaObjectsExecutor {
       if (argv.length > 0) {
          final String fileName = argv[0];
          DefaultCommand defCmd = new DefaultCommand();
-         Parser parser = new Parser(defCmd,exec);
+         Parser parser = new Parser(defCmd,exec,fileName);
          Tokenizer tkzer = new Tokenizer();
          BufferedReader fr;
          try {
@@ -123,17 +122,17 @@ public class JavaObjectsExecutor {
          } catch (ExecException ex) {
             throw ex;
          } catch (BreakCmdException ex) {
-            showException(fileName, defCmd, new BreakCmdException (
+            showException(defCmd, new BreakCmdException (
                           "Block name not found: " + ex.getMessage()));
             Return = 2;
          } catch (JOEException ex) {
-            showException(fileName, defCmd, ex);
+            showException(defCmd, ex);
             Return = 2;
          } catch (FileNotFoundException ex) {
-            showException(fileName, defCmd, ex);
+            showException(defCmd, ex);
             Return = 3;
          } catch (IOException ex) {
-            showException(fileName, defCmd, ex);
+            showException(defCmd, ex);
             Return = 4;
          }
          Return = 0;
@@ -145,7 +144,7 @@ public class JavaObjectsExecutor {
          defCmd.println (
              "JOE interactive ready, type 'exit' to exit the session");
          defCmd.println ();
-         Parser prg = new Parser(cmd, exec);
+         Parser prg = new Parser(cmd, exec,"<stdin>");
          Block b = null;
 
          while (!"exit".equals (line)) {
@@ -154,7 +153,7 @@ public class JavaObjectsExecutor {
                line = defCmd.readLine().toString();
                //defCmd.print (line);
             } catch (IOException ex) {
-               showException("<stdin>", defCmd, ex);
+               showException(defCmd, ex);
                Return = 4;
                break;
             }
@@ -169,16 +168,22 @@ public class JavaObjectsExecutor {
                } catch (ExecException ex) {
                   throw ex;
                } catch (JOEException ex) {
-                  showException("<stdin>", defCmd, ex);
+                  showException(defCmd, ex);
                } finally {
                   b.clear();
                }
             } catch (JOEException ex) {
-               showException("<stdin>", defCmd, ex);
+               showException(defCmd, ex);
             }
          }
       }
       return Return;
+   }
+   public static JOEObject newJoe (String fileName, Object argv[])
+                                                            throws Exception {
+      return new JOEObject (fileName,
+                            new BufferedReader(new FileReader(fileName)), argv,
+                            new DefaultCommand(), new StandardExecutor());
    }
 }
 

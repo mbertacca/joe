@@ -311,6 +311,18 @@ public class DefaultCommand extends CommandBase {
       return Return.toString();
    }
    /**
+    * Executes the specified JOE script and returns it as an object.
+    */
+   public JOEObject $new (String fname) throws Exception {
+      return JavaObjectsExecutor.newJoe (fname, null);
+   }
+   /**
+    * Executes the specified JOE script and returns it as an object.
+    */
+   public JOEObject $new (String fname, Object...argv) throws Exception {
+      return JavaObjectsExecutor.newJoe (fname, argv);
+   }
+   /**
     * Executes the specified JOE script and returns its return code.
     */
    public int runJoe (String...cmds) throws Exception {
