@@ -1,6 +1,6 @@
 :args.
 logo := !newInstance "Logo",800,600.
-logo setDelay 0 setXORMode ; setTitle (args get 0).
+logo setDelay 0 setTitle (args get 0).
 
 dim := 256.
 pensize := dim / 32.
@@ -8,13 +8,13 @@ pensize := dim / 32.
 circle := {:size.
    logo pendown ; arc 360, size penup.
 }.
-   
+
 pargram := {:size, angle.
    logo penup ;
         forward (size / 2)
         right 90
+        forward (size / 2)
         pendown ;
-        forward (size / 2)
         right (angle)
         forward size
         right (180 - angle)
@@ -22,20 +22,28 @@ pargram := {:size, angle.
         right (angle)
         forward size
         right (180 - angle)
-        forward (size / 2)
-
+        forward size
         penup ;
+        back (size / 2)
+
         left 90
         back (size / 2)
     .
 }.
-
+   
 square := {:size.
    pargram exec size,90.
 }.
 
-rombus := {:size.
-   pargram exec size,45.
+rhombus1 := {:size.
+   logo left 110.
+   pargram exec size,40.
+   logo right 110.
+}.
+rhombus2 := {:size.
+   logo left 20.
+   pargram exec size,40.
+   logo right 20.
 }.
 
 pentagon := {:size.
@@ -79,15 +87,15 @@ star := {:size.
    .
 }.
 
-shapes := !array circle,square,rombus,pentagon,star.
+shapes := !array circle,square,rhombus1,rhombus2,pentagon,star.
 
-draw := {:size.
-   simm := 3 + (logo random 4 intValue).
-   angle := 180 / simm.
-   logo repeat 16,{
+draw1 := {:size.
+   simm := 2 + (logo random 11 intValue).
+   angle := 180.0 / simm.
+   logo repeat (64 / simm),{
       shape := logo random (shapes length) intValue.
       dist := logo random size.
-      heading := logo random angle.
+      heading := logo random angle intValue.
       logo seth heading
            setpencolor (logo random 255 intValue),
                        (logo random 255 intValue),
@@ -97,7 +105,7 @@ draw := {:size.
          shapes get shape exec (dist / 6).
          logo penup ;
             back dist
-            right (heading).
+            right heading.
          logo penup ; forward dist .
          shapes get shape exec (dist / 6)
             back dist
@@ -107,9 +115,36 @@ draw := {:size.
    }.
 }.
 
-logo repeat 3, {
+draw2 := {:size.
+   simm := 2 + (logo random 11 intValue).
+   angle := 360.0 / simm.
+   logo repeat (64 / simm),{
+      shape := logo random (shapes length) intValue.
+      dist := logo random size.
+      heading := logo random angle intValue.
+      logo setpencolor (logo random 255 intValue),
+                       (logo random 255 intValue),
+                       (logo random 255 intValue).
+      logo repeat simm,{
+         logo left heading
+              penup ; forward dist .
+         shapes get shape exec (dist / 6).
+         logo penup ; back dist 
+              right (heading * 2)
+              penup ; forward dist.
+         shapes get shape exec (dist / 6).
+         logo penup ; back dist.
+
+         logo right (angle - heading) penup.
+      }.
+   }.
+}.
+
+draws := !array draw1,draw2.
+
+logo forever {
    logo setbackground 0,0,0
         setpensize pensize setXORMode.
-   draw exec dim.
-   logo setDelay 3000 forward 0 setDelay 0.
-}
+   draws get (logo random 2 intValue) exec dim.
+   logo setDelay 5000 forward 0 setDelay 0.
+}.
