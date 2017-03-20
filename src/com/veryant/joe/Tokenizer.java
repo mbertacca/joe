@@ -219,7 +219,11 @@ public class Tokenizer {
             break;
          case '!':
             if (breakChar(line[idx]))
-               tokens.add (newToken("!", TokenType._BANG_));
+               if (ila < line.length && line[ila] == '!') {
+                  tokens.add (newToken("!!", TokenType._BANGBANG_));
+                  idx++;
+               } else
+                  tokens.add (newToken("!", TokenType._BANG_));
             break;
          case '"':
             switch (status) {

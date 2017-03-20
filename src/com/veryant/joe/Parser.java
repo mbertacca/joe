@@ -308,6 +308,8 @@ public class Parser {
       switch (tk.type) {
       case _BANG_:
          return command;
+      case _BANGBANG_:
+         return block;
       case _STRING:
          return Literals.getString(tk.word);
       case _INTEGER:

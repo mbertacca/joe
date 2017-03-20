@@ -96,6 +96,9 @@ public class Block extends ArrayList<Message>
       } else
          return null;
    }
+   public Object getVariable (WString name) {
+      return getVariable (name.value);
+   }
    public Object getVariable (String name) {
       Object Return = variables.get(name);
       if (Return == null && !variables.containsKey (name)) {
@@ -104,6 +107,9 @@ public class Block extends ArrayList<Message>
             Return = parent.getVariable (name);
       }
       return Return;
+   }
+   public HashMap<String,Object> getVariables () {
+      return variables;
    }
    public Object execBlock (String name, Object...argv) throws JOEException {
       Object block = getVariable(name);
@@ -123,6 +129,13 @@ public class Block extends ArrayList<Message>
    }
    public int getCol() {
       return -1;
+   }
+   public Block $extends(JOEObject jo) {
+      return $extends (jo.block);
+   }
+   public Block $extends(Block b) {
+      variables = b.variables;
+      return this;
    }
    public String toString() {
       return "{" + super.toString() + "}";

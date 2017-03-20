@@ -24,7 +24,7 @@ import java.util.ArrayDeque;
 
 public class JOEObject implements InternalObject {
    private final String name;
-   private final Block block;
+   public final Block block;
    public JOEObject (String name, BufferedReader src, Object[] argv,
                      Object cmd, Executor exec) throws Exception {
       String line;

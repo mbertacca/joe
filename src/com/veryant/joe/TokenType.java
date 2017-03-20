@@ -24,6 +24,7 @@ import java.util.ArrayDeque;
 enum TokenType {
    _COMMA_,
    _BANG_,
+   _BANGBANG_,
    _SEMICOLON_,
    _COLON_,
    _DOT_,
