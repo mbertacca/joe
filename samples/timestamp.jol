@@ -1,0 +1,48 @@
+:y,mo,d,h,m,s.
+
+year := 0.
+month := 1.
+day := 1.
+
+
+parent := !new "time.jol",h,m,s.
+!extends !!,parent.
+self := !!.
+
+setDay := {:d.
+  !if (!isNull d not),{
+      !if ((d < 0) or (d > 31)),{
+         !throw ("Invalid day: " + h).
+      }.
+      day := d.
+   }.
+   self.
+}.
+
+setMonth := {:m.
+  !if (!isNull m not),{
+      !if ((m < 0) or (m > 12)),{
+         !throw ("Invalid month: " + m).
+      }.
+      month := m.
+   }.
+   self.
+}.
+
+setYear := {:y.
+  !if (!isNull y not),{
+      year := y.
+   }.
+   self.
+}.
+
+super_toString := toString.
+
+toString := {
+   "" + year + "/" + month + "/" + day + " " + (super_toString exec).
+}.
+
+setYear exec y.
+setMonth exec mo.
+setDay exec d.
+
