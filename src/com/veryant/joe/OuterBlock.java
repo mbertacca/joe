@@ -24,8 +24,8 @@ import java.util.ArrayDeque;
 
 
 public class OuterBlock extends Block {
-   static Block get  (String name, BufferedReader src, Object[] argv,
-                     Object cmd, Executor exec) throws Exception {
+   public static Block get (String name, BufferedReader src, Object[] argv,
+                            Object cmd, Executor exec) throws Exception {
       String line;
       final Tokenizer tkzer = new Tokenizer();
 
