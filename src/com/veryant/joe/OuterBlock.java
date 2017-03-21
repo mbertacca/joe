@@ -22,33 +22,51 @@ package com.veryant.joe;
 import java.io.BufferedReader;
 import java.util.ArrayDeque;
 
-public class JOEObject implements InternalObject {
-   private final String name;
-   public final Block block;
-   public JOEObject (String name, BufferedReader src, Object[] argv,
+
+public class OuterBlock extends Block {
+   static Block get  (String name, BufferedReader src, Object[] argv,
                      Object cmd, Executor exec) throws Exception {
       String line;
-      this.name = name;
-      Tokenizer tkzer = new Tokenizer();
+      final Tokenizer tkzer = new Tokenizer();
 
-      ArrayDeque<Token> tokens = new ArrayDeque<Token>();
+      final ArrayDeque<Token> tokens = new ArrayDeque<Token>();
       while ((line = src.readLine()) != null) {
          tkzer.tokenize (line.toCharArray(), tokens);
       }
       src.close();
-      Parser parser = new Parser(cmd, exec, name);
-      block = parser.compile (tokens);
-      block.sfExec (argv);
+      final Parser parser = new Parser(cmd, exec, name);
+      final Block Return = parser.compile (tokens);
+      if (argv != null) {
+         Object wobj;
+         for (int i = 0; i < argv.length; i++) 
+            if ((wobj = Wrapper.newInstance (argv[i])) != null)
+               argv[i] = wobj;
+      }
+      Return.sfExec (argv);
+      return Return;
    }
-   public Block getMethod (String name) {
-      Object Return = block.getVariable (name);
+
+   public OuterBlock (Executor exec) {
+      super (exec, null);
+   }
+   Block getMethod (String name) {
+      Object Return = getVariable (name);
       if (Return instanceof Block) {
           return (Block) Return;
       } else {
           return null;
       }
    }
-   public String toString () {
-      return name;
+   public String toString() {
+      Block joeToString = getMethod("toString");
+      if (joeToString != null)
+         try {
+            return joeToString.exec().toString();
+         } catch (JOEException _ex) {
+            return _ex.toString();
+         }
+      else
+         return name();
    }
 }
+

@@ -162,14 +162,14 @@ public class ExecMessage implements Message {
             Return[i] = origArgs[i];
       return Return;
    }
-   private MethodWArgs checkJO (JOEObject jo) throws JOEException {
+   private MethodWArgs checkJO (OuterBlock ob) throws JOEException {
       Object[] argArray = null;
       if (origArgs != null) 
          argArray = argsExec();
-      Block b = jo.getMethod (selector);
+      Block b = ob.getMethod (selector);
       if (b == null)
          throw new JOEException (
-            new NoSuchMethodException (selector + " in " + jo),row,col,fName);
+            new NoSuchMethodException(selector+" in "+ob.name()),row,col,fName);
       return new MethodWArgs (b, argArray);
    }
  
@@ -312,8 +312,8 @@ public class ExecMessage implements Message {
          if (actObj == null)
             throw new JOEException ("null receiver", row, col, fName);
          MethodWArgs mwa;
-         if (actObj instanceof JOEObject)
-            mwa = checkJO((JOEObject) actObj);
+         if (actObj instanceof OuterBlock)
+            mwa = checkJO((OuterBlock) actObj);
          else
             mwa = check(actObj);
          Return = mwa.invoke(actObj);

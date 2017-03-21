@@ -142,6 +142,18 @@ public class CommandBase {
       systemExit (0);
    }
    /**
+    * Throws an Exception whose message is the argument.
+    */
+   public void $throw (String msg) throws Exception {
+      throw new Exception (msg);
+   }
+   /**
+    * Throws a throwable passed as argument.
+    */
+   public void $throw (Throwable ex) throws Throwable {
+      throw ex;
+   }
+   /**
     * Returns true if the passed object is null, false otherwise.
     */
    public boolean isNull (Object obj) {
@@ -177,5 +189,11 @@ public class CommandBase {
     */
    public String chr (Integer n) {
       return Character.toString ((char) n.intValue());
+   }
+   /**
+    * Makes the child inheriting from parent.
+    */
+   public void $extends (OuterBlock child, OuterBlock parent) {
+      child.$extends (parent);
    }
 }

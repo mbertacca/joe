@@ -313,13 +313,13 @@ public class DefaultCommand extends CommandBase {
    /**
     * Executes the specified JOE script and returns it as an object.
     */
-   public JOEObject $new (String fname) throws Exception {
+   public Object $new (String fname) throws Exception {
       return JavaObjectsExecutor.newJoe (fname, null);
    }
    /**
     * Executes the specified JOE script and returns it as an object.
     */
-   public JOEObject $new (String fname, Object...argv) throws Exception {
+   public Object $new (String fname, Object...argv) throws Exception {
       return JavaObjectsExecutor.newJoe (fname, argv);
    }
    /**

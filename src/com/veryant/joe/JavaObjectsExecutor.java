@@ -179,9 +179,9 @@ public class JavaObjectsExecutor {
       }
       return Return;
    }
-   public static JOEObject newJoe (String fileName, Object argv[])
+   public static Block newJoe (String fileName, Object argv[])
                                                             throws Exception {
-      return new JOEObject (fileName,
+      return OuterBlock.get (fileName,
                             new BufferedReader(new FileReader(fileName)), argv,
                             new DefaultCommand(), new StandardExecutor());
    }

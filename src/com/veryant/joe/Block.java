@@ -26,7 +26,7 @@ import java.util.HashMap;
 public class Block extends ArrayList<Message>
                 implements InternalObject {
    final Executor executor;
-   final Block parent;
+   private Block parent;
    private HashMap<String,Object> variables;
    private final HashMap<String,Object> constants;
    private String name;
@@ -130,11 +130,8 @@ public class Block extends ArrayList<Message>
    public int getCol() {
       return -1;
    }
-   public Block $extends(JOEObject jo) {
-      return $extends (jo.block);
-   }
    public Block $extends(Block b) {
-      variables = b.variables;
+      parent = b;
       return this;
    }
    public String toString() {

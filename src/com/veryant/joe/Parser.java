@@ -67,9 +67,12 @@ public class Parser {
    final String fName;
 
    public Parser (Object cmds, Executor exec, String fn) {
-      this (cmds, exec, null, fn);
+      command = cmds;
+      block = new OuterBlock (exec);
+      fName = fn;
+      block.setName (fn);
    }
-   public Parser (Object cmds, Executor exec, Block par, String fn) {
+   private Parser (Object cmds, Executor exec, Block par, String fn) {
       command = cmds;
       block = new Block (exec, par);
       fName = fn;
