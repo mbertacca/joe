@@ -140,4 +140,25 @@ public class WString extends Wrapper {
    public String toString() {
       return value;
    }
+   public Integer intValue() {
+      try {
+         return new Integer (value);
+      } catch (NumberFormatException _ex) {
+         return null;
+      }
+   }
+   public Long longValue() {
+      try {
+         return new Long (value);
+      } catch (NumberFormatException _ex) {
+         return null;
+      }
+   }
+   public Double doubleValue() {
+      try {
+         return new Double (value);
+      } catch (NumberFormatException _ex) {
+         return null;
+      }
+   }
 }

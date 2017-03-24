@@ -64,18 +64,20 @@ public class Parser {
 
    private Object command;
    final Block block;
+   final OuterBlock outerBlock;
    final String fName;
 
    public Parser (Object cmds, Executor exec, String fn) {
       command = cmds;
-      block = new OuterBlock (exec);
+      block = outerBlock = new OuterBlock (exec);
       fName = fn;
       block.setName (fn);
    }
-   private Parser (Object cmds, Executor exec, Block par, String fn) {
-      command = cmds;
-      block = new Block (exec, par);
-      fName = fn;
+   private Parser (Parser parent) {
+      command = parent.command;
+      outerBlock = parent.outerBlock;
+      block = new Block (outerBlock.executor, parent.block);
+      fName = parent.fName;
    }
    public Object getCommand() {
       return command;
@@ -236,7 +238,7 @@ public class Parser {
    }
 
    private Block block (Token tk, TkStack tokens) throws JOEException {
-      Parser parser = new Parser(command, block.executor, block, fName);
+      Parser parser = new Parser(this);
       Block Return = parser.compile (tokens);
       return Return;
    }
@@ -312,7 +314,7 @@ public class Parser {
       case _BANG_:
          return command;
       case _BANGBANG_:
-         return block;
+         return outerBlock;
       case _STRING:
          return Literals.getString(tk.word);
       case _INTEGER:

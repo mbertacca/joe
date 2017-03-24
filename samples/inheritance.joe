@@ -1,4 +1,4 @@
-timestamp := !new "timestamp.jol",1492,10,12,8,13,21.
+timestamp := !new "timestamp.jol",1492,10,12,5,8,13.
 
 !println timestamp.
 timestamp setYear 2017

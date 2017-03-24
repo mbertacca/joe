@@ -4,8 +4,6 @@ hours := 0.
 minutes := 0.
 seconds := 0.
 
-self := !!.
-
 toString := {
    "" + hours + ":" + minutes + ":" + seconds.
 }.
@@ -21,7 +19,7 @@ setHours := {:h.
       }.
       hours := h.
    }.
-   self.
+   !!.
 }.
 
 setMinutes := {:m.
@@ -31,7 +29,7 @@ setMinutes := {:m.
       }.
       minutes := m.
    }.
-   self.
+   !!.
 }.
 
 setSeconds := {:s.
@@ -41,9 +39,9 @@ setSeconds := {:s.
       }.
       seconds := s.
    }.
-   self.
+   !!.
 }.
 
-setHours exec h.
-setMinutes exec m.
-setSeconds exec s.
+!! setHours h.
+!! setMinutes m.
+!! setSeconds s.

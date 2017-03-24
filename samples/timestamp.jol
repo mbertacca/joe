@@ -7,7 +7,6 @@ day := 1.
 
 parent := !new "time.jol",h,m,s.
 !extends !!,parent.
-self := !!.
 
 setDay := {:d.
   !if (!isNull d not),{
@@ -16,7 +15,7 @@ setDay := {:d.
       }.
       day := d.
    }.
-   self.
+   !!.
 }.
 
 setMonth := {:m.
@@ -26,14 +25,14 @@ setMonth := {:m.
       }.
       month := m.
    }.
-   self.
+   !!.
 }.
 
 setYear := {:y.
   !if (!isNull y not),{
       year := y.
    }.
-   self.
+   !!.
 }.
 
 super_toString := toString.
@@ -42,7 +41,7 @@ toString := {
    "" + year + "/" + month + "/" + day + " " + (super_toString exec).
 }.
 
-setYear exec y.
-setMonth exec mo.
-setDay exec d.
+!! setYear y.
+!! setMonth mo.
+!! setDay d.
 

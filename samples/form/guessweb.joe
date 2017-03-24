@@ -1,0 +1,43 @@
+#! /usr/bin/java com.veryant.joe.JavaObjectsExecutor
+
+answer := "".
+high := 1023.
+low := 1.
+ntry := 1.
+
+form := !newInstance "JOEForm".
+form loadFile "guessnum.html".
+
+!while {answer <> "c" and (answer <> "C")},
+{
+   try := ((high - low) / 2 + low).
+   form setText "myguess",("My guess is " + try)
+        setText "question","Is the guess (c)orrect, too (h)igh or too (l)ow?"
+        setValue "guess","".
+   answer := form input ; get "guess".
+   form setText "error","".
+   ! switch answer
+   case "C"
+   case "c", {
+      form setText "question",("I guessed the number using "+ntry+" guesses")
+           remove "guess"
+           setValue "button","Exit"
+           input.
+   }
+   case "H"
+   case "h", {
+      high := try.
+      ntry := (ntry + 1).
+   }
+   case "L"
+   case "l", {
+      low := try.
+      ntry := (ntry + 1).
+   }
+   default {
+      form setText "error","Answer with 'c', 'h' or 'l' please".
+   } 
+   endSwitch.
+}.
+
+form exit.
