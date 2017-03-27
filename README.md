@@ -1,4 +1,4 @@
-# Java Objects Executor: a polymorphic script environment.![alt tag](https://raw.githubusercontent.com/mbertacca/joe/master/logojoe/joe.png)
+# Java Objects Executor: a polymorphic script environment.![alt tag](https://raw.githubusercontent.com/mbertacca/joe/master/samples/logojoe/joe.png)
 (PRELIMINARY DRAFT: this project is in its early stage)
 
 Many applications in the real world are constituted by a mix of programs and scripts: programs communicate with the user and make the calculations while the scripts do the administrative tasks communicating mainly with the OS.
