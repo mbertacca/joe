@@ -107,6 +107,27 @@ public class DefaultCommand extends CommandBase {
       }
       return Return;
    }
+   /**
+    * if implementation without 'else'.
+    */
+   public Object $if (Block cond, Block ifTrue) throws Exception {
+      Object cnd;
+      if ((cnd = cond.exec()) != null && cnd instanceof WBoolean)
+         return $if (((WBoolean) cnd).booleanValue(), ifTrue);
+      else
+         return null;
+   }
+   /**
+    * if implementation with 'else'.
+    */
+   public Object $if (Block cond, Block ifTrue, Block ifFalse)
+                                                           throws Exception {
+      Object cnd;
+      if ((cnd = cond.exec()) != null && cnd instanceof WBoolean)
+         return $if (((WBoolean) cnd).booleanValue(), ifTrue, ifFalse);
+      else
+         return null;
+   }
 
    /**
     * This method implements a loop. The code block is executed while the
@@ -149,17 +170,17 @@ public class DefaultCommand extends CommandBase {
     * This class is used in order to implement a behaviour similar
     * to the Java switch.
     */
-   public static class Switch {
-      final Object cfrt1;
-      boolean alreadyDone;
-      boolean prevCondition;
-      Object Return;
+   protected static class Switch {
+      private final Object cfrt1;
+      private boolean alreadyDone;
+      private boolean prevCondition;
+      private Object Return;
 
       /**
        * Constructor, cfrt is the object to whom all the objects specified
        * in the following 'case' methods will be compared.
        */
-      Switch (Object cfrt) {
+      protected Switch (Object cfrt) {
          this.cfrt1 = cfrt;
       }
       /**
