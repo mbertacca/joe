@@ -24,6 +24,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayDeque;
 import java.util.HashMap;
 
@@ -179,11 +180,19 @@ public class JavaObjectsExecutor {
       }
       return Return;
    }
-   public static Block newJoe (String fileName, Object argv[])
+   public static Block newJoe (String fileName, Object...argv)
                                                             throws Exception {
-      return OuterBlock.get (fileName,
-                            new BufferedReader(new FileReader(fileName)), argv,
-                            new DefaultCommand(), new StandardExecutor());
+      return newJoe (fileName,
+                     new BufferedReader(new FileReader(fileName)), argv);
+   }
+   public static Block newJoe (String name, String code, Object...argv)
+                                                            throws Exception {
+      return newJoe (name, new BufferedReader (new StringReader (code)), argv);
+   }
+   public static Block newJoe (String name, BufferedReader code, Object...argv)
+                                                            throws Exception {
+      return OuterBlock.get (name, code, argv,
+                             new DefaultCommand(), new StandardExecutor());
    }
 }
 

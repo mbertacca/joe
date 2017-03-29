@@ -335,7 +335,7 @@ public class DefaultCommand extends CommandBase {
     * Executes the specified JOE script and returns it as an object.
     */
    public Object $new (String fname) throws Exception {
-      return JavaObjectsExecutor.newJoe (fname, null);
+      return JavaObjectsExecutor.newJoe (fname, (Object[]) null);
    }
    /**
     * Executes the specified JOE script and returns it as an object.
