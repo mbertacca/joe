@@ -30,6 +30,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Stack;
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -105,6 +106,7 @@ public class Logo extends JFrame {
          imgG2.fillRect (0, 0, width, height);
          if (xormode)
             setXORMode();
+         imgG2.setColor (currPen);
       }
       void drawTurtle (Graphics g) {
          if (currTurtle.show) {
@@ -279,6 +281,9 @@ public class Logo extends JFrame {
             direction += 360;
          repaint();
       }
+      double heading() {
+         return direction;
+      }
       void rotate (double angle) {
          seth (direction + angle);
       }
@@ -305,8 +310,51 @@ public class Logo extends JFrame {
          delay = ms;
       }
       Color colorunder () {
-         return new Color (image.getRGB ((int) Math.round(currTurtle.getX()),
-                                         (int) Math.round(currTurtle.getY())));
+         int x = (int) Math.round(currTurtle.getX());
+         int y = (int) Math.round(currTurtle.getY());
+         if (x >= 0 && x < width && y >= 0 && y < height)
+            return new Color(image.getRGB (x, y));
+         else
+            return currBg;
+      }
+      void fill (Color oldColor, Color newColor) {
+         final Color currColor = imgG2.getColor();
+         imgG2.setColor(newColor);
+         int node[] = new int[] {(int) Math.round (currTurtle.getX()),
+                                 (int) Math.round (currTurtle.getY())};
+         if (oldColor.equals(colorunder())) {
+            Stack<int[]> queue = new Stack<int[]>();
+            queue.push (node);
+            while (!queue.isEmpty()) {
+               final int thisPos[] = queue.pop();
+               final int y = thisPos[1];
+               int xs = thisPos[0];
+               if (xs < 0 || xs >= width ||
+                   y < 0 || y >= height)
+                  continue;
+               while (xs >= 0 && oldColor.getRGB() == image.getRGB(xs, y)) {
+                  if (y > 0 && oldColor.getRGB() == image.getRGB(xs, y - 1))
+                     queue.push (new int[] {xs, y - 1});
+                  if (y<height-1 && oldColor.getRGB() == image.getRGB(xs, y+1))
+                     queue.push (new int[] {xs, y + 1});
+                  xs--;
+               }
+               xs++;
+               int xe = thisPos[0];
+               while (xe < width && oldColor.getRGB() == image.getRGB(xe, y)) {
+                  if (y > 0 && oldColor.getRGB() == image.getRGB(xe, y-1))
+                     queue.push (new int[] {xe, y - 1});
+                  if (y<height-1 && oldColor.getRGB() == image.getRGB(xe, y+1))
+                     queue.push (new int[] {xe, y + 1});
+                  xe++;
+               }
+               xe--;
+               if (xs <= xe) {
+                  imgG2.drawLine (xs, y, xe, y);
+               }
+            }
+            imgG2.setColor(currColor);
+         }
       }
       void saveImage (String name, String ext) throws IOException {
          final File out = new File (name + "." + ext);
@@ -392,6 +440,12 @@ public class Logo extends JFrame {
       canvas.seth (angle);
       return this;
    }
+   public Logo setheading (int angle) {
+      return seth (angle);
+   }
+   public double heading () {
+      return canvas.heading ();
+   }
    public Logo setxy (int x, int y) {
       canvas.setxy (x, y);
       return this;
@@ -443,6 +497,17 @@ public class Logo extends JFrame {
    }
    public Color colorunder () {
       return canvas.colorunder ();
+   }
+   public Logo fill (Color oldColor, Color newColor) {
+      try {
+      canvas.fill (oldColor, newColor);
+      } catch (RuntimeException ex) {
+         ex.printStackTrace();
+         throw ex;
+      } catch (Throwable ex) {
+         ex.printStackTrace();
+      }
+      return this;
    }
    public Turtle newturtle () {
       return canvas.newturtle ();
