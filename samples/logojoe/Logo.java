@@ -498,15 +498,11 @@ public class Logo extends JFrame {
    public Color colorunder () {
       return canvas.colorunder ();
    }
+   public Logo fill () {
+      return fill (canvas.colorunder (), getpencolor());
+   }
    public Logo fill (Color oldColor, Color newColor) {
-      try {
       canvas.fill (oldColor, newColor);
-      } catch (RuntimeException ex) {
-         ex.printStackTrace();
-         throw ex;
-      } catch (Throwable ex) {
-         ex.printStackTrace();
-      }
       return this;
    }
    public Turtle newturtle () {

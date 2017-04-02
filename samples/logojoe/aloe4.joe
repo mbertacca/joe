@@ -1,11 +1,11 @@
 :args.
 logo := !newInstance "Logo",1024,768.
-logo setpensize 1 setantialiasingoff ; setTitle (args get 0).
+logo setTitle (args get 0).
 
 leaf := {:size.
    angle := 148.5.
    color := logo getpencolor.
-   logo setpencolor 0,0,0
+   logo setpencolor 0,0,128
         penup ;
         forward (size * 0.233)
         pendown ;
@@ -26,7 +26,8 @@ leaf := {:size.
         back (size * 0.866)
    .
    !if (size > 8),{
-       logo fill empty,color
+       logo setpencolor color
+            fill.
    }.
 }.
 
