@@ -1,0 +1,176 @@
+:args.
+logo := !newInstance "Logo".
+logo setantialiasingoff ; setTitle (args get 0).
+dim := 150.
+
+star := {:size.
+   seglen := size * 1.618.
+   logo penup ;
+        forward (size * 0.794)
+        pendown ;
+        right 162
+        pendown ;
+        forward seglen
+        right 144
+        forward seglen
+        right 144
+        forward seglen
+        right 144
+        forward seglen
+        right 144
+        forward seglen
+        left 18
+        penup ;
+        back (size * 0.794)
+   .
+}.
+circle := {:size.
+   logo pendown ; arc 360, size penup.
+}.
+
+pargram := {:size, angle.
+   logo penup ;
+        forward (size / 2)
+        right 90
+        forward (size / 2)
+        pendown ;
+        right (angle)
+        forward size
+        right (180 - angle)
+        forward size
+        right (angle)
+        forward size
+        right (180 - angle)
+        forward size
+        penup ;
+        back (size / 2)
+
+        left 90
+        back (size / 2)
+    .
+}.
+   
+square := {:size.
+   pargram exec size,90.
+}.
+
+rhombus1 := {:size.
+   logo left 110.
+   pargram exec size,40.
+   logo right 110.
+}.
+rhombus2 := {:size.
+   logo left 20.
+   pargram exec size,40.
+   logo right 20.
+}.
+
+shapes := !array circle,square,rhombus1,rhombus2,star.
+
+draw := {:size.
+   logo setXORMode ; setpensize 8 repeat 12,{
+      shape := logo random (shapes length) intValue.
+      dist := logo random size.
+      heading := logo random 60.
+      logo setpencolor (logo random 255 intValue),
+                       (logo random 255 intValue),
+                       (logo random 255 intValue)
+           left heading
+           penup ;
+           forward dist
+           pendown.
+      shapes get shape exec (dist / 4).
+      logo back dist
+           right heading.
+   }.
+}.
+
+cpTriangle := {:len.
+   start := logo pos.
+   rpt := len * 0.866 + 1 intValue.
+   return := !newArray rpt.
+
+   logo repeat rpt,{:repcount.
+      here := logo pos.
+
+      elem := !newArray (len + 1 intValue).
+      logo penup.
+      logo repeat ((len + 1) intValue),{:repcount1.
+         elem set (repcount1 - 1),(logo colorunder).
+         logo forward 1.
+      }.
+      return set (repcount - 1),elem.
+
+      logo penup ;
+           setxy (here get 0),(here get 1)
+           left 90
+           forward 1
+           right 90
+           forward 0.577
+           pendown ;
+      .
+      len := len - 1.154.
+   }.
+   logo setxy (start get 0), (start get 1).
+   return.
+}.
+
+showTriangle := {:treq,refl.
+   start := logo pos.
+   rpt := treq length.
+   logo repeat rpt,{:repcount.
+      here := logo pos.
+      elem := treq get (repcount - 1).
+      len := elem length.
+      point := null.
+      logo repeat len,{:repcount1.
+         !if (refl = 0),{
+            point := elem get (repcount1 - 1).
+         },{
+            point := elem get (len - repcount1).
+         }.
+         logo pendown ;
+              setpencolor point
+              forward 1.
+      }.
+      logo penup ;
+           setxy (here get 0),(here get 1)
+           left 90
+           forward 1
+           right 90
+           forward 0.577
+      .
+   }.
+   logo setxy (start get 0), (start get 1).
+}.
+
+drawCol := {:treq,refl.
+   logo repeat 3,{
+      !!showTriangle treq,refl.
+      logo forward dim.
+      logo left 60 forward dim left 180.
+      !!showTriangle treq,refl.
+      logo forward dim.
+      logo left 120 forward dim.
+      logo forward dim right 240.
+      !!showTriangle treq,refl.
+      logo left 240.
+   }.
+}.
+
+logo forever {
+   logo clearscreen ; setbackground 0,0,0.
+   !! draw (dim).
+   triangle := !!cpTriangle dim.
+   logo clearscreen ; setbackground 0,0,0 penup; setxy 320,-240.
+
+   logo repeat 2,{
+      logo repeat 3,{
+         !!drawCol triangle,0.
+         logo penup ; left 120 forward dim left 60.
+         !!drawCol triangle,1.
+         logo penup ; forward dim left 180.
+      }.
+      logo forward (dim *3).
+   }.
+}.
