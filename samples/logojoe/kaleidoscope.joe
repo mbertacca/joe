@@ -1,7 +1,7 @@
 :args.
 logo := !newInstance "Logo".
 logo setantialiasingoff ; setTitle (args get 0).
-dim := 128.
+dim := 124.
 
 star := {:size.
    seglen := size * 1.618.
