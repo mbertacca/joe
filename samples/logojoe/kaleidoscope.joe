@@ -1,7 +1,7 @@
 :args.
 logo := !newInstance "Logo".
 logo setantialiasingoff ; setTitle (args get 0).
-dim := 150.
+dim := 128.
 
 star := {:size.
    seglen := size * 1.618.
@@ -68,7 +68,7 @@ rhombus2 := {:size.
 shapes := !array circle,square,rhombus1,rhombus2,star.
 
 draw := {:size.
-   logo setXORMode ; setpensize 8 repeat 12,{
+   logo setXORMode ; setpensize 4 repeat 8,{
       shape := logo random (shapes length) intValue.
       dist := logo random size.
       heading := logo random 60.
@@ -79,6 +79,17 @@ draw := {:size.
            penup ;
            forward dist
            pendown.
+           head2 := logo random 360.
+           logo penup;
+                forward dist
+                left head2
+                forward size
+                pendown ;
+                back (size * 2)
+                penup ;
+                forward size
+                right head2
+                back dist.
       shapes get shape exec (dist / 4).
       logo back dist
            right heading.
@@ -122,16 +133,17 @@ showTriangle := {:treq,refl.
       here := logo pos.
       elem := treq get (repcount - 1).
       len := elem length.
-      point := null.
-      logo repeat len,{:repcount1.
-         !if (refl = 0),{
-            point := elem get (repcount1 - 1).
-         },{
-            point := elem get (len - repcount1).
+      logo pendown.
+      !if (refl = 0),{
+         logo repeat len,{:repcount1.
+            logo setpencolor (elem get (repcount1 - 1))
+                 forward 1.
          }.
-         logo pendown ;
-              setpencolor point
-              forward 1.
+      },{
+         logo repeat len,{:repcount1.
+            logo setpencolor (elem get (len - repcount1))
+                 forward 1.
+         }.
       }.
       logo penup ;
            setxy (here get 0),(here get 1)
