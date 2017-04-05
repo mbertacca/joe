@@ -19,6 +19,7 @@
 
 package com.veryant.joe;
 
+import java.lang.reflect.Array;
 import java.util.HashMap;
 
 public abstract class Wrapper implements InternalObject {
@@ -77,6 +78,37 @@ public abstract class Wrapper implements InternalObject {
                return new WArray ((Object[]) obj);
             }
          } else if (clazz.isArray()) {
+            final Class compClazz = clazz.getComponentType();
+            if (compClazz.isPrimitive()) {
+               final int len = Array.getLength(obj);
+               final Object[] objArray = new Object[len];
+               if (int.class.equals (compClazz)) {
+                  for(int i = 0; i < len; i++)
+                     objArray[i] = Integer.valueOf (((int[]) obj)[i]);
+               } else if (double.class.equals (compClazz)) {
+                  for(int i = 0; i < len; i++)
+                     objArray[i] = Double.valueOf (((double[]) obj)[i]);
+               } else if (float.class.equals (compClazz)) {
+                  for(int i = 0; i < len; i++)
+                     objArray[i] = Float.valueOf (((float[]) obj)[i]);
+               } else if (long.class.equals (compClazz)) {
+                  for(int i = 0; i < len; i++)
+                     objArray[i] = Long.valueOf (((long[]) obj)[i]);
+               } else if (short.class.equals (compClazz)) {
+                  for(int i = 0; i < len; i++)
+                     objArray[i] = Short.valueOf (((short[]) obj)[i]);
+               } else if (char.class.equals (compClazz)) {
+                  for(int i = 0; i < len; i++)
+                     objArray[i] = Character.valueOf (((char[]) obj)[i]);
+               } else if (byte.class.equals (compClazz)) {
+                  for(int i = 0; i < len; i++)
+                     objArray[i] = Byte.valueOf (((byte[]) obj)[i]);
+               } else { // boolean
+                  for(int i = 0; i < len; i++)
+                     objArray[i] = Boolean.valueOf (((boolean[]) obj)[i]);
+               }
+               obj = objArray;
+            } 
             return new WArray ((Object[]) obj);
          }
       }

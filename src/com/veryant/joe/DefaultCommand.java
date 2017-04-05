@@ -146,14 +146,19 @@ public class DefaultCommand extends CommandBase {
       return Return;
    }
    /**
-    * This method implements a fore each. The code block is executed for
+    * This method implements a 'for each'. The code block is executed for
     * each object passed, each object is passed to the block as argument.
     */
    public Object foreach (Object list[], Block code) throws JOEException {
       Object Return = null;
       for (int i = 0; i < list.length; i++) {
          try {
-            Return = code.exec(list[i]);
+            final Object o = Wrapper.newInstance(list[i]);
+            if (o != null) {
+               Return = code.exec(o);
+            } else {
+               Return = code.exec(list[i]);
+            }
          } catch (BreakLoopException _ex) {
             break;
          }
