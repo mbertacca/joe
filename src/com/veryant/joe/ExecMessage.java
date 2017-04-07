@@ -62,6 +62,8 @@ public class ExecMessage implements Message {
    private final Object origArgs[];
    private final String fName;
    private final int row, col;
+   private final HashMap<Class,Method[]> methCache =
+             new HashMap<Class,Method[]>();
 
    static {
       primitiveClasses = new HashMap<Class,Class>();
@@ -192,12 +194,7 @@ public class ExecMessage implements Message {
                argClasses[i] = Object.class;
             else
                argClasses[i] = argArray[i].getClass();
-         try {
-            Return = new MethodWArgs(clazz.getMethod (selector, argClasses),
-                                     argArray);
-         } catch (NoSuchMethodException ex) {
-            Return = getMethod(selector, argClasses, argArray, ex);
-         }
+         Return = getMethod(selector, argClasses, argArray);
       }  else {
          try {
             Return = new MethodWArgs (clazz.getMethod (selector), argArray);
@@ -225,63 +222,90 @@ public class ExecMessage implements Message {
    }
 
    private MethodWArgs getMethod(String selector, Class argClasses[],
-           Object[] argArray, NoSuchMethodException ex) throws JOEException {
+           Object[] argArray) throws JOEException {
       Method method = null;
       MethodWArgs Return;
-      final Method m[] = clazz.getMethods();
       int bestFit = -1;
       boolean bVarargs = false;
       Class types[], bTypes[] = null; 
-
+      Method m[] = methCache.get(clazz);
+      if (m == null) {
+         m = clazz.getMethods();
+         ArrayList<Method> goodMethods = new ArrayList<Method>();
+         for (int i = 0; i < m.length; i++)
+            if (m[i].getName().equals(selector))
+               goodMethods.add (m[i]);
+         m = goodMethods.toArray (new Method[goodMethods.size()]);
+         methCache.put(clazz,m);
+      }
       for (int i = 0; i < m.length; i++) {
-         if (m[i].getName().equals(selector)) {
-            types = m[i].getParameterTypes();
-            int currFit = 0;
-            boolean varargs = false;
-            if (types.length > 0 && types.length <= argClasses.length) {
-               final int fixed = types.length -1;
-               for (int j = 0; j < fixed && currFit >= 0; j++) {
-                  currFit = paramFits (types[j], argClasses[j], currFit);
-               }
-               if (currFit >= 0 && argClasses[fixed] != null) {
-                  boolean allFixed = false;
-                  if (types.length == argClasses.length) {
-                     int fits = 0;
-                     fits = paramFits(types[fixed],argClasses[fixed], fits);
-                     if (fits >= 0) {
-                        currFit += fits;
-                        allFixed = true;
-                     }
-                  }
-                  if (!allFixed && types[fixed].isArray()) {
+         types = m[i].getParameterTypes();
+         int currFit = 0;
+         boolean varargs = false;
+         if (types.length > 0 && types.length <= argClasses.length) {
+            final int fixed = types.length -1;
+            for (int j = 0; j < fixed && currFit >= 0; j++) {
+               currFit = paramFits (types[j], argClasses[j], currFit);
+            }
+            if (currFit >= 0 && argClasses[fixed] != null) {
+               boolean allFixed = false;
+               if (types.length == argClasses.length) {
+                  int fits = 0;
+                  fits = paramFits(types[fixed],argClasses[fixed], fits);
+                  if (fits >= 0) {
+                     currFit += fits;
                      allFixed = true;
-                     varargs = true;
-                     Class arCls = types[fixed].getComponentType();
-                     final int nArgLen = argClasses.length - fixed;
-                     int k;
-                     for (k = 0; k < nArgLen; k++) {
-                        if (argClasses[fixed+k] == null)
-                           break;
-                        else if (!arCls.isAssignableFrom (argClasses[fixed+k]))
-                           break;
-                     }
-                     if (k == nArgLen)
-                        currFit += 1;
-                      else 
-                        currFit = -1;
                   }
-                  if (allFixed && currFit > bestFit) {
-                     method = m[i];
-                     bTypes = types;
-                     bestFit = currFit;
-                     bVarargs = varargs;
+               }
+               if (!allFixed && types[fixed].isArray()) {
+                  allFixed = true;
+                  varargs = true;
+                  Class arCls = types[fixed].getComponentType();
+                  final int nArgLen = argClasses.length - fixed;
+                  int k;
+                  for (k = 0; k < nArgLen; k++) {
+                     if (argClasses[fixed+k] == null)
+                        break;
+                     else if (!arCls.isAssignableFrom (argClasses[fixed+k]))
+                        break;
                   }
+                  if (k == nArgLen)
+                     currFit += 1;
+                   else 
+                     currFit = -1;
+               }
+               if (allFixed && currFit > bestFit) {
+                  method = m[i];
+                  bTypes = types;
+                  bestFit = currFit;
+                  bVarargs = varargs;
                }
             }
          }
       }
-      if (method == null)
-         throw new JOEException (ex, row, col, fName);
+      if (method == null) {
+         StringBuilder sb = new StringBuilder();
+         sb.append(clazz.getName());
+         sb.append(" ");
+         sb.append(selector);
+         if (argArray != null && argArray.length > 0) {
+            sb.append(" ");
+            int i = 0;
+            for ( ; i < argArray.length - 1; i++) {
+               if (argArray[i] != null)
+                  sb.append(argArray[i].getClass().getName());
+               else
+                  sb.append("(null)");
+               sb.append(",");
+            }
+            if (argArray[i] != null)
+               sb.append(argArray[i].getClass().getName());
+            else
+               sb.append("(null)");
+         }
+         throw new JOEException (new NoSuchMethodException(sb.toString()),
+                                 row, col, fName);
+      }
       if (bVarargs) {
          Object newArgs[] = new Object[bTypes.length];
          Class arCls = bTypes[bTypes.length - 1].getComponentType();
