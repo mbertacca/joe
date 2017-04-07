@@ -185,5 +185,5 @@ logo forever {
       }.
       logo forward (dim *3).
    }.
-   logo setDelay 2000 forward 0 setDelay 0.
+   logo setDelay 5000 forward 0 setDelay 0.
 }.
