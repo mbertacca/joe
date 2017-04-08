@@ -1,0 +1,200 @@
+:args.
+logo := !newInstance "Logo",720,480.
+logo setantialiasingoff ; setTitle (args get 0).
+dim := 120.
+
+star := {:size.
+   seglen := size * 1.618.
+   logo penup ;
+        forward (size * 0.794)
+        pendown ;
+        right 162
+        pendown ;
+        forward seglen
+        right 144
+        forward seglen
+        right 144
+        forward seglen
+        right 144
+        forward seglen
+        right 144
+        forward seglen
+        left 18
+        penup ;
+        back (size * 0.794)
+   .
+}.
+circle := {:size.
+   logo pendown ; arc 360, size penup.
+}.
+
+pargram := {:size, angle.
+   logo penup ;
+        forward (size / 2)
+        right 90
+        forward (size / 2)
+        pendown ;
+        right (angle)
+        forward size
+        right (180 - angle)
+        forward size
+        right (angle)
+        forward size
+        right (180 - angle)
+        forward size
+        penup ;
+        back (size / 2)
+
+        left 90
+        back (size / 2)
+    .
+}.
+   
+square := {:size.
+   pargram exec size,90.
+}.
+
+rhombus1 := {:size.
+   logo left 110.
+   pargram exec size,40.
+   logo right 110.
+}.
+rhombus2 := {:size.
+   logo left 20.
+   pargram exec size,40.
+   logo right 20.
+}.
+
+shapes := !array circle,square,rhombus1,rhombus2,star.
+
+draw := {:size.
+   logo setXORMode ; setpensize 4 repeat 8,{
+      shape := logo random (shapes length) intValue.
+      dist := logo random size.
+      heading := logo random 60.
+      logo setpencolor (logo random 255 intValue),
+                       (logo random 255 intValue),
+                       (logo random 255 intValue)
+           left heading
+           penup ;
+           forward dist
+           pendown.
+           head2 := logo random 360.
+           logo penup;
+                forward dist
+                left head2
+                forward size
+                pendown ;
+                back (size * 2)
+                penup ;
+                forward size
+                right head2
+                back dist.
+      shapes get shape exec (dist / 4).
+      logo back dist
+           right heading.
+   }.
+}.
+draw_ := {:size.
+   logo setpensize 6
+        setpencolor 255,0,0
+        forward size
+        arc 360,8
+        setpencolor 255,255,0
+        left 90
+        forward size
+        arc 360,8
+        setpencolor 0,255,0
+        left 90
+        forward size
+        arc 360,8
+        setpencolor 0,0,255
+        left 90
+        forward size
+        arc 360,8
+        left 90
+    .
+}.
+
+cpSquare := {:len.
+   start := logo pos.
+   rpt := len +  1.
+   return := !newArray rpt.
+
+   logo repeat rpt,{:repcount.
+      here := logo pos.
+
+      elem := !newArray (len + 1 intValue).
+      logo penup.
+      logo repeat ((len + 1) intValue),{:repcount1.
+         elem set (repcount1 - 1),(logo colorunder).
+         logo forward 1.
+      }.
+      return set (repcount - 1),elem.
+
+      logo penup ;
+           setxy (here get 0),(here get 1)
+           left 90
+           forward 1
+           right 90
+           pendown ;
+      .
+   }.
+   logo setxy (start get 0), (start get 1).
+   return.
+}.
+
+showSquare := {:square,refl.
+   start := logo pos.
+   rpt := square length.
+   logo repeat rpt,{:repcount.
+      here := logo pos.
+      logo pendown.
+      !switch refl
+      case 0,{
+         elem := square get (repcount - 1).
+         logo repeat rpt,{:repcount1.
+            logo setpencolor (elem get (repcount1 - 1))
+                 forward 1.
+         }
+      }
+      case 1,{
+         elem := square get (repcount - 1).
+         logo repeat rpt,{:repcount1.
+            logo setpencolor (elem get (rpt - repcount1))
+                 forward 1.
+         }
+      }.
+      logo penup ;
+           setxy (here get 0),(here get 1)
+           left 90
+           forward 1
+           right 90
+      .
+   }.
+   logo setxy (start get 0), (start get 1).
+}.
+
+logo forever {
+   logo clearscreen ; setbackground 0,0,0.
+   !! draw dim.
+
+   square := !!cpSquare dim.
+   logo clearscreen ; setbackground 0,0,0 penup ; setxy 360,-240.
+
+   logo repeat 3,{
+      logo repeat 4,{:repcount.
+         !! showSquare square,(repcount % 2).
+         logo penup ; forward dim pendown;.
+      }.
+
+      logo penup ; left 90 forward dim forward dim left 90.
+
+      logo repeat 4,{:repcount.
+         !! showSquare square,(repcount % 2).
+         logo penup ; forward dim pendown;.
+      }.
+      logo penup ; right 180 pendown;.
+   }.
+   logo penup ; setDelay 5000 forward 0 setDelay 0 pendown.
+}.
