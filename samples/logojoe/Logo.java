@@ -440,7 +440,14 @@ public class Logo extends JFrame {
       canvas.seth (angle);
       return this;
    }
+   public Logo seth (double angle) {
+      canvas.seth (angle);
+      return this;
+   }
    public Logo setheading (int angle) {
+      return seth (angle);
+   }
+   public Logo setheading (double angle) {
       return seth (angle);
    }
    public double heading () {
