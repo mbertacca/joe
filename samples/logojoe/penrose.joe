@@ -1,0 +1,114 @@
+/*
+This script emulates an L-system in order to draw a Penrose tiling,
+based on the following description.
+
+The rhombus Penrose tiling can be drawn using the following L-system:
+   variables: 1 6 7 8 9 [ ]
+   constants: + -;
+   start: [7]++[7]++[7]++[7]++[7]
+   rules: 6 -> 81++91----71[-81----61]++
+          7 -> +81--91[---61--71]+
+          8 -> -61++71[+++81++91]-
+          9 -> --81++++61[+91++++71]--71
+          1 -> (eliminated at each iteration)
+   angle: 36 degrees
+
+here 1 means "draw forward", + means "turn left by angle", and -
+means "turn right by angle" (see turtle graphics). The [ means save the
+present position and direction to restore them when corresponding ] is
+executed. The symbols 6, 7, 8 and 9 do not correspond to any action; they are there only to produce the
+correct curve evolution.
+*/
+
+:args.
+logo := !newInstance "Logo".
+logo setTitle (args get 0).
+
+len := 12.
+iteration := 6.
+
+angle := 36.
+savePos := !newInstance "java.util.Stack".
+
+[ := {[:.
+   !if show,{
+      savePos push (!array (logo pos),(logo heading)).
+   }.
+   !array [.
+}.
+
+] := {]:.
+   !if show,{
+      sp := savePos pop.
+      pos := sp get 0.
+      heading := sp get 1.
+      logo penup ;
+           setxy (pos get 0), (pos get 1)
+           seth heading
+           pendown.
+   }.
+   !array ].
+}.
+
++ := {+:.
+   !if show,{
+      logo left angle.
+   }.
+   !array +.
+}.
+
+- := {-:.
+   !if show,{
+      logo right angle.
+   }.
+   !array -.
+}.
+
+start := {
+   !array [,_7,],+,+,[,_7,],+,+,[,_7,],+,+,[,_7,],+,+,[,_7,].
+}.
+
+_6 := {_6:.
+   !array _8,_1,+,+,_9,_1,-,-,-,-,_7,_1,[,-,_8,_1,-,-,-,-,_6,_1,],+,+.
+}.
+
+_7 := {_7:.
+   !array +,_8,_1,-,-,_9,_1,[,-,-,-,_6,_1,-,-,_7,_1,],+.
+}.
+
+_8 := {_8:.
+   !array -,_6,_1,+,+,_7,_1,[,+,+,+,_8,_1,+,+,_9,_1,],-.
+}.
+
+_9 := {_9:.
+   !array -,-,_8,_1,+,+,+,+,_6,_1,[,+,_9,_1,+,+,+,+,_7,_1,],-,-,_7,_1.
+}.
+
+_1 := {_1:.
+   !if show,{
+      logo forward len.
+   }.
+   _1.
+}.
+
+list := !newInstance "java.util.ArrayList".
+show := 0 = 1.
+array := !!start.
+
+logo repeat iteration,{
+  !foreach array,{:item0.
+     part := item0 exec.
+     !if (part = _1 not),{
+        !foreach part,{:item1.
+           list add item1.
+        }.
+     }.
+  }.
+  array := list toArray.
+  list clear.
+}.
+
+show := 1 = 1.
+!foreach array,{:item.
+   item exec.
+}.
