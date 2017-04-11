@@ -1,0 +1,84 @@
+/* This script emulates an L-system
+see https://en.wikipedia.org/wiki/L-system
+Example 7
+ */
+
+:args.
+logo := !newInstance "Logo".
+logo setTitle (args get 0).
+
+iteration := 6.
+len := 20 / iteration.
+
+angle := 25.
+savePos := !newInstance "java.util.Stack".
+
+[ := {[:.
+   !if show,{
+      savePos push (!array (logo pos),(logo heading)).
+   }.
+   !array [.
+}.
+
+] := {]:.
+   !if show,{
+      sp := savePos pop.
+      pos := sp get 0.
+      heading := sp get 1.
+      logo penup ;
+           setxy (pos get 0), (pos get 1)
+           seth heading
+           pendown.
+   }.
+   !array ].
+}.
+
++ := {+:.
+   !if show,{
+      logo right angle.
+   }.
+   !array +.
+}.
+
+- := {-:.
+   !if show,{
+      logo left angle.
+   }.
+   !array -.
+}.
+
+start := {
+   !array +,X.
+}.
+
+X := {X:.
+   !array  F,-,[,[,X,],+,X,],+,F,[,+,F,X,],-,X.
+}.
+
+F := {F:.
+   !if show,{
+      logo forward len.
+   }.
+   !array F,F.
+}.
+
+list := !newInstance "java.util.ArrayList".
+show := 0 = 1.
+array := !!start.
+
+logo repeat iteration,{
+  !foreach array,{:item0.
+     part := item0 exec.
+     !foreach part,{:item1.
+        list add item1.
+     }.
+  }.
+  array := list toArray.
+  list clear.
+}.
+
+show := 1 = 1.
+logo penup ; setxy -200,-200 setpencolor 64,128,0 pendown.
+!foreach array,{:item.
+   item exec.
+}.
