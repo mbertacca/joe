@@ -141,6 +141,8 @@ public class DefaultCommand extends CommandBase {
          try {
             Return = code.exec();
          } catch (BreakLoopException _ex) {
+            if (_ex.hasReturnObject())
+               Return = _ex.getReturnObject();
             break;
          }
       return Return;
@@ -160,6 +162,8 @@ public class DefaultCommand extends CommandBase {
                Return = code.exec(list[i]);
             }
          } catch (BreakLoopException _ex) {
+            if (_ex.hasReturnObject())
+               Return = _ex.getReturnObject();
             break;
          }
       }
