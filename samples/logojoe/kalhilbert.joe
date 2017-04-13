@@ -10,7 +10,7 @@ hilbert := {hilbert:level,angle,size.
       red := cc getRed.
       green := cc getGreen.
       blue := cc getBlue.
-      inc := 16.
+      inc := 32.
       !switch (logo random 6 intValue)
       case 0,{
          red := red - inc.
