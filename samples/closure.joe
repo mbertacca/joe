@@ -1,0 +1,23 @@
+getClos := {:n.
+   i := n.
+   {
+      i := i + 1.
+   }.
+}.
+
+intSeq1 := getClos init 10.
+!println (intSeq1 exec).
+!println (intSeq1 exec).
+!println (intSeq1 exec).
+
+intSeq2 := getClos clone ; init 20.
+!println (intSeq2 exec).
+!println (intSeq2 exec).
+!println (intSeq2 exec).
+
+getClos exec.
+
+!println (intSeq1 exec).
+!println (intSeq2 exec).
+!println (intSeq1 exec).
+!println (intSeq2 exec).
