@@ -129,8 +129,8 @@ public class Parser {
       if (val instanceof Message) {
          final Message msg = (Message) val;
          Return = new Message() {
-            public Object exec () throws JOEException {
-               return block.setVariable(name, msg.exec());
+            public Object exec (Block blk) throws JOEException {
+               return blk.setVariable(name, msg.exec(blk));
             }
             public int getRow() {
                return row;
@@ -144,8 +144,8 @@ public class Parser {
          };
       } else {
          Return = new Message() {
-            public Object exec () throws JOEException {
-               return block.setVariable(name, val);
+            public Object exec (Block blk) throws JOEException {
+               return blk.setVariable(name, val);
             }
             public int getRow() {
                return row;
@@ -181,7 +181,7 @@ public class Parser {
          } else {
             final int row = tk.row, col = tk.col;
             Return = new Message() {
-               public Object exec () throws JOEException {
+               public Object exec (Block blk) throws JOEException {
                   return val;
                }
                public int getRow() {
@@ -237,9 +237,24 @@ public class Parser {
       }
    }
 
-   private Block block (Token tk, TkStack tokens) throws JOEException {
+   private Message block (final Token tk, TkStack tokens) throws JOEException {
       Parser parser = new Parser(this);
-      Block Return = parser.compile (tokens);
+      final Block newBlock = parser.compile (tokens);
+      final int blkIdx = block.getLastChild();
+      Message Return = new Message() {
+         public Object exec (Block blk) throws JOEException {
+            return blk.getChild(blkIdx);
+         }
+         public int getRow() {
+            return tk.row;
+         }
+         public int getCol() {
+            return tk.col;
+         }
+         public String toString () {
+            return newBlock.toString();
+         }
+      };
       return Return;
    }
 
@@ -323,8 +338,8 @@ public class Parser {
          return Literals.getDecimal(tk.word);
       case _WORD:
          return new SingleVariableMessage()  {
-            public Object exec () {
-               return block.getVariable(tk.word);
+            public Object exec (Block blk) {
+               return blk.getVariable(tk.word);
             }
             public int getRow() {
                return tk.row;

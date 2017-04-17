@@ -22,5 +22,5 @@ package com.veryant.joe;
 public interface Message {
    int getRow();
    int getCol();
-   Object exec() throws JOEException;
+   Object exec(Block blk) throws JOEException;
 }

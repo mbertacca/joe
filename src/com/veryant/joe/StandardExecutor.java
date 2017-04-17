@@ -24,7 +24,7 @@ public class StandardExecutor implements Executor {
       Object Return = null;
       try {
          for (Message msg : blk)
-            Return = msg.exec();
+            Return = msg.exec(blk);
       } catch (BreakLoopException ex) {
          if (!ex.hasReturnObject())
             ex.setReturnObject(Return);
