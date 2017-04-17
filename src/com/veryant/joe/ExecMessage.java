@@ -155,19 +155,19 @@ public class ExecMessage implements Message {
    public int getCol() {
       return col;
    }
-   private Object[] argsExec () throws JOEException {
+   private Object[] argsExec (Block blk) throws JOEException {
       Object[] Return = new Object[origArgs.length];
       for (int i = 0; i < origArgs.length; i++)
          if (origArgs[i] instanceof Message)
-            Return[i] = ((Message) origArgs[i]).exec();
+            Return[i] = ((Message) origArgs[i]).exec(blk);
          else
             Return[i] = origArgs[i];
       return Return;
    }
-   private MethodWArgs checkJO (OuterBlock ob) throws JOEException {
+   private MethodWArgs checkJO (OuterBlock ob, Block blk) throws JOEException {
       Object[] argArray = null;
       if (origArgs != null) 
-         argArray = argsExec();
+         argArray = argsExec(blk);
       Block b = ob.getMethod (selector);
       if (b == null)
          throw new JOEException (
@@ -175,7 +175,7 @@ public class ExecMessage implements Message {
       return new MethodWArgs (b, argArray);
    }
  
-   private MethodWArgs check (Object actObj) throws JOEException {
+   private MethodWArgs check (Object actObj, Block blk) throws JOEException {
       MethodWArgs Return;
       Object[] argArray = null;
       if (actObj instanceof ClassReference)
@@ -183,7 +183,7 @@ public class ExecMessage implements Message {
       else
          clazz = actObj.getClass();
       if (origArgs != null) {
-         argArray = argsExec();
+         argArray = argsExec(blk);
          if (! (actObj instanceof InternalObject))
             for (int i = 0; i < argArray.length; i++)
                if (argArray[i] instanceof Wrapper)
@@ -323,13 +323,13 @@ public class ExecMessage implements Message {
       return new MethodWArgs (method, argArray);
    }
 
-   public Object exec () throws JOEException {
+   public Object exec (Block blk) throws JOEException {
       Object wobj;
       Object actObj;
       Object Return;
       try {
          if (receiver != null) {
-            actObj = receiver.exec();
+            actObj = receiver.exec(blk);
          } else {
             actObj = object;
          }
@@ -337,9 +337,9 @@ public class ExecMessage implements Message {
             throw new JOEException ("null receiver", row, col, fName);
          MethodWArgs mwa;
          if (actObj instanceof OuterBlock)
-            mwa = checkJO((OuterBlock) actObj);
+            mwa = checkJO((OuterBlock) actObj, blk);
          else
-            mwa = check(actObj);
+            mwa = check(actObj, blk);
          Return = mwa.invoke(actObj);
          if ((wobj = Wrapper.newInstance (Return)) != null)
             Return = wobj;

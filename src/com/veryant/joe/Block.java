@@ -29,6 +29,7 @@ public class Block extends ArrayList<Message>
    private Block parent;
    private HashMap<String,Object> variables;
    private final HashMap<String,Object> constants;
+   private ArrayList<Block> children = new ArrayList<Block>();
    private String name;
    private String[] argName;
 
@@ -39,6 +40,8 @@ public class Block extends ArrayList<Message>
          constants = parent.constants;
       else
          constants = new HashMap<String,Object>();
+      if (parent != null)
+         parent.children.add (this);
    }
    void setArguments (String argn[]) {
       argName = argn;
@@ -49,6 +52,15 @@ public class Block extends ArrayList<Message>
    public Object exec (Object...argv) throws JOEException {
       return vExec (new HashMap<String,Object>(), argv);
    }
+   public Object init () throws JOEException {
+      return init ((Object[]) null);
+   }
+   public Object init (Object...argv) throws JOEException {
+      if (variables == null)
+         variables = new HashMap<String,Object>();
+      return vExec (variables, argv);
+   }
+   @Deprecated
    public Object sfExec (Object...argv) throws JOEException {
       if (variables == null)
          variables = new HashMap<String,Object>();
@@ -117,6 +129,22 @@ public class Block extends ArrayList<Message>
          return ((Block) block).exec (argv);
       else
          return null;
+   }
+   public Object clone() {
+      Block Return = (Block) super.clone();
+      Return.variables = null;
+      Return.children = new ArrayList<Block>();
+      final int size = children.size();
+      for (int i = 0; i < size; i++)
+         Return.children.add(((Block)children.get(i).clone()).$extends(Return));
+      return Return;
+   }
+   int getLastChild() {
+      return children.size() - 1;
+   }
+   Block getChild(int n) {
+      final Block Return = children.get(n);
+      return Return;
    }
    public String name() {
       return name;

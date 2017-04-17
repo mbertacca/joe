@@ -56,11 +56,11 @@ public class JavaObjectsExecutor {
          Return = ((Wrapper) Return).getWrapped();
       return Return;
    }
-   public Object sfExec () throws Exception {
-      return sfExec ((Object[]) null);
+   public Object init () throws Exception {
+      return init ((Object[]) null);
    }
-   public Object sfExec (Object...a1) throws Exception {
-      Object Return = block.sfExec (a1);
+   public Object init (Object...a1) throws Exception {
+      Object Return = block.init (a1);
       if (Return instanceof Wrapper)
          Return = ((Wrapper) Return).getWrapped();
       return Return;
@@ -164,7 +164,7 @@ public class JavaObjectsExecutor {
             try {
                b = prg.compile (tokens);
                try {
-                  b.sfExec();
+                  b.init();
                   cmd = prg.getCommand();
                } catch (ExecException ex) {
                   throw ex;

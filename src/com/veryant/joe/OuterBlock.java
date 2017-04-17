@@ -42,7 +42,7 @@ public class OuterBlock extends Block {
             if ((wobj = Wrapper.newInstance (argv[i])) != null)
                argv[i] = wobj;
       }
-      Return.sfExec (argv);
+      Return.init (argv);
       return Return;
    }
 
