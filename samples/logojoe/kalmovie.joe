@@ -55,7 +55,7 @@ newColorsCol := {:square,idx.
    rpt := elem length.
    i1 := idx - 1.
    !if (i1 < 0),{
-       i1 := rpt - 1.
+       i1 := rpt *0.866 intValue.
    }.
    j := 0.
    buc := elem get j.
@@ -170,7 +170,7 @@ colors := !!initColors dim.
 save := cloSave init.
 logo forever {
    idx := 0.
-   logo repeat (dim*0.866 intValue),{
+   logo repeat (dim*0.866 + 2 intValue),{
       logo penup ; setxy (winwidth/2),(-1*winheight/2) pendown ; hideturtle.
       millis := system currentTimeMillis.
       logo setupdateoff.
