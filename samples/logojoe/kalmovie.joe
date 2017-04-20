@@ -1,0 +1,213 @@
+:args.
+winwidth := 320.
+winheight := 240.
+logo := !newInstance "Logo",winwidth,winheight.
+logo setantialiasingoff ; setTitle (args get 0).
+
+dim := 62.
+inc := 16.
+
+newComponent := {:c.
+   delta := inc.
+   !if ((logo random 2.0) > 1.0),{
+      delta := delta * -1.
+   }.
+   c := c + delta.
+   !if (c > 255),{
+      c := 511 - c.
+   },{
+      !if (c < 1),{
+         c := c * -1.
+      }.
+   }.
+   c.
+}.
+
+initColors := {:dim.
+   return := !newArray dim.
+   red := (logo random 255 intValue).
+   green := (logo random 255 intValue).
+   blue := (logo random 255 intValue).
+   i := 0.
+   logo repeat dim,{
+      return set i,(!newArray dim).
+      j := 0.
+      logo repeat dim,{
+         !if (i>0 and (j < (dim - 1))),{
+             luc := return get (i - 1) get (j + 1).
+             red := 1 + (luc getRed) + red / 2.
+             green := 1 + (luc getGreen) + green / 2.
+             blue := 1 + (luc getBlue) + blue / 2.
+         }.
+         red := newComponent exec red.
+         green := newComponent exec green. 
+         blue := newComponent exec blue.
+         return get i set j,(!newInstance "java.awt.Color",red,green,blue).
+         j := j + 1.
+      }.
+      i := i + 1.
+   }.
+   return.
+}.
+
+newColorsCol := {:square,idx.
+   elem := square get (idx).
+   rpt := elem length.
+   i1 := idx - 1.
+   !if (i1 < 0),{
+       i1 := rpt - 1.
+   }.
+   j := 0.
+   buc := elem get j.
+   luc := 0.
+   logo repeat dim,{
+      !if (j < (dim - 1)),{
+         luc := square get i1 get (j + 1).
+      },{
+         luc := square get i1 get j.
+      }.
+      corr:= j % 2.
+      red := corr + ((buc getRed) + (luc getRed)) / 2.
+      green := corr + ((buc getGreen) + (luc getGreen)) / 2.
+      blue := corr + ((buc getBlue) + (luc getBlue)) / 2.
+
+      red := newComponent exec red.
+      green := newComponent exec green. 
+      blue := newComponent exec blue.
+
+      buc := !newInstance "java.awt.Color",red,green,blue.
+      elem set j,buc.
+      luc := square get i1 get j.
+      *>elem set j,(square get i1 get j).
+      j := j + 1.
+   }.
+}.
+
+showTriangle := {:square,idx,refl.
+   start := logo pos.
+   len := square length.
+   sqlen := len.
+   rpt := len * 0.866 + 1 intValue.
+   beg := 0.
+
+   logo repeat rpt,{
+      here := logo pos.
+      elem := square get (idx).
+      logo pendown.
+      !if (refl),{
+         j := sqlen - beg - 1 intValue.
+         logo repeat (len intValue),{
+            logo setpencolor (elem get (j))
+                forward 1.
+            j := j - 1.
+         }.
+      },{
+         j := beg intValue.
+         logo repeat (len intValue),{
+             logo setpencolor (elem get (j))
+                  forward 1.
+             j := j + 1.
+         }.
+      }.
+      beg := beg + 0.577.
+      len := len - 1.154.
+      idx := idx + 1.
+      !if (idx > rpt),{
+         idx := 0.
+      }.
+      logo penup ;
+           setxy (here get 0),(here get 1)
+           left 90
+           forward 1
+           right 90
+           forward 0.577
+      .
+
+   }.
+   logo setxy (start get 0), (start get 1).
+}.
+
+showRotTriangle := {:square,idx,refl,rot.
+  !switch rot
+   case 0,{
+      !!showTriangle square,idx,refl.
+   }
+   case 2,{
+      logo penup ; forward dim left 120 setpensize 2.
+      !!showTriangle square,idx,refl.
+      logo penup ; right 120 back dim setpensize 1.
+   }
+   case 1,{
+      logo penup ; left 60 forward dim left 180 setpensize 2.
+      !!showTriangle square,idx,refl.
+      logo penup ; left 180 back dim right 60 setpensize 1.
+   }.
+}.
+
+true := 1 = 1.
+false := true not.
+
+cloSave := {
+   a := 0.
+   {
+      !switch (true)
+      case (a <= 9),{
+         logo saveImage ("video/kalimg00" + a).
+      }
+      case (a <= 99),{
+         logo saveImage ("video/kalimg0" + a).
+      }
+      default {
+         logo saveImage ("video/kalimg" + a).
+      }.
+      a := a + 1.
+   }.
+}.
+
+system := !getClassRef "java.lang.System".
+
+colors := !!initColors dim.
+save := cloSave init.
+logo forever {
+   idx := 0.
+   logo repeat (dim*0.866 intValue),{
+      logo penup ; setxy (winwidth/2),(-1*winheight/2) pendown ; hideturtle.
+      millis := system currentTimeMillis.
+      logo setupdateoff.
+      logo repeat 3,{
+         cnt := 0.
+         logo repeat 4, {:repcount.
+            cnt := cnt + 1.
+            !!showRotTriangle colors,(idx),false,(cnt % 3).
+            logo forward dim.
+         }.
+         logo left 60 penup ; forward dim left 120 pendown.
+         cnt := cnt + 1.
+         logo repeat 5, {:repcount.
+            cnt := cnt + 1.
+            !!showRotTriangle colors,(idx),true,(cnt % 3).
+            logo forward dim.
+         }.
+         logo left 180 .
+         logo repeat 5, {:repcount.
+            cnt := cnt + 1.
+            !!showRotTriangle colors,(idx),false,(cnt % 3).
+            logo forward dim.
+         }.
+         logo left 120 penup ; forward dim left 60 pendown.
+         cnt := cnt + 1.
+
+         logo repeat 4, {:repcount.
+            cnt := cnt + 1.
+            !!showRotTriangle colors,(idx),true,(cnt % 3).
+            logo forward dim.
+         }.
+         logo left 180 .
+      }.
+      !!newColorsCol colors,(idx).
+      idx := idx + 1.
+      logo setupdateon.
+      *>save exec.
+   }.
+}.
+!systemExit.

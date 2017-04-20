@@ -52,6 +52,7 @@ public class Logo extends JFrame {
       private final double SQRT2 = Math.sqrt (2);
       private final int width, height;
       private BufferedImage image;
+      private BufferedImage offImage;
       private Graphics2D imgG2;
       private Turtle currTurtle;
       private boolean penDown;
@@ -67,6 +68,11 @@ public class Logo extends JFrame {
          this.height = height;
          clearScreen();
          setPreferredSize(new Dimension(width, height));
+      }
+      @Override
+      public void repaint() {
+         if (offImage == null)
+            super.repaint();
       }
       Turtle newturtle () {
          return new Turtle (width / 2, height / 2);
@@ -215,8 +221,28 @@ public class Logo extends JFrame {
       }
       public void paintComponent(Graphics g) {
          super.paintComponent(g);
-         g.drawImage (image, 0, 0, null);
-         drawTurtle (g);
+         if (offImage == null) {
+            g.drawImage (image, 0, 0, null);
+            drawTurtle (g);
+         } else {
+            g.drawImage (offImage, 0, 0, null);
+         }
+      }
+      public static BufferedImage copy (BufferedImage src){
+         BufferedImage Return =
+              new BufferedImage(src.getWidth(),src.getHeight(), src.getType());
+         Graphics2D g = Return.createGraphics();
+         g.drawImage(src, 0, 0, null);
+         g.dispose();
+         return Return;
+      }
+      private void setUpdate (boolean on) {
+         if (on) {
+            offImage = null;
+            repaint();
+         } else {
+            offImage = copy (image);
+         }
       }
       public void delay() {
          if (delay > 0)
@@ -581,6 +607,14 @@ public class Logo extends JFrame {
    }
    public Logo setDelay (int ms) {
       canvas.setDelay (ms);
+      return this;
+   }
+   public Logo setupdateoff () {
+      canvas.setUpdate (false);
+      return this;
+   }
+   public Logo setupdateon () {
+      canvas.setUpdate (true);
       return this;
    }
    public Logo saveImage (String name) throws IOException {

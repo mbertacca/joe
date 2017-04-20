@@ -1,0 +1,209 @@
+:args.
+logo := !newInstance "Logo".
+logo setTitle (args get 0).
+dim := 124.
+
+cloud := {:dim.
+   bg := logo colorunder.
+   red := (logo random 255 intValue).
+   green := (logo random 255 intValue).
+   blue := (logo random 255 intValue).
+   logo penup ;
+        forward (dim /2)
+        left 90
+        forward (dim / 2)
+        right 90
+        hideturtle.
+
+   inc := 6.
+
+   newComponent := {:c.
+      delta := inc.
+      !if ((logo random 2.0) > 1),{
+          delta := delta * -1.
+      }.
+      c := c + delta.
+      !if (c > 255),{
+         c := 511 - c.
+      },{
+         !if (c < 1),{
+           c := c * -1.
+         }.
+      }.
+      c.
+   }.
+   forward := {:n.
+      logo repeat n,{
+         logo penup ;
+              forward 1
+              left 90
+              forward 1.
+         luc := logo colorunder.
+         logo back 1
+              right 90
+              back 1
+              pendown.
+
+         !if (luc = bg not),{
+             red := (luc getRed) + red / 2.
+             green := (luc getGreen) + green / 2.
+             blue := (luc getBlue) + blue / 2.
+         }.
+
+         red := newComponent exec red.
+         green := newComponent exec green. 
+         blue := newComponent exec blue.
+   
+         logo setpencolor red,green,blue
+              forward 0
+              penup ;
+              forward 1
+              pendown ;
+              .
+      }.
+   }.
+
+   s := 0.
+   logo pendown ; forward 0.
+   !while { s <= dim. },{
+      forward exec s.
+      logo left 90.
+      forward exec s.
+      logo left 90.
+      forward exec s.
+      logo left 90.
+      forward exec s.
+      logo penup ; forward 1 right 90 forward 1 right 180 pendown ;.
+      s := s + 2.
+   }.
+}.
+
+draw := {:size.
+  !!cloud dim.
+  logo penup ; home.
+}.
+
+cpTriangle := {:len.
+   start := logo pos.
+   rpt := len * 0.866 + 1 intValue.
+   return := !newArray rpt.
+
+   logo repeat rpt,{:repcount.
+      here := logo pos.
+
+      elem := !newArray (len + 1 intValue).
+      logo penup.
+      logo repeat ((len + 1) intValue),{:repcount1.
+         elem set (repcount1 - 1),(logo colorunder).
+         logo forward 1.
+      }.
+      return set (repcount - 1),elem.
+
+      logo penup ;
+           setxy (here get 0),(here get 1)
+           left 90
+           forward 1
+           right 90
+           forward 0.577
+           pendown ;
+      .
+      len := len - 1.154.
+   }.
+   logo setxy (start get 0), (start get 1).
+   return.
+}.
+
+showTriangle := {:treq,refl.
+   start := logo pos.
+   rpt := treq length.
+   logo repeat rpt,{:repcount.
+      here := logo pos.
+      elem := treq get (repcount - 1).
+      len := elem length.
+      logo pendown.
+      !if (refl = 0),{
+         logo repeat len,{:repcount1.
+            logo setpencolor (elem get (repcount1 - 1))
+                 forward 1.
+         }.
+      },{
+         logo repeat len,{:repcount1.
+            logo setpencolor (elem get (len - repcount1))
+                 forward 1.
+         }.
+      }.
+      logo penup ;
+           setxy (here get 0),(here get 1)
+           left 90
+           forward 1
+           right 90
+           forward 0.577
+      .
+   }.
+   logo setxy (start get 0), (start get 1).
+}.
+
+showRotTriangle := {:treq,len,rot,refl.
+   !switch rot
+   case 0,{
+      !!showTriangle treq,refl.
+   }
+   case 2,{
+      logo penup ; forward len left 120.
+      !!showTriangle treq,refl.
+      logo penup ; right 120 back len.
+   }
+   case 1,{
+      logo penup ; left 60 forward len left 180.
+      !!showTriangle treq,refl.
+      logo penup ; left 180 back len right 60.
+   }.
+}.
+
+
+logo forever {
+   logo clearscreen ;
+        setbackground 0,0,0
+        setpencolor (logo random 256 intValue),
+                    (logo random 256 intValue),
+                    (logo random 256 intValue).
+
+   !! draw (dim).
+
+   triangle := !!cpTriangle dim.
+   logo clearscreen ; setbackground 0,0,0 penup; setxy 320,-240 setpensize 2.
+   cnt := 2.
+   logo repeat 3,{
+      cnt := 0.
+      logo repeat 4, {:repcount.
+         cnt := cnt + 1.
+         !!showRotTriangle triangle,dim,(cnt % 3),0.
+         logo forward dim.
+      }.
+      logo left 60 penup ; forward dim left 120 pendown.
+      cnt := cnt + 1.
+      logo repeat 5, {:repcount.
+         cnt := cnt + 1.
+         !!showRotTriangle triangle,dim,(cnt % 3),1.
+         logo forward dim.
+      }.
+      logo left 180 .
+      logo repeat 5, {:repcount.
+         cnt := cnt + 1.
+         !!showRotTriangle triangle,dim,(cnt % 3),0.
+         logo forward dim.
+      }.
+      logo left 120 penup ; forward dim left 60 pendown.
+      cnt := cnt + 1.
+
+      logo repeat 4, {:repcount.
+         cnt := cnt + 1.
+         !!showRotTriangle triangle,dim,(cnt % 3),1.
+         logo forward dim.
+      }.
+      logo left 180 .
+   }.
+
+   logo setDelay 5000 forward 0 setDelay 0.
+}.
+
