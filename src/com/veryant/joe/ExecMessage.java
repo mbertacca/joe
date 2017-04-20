@@ -197,7 +197,13 @@ public class ExecMessage implements Message {
          Return = getMethod(selector, argClasses, argArray);
       }  else {
          try {
-            Return = new MethodWArgs (clazz.getMethod (selector), argArray);
+            Method m[] = methCache.get(clazz);
+            if (m == null) {
+               m = new Method[1];
+               m[0] = clazz.getMethod(selector);
+               methCache.put(clazz,m);
+            }
+            Return = new MethodWArgs (m[0], argArray);
          } catch (NoSuchMethodException ex) {
             throw new JOEException (ex, row, col, fName);
          }
