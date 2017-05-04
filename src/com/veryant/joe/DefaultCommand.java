@@ -149,11 +149,12 @@ public class DefaultCommand extends CommandBase {
    }
    /**
     * This method implements a 'for each'. The code block is executed for
-    * each object passed, each object is passed to the block as argument.
+    * each object passed in the array startint from the n-th,
+    * each object is passed to the block as argument.
     */
-   public Object foreach (Object list[], Block code) throws JOEException {
+   public Object foreach(Object list[], int n, Block code) throws JOEException {
       Object Return = null;
-      for (int i = 0; i < list.length; i++) {
+      for (int i = n; i < list.length; i++) {
          try {
             final Object o = Wrapper.newInstance(list[i]);
             if (o != null) {
@@ -168,6 +169,12 @@ public class DefaultCommand extends CommandBase {
          }
       }
       return Return;
+   }
+   /**
+    * This is a convenience method for foreach (list, 0, code).
+    */
+   public Object foreach (Object list[], Block code) throws JOEException {
+      return foreach (list, 0, code);
    }
    /**
     * Causes the exit from a loop.

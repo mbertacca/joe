@@ -20,12 +20,14 @@
 package com.veryant.joe;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.ArrayDeque;
 
 
 public class OuterBlock extends Block {
    public static Block get (String name, BufferedReader src, Object[] argv,
-                            Object cmd, Executor exec) throws Exception {
+                            Object cmd, Executor exec)
+                                          throws IOException, JOEException {
       String line;
       final Tokenizer tkzer = new Tokenizer();
 
