@@ -19,8 +19,9 @@
 
 package com.veryant.joe;
 
-import java.io.Console;
 import java.io.BufferedReader;
+import java.io.Console;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -31,49 +32,6 @@ import java.util.HashMap;
 public class JavaObjectsExecutor {
    public static final String rcsid = "$Id$";
    private Block block;
-
-   public JavaObjectsExecutor (String fileName) throws Exception {
-      String line;
-      BufferedReader fr;
-      Tokenizer tkzer = new Tokenizer();
-      DefaultCommand defcmd = new DefaultCommand();
-      fr = new BufferedReader(new FileReader(fileName));
-      ArrayDeque<Token> tokens = new ArrayDeque<Token>();
-      while ((line = fr.readLine()) != null) {
-         tkzer.tokenize (line.toCharArray(), tokens);
-      }
-      fr.close();
-      Executor exec = new StandardExecutor();
-      Parser parser = new Parser(defcmd, exec, fileName);
-      block = parser.compile (tokens);
-   }
-   public Object exec () throws Exception {
-      return exec ((Object[]) null);
-   }
-   public Object exec (Object...a1) throws Exception {
-      Object Return = block.exec (a1);
-      if (Return instanceof Wrapper)
-         Return = ((Wrapper) Return).getWrapped();
-      return Return;
-   }
-   public Object init () throws Exception {
-      return init ((Object[]) null);
-   }
-   public Object init (Object...a1) throws Exception {
-      Object Return = block.init (a1);
-      if (Return instanceof Wrapper)
-         Return = ((Wrapper) Return).getWrapped();
-      return Return;
-   }
-   public Object execBlock (String name) throws Exception {
-      return execBlock (name, (Object[]) null);
-   }
-   public Object execBlock (String name, Object...a1) throws Exception {
-      Object Return = block.execBlock (name, a1);
-      if (Return instanceof Wrapper)
-         Return = ((Wrapper) Return).getWrapped();
-      return Return;
-   }
 
    public static void showException (DefaultCommand cmd, Throwable ex) {
       cmd.println(ex.getMessage());
@@ -101,23 +59,13 @@ public class JavaObjectsExecutor {
       String line;
       Executor exec = new StandardExecutor();
       if (argv.length > 0) {
-         final String fileName = argv[0];
          DefaultCommand defCmd = new DefaultCommand();
-         Parser parser = new Parser(defCmd,exec,fileName);
-         Tokenizer tkzer = new Tokenizer();
-         BufferedReader fr;
+         ScriptManager sm;
          try {
-            fr = new BufferedReader(new FileReader(fileName));
-            ArrayDeque<Token> tokens = new ArrayDeque<Token>();
-            while ((line = fr.readLine()) != null) {
-               tkzer.tokenize (line.toCharArray(), tokens);
-/*
-               for (Token tk : tokens)
-                  System.out.println (tk.toString());
-*/
-            }
-            fr.close();
-            parser.compile (tokens).exec(new WArray(argv));
+            final File f = new File (argv[0]).getCanonicalFile();
+            sm = new ScriptManager(f.getParentFile(), exec, defCmd);
+            Object[] jarg = new Object [] {new WArray (argv)};
+            sm.newInstance (f.getName(), jarg);
          } catch (BreakEndException ex) {
             Return = 0;
          } catch (ExecException ex) {
@@ -140,6 +88,9 @@ public class JavaObjectsExecutor {
       } else {
          Return = 0;
          DefaultCommand defCmd = new DefaultCommand();
+         File cwd = new java.io.File (System.getProperty("user.dir"));
+         ScriptManager sm = new ScriptManager(cwd, exec, defCmd);
+
          Object cmd = defCmd;
          line = "";
          defCmd.println (
@@ -179,20 +130,6 @@ public class JavaObjectsExecutor {
          }
       }
       return Return;
-   }
-   public static Block newJoe (String fileName, Object...argv)
-                                                            throws Exception {
-      return newJoe (fileName,
-                     new BufferedReader(new FileReader(fileName)), argv);
-   }
-   public static Block newJoe (String name, String code, Object...argv)
-                                                            throws Exception {
-      return newJoe (name, new BufferedReader (new StringReader (code)), argv);
-   }
-   public static Block newJoe (String name, BufferedReader code, Object...argv)
-                                                            throws Exception {
-      return OuterBlock.get (name, code, argv,
-                             new DefaultCommand(), new StandardExecutor());
    }
 }
 

@@ -174,6 +174,18 @@ public class CommandBase {
       return false;
    }
    /**
+    * Executes the specified JOE script and returns it as an object.
+    */
+   public Object $new (String fname) throws Exception {
+      return ScriptManager.newInstance (this, fname, null);
+   }
+   /**
+    * Executes the specified JOE script and returns it as an object.
+    */
+   public Object $new (String fname, Object...argv) throws Exception {
+      return ScriptManager.newInstance (this, fname, argv);
+   }
+   /**
     * Convenience method for instanceof (obj, getClass(clazz)).
     */
    public boolean $instanceof (Object obj, String clazz) {
