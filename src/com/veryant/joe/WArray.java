@@ -20,7 +20,7 @@
 package com.veryant.joe;
 
 public class WArray extends Wrapper {
-   private final Object[] value;
+   private Object[] value;
 
    public WArray (Object[] array) {
       value = array;
@@ -45,5 +45,13 @@ public class WArray extends Wrapper {
    }
    public Object set(WNumber idx, Object obj) {
       return value[idx.intValue()] = obj;
+   }
+   public Object add(Object obj) {
+      Object newValue[] = new Object[value.length + 1];
+      int i;
+      for (i = 0; i < value.length; i++)
+         newValue[i] = value[i];
+      value = newValue;
+      return value[i] = obj;
    }
 }

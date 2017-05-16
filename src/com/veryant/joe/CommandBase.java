@@ -42,6 +42,7 @@ public class CommandBase {
       primitiveClasses.put (Float.class, float.class);
       primitiveClasses.put (Double.class, double.class);
    }
+   static final String eol = System.getProperty("line.separator", "\n");
    /**
     * Returns a new instance of the specified class.
     */
@@ -194,6 +195,12 @@ public class CommandBase {
       } catch (Exception ex) {
          return false;
       }
+   }
+   /**
+    * Returns a string containing the line terminator.
+    */
+   public String nl () {
+      return eol;
    }
    /**
     * Returns a string one character long containing the character whose

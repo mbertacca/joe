@@ -164,7 +164,7 @@ public class ExecMessage implements Message {
             Return[i] = origArgs[i];
       return Return;
    }
-   private MethodWArgs checkJO (OuterBlock ob, Block blk) throws JOEException {
+   private MethodWArgs checkJO (Block ob, Block blk) throws JOEException {
       Object[] argArray = null;
       if (origArgs != null) 
          argArray = argsExec(blk);
@@ -342,8 +342,8 @@ public class ExecMessage implements Message {
          if (actObj == null)
             throw new JOEException ("null receiver", row, col, fName);
          MethodWArgs mwa;
-         if (actObj instanceof OuterBlock)
-            mwa = checkJO((OuterBlock) actObj, blk);
+         if (actObj instanceof Block && ((Block)actObj).isExecAsJoe())
+            mwa = checkJO((Block) actObj, blk);
          else
             mwa = check(actObj, blk);
          Return = mwa.invoke(actObj);

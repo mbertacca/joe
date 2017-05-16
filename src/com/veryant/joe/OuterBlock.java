@@ -51,13 +51,8 @@ public class OuterBlock extends Block {
    public OuterBlock (Executor exec) {
       super (exec, null);
    }
-   Block getMethod (String name) {
-      Object Return = getVariable (name);
-      if (Return instanceof Block) {
-          return (Block) Return;
-      } else {
-          return null;
-      }
+   protected boolean isExecAsJoe () {
+      return true;
    }
    public String toString() {
       Block joeToString = getMethod("toString");

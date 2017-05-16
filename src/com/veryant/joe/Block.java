@@ -32,6 +32,7 @@ public class Block extends ArrayList<Message>
    private ArrayList<Block> children = new ArrayList<Block>();
    private String name;
    private String[] argName;
+   private boolean execAsJoe;
 
    Block (Executor exec, Block par) {
       executor = exec;
@@ -82,7 +83,7 @@ public class Block extends ArrayList<Message>
       return Return;
    }
    private HashMap<String,Object> getDataContaining (String name) {
-      if (variables.containsKey (name))
+      if (variables != null && variables.containsKey (name))
          return variables;
       else if (parent != null)
          return parent.getDataContaining (name);
@@ -123,6 +124,17 @@ public class Block extends ArrayList<Message>
    public HashMap<String,Object> getVariables () {
       return variables;
    }
+   protected boolean isExecAsJoe () {
+     return execAsJoe;
+   }
+   Block getMethod (String name) {
+      Object Return = getVariable (name);
+      if (Return instanceof Block) {
+          return (Block) Return;
+      } else {
+          return null;
+      }
+   }
    public Object execBlock (String name, Object...argv) throws JOEException {
       Object block = getVariable(name);
       if (block instanceof Block)
@@ -137,6 +149,15 @@ public class Block extends ArrayList<Message>
       final int size = children.size();
       for (int i = 0; i < size; i++)
          Return.children.add(((Block)children.get(i).clone()).$extends(Return));
+      return Return;
+   }
+   public Block $new() throws JOEException {
+      return $new ((Object[]) null);
+   }
+   public Block $new(Object...args) throws JOEException {
+      Block Return = (Block) clone();
+      Return.init (args);
+      Return.execAsJoe = true;
       return Return;
    }
    int getLastChild() {
@@ -163,7 +184,17 @@ public class Block extends ArrayList<Message>
       return this;
    }
    public String toString() {
-      return "{" + super.toString() + "}";
+      String Return;
+      Block joeToString;
+      if (isExecAsJoe() && (joeToString = getMethod("toString")) != null)
+         try {
+            Return = joeToString.exec().toString();
+         } catch (JOEException _ex) {
+            Return = _ex.toString();
+         }
+      else if ((Return = name()) == null)
+         Return = "{" + super.toString() + "}";
+      return Return;
    }
 }
 

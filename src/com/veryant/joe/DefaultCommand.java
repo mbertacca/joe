@@ -248,10 +248,16 @@ public class DefaultCommand extends CommandBase {
       }
    }
    /**
-    * Return an instance of class Switch created using cfrt as parameter.
+    * Returns an instance of class Switch created using cfrt as parameter.
     */
    public Object $switch (Object cfrt) {
       return new Switch (cfrt);
+   }
+   /**
+    * Returns an instance of class Switch created using Boolean.TRUE as parameter.
+    */
+   public Object switchTrue () {
+      return new Switch (Boolean.TRUE);
    }
    /**
     * Causes the exit from the current block.

@@ -149,7 +149,7 @@ false := true not.
 
 cloSave := {
    a := 0.
-   {
+   exec := {
       !switch (true)
       case (a <= 9),{
          logo saveImage ("video/kalimg00" + a).
@@ -167,7 +167,7 @@ cloSave := {
 system := !getClassRef "java.lang.System".
 
 colors := !!initColors dim.
-save := cloSave init.
+save := cloSave new.
 logo forever {
    idx := 0.
    logo repeat (dim*0.866 + 2 intValue),{
