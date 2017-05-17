@@ -6,7 +6,7 @@ low := 1.
 ntry := 1.
 
 form := !newInstance "JOEForm".
-form loadFile "guessnum.html".
+form loadURL (!getURL "guessnum.html").
 
 !while {answer <> "c" and (answer <> "C")},
 {

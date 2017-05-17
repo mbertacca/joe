@@ -123,7 +123,9 @@ public class JOEForm extends JFrame {
    }
 
    public void loadFile (final String fileName) throws Exception {
-      final URL url = new File (fileName).toURI().toURL();
+      loadURL (new File (fileName).toURI().toURL());
+   }
+   public void loadURL (final URL url) throws Exception {
       SwingUtilities.invokeAndWait(new Runnable() {
          public void run() {
             try {

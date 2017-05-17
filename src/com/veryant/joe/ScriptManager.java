@@ -21,11 +21,13 @@ package com.veryant.joe;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.security.CodeSource;
@@ -49,7 +51,7 @@ public class ScriptManager {
    static URL getURL (File f) {
       try {
          return f.toURI().toURL();
-      } catch (java.net.MalformedURLException ex) {
+      } catch (MalformedURLException ex) {
          throw new RuntimeException (ex);
       }
    }
@@ -80,6 +82,26 @@ public class ScriptManager {
       }
       return null;
    }
+   public URL getEntryPoint () {
+      return entryPoint;
+   }
+   public URL getURL (String spec) throws MalformedURLException {
+      return new URL (entryPoint, spec);
+   }
+   public InputStream getInputStream (String name) throws IOException {
+      InputStream Return;
+
+      File f = new File (entryPoint.getFile());
+      if (f.isDirectory()) {
+         f = new File (f, name);
+         Return = new FileInputStream (f);
+      } else {
+         Return = getStreamFromJar (name);
+         if (Return == null) 
+            throw new FileNotFoundException (name);
+      }
+      return Return;
+   }
    public Block newInstance (String name, Object[] argv)
                                throws IOException,JOEException {
       Block Return = blocks.get (name);
@@ -93,18 +115,8 @@ public class ScriptManager {
          }
          Return.init (argv);
       } else {
-         BufferedReader src;
-
-         File f = new File (entryPoint.getFile());
-         if (f.isDirectory()) {
-            f = new File (f, name);
-            src = new BufferedReader (new FileReader (f));
-         } else {
-            InputStream is = getStreamFromJar (name);
-            if (is == null) 
-               throw new FileNotFoundException (name);
-            src = new BufferedReader (new InputStreamReader(is));
-         }
+         BufferedReader src =  new BufferedReader (
+                                  new InputStreamReader(getInputStream(name)));
          Return = OuterBlock.get (name, src, argv, command, executor);
          blocks.put (name, Return);
       }

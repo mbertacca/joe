@@ -23,6 +23,8 @@ import java.io.Console;
 import java.util.HashMap;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * This class contains some methods that are useful for any flavor of
@@ -214,5 +216,11 @@ public class CommandBase {
     */
    public void $extends (OuterBlock child, OuterBlock parent) {
       child.$extends (parent);
+   }
+   /**
+    * Returns an URL based on the base URL of the first script run.
+    */
+   public URL getURL (String spec) throws MalformedURLException {
+      return ScriptManager.get (this).getURL (spec);
    }
 }
