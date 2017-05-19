@@ -2,6 +2,10 @@
 logo := !newInstance "Logo".
 logo setTitle (args get 0).
 dim := 124.
+screenWidth := logo width.
+screenHeight := logo height.
+brx := screenWidth / 2.
+bry := -1 * screenHeight / 2.
 
 cloud := {:dim.
    bg := logo colorunder.
@@ -113,6 +117,49 @@ cpTriangle := {:len.
    return.
 }.
 
+cpRectangle := {:w,h.
+   logo seth 0.
+   return := !newArray w.
+
+   logo repeat w,{:repcount.
+      elem := !newArray h.
+      logo penup.
+      logo repeat h,{:repcount1.
+         elem set (repcount1 - 1),(logo colorunder).
+         logo forward 1.
+      }.
+      return set (repcount - 1),elem.
+
+      logo penup ;
+           back h
+           left 90
+           forward 1
+           right 90
+           pendown ;
+      .
+   }.
+   return.
+}.
+
+showRectangle := {:rect.
+   w := rect length.
+   h := rect get 0 length.
+   logo repeat w,{:repcount.
+      elem := rect get (repcount - 1).
+      logo repeat h,{:repcount1.
+         logo setpencolor (elem get (repcount1 - 1))
+         forward 1.
+      }.
+      logo penup ;
+           back h
+           left 90
+           forward 1
+           right 90
+           pendown ;
+      .
+   }.
+}.
+
 showTriangle := {:treq,refl.
    start := logo pos.
    rpt := treq length.
@@ -159,11 +206,12 @@ showRotTriangle := {:treq,len,rot,refl.
       logo penup ; left 180 back len right 60.
    }.
 }.
-
+logo setbackground 0,0,0.
 
 logo forever {
+   logo setupdateoff.
+
    logo clearscreen ;
-        setbackground 0,0,0
         setpencolor (logo random 256 intValue),
                     (logo random 256 intValue),
                     (logo random 256 intValue).
@@ -171,39 +219,54 @@ logo forever {
    !! draw (dim).
 
    triangle := !!cpTriangle dim.
-   logo clearscreen ; setbackground 0,0,0 penup; setxy 320,-240 setpensize 2.
-   cnt := 2.
-   logo repeat 3,{
-      cnt := 0.
-      logo repeat 4, {:repcount.
-         cnt := cnt + 1.
-         !!showRotTriangle triangle,dim,(cnt % 3),0.
-         logo forward dim.
-      }.
-      logo left 60 penup ; forward dim left 120 pendown.
-      cnt := cnt + 1.
-      logo repeat 5, {:repcount.
-         cnt := cnt + 1.
-         !!showRotTriangle triangle,dim,(cnt % 3),1.
-         logo forward dim.
-      }.
-      logo left 180 .
-      logo repeat 5, {:repcount.
-         cnt := cnt + 1.
-         !!showRotTriangle triangle,dim,(cnt % 3),0.
-         logo forward dim.
-      }.
-      logo left 120 penup ; forward dim left 60 pendown.
-      cnt := cnt + 1.
+   logo clearscreen ; penup; setxy brx,bry setpensize 2.
 
-      logo repeat 4, {:repcount.
-         cnt := cnt + 1.
-         !!showRotTriangle triangle,dim,(cnt % 3),1.
-         logo forward dim.
-      }.
-      logo left 180 .
+   cnt := 0.
+   logo repeat 3, {:repcount.
+      cnt := cnt + 1.
+      !!showRotTriangle triangle,dim,(cnt % 3),0.
+      logo forward dim.
+   }.
+   logo left 60 penup ; forward dim left 120 pendown.
+   logo repeat 4, {:repcount.
+      cnt := cnt + 1.
+      !!showRotTriangle triangle,dim,(cnt % 3),1.
+      logo forward dim.
+   }.
+   logo left 180 .
+   logo repeat 4, {:repcount.
+      cnt := cnt + 1.
+      !!showRotTriangle triangle,dim,(cnt % 3),0.
+      logo forward dim.
+   }.
+   logo left 120 penup ; forward dim left 60 pendown.
+
+   logo repeat 4, {:repcount.
+      cnt := cnt + 1.
+      !!showRotTriangle triangle,dim,(cnt % 3),1.
+      logo forward dim.
    }.
 
-   logo setDelay 5000 forward 0 setDelay 0.
-}.
+   modWidth := dim * 0.866 * 2 intValue.
+   modHeight := dim * 3.
 
+   logo setxy (brx - 1), (bry + 1).
+   rectangle := !!cpRectangle modWidth,modHeight.
+   logo clearscreen ; penup; setxy brx,bry setpensize 2 setbackground 0,0,0.
+
+   horRep := screenWidth / modWidth + 1.
+   verRep := screenHeight / modHeight + 1.
+   logo repeat verRep, {
+      logo repeat horRep, {
+         !!showRectangle rectangle.
+         logo showturtle.
+      }.
+      logo penup;
+           left 90
+           back (horRep * modWidth)
+           right 90
+           forward modHeight
+      .
+   }.
+   logo fade 5.
+}.

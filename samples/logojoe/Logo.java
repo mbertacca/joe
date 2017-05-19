@@ -18,6 +18,7 @@
  */
 
 
+import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Container;
@@ -25,6 +26,9 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -35,6 +39,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 import com.veryant.joe.Block;
 import com.veryant.joe.BreakEndException;
@@ -62,6 +67,7 @@ public class Logo extends JFrame {
       private int delay = 0;
       private int penSize = 1;
       private boolean xormode;
+      private volatile float fading;
 
       Canvas (int width, int height) {
          this.width = width;
@@ -71,7 +77,7 @@ public class Logo extends JFrame {
       }
       @Override
       public void repaint() {
-         if (offImage == null)
+         if (offImage == null || fading > 0)
             super.repaint();
       }
       Turtle newturtle () {
@@ -220,12 +226,22 @@ public class Logo extends JFrame {
          }
       }
       public void paintComponent(Graphics g) {
+         final float fad = fading;
          super.paintComponent(g);
          if (offImage == null) {
             g.drawImage (image, 0, 0, null);
             drawTurtle (g);
          } else {
-            g.drawImage (offImage, 0, 0, null);
+            if (fad > 0) {
+               Graphics2D g2d = (Graphics2D) g.create();
+               g.drawImage (image, 0, 0, null);
+               g2d.setComposite(AlphaComposite.getInstance(
+                                AlphaComposite.SRC_OVER, fad));
+
+               g2d.drawImage (offImage, 0, 0, null);
+            } else {
+               g.drawImage (offImage, 0, 0, null);
+            }
          }
       }
       public static BufferedImage copy (BufferedImage src){
@@ -235,6 +251,36 @@ public class Logo extends JFrame {
          g.drawImage(src, 0, 0, null);
          g.dispose();
          return Return;
+      }
+      private void fade (float fadeTime) {
+         final int delayMillis = 50;
+         final float fadstep = delayMillis / (fadeTime * 1000);
+
+         fading = 1F;
+         final Timer timer = new Timer(delayMillis, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+               fading -= fadstep;
+               if (fading < fadstep)
+                  fading = 0;
+               else
+                  repaint();
+            }
+         });
+         timer.setRepeats(true);
+         timer.setCoalesce(true);
+         timer.start();
+         try {
+            Thread.sleep ((int) fadeTime * 1000);
+            while (fading > 0) 
+               Thread.sleep (delayMillis);
+         } catch (InterruptedException _ex) {
+         }
+      
+         timer.stop();
+         fading = 0;
+         offImage = null;
+         repaint();
       }
       private void setUpdate (boolean on) {
          if (on) {
@@ -395,6 +441,14 @@ public class Logo extends JFrame {
       this (640, 480);
    }
    public Logo (int width, int height) {
+      if (width <= 0 || height <= 0) {
+         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+         if (width <= 0)
+            width = screenSize.width;
+         if (height <= 0)
+            height = screenSize.height;
+         setUndecorated (true);
+      }
       canvas = new Canvas(width, height);
       SwingUtilities.invokeLater(new Runnable() {
          public void run() {
@@ -413,6 +467,12 @@ public class Logo extends JFrame {
          }
       });
       setTitle("Logo Joe");
+   }
+   public int width() {
+      return canvas.width;
+   }
+   public int height() {
+      return canvas.height;
    }
    public Logo forward (double px) {
       canvas.forward (px);
@@ -607,6 +667,18 @@ public class Logo extends JFrame {
    }
    public Logo setDelay (int ms) {
       canvas.setDelay (ms);
+      return this;
+   }
+   public Logo fade () {
+      canvas.fade (1F);
+      return this;
+   }
+   public Logo fade (int fadeTimeSec) {
+      canvas.fade (fadeTimeSec);
+      return this;
+   }
+   public Logo fade (double fadeTimeSec) {
+      canvas.fade ((float) fadeTimeSec);
       return this;
    }
    public Logo setupdateoff () {
