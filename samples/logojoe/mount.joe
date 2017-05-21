@@ -22,23 +22,23 @@ getMidPoint := {:ax,ay,bx,by.
 triangle := {:ax,ay,bx,by,cx,cy,it.
 
    !if (it < iteration),{
-      m := !!getMidPoint ax,ay,bx,by;
+      m := getMidPoint exec ax,ay,bx,by;
       mx1 := m get 0.
       my1 := m get 1.
 
-      m := !!getMidPoint bx,by,cx,cy;
+      m := getMidPoint exec bx,by,cx,cy;
       mx2 := m get 0.
       my2 := m get 1.
 
-      m := !!getMidPoint cx,cy,ax,ay;
+      m := getMidPoint exec cx,cy,ax,ay;
       mx3 := m get 0.
       my3 := m get 1.
 
       it := it + 1.
-      !!triangle ax,ay,mx1,my1,mx3,my3,it.
-      !!triangle bx,by,mx2,my2,mx1,my1,it.
-      !!triangle cx,cy,mx3,my3,mx2,my2,it.
-      !!triangle mx1,my1,mx3,my3,mx2,my2,it.
+      triangle exec ax,ay,mx1,my1,mx3,my3,it.
+      triangle exec bx,by,mx2,my2,mx1,my1,it.
+      triangle exec cx,cy,mx3,my3,mx2,my2,it.
+      triangle exec mx1,my1,mx3,my3,mx2,my2,it.
       .
    },{
       logo penup ;
@@ -52,7 +52,7 @@ triangle := {:ax,ay,bx,by,cx,cy,it.
 }.
 
 logo forever {
-   !!triangle -300,-220,
+   triangle exec -300,-220,
                  0, 220,
                300,-220,
                0.

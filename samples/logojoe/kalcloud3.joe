@@ -83,7 +83,7 @@ cloud := {:dim.
 }.
 
 draw := {:size.
-  !!cloud dim.
+  cloud exec dim.
   logo penup ; home.
 }.
 
@@ -193,16 +193,16 @@ showTriangle := {:treq,refl.
 showRotTriangle := {:treq,len,rot,refl.
    !switch rot
    case 0,{
-      !!showTriangle treq,refl.
+      showTriangle exec treq,refl.
    }
    case 2,{
       logo penup ; forward len left 120.
-      !!showTriangle treq,refl.
+      showTriangle exec treq,refl.
       logo penup ; right 120 back len.
    }
    case 1,{
       logo penup ; left 60 forward len left 180.
-      !!showTriangle treq,refl.
+      showTriangle exec treq,refl.
       logo penup ; left 180 back len right 60.
    }.
 }.
@@ -216,34 +216,34 @@ logo forever {
                     (logo random 256 intValue),
                     (logo random 256 intValue).
 
-   !! draw (dim).
+    draw exec (dim).
 
-   triangle := !!cpTriangle dim.
+   triangle := cpTriangle exec dim.
    logo clearscreen ; penup; setxy brx,bry setpensize 2.
 
    cnt := 0.
    logo repeat 3, {:repcount.
       cnt := cnt + 1.
-      !!showRotTriangle triangle,dim,(cnt % 3),0.
+      showRotTriangle exec triangle,dim,(cnt % 3),0.
       logo forward dim.
    }.
    logo left 60 penup ; forward dim left 120 pendown.
    logo repeat 4, {:repcount.
       cnt := cnt + 1.
-      !!showRotTriangle triangle,dim,(cnt % 3),1.
+      showRotTriangle exec triangle,dim,(cnt % 3),1.
       logo forward dim.
    }.
    logo left 180 .
    logo repeat 4, {:repcount.
       cnt := cnt + 1.
-      !!showRotTriangle triangle,dim,(cnt % 3),0.
+      showRotTriangle exec triangle,dim,(cnt % 3),0.
       logo forward dim.
    }.
    logo left 120 penup ; forward dim left 60 pendown.
 
    logo repeat 4, {:repcount.
       cnt := cnt + 1.
-      !!showRotTriangle triangle,dim,(cnt % 3),1.
+      showRotTriangle exec triangle,dim,(cnt % 3),1.
       logo forward dim.
    }.
 
@@ -251,14 +251,14 @@ logo forever {
    modHeight := dim * 3.
 
    logo setxy (brx - 1), (bry + 1).
-   rectangle := !!cpRectangle modWidth,modHeight.
+   rectangle := cpRectangle exec modWidth,modHeight.
    logo clearscreen ; penup; setxy brx,bry setpensize 2 setbackground 0,0,0.
 
    horRep := screenWidth / modWidth + 1.
    verRep := screenHeight / modHeight + 1.
    logo repeat verRep, {
       logo repeat horRep, {
-         !!showRectangle rectangle.
+         showRectangle exec rectangle.
          logo showturtle.
       }.
       logo penup;

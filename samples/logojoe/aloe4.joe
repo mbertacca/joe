@@ -41,7 +41,7 @@ logo repeat 60,{:repcount.
         penup ;
         forward size
         pendown.
-   !!leaf size.
+   leaf exec size.
    logo penup ;
         back size
         pendown.

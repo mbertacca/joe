@@ -177,21 +177,21 @@ showSquare := {:square,refl.
 
 logo forever {
    logo clearscreen ; setbackground 0,0,0.
-   !! draw dim.
+   draw exec dim.
 
-   square := !!cpSquare dim.
+   square := cpSquare exec dim.
    logo clearscreen ; setbackground 0,0,0 penup ; setxy 360,-240.
 
    logo repeat 3,{
       logo repeat 4,{:repcount.
-         !! showSquare square,(repcount % 2).
+         showSquare exec square,(repcount % 2).
          logo penup ; forward dim pendown;.
       }.
 
       logo penup ; left 90 forward dim forward dim left 90.
 
       logo repeat 4,{:repcount.
-         !! showSquare square,(repcount % 2).
+         showSquare exec square,(repcount % 2).
          logo penup ; forward dim pendown;.
       }.
       logo penup ; right 180 pendown;.

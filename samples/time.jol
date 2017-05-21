@@ -1,4 +1,5 @@
 :h,m,s.
+this := !!.
 
 hours := 0.
 minutes := 0.
@@ -19,7 +20,7 @@ setHours := {:h.
       }.
       hours := h.
    }.
-   !!.
+   this.
 }.
 
 setMinutes := {:m.
@@ -29,7 +30,7 @@ setMinutes := {:m.
       }.
       minutes := m.
    }.
-   !!.
+   this.
 }.
 
 setSeconds := {:s.
@@ -39,9 +40,9 @@ setSeconds := {:s.
       }.
       seconds := s.
    }.
-   !!.
+   this.
 }.
 
-!! setHours h.
-!! setMinutes m.
-!! setSeconds s.
+this setHours h.
+this setMinutes m.
+this setSeconds s.

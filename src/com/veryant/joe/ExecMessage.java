@@ -128,7 +128,7 @@ public class ExecMessage implements Message {
       javaKeywords.add ("while");
    }
 
-   public static String getSelector(String s) {
+   public static String getJSelector(String s) {
       if (javaKeywords.contains (s))
          return "$" + s;
       else
@@ -137,7 +137,7 @@ public class ExecMessage implements Message {
 
    ExecMessage (Object obj, Token sel, Object args[], String fn)
                                               throws JOEException {
-      selector = getSelector (sel.word);
+      selector = sel.word;
       row = sel.row;
       col = sel.col;
       fName = fn;
@@ -177,6 +177,7 @@ public class ExecMessage implements Message {
  
    private MethodWArgs check (Object actObj, Block blk) throws JOEException {
       MethodWArgs Return;
+      final String jSelector = getJSelector (selector);
       Object[] argArray = null;
       if (actObj instanceof ClassReference)
          clazz = ((ClassReference) actObj).get();
@@ -194,13 +195,13 @@ public class ExecMessage implements Message {
                argClasses[i] = Object.class;
             else
                argClasses[i] = argArray[i].getClass();
-         Return = getMethod(selector, argClasses, argArray);
+         Return = getMethod(jSelector, argClasses, argArray);
       }  else {
          try {
             Method m[] = methCache.get(clazz);
             if (m == null) {
                m = new Method[1];
-               m[0] = clazz.getMethod(selector);
+               m[0] = clazz.getMethod(jSelector);
                methCache.put(clazz,m);
             }
             Return = new MethodWArgs (m[0], argArray);
@@ -227,7 +228,7 @@ public class ExecMessage implements Message {
       return currFit;
    }
 
-   private MethodWArgs getMethod(String selector, Class argClasses[],
+   private MethodWArgs getMethod(String jSelector, Class argClasses[],
            Object[] argArray) throws JOEException {
       Method method = null;
       MethodWArgs Return;
@@ -239,7 +240,7 @@ public class ExecMessage implements Message {
          m = clazz.getMethods();
          ArrayList<Method> goodMethods = new ArrayList<Method>();
          for (int i = 0; i < m.length; i++)
-            if (m[i].getName().equals(selector))
+            if (m[i].getName().equals(jSelector))
                goodMethods.add (m[i]);
          m = goodMethods.toArray (new Method[goodMethods.size()]);
          methCache.put(clazz,m);
@@ -293,7 +294,7 @@ public class ExecMessage implements Message {
          StringBuilder sb = new StringBuilder();
          sb.append(clazz.getName());
          sb.append(" ");
-         sb.append(selector);
+         sb.append(jSelector);
          if (argArray != null && argArray.length > 0) {
             sb.append(" ");
             int i = 0;

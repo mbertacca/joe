@@ -64,7 +64,7 @@ F := {F:.
 
 list := !newInstance "java.util.ArrayList".
 show := 0 = 1.
-array := !!start.
+array := start exec.
 
 logo repeat iteration,{
   !foreach array,{:item0.

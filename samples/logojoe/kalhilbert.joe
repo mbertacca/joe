@@ -51,25 +51,25 @@ hilbert := {hilbert:level,angle,size.
 
       logo right angle.
       logo setpencolor red,green,blue.
-      !!hilbert level, (angle * -1), size.
+      hilbert exec level, (angle * -1), size.
       logo setpencolor red,green,blue
            forward size
            left angle.
-      !!hilbert level, angle, size.
+      hilbert exec level, angle, size.
       logo setpencolor red,green,blue
            forward size.
-      !!hilbert level, angle, size.
+      hilbert exec level, angle, size.
       logo setpencolor red,green,blue
            left angle
            forward size.
-      !!hilbert level, (angle * -1), size.
+      hilbert exec level, (angle * -1), size.
       logo right angle.
   }.
 }.
 
 draw := {:size.
   logo left 90.
-  !!hilbert 8,90,1.
+  hilbert exec 8,90,1.
   logo home.
 }.
 
@@ -136,16 +136,16 @@ showTriangle := {:treq,refl.
 showRotTriangle := {:treq,len,rot,refl.
    !switch rot
    case 0,{
-      !!showTriangle treq,refl.
+      showTriangle exec treq,refl.
    }
    case 2,{
       logo penup ; forward len left 120.
-      !!showTriangle treq,refl.
+      showTriangle exec treq,refl.
       logo penup ; right 120 back len.
    }
    case 1,{
       logo penup ; left 60 forward len left 180.
-      !!showTriangle treq,refl.
+      showTriangle exec treq,refl.
       logo penup ; left 180 back len right 60.
    }.
 }.
@@ -157,29 +157,29 @@ logo forever {
                     (logo random 256 intValue),
                     (logo random 256 intValue).
 
-   !! draw (dim).
+   draw exec (dim).
 
-   triangle := !!cpTriangle dim.
+   triangle := cpTriangle exec dim.
    logo clearscreen ; setbackground 0,0,0 penup; setxy 320,-240 setpensize 2.
    cnt := 2.
    logo repeat 3,{
       cnt := 0.
       logo repeat 4, {:repcount.
          cnt := cnt + 1.
-         !!showRotTriangle triangle,dim,(cnt % 3),0.
+         showRotTriangle exec triangle,dim,(cnt % 3),0.
          logo forward dim.
       }.
       logo left 60 penup ; forward dim left 120 pendown.
       cnt := cnt + 1.
       logo repeat 5, {:repcount.
          cnt := cnt + 1.
-         !!showRotTriangle triangle,dim,(cnt % 3),1.
+         showRotTriangle exec triangle,dim,(cnt % 3),1.
          logo forward dim.
       }.
       logo left 180 .
       logo repeat 5, {:repcount.
          cnt := cnt + 1.
-         !!showRotTriangle triangle,dim,(cnt % 3),0.
+         showRotTriangle exec triangle,dim,(cnt % 3),0.
          logo forward dim.
       }.
       logo left 120 penup ; forward dim left 60 pendown.
@@ -187,7 +187,7 @@ logo forever {
 
       logo repeat 4, {:repcount.
          cnt := cnt + 1.
-         !!showRotTriangle triangle,dim,(cnt % 3),1.
+         showRotTriangle exec triangle,dim,(cnt % 3),1.
          logo forward dim.
       }.
       logo left 180 .

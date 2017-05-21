@@ -329,7 +329,23 @@ public class Parser {
       case _BANG_:
          return command;
       case _BANGBANG_:
-         return outerBlock;
+         return new Message ()  {
+            public Object exec (Block blk) {
+               return blk;
+            }
+            public int getRow() {
+               return tk.row;
+            }
+            public int getCol() {
+               return tk.col;
+            }
+            public String getName () {
+               return tk.word;
+            }
+            public String toString () {
+               return tk.word;
+            }
+         };
       case _STRING:
          return Literals.getString(tk.word);
       case _INTEGER:

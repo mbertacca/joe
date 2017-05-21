@@ -27,7 +27,7 @@ logo setpencolor 0,255,0 arc 360,size setDelay 5.
 logo repeat 90,{:repcount.
    size := size * 1.05.
    logo setpencolor 0,(255 - (repcount * 2)),0 penup ; forward size pendown.
-   !! leaf size.
+   leaf exec size.
    logo penup ; back size pendown.
    logo right 137.508.
 }.

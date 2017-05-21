@@ -159,45 +159,45 @@ showTriangle := {:treq,refl.
 showRotTriangle := {:treq,len,rot,refl.
    !switch rot
    case 0,{
-      !!showTriangle treq,refl.
+      showTriangle exec treq,refl.
    }
    case 2,{
       logo penup ; forward len left 120.
-      !!showTriangle treq,refl.
+      showTriangle exec treq,refl.
       logo penup ; right 120 back len.
    }
    case 1,{
       logo penup ; left 60 forward len left 180.
-      !!showTriangle treq,refl.
+      showTriangle exec treq,refl.
       logo penup ; left 180 back len right 60.
    }.
 }.
 
 logo forever {
    logo clearscreen ; setbackground 0,0,0.
-   !! draw (dim).
+   draw exec (dim).
 
-   triangle := !!cpTriangle dim.
+   triangle := cpTriangle exec dim.
    logo clearscreen ; setbackground 0,0,0 penup; setxy 320,-240.
    cnt := 2.
    logo repeat 3,{
       cnt := 0.
       logo repeat 4, {:repcount.
          cnt := cnt + 1.
-         !!showRotTriangle triangle,dim,(cnt % 3),0.
+         showRotTriangle exec triangle,dim,(cnt % 3),0.
          logo forward dim.
       }.
       logo left 60 penup ; forward dim left 120 pendown.
       cnt := cnt + 1.
       logo repeat 5, {:repcount.
          cnt := cnt + 1.
-         !!showRotTriangle triangle,dim,(cnt % 3),1.
+         showRotTriangle exec triangle,dim,(cnt % 3),1.
          logo forward dim.
       }.
       logo left 180 .
       logo repeat 5, {:repcount.
          cnt := cnt + 1.
-         !!showRotTriangle triangle,dim,(cnt % 3),0.
+         showRotTriangle exec triangle,dim,(cnt % 3),0.
          logo forward dim.
       }.
       logo left 120 penup ; forward dim left 60 pendown.
@@ -205,7 +205,7 @@ logo forever {
 
       logo repeat 4, {:repcount.
          cnt := cnt + 1.
-         !!showRotTriangle triangle,dim,(cnt % 3),1.
+         showRotTriangle exec triangle,dim,(cnt % 3),1.
          logo forward dim.
       }.
       logo left 180 .
