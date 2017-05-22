@@ -48,6 +48,7 @@ public class ExecMessage implements Message {
          if (_block != null) {
             return _block.exec (_args);
          } else {
+            _method.setAccessible (true);
             return _method.invoke (obj, _args);
          }
       }
