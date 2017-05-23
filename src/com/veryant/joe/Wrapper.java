@@ -50,7 +50,7 @@ public abstract class Wrapper implements InternalObject {
       mapping.put (Object[].class, Type.OBJECT_ARRAY);
    }
 
-   static Wrapper newInstance (Object obj) {
+   public static Wrapper newInstance (Object obj) {
       if (obj != null) {
          Type t;
          Class clazz = obj.getClass();
