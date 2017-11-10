@@ -1,0 +1,92 @@
+time := {time:.
+   this := !!.
+
+   hours := 0.
+   minutes := 0.
+   seconds := 0.
+
+   toString := {
+      "" + hours + ":" + minutes + ":" + seconds.
+   }.
+
+   setHours := {:h.
+     !if (!isNull h not),{
+         !if ((h < 0) or (h > 23)),{
+            !throw ("Invalid hour: " + h).
+         }.
+         hours := h.
+      }.
+      this.
+   }.
+   setMinutes := {:m.
+     !if (!isNull m not),{
+         !if ((m < 0) or (m > 59)),{
+            !throw ("Invalid minutes: " + m).
+         }.
+         minutes := m.
+      }.
+      this.
+   }.
+   setSeconds := {:s.
+     !if (!isNull s not),{
+         !if ((s < 0) or (s > 59)),{
+            !throw ("Invalid seconds: " + s).
+         }.
+         seconds := s.
+      }.
+      this.
+   }.
+}.
+aTime := time new.
+aTime setHours 16 setMinutes 23 setSeconds 45.
+
+!println aTime.
+
+timeStamp := {timeStamp:.
+   super := time new.
+   !! extends super.
+   this := !!.
+   year := 0.
+   month := 0.
+   day := 0.
+
+   toString := {
+      "" + year + "/" + month + "/" + day
+         + " " + (super toString)
+      .
+   }.
+
+   setYear := {:y.
+      !if (!isNull y not),{
+         year := y.
+      }.
+      this.
+   }.
+
+   setMonth := {:m.
+      !if (!isNull m not),{
+         !if ((m < 0) or (m > 12)),{
+            !throw ("Invalid month: " + m).
+         }.
+         month := m.
+      }.
+      this.
+   }.
+
+   setDay := {:d.
+     !if (!isNull d not),{
+         !if ((d < 0) or (d > 31)),{
+            !throw ("Invalid day: " + s).
+         }.
+         day := d.
+      }.
+      this.
+   }.
+}.
+
+aTimeStamp := timeStamp new.
+
+aTimeStamp setYear 2017  setMonth 11 setDay 2
+           setHours 21 setMinutes 43 setSeconds 54
+           .
+!println aTimeStamp.

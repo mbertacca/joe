@@ -1,0 +1,24 @@
+cat:args.
+
+!if ((args length) = 1), {
+   !println "usage: ",(args get 0), " <file-name>".
+   !break "cat".
+}.
+
+line := "........................................" +
+        "........................................".
+so := !loadSO "".
+*>so call "printf","Hello, World%c",10.
+idx := 0.
+!while {idx := idx + 1. idx < (args length)}, {
+   file := so call "fopen",(args get idx),"r".
+   rc := 1.
+   !while {rc := so call "fgets",line,(line length; - 1), file. rc <> 0},
+   {
+      !print line.
+      line := "........................................" +
+              "........................................".
+   }.
+   so call "fclose", file.
+}.
+

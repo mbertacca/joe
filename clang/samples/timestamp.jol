@@ -1,0 +1,46 @@
+:y,mo,d,h,m,s.
+this := !!.
+
+year := 0.
+month := 1.
+day := 1.
+
+super := !newInstance "joe_LoadScript","time.jol"
+         new h,m,s.
+!! extends super.
+
+setDay := {:d.
+  !if (!isNull d not),{
+      !if ((d < 0) or (d > 31)),{
+         !throw ("Invalid day: " + h).
+      }.
+      day := d.
+   }.
+   this.
+}.
+
+setMonth := {:m.
+  !if (!isNull m not),{
+      !if ((m < 0) or (m > 12)),{
+         !throw ("Invalid month: " + m).
+      }.
+      month := m.
+   }.
+   this.
+}.
+
+setYear := {:y.
+  !if (!isNull y not),{
+      year := y.
+   }.
+   this.
+}.
+
+toString := {
+   "" + year + "/" + month + "/" + day + " " + super.
+}.
+
+this setYear y.
+this setMonth mo.
+this setDay d.
+

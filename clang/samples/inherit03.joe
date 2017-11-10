@@ -1,0 +1,12 @@
+timestamp := !newInstance "joe_LoadScript","timestamp.jol"
+             new 1492,10,12,5,8,11.
+
+!println timestamp.
+timestamp setYear 2017
+          setMonth 3
+          setDay 21
+          setHours 13
+          setMinutes 21
+          setSeconds 34.
+
+!println timestamp.

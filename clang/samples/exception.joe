@@ -1,0 +1,13 @@
+excpt := !newInstance "joe_Exception", "i > 3!".
+i := 0.
+
+!while { i < 10 },
+{
+   !if (i <= 3),{
+       !println i.
+   },{
+      excpt throw.
+*>    !throw ("Exception! i > 3 (" + i + ")").
+   }.
+   i := i + 1.
+}.

@@ -1,0 +1,34 @@
+answer := "".
+high := 1023.
+low := 1.
+ntry := 1.
+
+!println "Think to a number between ",low," and ",high,
+                                    ": I can guess it using 10 tries at most".
+
+!while { answer <> "c" and (answer <> "C")},
+{
+   try := ((high - low) / 2 + low).
+   !println "My guess is ", try.
+   !println "Is the guess (c)orrect, too (h)igh or too (l)ow?".
+   answer := !readLine.
+   ! switch answer
+   case "C"
+   case "c", {
+      !println "I guessed the number using ",ntry," guesses".
+   }
+   case "H"
+   case "h", {
+      high := try.
+      ntry := (ntry + 1).
+   }
+   case "L"
+   case "l", {
+      low := try.
+      ntry := (ntry + 1).
+   }
+   default {
+      !println "Answer with 'c', 'h' or 'l' please".
+   } 
+   endSwitch.
+}.

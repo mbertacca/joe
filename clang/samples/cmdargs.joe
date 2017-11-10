@@ -1,0 +1,32 @@
+/*
+ * print the arguments on the command line using 3 approaches
+ */
+exit:args.
+
+!foreach args,{:itm.
+    !println itm.
+}.
+
+!println "-----".
+
+argc := args length.
+i := -1.
+
+!while { i := i + 1. i < argc }, {
+    !println (args get i).
+    args set i, (args get i toUpperCase).
+}.
+
+!println "----- upper case".
+scan := !newInstance "joe_ArrayScan", args.
+
+!while {scan hasNext},{
+    !println (scan next).
+}.
+!println "----- reverse". 
+!while {scan hasPeek},{
+    !println (scan peek).
+    scan back.
+}.
+
+!println "----- end".

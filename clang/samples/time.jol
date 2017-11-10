@@ -1,0 +1,48 @@
+:h,m,s.
+this := !!.
+
+hours := 0.
+minutes := 0.
+seconds := 0.
+
+toString := {
+   "" + hours + ":" + minutes + ":" + seconds.
+}.
+
+show := {
+   !println (toString exec).
+}.
+
+setHours := {:h.
+  !if (!isNull h not),{
+      !if ((h < 0) or (h > 23)),{
+         !throw ("Invalid hour: " + h).
+      }.
+      hours := h.
+   }.
+   this.
+}.
+
+setMinutes := {:m.
+  !if (!isNull m not),{
+      !if ((m < 0) or (m > 59)),{
+         !throw ("Invalid minutes: " + m).
+      }.
+      minutes := m.
+   }.
+   this.
+}.
+
+setSeconds := {:s.
+  !if (!isNull s not),{
+      !if ((s < 0) or (s > 59)),{
+         !throw ("Invalid seconds: " + s).
+      }.
+      seconds := s.
+   }.
+   this.
+}.
+
+this setHours h.
+this setMinutes m.
+this setSeconds s.

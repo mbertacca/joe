@@ -1,0 +1,11 @@
+/* The library must be accessible, so set LD_LIBRARY_PATH accordingly */
+!loadSO "libtimeobjs.so".
+
+aTime := !newInstance "example_Time".
+aTime setHour 16 setMin 23 setSec 45.
+!println aTime.
+
+aTimeStamp := !newInstance "example_TimeStamp".
+aTimeStamp setYear 2017 setMonth 11 setDay 6
+           setHour 16 setMin 23 setSec 45.
+!println aTimeStamp.

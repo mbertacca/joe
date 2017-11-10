@@ -1,0 +1,18 @@
+parent := {parent:.
+   a := 7.
+   inc := {
+      a := a + 1.
+   }.
+   getA := { a. }.
+}.
+
+child := {child:.
+   super := parent new.
+   !! extends super.
+   !! inc.
+   !println (!! getA).
+   super inc.
+   !println (!!getA)," ".
+}.
+
+obj := child new.
