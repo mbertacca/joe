@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.CodeSource;
 import java.util.HashMap;
@@ -90,8 +91,13 @@ public class ScriptManager {
    }
    public InputStream getInputStream (String name) throws IOException {
       InputStream Return;
+      File f;
 
-      File f = new File (entryPoint.getFile());
+      try {
+         f = new File (entryPoint.toURI());
+      } catch (URISyntaxException _ex) {
+         throw new FileNotFoundException (entryPoint.getFile());
+      }
       if (f.isDirectory()) {
          f = new File (f, name);
          Return = new FileInputStream (f);
