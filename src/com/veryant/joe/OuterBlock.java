@@ -47,12 +47,8 @@ public class OuterBlock extends Block {
       Return.init (argv);
       return Return;
    }
-
    public OuterBlock (Executor exec) {
       super (exec, null);
-   }
-   protected boolean isExecAsJoe () {
-      return true;
    }
    public String toString() {
       Block joeToString = getMethod("toString");

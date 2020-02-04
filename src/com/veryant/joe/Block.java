@@ -121,6 +121,18 @@ public class Block extends ArrayList<Message>
       }
       return Return;
    }
+   private void getVariablesNames(ArrayList<String> list) {
+      for (String entry : variables.keySet())
+         list.add (entry);
+      if (parent != null)
+         parent. getVariablesNames(list);
+   }
+   public String[] getVariablesNames() {
+      ArrayList<String> list = new ArrayList<String>();
+      getVariablesNames(list);
+      String Return[] = new String[list.size()];
+      return list.toArray (Return);
+   }
    public HashMap<String,Object> getVariables () {
       return variables;
    }

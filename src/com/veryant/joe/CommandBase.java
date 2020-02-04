@@ -223,4 +223,10 @@ public class CommandBase {
    public URL getURL (String spec) throws MalformedURLException {
       return ScriptManager.get (this).getURL (spec);
    }
+   /**
+    * Returns the version.
+    */
+   public String version () {
+      return JavaObjectsExecutor.rcsid;
+   }
 }
