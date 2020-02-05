@@ -1,5 +1,5 @@
 /*
- * Script di build
+ * Build script
  * requires Java 7 or newer
  */
 :args.
@@ -75,7 +75,7 @@ compileIn := {:dir.
 }.
 
 help := {
-   !println "Tag disponibili:".
+   !println "Available tags:".
    !foreach (!! getVariablesNames), {:tag.
       !if (tag startsWith "@"),{
          !println "   ",tag.
@@ -88,7 +88,7 @@ toExec := null.
 !if ((args length) > 1),{
    toExec := !!getVariable (args get 1).
    !if (!isNull toExec),{
-       !println "Il tag ",(args get 1), " non e' definito!".
+       !println "Tag ",(args get 1), " is not present!".
        help exec.
        !systemExit 2.
    }.
