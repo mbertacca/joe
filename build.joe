@@ -1,0 +1,101 @@
+/*
+ * Script di build
+ * requires Java 7 or newer
+ */
+:args.
+
+SystemCommand := !newArray 3.
+SystemClass := !getClassRef "java.lang.System".
+Cwd := SystemClass getProperty "user.dir".
+
+Paths := !getClassRef "java.nio.file.Paths".
+Files := !getClassRef "java.nio.file.Files".
+CopyOption := !getStaticField "java.nio.file.StandardCopyOption",
+                              "REPLACE_EXISTING".
+
+system := system;
+pathSep := pathSep;
+
+!if ((SystemClass getProperty "os.name") startsWith "Windows"),{
+   pathSep := ";".
+   system := {:cmd.
+      !exec "cmd","/c",cmd.
+   }.
+},{
+   pathSep := ":".
+   system := {:cmd.
+      !exec "sh","-c",cmd.
+   }.
+}.
+
+copy := {:from,to.
+   Files copy (Paths get from,""), (Paths get to,""), CopyOption.
+}.
+
+@compileJoe := {
+   rc := system exec "javac -g -cp src src/com/veryant/joe/*.java".
+   !if (rc <> 0), {
+      !throw "Compilation failed!".
+   }
+}.
+
+compileIn := {:dir.
+   rc := system exec ("javac -g -cp ""jar/joe.jar"+pathSep+dir+""" "+dir+"/*.java").
+   !if (rc <> 0), {
+      !throw ("Compilation in "+ dir + " failed!").
+   }
+}.
+
+@makeJoeJar := {
+   jar := !newInstance "java.io.File","jar/joe.jar".
+   !if (jar exists),{
+       jar delete.
+   }.
+   rc := system exec ("jar cvfm jar/joe.jar jar/Manifest.txt -C src dummy"
+                    + " src/com/veryant/joe/*.class").
+}.
+
+@makeLogoJar := {
+   compileIn exec "samples/logojoe".
+   copy exec "jar/joe.jar", "samples/logojoe/logojoe.jar".
+   rc := system exec ("jar uvf samples/logojoe/logojoe.jar -C samples/logojoe dummy samples/logojoe/Logo*.class samples/logojoe/joe.png").
+}.
+
+@makeFormJar := {
+   compileIn exec "samples/form".
+   copy exec "jar/joe.jar", "samples/form/formjoe.jar".
+   rc := system exec ("jar uvf samples/form/formjoe.jar -C samples/form dummy samples/form/JOEForm*.class samples/form/joe.png").
+}.
+
+@all := {
+   @compileJoe exec.
+   @makeJoeJar exec.
+   @makeLogoJar exec.
+   @makeFormJar exec.
+}.
+
+help := {
+   !println "Tag disponibili:".
+   !foreach (!! getVariablesNames), {:tag.
+      !if (tag startsWith "@"),{
+         !println "   ",tag.
+      }.
+   }
+}.
+
+toExec := null.
+
+!if ((args length) > 1),{
+   toExec := !!getVariable (args get 1).
+   !if (!isNull toExec),{
+       !println "Il tag ",(args get 1), " non e' definito!".
+       help exec.
+       !systemExit 2.
+   }.
+}.
+
+!if (!isNull toExec),{
+   help exec.
+},{
+   toExec exec.
+}.
