@@ -30,7 +30,7 @@ import java.util.ArrayDeque;
 import java.util.HashMap;
 
 public class JavaObjectsExecutor {
-   public static final String rcsid = "1.3.1";
+   public static final String rcsid = "1.4";
    private Block block;
 
    public static void showException (DefaultCommand cmd, Throwable ex) {
@@ -65,7 +65,8 @@ public class JavaObjectsExecutor {
             final File f = new File (argv[0]).getCanonicalFile();
             sm = new ScriptManager(f.getParentFile(), exec, defCmd);
             Object[] jarg = new Object [] {new WArray (argv)};
-            sm.newInstance (f.getName(), jarg);
+            Block blk = sm.load (f.getName(), jarg);
+            blk.init (jarg);
          } catch (BreakEndException ex) {
             Return = 0;
          } catch (ExecException ex) {

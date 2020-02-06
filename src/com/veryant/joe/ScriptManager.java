@@ -42,12 +42,12 @@ public class ScriptManager {
    public static ScriptManager get (Object cmd) {
       return scriptManagerMap.get (cmd);
    }
-   public static Block newInstance (Object cmd, String name, Object[] argv)
+   public static Block load (Object cmd, String name, Object[] argv)
                                              throws IOException,JOEException {
       ScriptManager sm = ScriptManager.get (cmd);
       if (sm == null)
          throw new RuntimeException ("ScriptManager not found!");
-      return sm.newInstance (name, argv);
+      return sm.load (name, argv);
    }
    static URL getURL (File f) {
       try {
@@ -108,7 +108,7 @@ public class ScriptManager {
       }
       return Return;
    }
-   public Block newInstance (String name, Object[] argv)
+   public Block load (String name, Object[] argv)
                                throws IOException,JOEException {
       Block Return = blocks.get (name);
       if (Return != null) {
@@ -119,7 +119,6 @@ public class ScriptManager {
                if ((wobj = Wrapper.newInstance (argv[i])) != null)
                   argv[i] = wobj;
          }
-         Return.init (argv);
       } else {
          BufferedReader src =  new BufferedReader (
                                   new InputStreamReader(getInputStream(name)));

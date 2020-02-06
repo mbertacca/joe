@@ -44,7 +44,6 @@ public class OuterBlock extends Block {
             if ((wobj = Wrapper.newInstance (argv[i])) != null)
                argv[i] = wobj;
       }
-      Return.init (argv);
       return Return;
    }
    public OuterBlock (Executor exec) {

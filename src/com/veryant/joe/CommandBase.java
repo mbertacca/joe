@@ -180,13 +180,17 @@ public class CommandBase {
     * Executes the specified JOE script and returns it as an object.
     */
    public Object $new (String fname) throws Exception {
-      return ScriptManager.newInstance (this, fname, null);
+      Block blk = ScriptManager.load (this, fname, null);
+      blk = blk.$new ();
+      return blk;
    }
    /**
     * Executes the specified JOE script and returns it as an object.
     */
    public Object $new (String fname, Object...argv) throws Exception {
-      return ScriptManager.newInstance (this, fname, argv);
+      Block blk = ScriptManager.load (this, fname, argv);
+      blk = blk.$new (argv);
+      return blk;
    }
    /**
     * Convenience method for instanceof (obj, getClass(clazz)).

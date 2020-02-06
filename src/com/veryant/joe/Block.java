@@ -168,8 +168,8 @@ public class Block extends ArrayList<Message>
    }
    public Block $new(Object...args) throws JOEException {
       Block Return = (Block) clone();
-      Return.init (args);
       Return.execAsJoe = true;
+      Return.init (args);
       return Return;
    }
    int getLastChild() {
