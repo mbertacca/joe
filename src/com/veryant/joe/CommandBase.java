@@ -218,7 +218,7 @@ public class CommandBase {
    /**
     * Makes the child inheriting from parent.
     */
-   public void $extends (OuterBlock child, OuterBlock parent) {
+   public void $extends (Block child, Block parent) {
       child.$extends (parent);
    }
    /**

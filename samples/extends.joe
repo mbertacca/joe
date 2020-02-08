@@ -1,0 +1,47 @@
+Time := {:h,m,s.
+
+   hours := h.
+   minutes := m.
+   seconds := s.
+
+   toString := {
+      "" + hours + ":" + minutes + ":" + seconds.
+   }.
+   setTime := {:h, m, s.
+      hours:= h.
+      minutes:= m.
+      seconds:= s.
+   }.
+}.
+
+Timestamp := {:y,mo,d,h,m,s.
+
+   year := y.
+   month := mo.
+   day := d.
+
+   super := Time new h,m,s.
+   !extends !!,super.
+
+   setDate := {:y,mo,d,h,m,s.
+      parent setTime h,m,s.
+      year := y.
+      month := mo.
+      day := d.
+   }.
+
+   super_toString := toString.
+   toString := {
+     "" + year + "/" + month + "/" + day + " " + (super_toString exec).
+   }.
+}.
+
+aTime := Time new 11,21,35.
+aDate := Timestamp new 2020,02,08,12,22,36.
+
+!println aTime.
+!println aDate.
+
+aDate setTime 13,23,37.
+
+!println aDate.
