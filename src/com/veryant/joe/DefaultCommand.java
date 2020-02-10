@@ -335,32 +335,14 @@ public class DefaultCommand extends CommandBase {
     * Executes the specified command and returns its return code.
     */
    public int exec (String...cmds) throws Exception {
-      final Runtime rt = Runtime.getRuntime();
-      final Process proc = rt.exec(cmds);
-      InputStream stdout = proc.getInputStream();
-      InputStream stderr = proc.getErrorStream();
-      OutputStream stdin = proc.getOutputStream();
+      int rc = 0;
+      ProcessBuilder pb = new ProcessBuilder (cmds);
+      pb.redirectInput(ProcessBuilder.Redirect.INHERIT);
+      pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+      pb.redirectError(ProcessBuilder.Redirect.INHERIT);
 
-      Thread in = new ThreadReader(System.in, stdin);
-      Thread out = new ThreadReader(stdout, System.out);
-      Thread err = new ThreadReader(stderr, System.err);
-
-      in.setDaemon(true);
-      out.setDaemon(true);
-      err.setDaemon(true);
-
-      in.start();
-      out.start();
-      err.start();
-
-      int rc = proc.waitFor();
-      out.join();
-      err.join();
-
-      stdin.close();
-      stdout.close();
-      stderr.close();
-
+      Process p = pb.start();
+      rc = p.waitFor();
       return rc;
    }
    /**
