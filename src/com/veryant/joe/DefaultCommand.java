@@ -24,8 +24,9 @@ import java.io.Console;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.Writer;
 import java.util.HashMap;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -310,21 +311,70 @@ public class DefaultCommand extends CommandBase {
       }
       return Return;
    }
+
+   private static class ThreadReader extends Thread {
+      final InputStream in;
+      final OutputStream out;
+      ThreadReader (InputStream in, OutputStream out) {
+         this.in = in;
+         this.out = out;
+      }
+      public void run () {
+         try {
+            int c;
+            while ((c = in.read()) >= 0) {
+               out.write (c);
+               out.flush();
+            }
+         } catch (IOException ignore) {
+            System.out.println (ignore + "(" + in + ";" + out + ")");
+         }
+      }
+   };
+   private String[] toStringArray (Object[] arg) {
+      String Return[];
+      if (arg != null) {
+         Return = new String[arg.length];
+         for (int i = 0; i < arg.length; i++)
+            Return[i] = arg.toString();
+      } else
+         Return = null;
+      return Return;
+   }
    /**
     * Executes the specified command and returns its return code.
     */
    public int exec (String...cmds) throws Exception {
       final Runtime rt = Runtime.getRuntime();
       final Process proc = rt.exec(cmds);
-      BufferedReader bro = new BufferedReader(
-                              new InputStreamReader (proc.getInputStream()));
-      BufferedReader bre = new BufferedReader(
-                              new InputStreamReader (proc.getErrorStream()));
-       String line;
-       while ((line = bro.readLine()) != null ||
-              (line = bre.readLine()) != null)
-          println (line);
-      return proc.waitFor();
+      InputStream stdout = proc.getInputStream();
+      InputStream stderr = proc.getErrorStream();
+      OutputStream stdin = proc.getOutputStream();
+
+      Thread in = new ThreadReader(System.in, stdin);
+      Thread out = new ThreadReader(stdout, System.out);
+      Thread err = new ThreadReader(stderr, System.err);
+
+      in.setDaemon(true);
+      out.setDaemon(true);
+      err.setDaemon(true);
+
+      in.start();
+      out.start();
+      err.start();
+
+      int rc = proc.waitFor();
+      out.join();
+      err.join();
+
+      stdin.close();
+      stdout.close();
+      stderr.close();
+
+      return rc;
+   }
+   public int exec (Object...cmds) throws Exception {
+      return exec (toStringArray(cmds));
    }
    /**
     * Executes the specified command and returns its standard output
@@ -353,17 +403,26 @@ public class DefaultCommand extends CommandBase {
       }
       return Return.toString();
    }
+   public String execGetOut (Object...cmds) throws Exception {
+      return execGetOut (toStringArray(cmds));
+   }
    /**
     * Executes the specified JOE script and returns its return code.
     */
    public int runJoe (String...cmds) throws Exception {
       return JavaObjectsExecutor.imain (cmds);
    }
+   public int runJoe (Object...cmds) throws Exception {
+      return runJoe (toStringArray(cmds));
+   }
    /** Stops the execution of the current script and executes the
     * script specified as argument.
     */
    public int execJoe (String...cmds) throws ExecException {
       throw new ExecException (cmds);
+   }
+   public int execJoe (Object...cmds) throws ExecException {
+      return execJoe (toStringArray(cmds));
    }
    /**
     * Reads the value of the specified environment variable.
