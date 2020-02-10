@@ -330,16 +330,6 @@ public class DefaultCommand extends CommandBase {
             System.out.println (ignore + "(" + in + ";" + out + ")");
          }
       }
-   };
-   private String[] toStringArray (Object[] arg) {
-      String Return[];
-      if (arg != null) {
-         Return = new String[arg.length];
-         for (int i = 0; i < arg.length; i++)
-            Return[i] = arg.toString();
-      } else
-         Return = null;
-      return Return;
    }
    /**
     * Executes the specified command and returns its return code.
@@ -373,9 +363,6 @@ public class DefaultCommand extends CommandBase {
 
       return rc;
    }
-   public int exec (Object...cmds) throws Exception {
-      return exec (toStringArray(cmds));
-   }
    /**
     * Executes the specified command and returns its standard output
     * as a string.
@@ -403,26 +390,17 @@ public class DefaultCommand extends CommandBase {
       }
       return Return.toString();
    }
-   public String execGetOut (Object...cmds) throws Exception {
-      return execGetOut (toStringArray(cmds));
-   }
    /**
     * Executes the specified JOE script and returns its return code.
     */
    public int runJoe (String...cmds) throws Exception {
       return JavaObjectsExecutor.imain (cmds);
    }
-   public int runJoe (Object...cmds) throws Exception {
-      return runJoe (toStringArray(cmds));
-   }
    /** Stops the execution of the current script and executes the
     * script specified as argument.
     */
    public int execJoe (String...cmds) throws ExecException {
       throw new ExecException (cmds);
-   }
-   public int execJoe (Object...cmds) throws ExecException {
-      return execJoe (toStringArray(cmds));
    }
    /**
     * Reads the value of the specified environment variable.
