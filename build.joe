@@ -1,8 +1,13 @@
 /*
- * Build script
- * requires Java 7 or newer
+ * JOE Build script
+ * It requires Java 7 or newer.
+ * Note that Windows doesn't allow you to rewrite the jar you are using.
+ * The first part, roughly half of the total code, is generic and can be used for any build.
  */
 :args.
+
+true := 1 = 1.
+false := true not.
 
 SystemCommand := !newArray 3.
 SystemClass := !getClassRef "java.lang.System".
@@ -13,17 +18,19 @@ Files := !getClassRef "java.nio.file.Files".
 CopyOption := !getStaticField "java.nio.file.StandardCopyOption",
                               "REPLACE_EXISTING".
 
-system := system;
-pathSep := pathSep;
+system := system.
+pathSep := pathSep.
 
 !if ((SystemClass getProperty "os.name") startsWith "Windows"),{
    pathSep := ";".
    system := {:cmd.
+      !println cmd.
       !exec "cmd","/c",cmd.
    }.
 },{
    pathSep := ":".
    system := {:cmd.
+      !println cmd.
       !exec "sh","-c",cmd.
    }.
 }.
@@ -32,46 +39,165 @@ copy := {:from,to.
    Files copy (Paths get from,""), (Paths get to,""), CopyOption.
 }.
 
-@compileJoe := {
-   rc := system exec "javac -g -cp src src/com/veryant/joe/*.java".
-   !if (rc <> 0), {
-      !throw "Compilation failed!".
-   }
+build := {
+   self := !!.
+   executedBlocks := !newInstance "java.util.HashSet".
+
+   _file := {:aPath.
+      thisFile := !newInstance "java.io.File",aPath.
+
+      olderThan := {:aFile.
+         !if (thisFile lastModified; < (!newInstance "java.io.File",aFile lastModified)),{
+            true.
+         },{
+            false.
+         }.
+      }.
+      olderThanAny := {exit:aDir,aExt.
+         thisLm := thisFile lastModified.
+         list := !newInstance "java.io.File",aDir list.
+         !foreach list, {:item.
+            !if (item endsWith aExt),{
+                lm := !newInstance "java.io.File",aDir,item lastModified.
+                !if (thisLm < lm), {
+                   true.
+                   !break "exit".
+                }.
+            }.
+         }.
+         false.
+      }.
+      delete := {
+         thisFile delete.
+      }.
+      toString := {
+         thisFile getPath.
+      }.
+   }.
+   file := {:path.
+      _file new path.
+   }.
+
+   depends := {:block.
+      !if (executedBlocks contains block not),{
+          executedBlocks add block.
+          block exec.
+      }.
+      self.
+   }.
+   moreRecent := {:a,b.
+      lmA := !newInstance "java.io.File",a lastModified.
+      lmB := !newInstance "java.io.File",b lastModified.
+      lmB - lmA.
+   }.
+   anythingNew := {exit:srcDir,srcExt,exeDir,exeExt.
+      srcExtLen := srcExt length.
+      fDir := !newInstance "java.io.File",srcDir.
+      list := fDir list.
+
+      !foreach list,{:src.
+         !if (src endsWith srcExt),{
+             exe := src substring 0,(src length; - srcExtLen) + exeExt.
+             !if (moreRecent exec (srcDir+"/"+src),(exeDir+"/"+exe) < 0), {
+                true.
+                !break "exit".
+             }.
+         }.
+      }.
+      false.
+   }.
+} new.
+
+/*
+ * Here starts the part that is not generic
+ */
+
+compileJoe := {
+   dir := "src/com/veryant/joe".
+   !if (build anythingNew dir,".java",dir,".class"), {
+      rc := system exec "javac -g -cp src src/com/veryant/joe/*.java".
+      !if (rc <> 0), {
+         !throw "Compilation failed!".
+      }.
+   }.
 }.
 
-compileIn := {:dir.
-   rc := system exec ("javac -g -cp ""jar/joe.jar"+pathSep+dir+""" "+dir+"/*.java").
-   !if (rc <> 0), {
-      !throw ("Compilation in "+ dir + " failed!").
-   }
+@compileJoe := {
+   build depends compileJoe.
+}.
+
+makeJoeJar := {
+   build depends compileJoe.
+   thisJar := build file "jar/joe.jar".
+   !if (thisJar olderThanAny "src/com/veryant/joe",".class"),{
+      thisJar delete.
+      rc := system exec ("jar cvfm " + thisJar + " jar/Manifest.txt -C src dummy"
+                       + " src/com/veryant/joe/*.class").
+   }.
 }.
 
 @makeJoeJar := {
-   jar := !newInstance "java.io.File","jar/joe.jar".
-   !if (jar exists),{
-       jar delete.
+   build depends makeJoeJar.
+}.
+
+compileIn := {:dir.
+   build depends makeJoeJar.
+   !if (build anythingNew dir,".java",dir,".class"), {
+      rc := system exec ("javac -g -cp ""jar/joe.jar"+pathSep+dir+""" "+dir+"/*.java").
+      !if (rc <> 0), {
+         !throw ("Compilation in "+ dir + " failed!").
+      }.
    }.
-   rc := system exec ("jar cvfm jar/joe.jar jar/Manifest.txt -C src dummy"
-                    + " src/com/veryant/joe/*.class").
+}.
+
+compileLogo := {
+   compileIn exec "samples/logojoe".
+}.
+
+compileForm := {
+   compileIn exec "samples/form".
+}.
+
+makeLogoJar := {
+   build depends makeJoeJar
+         depends compileLogo.
+
+   thisJar := build file "samples/logojoe/logojoe.jar".
+
+   !if ( thisJar olderThan "jar/joe.jar" or (thisJar olderThanAny "samples/logojoe",".class")),{
+      copy exec "jar/joe.jar", (thisJar toString).
+      rc := system exec ("jar uvf " + thisJar + " -C samples/logojoe dummy samples/logojoe/Logo*.class samples/logojoe/joe.png").
+   }.
 }.
 
 @makeLogoJar := {
-   compileIn exec "samples/logojoe".
-   copy exec "jar/joe.jar", "samples/logojoe/logojoe.jar".
-   rc := system exec ("jar uvf samples/logojoe/logojoe.jar -C samples/logojoe dummy samples/logojoe/Logo*.class samples/logojoe/joe.png").
+ build depends makeLogoJar.
+}.
+
+makeFormJar := {
+   build depends makeJoeJar
+         depends compileForm.
+
+   thisJar := build file "samples/form/formjoe.jar".
+
+   !if ( thisJar olderThan "jar/joe.jar" or
+        (thisJar olderThanAny "samples/form",".class")),{
+      copy exec "jar/joe.jar",(thisJar toString).
+      rc := system exec ("jar uvf " + thisJar +" -C samples/form dummy samples/form/*.class samples/form/joe.png").
+   }.
 }.
 
 @makeFormJar := {
-   compileIn exec "samples/form".
-   copy exec "jar/joe.jar", "samples/form/formjoe.jar".
-   rc := system exec ("jar uvf samples/form/formjoe.jar -C samples/form dummy samples/form/JOEForm*.class samples/form/joe.png").
+ build depends makeFormJar.
 }.
 
 @all := {
-   @compileJoe exec.
-   @makeJoeJar exec.
-   @makeLogoJar exec.
-   @makeFormJar exec.
+   !foreach (!! getVariablesNames), {:tag.
+      !if (tag startsWith "@" and (tag <> "@all")),{
+         !println "executing: ",tag.
+         !! getVariable tag exec.
+      }.
+   }.
 }.
 
 help := {
