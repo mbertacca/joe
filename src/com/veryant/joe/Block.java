@@ -32,6 +32,7 @@ public class Block extends ArrayList<Message>
    private ArrayList<Block> children = new ArrayList<Block>();
    private String name;
    private String[] argName;
+   private Object argArray[];
    private boolean execAsJoe;
 
    Block (Executor exec, Block par) {
@@ -73,10 +74,15 @@ public class Block extends ArrayList<Message>
       HashMap<String,Object> saveVar = variables;
       variables = vars;
 
-      if (argv != null && argName != null) {
-         final int nArgs = Math.min (argv.length, argName.length);
-         for (int i = 0; i < nArgs; i++)
-            variables.put (argName[i], argv[i]);
+      if (argv != null) {
+         argArray = argv;
+         if (argName != null) {
+            final int nArgs = Math.min (argv.length, argName.length);
+            for (int i = 0; i < nArgs; i++)
+               variables.put (argName[i], argv[i]);
+         }
+      } else {
+         argArray = new Object[] {};
       }
       Object Return = executor.run (this);
       variables = saveVar;
@@ -135,6 +141,9 @@ public class Block extends ArrayList<Message>
    }
    public HashMap<String,Object> getVariables () {
       return variables;
+   }
+   public Object[] getArgv() {
+      return argArray;
    }
    protected boolean isExecAsJoe () {
      return execAsJoe;
@@ -209,4 +218,3 @@ public class Block extends ArrayList<Message>
       return Return;
    }
 }
-

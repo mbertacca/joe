@@ -1,0 +1,21 @@
+blk := {:x0,x1.
+   argv := !!getArgv.
+   !println (argv length).
+   !println argv.
+   !println x0,x1.
+}.
+
+obj := {
+   meth:= {:x0,x1.
+      argv := !!getArgv.
+   !println (argv length).
+      !println argv.
+      !println x0,x1.
+   }.
+} new.
+
+blk exec.
+blk exec "A","B","C","D","E".
+obj meth.
+obj meth "a","b","c","d","e".
+
