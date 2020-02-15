@@ -1,3 +1,7 @@
+/*
+ * JOE 'class' useful to make OS indipendent build scripts, see ../build.joe
+ */
+
 self := !!.
 executedBlocks := !newInstance "java.util.HashSet".
 true := 1 = 1.
