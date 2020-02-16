@@ -30,7 +30,7 @@ import java.util.ArrayDeque;
 import java.util.HashMap;
 
 public class JavaObjectsExecutor {
-   public static final String rcsid = "1.5";
+   public static final String rcsid = "1.6";
    private Block block;
 
    public static void showException (DefaultCommand cmd, Throwable ex) {
@@ -101,10 +101,12 @@ public class JavaObjectsExecutor {
          Parser prg = new Parser(cmd, exec,"<stdin>");
          Block b = null;
 
-         while (!"exit".equals (line)) {
+         while (line != null && !"exit".equals (line)) {
             defCmd.print ("joe> ");
             try {
-               line = defCmd.readLine().toString();
+               line = defCmd.readLine();
+               if (line == null)
+                  break;
                //defCmd.print (line);
             } catch (IOException ex) {
                showException(defCmd, ex);

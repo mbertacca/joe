@@ -21,6 +21,7 @@ package com.veryant.joe;
 
 import java.io.BufferedReader;
 import java.io.Console;
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
@@ -37,15 +38,23 @@ import java.lang.reflect.Field;
  */
 
 public class DefaultCommand extends CommandBase {
+   final static BufferedReader stdin;
+   final static Console console;
+   static {
+      console = System.console();
+      if (console == null)
+         stdin = new BufferedReader (new InputStreamReader (System.in));
+      else
+         stdin = null;
+   }
    /**
     * Read a line from the console.
     */
    public String readLine () throws IOException {
-      Console cons = System.console();
-      if (cons != null)
-         return cons.readLine();
+      if (console != null)
+         return console.readLine();
       else
-         throw new IOException ("console not available");
+         return stdin.readLine();
    }
    /**
     * Prints a newline.
@@ -332,18 +341,37 @@ public class DefaultCommand extends CommandBase {
       }
    }
    /**
-    * Executes the specified command and returns its return code.
+    * Executes the specified ProcessBuilder
     */
-   public int exec (String...cmds) throws Exception {
-      int rc = 0;
-      ProcessBuilder pb = new ProcessBuilder (cmds);
+   public int exec (ProcessBuilder pb) throws Exception {
       pb.redirectInput(ProcessBuilder.Redirect.INHERIT);
       pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
       pb.redirectError(ProcessBuilder.Redirect.INHERIT);
 
       Process p = pb.start();
-      rc = p.waitFor();
-      return rc;
+      return p.waitFor();
+   }
+   /**
+    * Executes the specified command and returns its return code.
+    */
+   public int exec (String...cmds) throws Exception {
+      return exec (new ProcessBuilder (cmds));
+   }
+   /**
+    * Executes the specified command from the specified directory
+    * and returns its return code.
+    */
+   public int execFromDir (File dir, String...cmds) throws Exception {
+      ProcessBuilder pb = new ProcessBuilder (cmds);
+      pb.directory (dir);
+      return exec (pb);
+   }
+   /**
+    * Executes the specified command from the specified directory
+    * and returns its return code.
+    */
+   public int execFromDir (String dir, String...cmds) throws Exception {
+      return execFromDir (new File (dir), cmds);
    }
    /**
     * Executes the specified command and returns its standard output
