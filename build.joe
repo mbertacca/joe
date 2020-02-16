@@ -5,7 +5,7 @@
  */
 :args.
 
-build := !new "samples/builder.joe".
+build := !new "samples/builder.jol".
 pathSep := build pathSep.
 
 compileJoe := {
@@ -99,6 +99,7 @@ makeFormJar := {
 }.
 
 help := {
+   !println "Usage: joe ",(args get 0)," <tag>".
    !println "Available tags:".
    !foreach (!! getVariablesNames), {:tag.
       !if (tag startsWith "@"),{
