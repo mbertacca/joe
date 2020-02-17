@@ -5,8 +5,8 @@ year := 0.
 month := 1.
 day := 1.
 
-parent := !new "time.jol",h,m,s.
-!extends !!,parent.
+super := !new "time.jol",h,m,s.
+!extends !!,super.
 
 setDay := {:d.
   !if (!isNull d not),{
@@ -35,10 +35,8 @@ setYear := {:y.
    this.
 }.
 
-super_toString := toString.
-
 toString := {
-   "" + year + "/" + month + "/" + day + " " + (super_toString exec).
+   "" + year + "/" + month + "/" + day + " " + super.
 }.
 
 this setYear y.

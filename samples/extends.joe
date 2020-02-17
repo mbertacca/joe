@@ -30,9 +30,8 @@ Timestamp := {:y,mo,d,h,m,s.
       day := d.
    }.
 
-   super_toString := toString.
    toString := {
-     "" + year + "/" + month + "/" + day + " " + (super_toString exec).
+     "" + year + "/" + month + "/" + day + " " + super.
    }.
 }.
 

@@ -1,0 +1,14 @@
+:i_cnt,i_avg.
+
+self := !!.
+cnt := i_cnt doubleValue.
+avg := i_avg doubleValue.
+
+put := {:val.
+   avg := avg * cnt + val.
+   cnt := cnt + 1.
+   avg := avg / cnt.
+   self.
+}.
+
+get := { avg. }.

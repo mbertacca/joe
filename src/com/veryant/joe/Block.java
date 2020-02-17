@@ -106,11 +106,15 @@ public class Block extends ArrayList<Message>
 
    public Object setVariable (String name, Object val) {
       if (constants.get (name) == null) {
-         HashMap<String,Object> var = getDataContaining (name);
-         if (var != null)
-            var.put (name, val);
-         else
+         if (execAsJoe) {
             variables.put (name, val);
+         } else {
+            HashMap<String,Object> var = getDataContaining (name);
+            if (var != null)
+               var.put (name, val);
+            else
+               variables.put (name, val);
+         }
          return val;
       } else
          return null;
