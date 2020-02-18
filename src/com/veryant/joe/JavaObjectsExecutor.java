@@ -54,7 +54,7 @@ public class JavaObjectsExecutor {
          }
    }
    private static int _main (String argv[]) throws ExecException {
-      int Return;
+      int Return = 0;
       Console cons;
       String line;
       Executor exec = new StandardExecutor();
@@ -85,7 +85,6 @@ public class JavaObjectsExecutor {
             showException(defCmd, ex);
             Return = 4;
          }
-         Return = 0;
       } else {
          Return = 0;
          DefaultCommand defCmd = new DefaultCommand();
