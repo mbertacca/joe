@@ -47,6 +47,9 @@ public class DefaultCommand extends CommandBase {
       else
          stdin = null;
    }
+   public boolean isConsole() {
+      return console != null;
+   }
    /**
     * Read a line from the console.
     */

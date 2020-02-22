@@ -1,5 +1,4 @@
-aSubr :=
-{
+aSubr := {
    !if ((idx = 0) or (idx = last) and (1=1)), {
       !println (aString toUpperCase; substring idx,(idx+1)).
    } , {

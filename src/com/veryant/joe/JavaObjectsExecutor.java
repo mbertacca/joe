@@ -30,7 +30,7 @@ import java.util.ArrayDeque;
 import java.util.HashMap;
 
 public class JavaObjectsExecutor {
-   public static final String rcsid = "1.7";
+   public static final String rcsid = "1.7.1";
    private Block block;
 
    public static void showException (DefaultCommand cmd, Throwable ex) {
@@ -101,12 +101,8 @@ public class JavaObjectsExecutor {
          Block b = null;
 
          while (line != null && !"exit".equals (line)) {
-            defCmd.print ("joe> ");
             try {
-               line = defCmd.readLine();
-               if (line == null)
-                  break;
-               //defCmd.print (line);
+               line = readLine(defCmd);
             } catch (IOException ex) {
                showException(defCmd, ex);
                Return = 4;
@@ -133,6 +129,58 @@ public class JavaObjectsExecutor {
          }
       }
       return Return;
+   }
+   static String readLine (DefaultCommand defCmd) throws IOException {
+      boolean isConsole = defCmd.isConsole();
+      StringBuilder buffer = new StringBuilder();
+      String line = null;
+      int braces = 0;
+      do {
+         if (defCmd.isConsole()) {
+            if (braces > 0) {
+               if (braces < 10)
+                  defCmd.print ("00" + braces + "> ");
+               else if (braces < 100)
+                  defCmd.print ("0" + braces + "> ");
+               else
+                  defCmd.print (braces + "> ");
+            } else {
+               defCmd.print ("joe> ");
+            }
+         }
+         line = defCmd.readLine();
+         if (line == null || line.equals ("exit")) {
+            line = "exit";
+            buffer.append (line);
+            braces = 0;
+         } else {
+            buffer.append (line);
+            buffer.append (' ');
+            braces = countBraces (line, braces);
+         }
+      } while (braces > 0 && !"exit".equals (line));
+      return buffer.toString();
+   }
+   static int countBraces (String line, int braces) {
+      boolean inquote = false;
+      for (int i = 0; i < line.length(); i++) {
+         switch (line.charAt (i)) {
+         case '{':
+            if (!inquote)
+               braces++;
+            break;
+         case '}':
+            if (!inquote)
+               braces--;
+            break;
+         case '"':
+            inquote = !inquote;
+            break;
+         default:
+            break;
+         }
+      }
+      return braces;
    }
 }
 
