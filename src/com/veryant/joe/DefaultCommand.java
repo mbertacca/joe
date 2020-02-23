@@ -161,6 +161,46 @@ public class DefaultCommand extends CommandBase {
       return Return;
    }
    /**
+    * This method implements a 'for' cycle. The code block is executed for
+    * passing the index as argument.
+    */
+   public Object $for(int start, int end, int step, Block code)
+                                                       throws JOEException {
+      Object Return = null;
+      if (step > 0) {
+         for (int i = start; i <= end; i += step) {
+            try {
+               Return = code.exec(new Integer(i));
+            } catch (BreakLoopException _ex) {
+               if (_ex.hasReturnObject())
+                  Return = _ex.getReturnObject();
+               break;
+            }
+         }
+      } else if (step < 0) {
+         for (int i = start; i >= end; i += step) {
+            try {
+               Return = code.exec(new Integer(i));
+            } catch (BreakLoopException _ex) {
+               if (_ex.hasReturnObject())
+                  Return = _ex.getReturnObject();
+               break;
+            }
+         }
+      } else {
+         throw new JOEException ("step = 0 is not allowed!");
+      }
+      return Return;
+   }
+   /**
+    * This is a convenience method for for (start, end, 1).
+    */
+   public Object $for(int start, int end, Block code)
+                                                       throws JOEException {
+      return $for (start, end, 1, code);
+   }
+
+   /**
     * This method implements a 'for each'. The code block is executed for
     * each object passed in the array startint from the n-th,
     * each object is passed to the block as argument.

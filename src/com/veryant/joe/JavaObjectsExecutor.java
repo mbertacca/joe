@@ -30,7 +30,7 @@ import java.util.ArrayDeque;
 import java.util.HashMap;
 
 public class JavaObjectsExecutor {
-   public static final String rcsid = "1.7.1";
+   public static final String rcsid = "1.7.2";
    private Block block;
 
    public static void showException (DefaultCommand cmd, Throwable ex) {
@@ -135,6 +135,7 @@ public class JavaObjectsExecutor {
       StringBuilder buffer = new StringBuilder();
       String line = null;
       int braces = 0;
+      boolean missingDot = false;
       do {
          if (defCmd.isConsole()) {
             if (braces > 0) {
@@ -144,21 +145,31 @@ public class JavaObjectsExecutor {
                   defCmd.print ("0" + braces + "> ");
                else
                   defCmd.print (braces + "> ");
+            } else if (missingDot) {
+               defCmd.print (" . > ");
             } else {
                defCmd.print ("joe> ");
             }
          }
          line = defCmd.readLine();
-         if (line == null || line.equals ("exit")) {
+         if (line == null || (line = line.trim()).equals ("exit")) {
             line = "exit";
+            buffer.delete (0, buffer.length());
             buffer.append (line);
             braces = 0;
+         } else if ("".equals (line)) {
+            if (missingDot || braces != 0) {
+               braces = 0;
+               missingDot = false;
+            }
          } else {
+            line = line.trim();
             buffer.append (line);
             buffer.append (' ');
             braces = countBraces (line, braces);
+            missingDot = line.charAt (line.length() - 1) != '.';
          }
-      } while (braces > 0 && !"exit".equals (line));
+      } while ((braces > 0 || missingDot) && !"exit".equals (line));
       return buffer.toString();
    }
    static int countBraces (String line, int braces) {

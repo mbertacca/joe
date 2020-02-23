@@ -1,0 +1,10 @@
+!for 1,8,{:i.
+   !println i.
+}.
+
+!for -1,-8,-1,{:i.
+   !println i.
+   !if (i = -5),{
+      !breakLoop.
+   }.
+}.
