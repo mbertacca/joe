@@ -23,7 +23,7 @@ The syntax can be summarized in the following 2 lines:
 *message:* [var := ] obj [ method1 { ; | obj-arg1-1 [,obj-arg1-2] ... } [ method2 { ; | obj-arg2-1 [,obj-arg2-2] ...}] ... ].  
 *block:* { [*message*] ... }
 
-*block* is an object itself therefore it can be put wherever an object can. Parenthesis can be used to alter the evaluation order.
+*block* is an object itself therefore it can be put wherever an object can. Parenthesis can be used to alter the default left-to-right evaluation  order.
 
 I developed also a version using C language that could be used in small devices (automation, robotics, Internet of things) in order to allow the use of an object oriented interpreter with garbage collection and a small memory footprint. Currently it is just a proof-of-concept developed on Linux, however it should be easy to compile it on any other platform.
 
