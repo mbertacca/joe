@@ -12,6 +12,10 @@ compileJoe := {
    dir := "src/com/veryant/joe".
 
    !if (build anythingNew dir,".java",dir,".class"), {
+      revision := "\$Revision: " +
+                  (build systemGetOut "git describe --tag") + "\$".
+      build replaceFirstInFile "src\com\veryant\joe\Revision.java",
+                               "\$Revision.*\$",revision.
       rc := build system ("javac -g -cp src "+dir+"/*.java").
       !if (rc <> 0), {
          !throw "Compilation failed!".

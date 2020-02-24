@@ -12,7 +12,14 @@ Paths := !getClassRef "java.nio.file.Paths".
 Files := !getClassRef "java.nio.file.Files".
 CopyOption := !getStaticField "java.nio.file.StandardCopyOption",
                               "REPLACE_EXISTING".
+OpenWrite := !getStaticField "java.nio.file.StandardOpenOption",
+                              "WRITE".
+OpenTrunc := !getStaticField "java.nio.file.StandardOpenOption",
+                              "TRUNCATE_EXISTING".
+charset := (!getClassRef "java.nio.charset.Charset") defaultCharset.
+
 system := system.
+systemGetOut := systemGetOut.
 pathSep := pathSep.
 
 !if ((SystemClass getProperty "os.name") startsWith "Windows"),{
@@ -21,11 +28,19 @@ pathSep := pathSep.
       !println cmd.
       !exec "cmd","/c",cmd.
    }.
+   systemGetOut := {:cmd.
+      !println cmd.
+      !execGetOut "cmd","/c",cmd.
+   }.
 },{
    pathSep := { ":" }.
    system := {:cmd.
       !println cmd.
       !exec "sh","-c",cmd.
+   }.
+   systemGetOut := {:cmd.
+      !println cmd.
+      !execGetOut "sh","-c",cmd.
    }.
 }.
 
@@ -99,4 +114,13 @@ anythingNew := {exit:srcDir,srcExt,exeDir,exeExt.
       }.
    }.
    false.
+}.
+
+replaceFirstInFile := {:file,regex,replace.
+   path := Paths get file,"".
+   lines := Files readAllLines path,charset.
+   !for 0,(lines size; - 1),{:i.
+      lines set i, (lines get i replaceFirst regex,replace).
+   }.
+   Files write path,lines,charset,OpenWrite,OpenTrunc.
 }.

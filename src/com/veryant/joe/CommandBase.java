@@ -231,6 +231,6 @@ public class CommandBase {
     * Returns the version.
     */
    public String version () {
-      return JavaObjectsExecutor.rcsid;
+      return Revision.id;
    }
 }

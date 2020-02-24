@@ -30,7 +30,6 @@ import java.util.ArrayDeque;
 import java.util.HashMap;
 
 public class JavaObjectsExecutor {
-   public static final String rcsid = "1.7.2";
    private Block block;
 
    public static void showException (DefaultCommand cmd, Throwable ex) {
@@ -94,8 +93,8 @@ public class JavaObjectsExecutor {
          Object cmd = defCmd;
          line = "";
          defCmd.println (
-             "JOE interactive ver. " + rcsid +
-             " ready, type 'exit' to exit the session");
+             "JOE " + Revision.id 
+                    + " interactive ready, type 'exit' to exit the session");
          defCmd.println ();
          Parser prg = new Parser(cmd, exec,"<stdin>");
          Block b = null;
