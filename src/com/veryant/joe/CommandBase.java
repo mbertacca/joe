@@ -21,6 +21,7 @@ package com.veryant.joe;
 
 import java.io.Console;
 import java.util.HashMap;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
@@ -92,6 +93,18 @@ public class CommandBase {
     */
    public Object[] newArray (int n) throws Exception {
       return new Object[n];
+   }
+   /**
+    * Returns an Object array of the specified class whose length is n.
+    */
+   public Object newArray (Class clazz, int n) throws Exception {
+      return Array.newInstance (clazz, n);
+   }
+   /**
+    * Returns an Object array of the specified class whose length is n.
+    */
+   public Object newArray (String clazz, int n) throws Exception {
+      return newArray(getClass(clazz), n);
    }
    /**
     * Returns an Object array whose items are the parameters
