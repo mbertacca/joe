@@ -29,4 +29,7 @@ public class Literals {
    public static Object getString (String val) {
       return Wrapper.newInstance (val);
    }
+   public static Object getBoolean (boolean val) {
+      return Wrapper.newInstance (val);
+   }
 }

@@ -40,6 +40,8 @@ enum TokenType {
    _FLOAT,
    _ASSIGN,
    _ML_COMMENT,
-   _COMMENT
+   _COMMENT,
+   _TRUE,
+   _FALSE
 }
 

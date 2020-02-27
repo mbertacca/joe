@@ -125,6 +125,13 @@ public class Tokenizer {
                   tokens.add (newToken("le", TokenType._WORD));
                } else if (idx < line.length && line[idx] == '>') {
                   tokens.add (newToken("ne", TokenType._WORD));
+               } else if (idx + 1 < line.length && line[idx + 1] == '>' &&
+                                    (line[idx] == '0' || line[idx] == '1')) {
+                  if (line[idx] == '1')
+                     tokens.add (newToken("<1>", TokenType._TRUE));
+                  else
+                     tokens.add (newToken("<0>", TokenType._FALSE));
+                  idx++;
                } else {
                   --idx;
                   tokens.add (newToken("lt", TokenType._WORD));

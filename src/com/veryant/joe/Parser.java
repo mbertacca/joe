@@ -352,6 +352,10 @@ public class Parser {
          return Literals.getInteger(tk.word);
       case _FLOAT:
          return Literals.getDecimal(tk.word);
+      case _TRUE:
+         return Literals.getBoolean(true);
+      case _FALSE:
+         return Literals.getBoolean(false);
       case _WORD:
          return new SingleVariableMessage()  {
             public Object exec (Block blk) {
