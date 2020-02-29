@@ -58,7 +58,7 @@ public class WBoolean extends Wrapper {
          if (b instanceof WBoolean)
             return (WBoolean) b;
       }
-      return new WBoolean (false);
+      return this;
    }
    public WBoolean or (WBoolean b) {
       return new WBoolean (pValue || b.pValue);
@@ -72,9 +72,16 @@ public class WBoolean extends Wrapper {
          if (b instanceof WBoolean)
             return (WBoolean) b;
       }
-      return new WBoolean (true);
+      return this;
    }
    public WBoolean not () {
       return new WBoolean (!pValue);
+   }
+
+   public Object iif (Object oTrue, Object oFalse) throws JOEException {
+      if (pValue)
+         return oTrue;
+      else
+         return oFalse;
    }
 }
