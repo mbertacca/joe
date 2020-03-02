@@ -444,6 +444,13 @@ public class DefaultCommand extends CommandBase {
       return Return.toString();
    }
    /**
+    * Returns an object of type Pipe that allows the execution of programs
+    * in a pipeline.
+    */
+   public Pipe pipe() {
+      return new Pipe();
+   }
+   /**
     * Executes the specified JOE script and returns its return code.
     */
    public int runJoe (String...cmds) throws Exception {
