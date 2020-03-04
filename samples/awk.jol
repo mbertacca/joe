@@ -1,0 +1,28 @@
+/*
+ * Very basic example of an awk emulator
+ */
+
+:blk,file.
+
+Paths := !getClassRef "java.nio.file.Paths".
+Files := !getClassRef "java.nio.file.Files".
+cs := (!getClassRef "java.nio.charset.Charset") defaultCharset.
+
+PROCESS := blk getVariable "PROCESS".
+END := blk getVariable "END".
+
+FS := blk getVariable "FS".
+!if (!isNull FS),{
+   FS := " +".
+}.
+
+!if (!isNull PROCESS not),{
+   lines := Files readAllLines (Paths get file,""),cs.
+   !foreach (lines toArray),{:line.
+       PROCESS exec line,(line split FS).
+   }.
+}.
+
+!if (!isNull END not),{
+   END exec.   
+}.

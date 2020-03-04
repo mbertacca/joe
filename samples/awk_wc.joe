@@ -1,0 +1,44 @@
+/*
+ * Calculate word frequencies
+ * usage: joe awk_wc.joe <file>
+ * awk example from Wikipedia
+ *
+ * BEGIN {
+ *     FS="[^a-zA-Z]+"
+ * }
+ * {
+ *     for (i=1; i<=NF; i++)
+ *          words[tolower($i)]++
+ * }
+ * END {
+ *     for (i in words)
+ *         print i, words[i]
+ * }
+ *
+ */
+:args.
+words := !newInstance "java.util.HashMap".
+
+FS := "[^a-zA-Z]+".
+
+PROCESS := {:$0,$.
+   !foreach $,{:fld.
+      fld := fld toLowerCase.
+      cnt := words get fld.
+      !if (!isNull cnt),{
+         words put fld,1.
+      },{
+         cnt := cnt + 1.
+         words put fld,cnt.
+      }.
+   }.
+}.
+
+END := {
+   keys := (words keySet) toArray.
+   !foreach keys,{:key.
+      !println key," ",(words get key).
+    }.
+}.
+
+awk := !new "awk.jol",!!,(args get 1).
