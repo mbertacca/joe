@@ -172,7 +172,7 @@ public class DefaultCommand extends CommandBase {
       if (step > 0) {
          for (int i = start; i <= end; i += step) {
             try {
-               Return = code.exec(new Integer(i));
+               Return = code.exec(new WInteger(i));
             } catch (BreakLoopException _ex) {
                if (_ex.hasReturnObject())
                   Return = _ex.getReturnObject();
@@ -182,7 +182,7 @@ public class DefaultCommand extends CommandBase {
       } else if (step < 0) {
          for (int i = start; i >= end; i += step) {
             try {
-               Return = code.exec(new Integer(i));
+               Return = code.exec(new WInteger(i));
             } catch (BreakLoopException _ex) {
                if (_ex.hasReturnObject())
                   Return = _ex.getReturnObject();
