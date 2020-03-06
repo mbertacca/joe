@@ -35,8 +35,7 @@ PROCESS := {:$0,$.
 }.
 
 END := {
-   keys := (words keySet) toArray.
-   !foreach keys,{:key.
+   !foreach (words keySet),{:key.
       !println key," ",(words get key).
     }.
 }.
