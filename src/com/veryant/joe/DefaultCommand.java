@@ -28,7 +28,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 
@@ -229,6 +231,37 @@ public class DefaultCommand extends CommandBase {
    public Object foreach (Object list[], Block code) throws JOEException {
       return foreach (list, 0, code);
    }
+   /**
+    * This method implements a 'for each'. The code block is executed for
+    * each object passed in the Collection startint from the n-th,
+    * each object is passed to the block as argument.
+    */
+   public Object foreach(Collection list, int n, Block code) throws JOEException {
+      Object Return = null;
+      Iterator it = list.iterator();
+      while (it.hasNext()) {
+         try {
+            final Object o = Wrapper.newInstance(Return = it.next());
+            if (o != null) {
+               Return = code.exec(o);
+            } else {
+               Return = code.exec(Return);
+            }
+         } catch (BreakLoopException _ex) {
+            if (_ex.hasReturnObject())
+               Return = _ex.getReturnObject();
+            break;
+         }
+      }
+      return Return;
+   }
+   /**
+    * This is a convenience method for foreach (list, 0, code).
+    */
+   public Object foreach (Collection list, Block code) throws JOEException {
+      return foreach (list, 0, code);
+   }
+
    /**
     * Causes the exit from a loop.
     */
