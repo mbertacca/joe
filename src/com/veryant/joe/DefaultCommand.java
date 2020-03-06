@@ -239,6 +239,8 @@ public class DefaultCommand extends CommandBase {
    public Object foreach(Collection list, int n, Block code) throws JOEException {
       Object Return = null;
       Iterator it = list.iterator();
+      for ( ;it.hasNext() && n > 0; n--)
+         it.next();
       while (it.hasNext()) {
          try {
             final Object o = Wrapper.newInstance(Return = it.next());
