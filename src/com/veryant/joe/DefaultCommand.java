@@ -169,7 +169,7 @@ public class DefaultCommand extends CommandBase {
    public Object $for(int start, int end, int step, Block code)
                                                        throws JOEException {
       Object Return = null;
-      if (step > 0) {
+      if (step >= 0) {
          for (int i = start; i <= end; i += step) {
             try {
                Return = code.exec(new WInteger(i));
@@ -179,7 +179,7 @@ public class DefaultCommand extends CommandBase {
                break;
             }
          }
-      } else if (step < 0) {
+      } else {
          for (int i = start; i >= end; i += step) {
             try {
                Return = code.exec(new WInteger(i));
@@ -189,8 +189,6 @@ public class DefaultCommand extends CommandBase {
                break;
             }
          }
-      } else {
-         throw new JOEException ("step = 0 is not allowed!");
       }
       return Return;
    }
