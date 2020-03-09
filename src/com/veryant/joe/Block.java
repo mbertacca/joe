@@ -30,7 +30,7 @@ public class Block extends ArrayList<Message>
    private HashMap<String,Object> variables;
    private final HashMap<String,Object> constants;
    private ArrayList<Block> children = new ArrayList<Block>();
-   private String name;
+   private String blockName;
    private String[] argName;
    private Object argArray[];
    private boolean execAsJoe;
@@ -193,10 +193,13 @@ public class Block extends ArrayList<Message>
       return Return;
    }
    public String name() {
-      return name;
+      if (blockName == null)
+         return "block-" + hashCode();
+      else
+         return blockName;
    }
    void setName(String n) {
-      name = n;
+      blockName = n;
    }
    public int getRow() {
       return -1;
@@ -217,7 +220,7 @@ public class Block extends ArrayList<Message>
          } catch (JOEException _ex) {
             Return = _ex.toString();
          }
-      else if ((Return = name()) == null)
+      else if ((Return = blockName) == null)
          Return = "{" + super.toString() + "}";
       return Return;
    }

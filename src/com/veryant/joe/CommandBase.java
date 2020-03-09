@@ -176,6 +176,12 @@ public class CommandBase {
       return obj == null;
    }
    /**
+    * Returns true if the passed objects are the same object, false otherwise.
+    */
+   public boolean areSameObject (Object o1, Object o2) {
+      return o1 == o2;
+   }
+   /**
     * Returns the result of obj instanceof Throwable
     */
    public boolean isThrowable (Object obj) {
