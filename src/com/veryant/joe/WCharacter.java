@@ -32,4 +32,13 @@ public class WCharacter extends WLong {
    public Object getWrapped () {
       return new Character ((char) value);
    }
+   public String add (WString s) {
+      return toString().concat (s.value);
+   }
+   public String add (Object s) {
+      return toString().concat (s.toString());
+   }
+   public String toString () {
+      return new Character ((char) value).toString();
+   }
 }
