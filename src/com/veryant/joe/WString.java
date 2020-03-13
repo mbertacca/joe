@@ -74,8 +74,8 @@ public class WString extends Wrapper {
       return new WString (value.substring(beginIndex.intValue(),
                                            endIndex.intValue()));
    }
-   public WString charAt (WNumber index) {
-      return new WString (value.charAt(index.intValue()));
+   public WCharacter charAt (WNumber index) {
+      return new WCharacter (value.charAt(index.intValue()));
    }
    public WString toLowerCase () {
       return new WString (value.toLowerCase());

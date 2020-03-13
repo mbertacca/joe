@@ -84,4 +84,16 @@ public class WBoolean extends Wrapper {
       else
          return oFalse;
    }
+   public WBoolean ifTrue (Block m) throws JOEException {
+      if (pValue)
+         m.exec();
+
+      return this;
+   }
+   public WBoolean ifFalse (Block m) throws JOEException {
+      if (!pValue)
+         m.exec();
+
+      return this;
+   }
 }

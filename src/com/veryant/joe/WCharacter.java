@@ -19,10 +19,17 @@
 
 package com.veryant.joe;
 
-public class Revision {
-   public static final String id = "$Revision: v1.8-12-gaeb16bc$";
-   public static void main (String argv[]) {
-      System.out.println (id);
+public class WCharacter extends WLong {
+   public WCharacter (long n) {
+      super (n);
+   }
+   public WCharacter (String n) {
+      super (n);
+   }
+   public Type type() {
+      return Type.CHAR;
+   }
+   public Object getWrapped () {
+      return new Character ((char) value);
    }
 }
-

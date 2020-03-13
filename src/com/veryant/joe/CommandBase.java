@@ -235,6 +235,13 @@ public class CommandBase {
       return Character.toString ((char) n.intValue());
    }
    /**
+    * Returns a char representing the codepoint corresponding
+    * to the first letter in a string.
+    */
+   public char asc (String a) {
+      return a.charAt (0);
+   }
+   /**
     * Makes the child inheriting from parent.
     */
    public void $extends (Block child, Block parent) {
