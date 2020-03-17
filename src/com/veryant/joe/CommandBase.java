@@ -78,7 +78,12 @@ public class CommandBase {
          for (int i = 0; i < objType.length; i++)
             if ((c = primitiveClasses.get(objType[i])) != null)
                objType[i] = c;
-         ctor = clazz.getConstructor (objType);
+         try {
+            ctor = clazz.getConstructor (objType);
+         } catch (NoSuchMethodException ignore) {
+            return clazz.getConstructor (new Class[] { args.getClass() } )
+                        .newInstance (new Object[]{args});
+         }
       }
       return ctor.newInstance (args);
    }
