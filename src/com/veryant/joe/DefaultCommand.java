@@ -29,6 +29,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.lang.reflect.Constructor;
@@ -261,7 +262,68 @@ public class DefaultCommand extends CommandBase {
    public Object foreach (Collection list, Block code) throws JOEException {
       return foreach (list, 0, code);
    }
-
+   /**
+    * This method implements a 'for each'. The code block is executed for
+    * each object passed in the Iterator starting from n,
+    * each object is passed to the block as argument.
+    */
+   public Object foreach(Iterator it, int n, Block code) throws JOEException {
+      Object Return = null;
+      for ( ;it.hasNext() && n > 0; n--)
+         it.next();
+      while (it.hasNext()) {
+         try {
+            final Object o = Wrapper.newInstance(Return = it.next());
+            if (o != null) {
+               Return = code.exec(o);
+            } else {
+               Return = code.exec(Return);
+            }
+         } catch (BreakLoopException _ex) {
+            if (_ex.hasReturnObject())
+               Return = _ex.getReturnObject();
+            break;
+         }
+      }
+      return Return;
+   }
+   /**
+    * This is a convenience method for foreach (list, 0, code).
+    */
+   public Object foreach (Iterator it, Block code) throws JOEException {
+      return foreach (it, 0, code);
+   }
+   /**
+    * This method implements a 'for each'. The code block is executed for
+    * each object passed in the Enumeration starting from n,
+    * each object is passed to the block as argument.
+    */
+   public Object foreach(Enumeration it, int n, Block code) throws JOEException {
+      Object Return = null;
+      for ( ;it.hasMoreElements() && n > 0; n--)
+         it.nextElement();
+      while (it.hasMoreElements()) {
+         try {
+            final Object o = Wrapper.newInstance(Return = it.nextElement());
+            if (o != null) {
+               Return = code.exec(o);
+            } else {
+               Return = code.exec(Return);
+            }
+         } catch (BreakLoopException _ex) {
+            if (_ex.hasReturnObject())
+               Return = _ex.getReturnObject();
+            break;
+         }
+      }
+      return Return;
+   }
+   /**
+    * This is a convenience method for foreach (list, 0, code).
+    */
+   public Object foreach (Enumeration it, Block code) throws JOEException {
+      return foreach (it, 0, code);
+   }
    /**
     * Causes the exit from a loop.
     */

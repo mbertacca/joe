@@ -20,7 +20,7 @@
 package com.veryant.joe;
 
 public class Revision {
-   public static final String id = "$Revision: v1.8-14-g51a8cdd$";
+   public static final String id = "$Revision: v1.8-15-g711de6a$";
    public static void main (String argv[]) {
       System.out.println (id);
    }
