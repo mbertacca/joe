@@ -40,4 +40,10 @@ END := {
     }.
 }.
 
+!if (args length; < 2), {
+    !println "usage: joe ",(args get 0)," <text-file>".
+    !systemExit 2.
+}.
+
 awk := !new "awk.jol",!!,(args get 1).
+}

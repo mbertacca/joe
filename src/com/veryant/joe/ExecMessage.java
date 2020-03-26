@@ -193,7 +193,7 @@ public class ExecMessage implements Message {
          Class argClasses[] = new Class[argArray.length];
          for (int i = 0; i < argArray.length; i++)
             if (argArray[i] == null)
-               argClasses[i] = Object.class;
+               argClasses[i] = null;
             else
                argClasses[i] = argArray[i].getClass();
          Return = getMethod(jSelector, argClasses, argArray);
@@ -255,7 +255,7 @@ public class ExecMessage implements Message {
             for (int j = 0; j < fixed && currFit >= 0; j++) {
                currFit = paramFits (types[j], argClasses[j], currFit);
             }
-            if (currFit >= 0 && argClasses[fixed] != null) {
+            if (currFit >= 0) {
                boolean allFixed = false;
                if (types.length == argClasses.length) {
                   int fits = 0;

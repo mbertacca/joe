@@ -2,15 +2,19 @@ blk := {:x0,x1.
    argv := !!getArgv.
    !println (argv length).
    !println argv.
-   !println x0,x1.
+   !if (argv length; > 1),{
+      !println x0,x1.
+   }.
 }.
 
 obj := {
    meth:= {:x0,x1.
       argv := !!getArgv.
-   !println (argv length).
+      !println (argv length).
       !println argv.
-      !println x0,x1.
+      !if (argv length; > 1),{
+         !println x0,x1.
+      }.
    }.
 } new.
 
