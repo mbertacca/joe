@@ -54,12 +54,17 @@ public class WArray extends Wrapper {
       value = newValue;
       return value[i] = obj;
    }
-   public Object shift() {
-      Object newValue[] = new Object[value.length - 1];
-      int i;
-      for (i = 1; i < value.length; i++)
-         newValue[i - 1] = value[i];
+   public Object shift(final int shft) {
+      Object newValue[] = new Object[value.length - shft];
+      for (int i = shft; i < value.length; i++)
+         newValue[i - shft] = value[i];
       value = newValue;
       return this;
+   }
+   public Object shift(WNumber shiftValue) {
+      return shift (shiftValue.intValue());
+   }
+   public Object shift() {
+      return shift (1);
    }
 }

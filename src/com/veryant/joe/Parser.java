@@ -324,58 +324,62 @@ public class Parser {
       return Return;
    }
 
-   private Object getValue (final Token tk) {
-      switch (tk.type) {
-      case _BANG_:
-         return command;
-      case _BANGBANG_:
-         return new Message ()  {
-            public Object exec (Block blk) {
-               return blk;
-            }
-            public int getRow() {
-               return tk.row;
-            }
-            public int getCol() {
-               return tk.col;
-            }
-            public String getName () {
-               return tk.word;
-            }
-            public String toString () {
-               return tk.word;
-            }
-         };
-      case _STRING:
-         return Literals.getString(tk.word);
-      case _INTEGER:
-         return Literals.getInteger(tk.word);
-      case _FLOAT:
-         return Literals.getDecimal(tk.word);
-      case _TRUE:
-         return Literals.getBoolean(true);
-      case _FALSE:
-         return Literals.getBoolean(false);
-      case _WORD:
-         return new SingleVariableMessage()  {
-            public Object exec (Block blk) {
-               return blk.getVariable(tk.word);
-            }
-            public int getRow() {
-               return tk.row;
-            }
-            public int getCol() {
-               return tk.col;
-            }
-            public String getName () {
-               return tk.word;
-            }
-            public String toString () {
-               return tk.word;
-            }
-         };
-      default:
-         return tk;
+   private Object getValue (final Token tk) throws JOEException {
+      try {
+         switch (tk.type) {
+         case _BANG_:
+            return command;
+         case _BANGBANG_:
+            return new Message ()  {
+               public Object exec (Block blk) {
+                  return blk;
+               }
+               public int getRow() {
+                  return tk.row;
+               }
+               public int getCol() {
+                  return tk.col;
+               }
+               public String getName () {
+                  return tk.word;
+               }
+               public String toString () {
+                  return tk.word;
+               }
+            };
+         case _STRING:
+            return Literals.getString(tk.word);
+         case _INTEGER:
+            return Literals.getInteger(tk.word);
+         case _FLOAT:
+            return Literals.getDecimal(tk.word);
+         case _TRUE:
+            return Literals.getBoolean(true);
+         case _FALSE:
+            return Literals.getBoolean(false);
+         case _WORD:
+            return new SingleVariableMessage()  {
+               public Object exec (Block blk) {
+                  return blk.getVariable(tk.word);
+               }
+               public int getRow() {
+                  return tk.row;
+               }
+               public int getCol() {
+                  return tk.col;
+               }
+               public String getName () {
+                  return tk.word;
+               }
+               public String toString () {
+                  return tk.word;
+               }
+            };
+         default:
+            return tk;
+         }
+      } catch (Exception ex) {
+         throw new JOEException (ex.toString(), tk, fName);
       }
    }
    private void parClose (TkStack tokens) throws JOEException {

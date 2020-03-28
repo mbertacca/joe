@@ -137,6 +137,24 @@ public class WLong extends Wrapper implements WNumber {
    public WBoolean ne (WNumber n) {
       return new WBoolean (value != n.longValue());
    }
+   public WLong and (WLong n) {
+      return new WLong (value & n.value);
+   }
+   public WLong and (WIntegers n) {
+      return new WLong (value & n.longValue());
+   }
+   public WLong or (WLong n) {
+      return new WLong (value | n.value);
+   }
+   public WLong or (WIntegers n) {
+      return new WLong (value | n.longValue());
+   }
+   public WLong xor (WLong n) {
+      return new WLong (value ^ n.value);
+   }
+   public WLong xor (WIntegers n) {
+      return new WLong (value ^ n.longValue());
+   }
    public String toString() {
       return Long.toString (value);
    }

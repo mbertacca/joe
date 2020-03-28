@@ -7,16 +7,24 @@
 
 build := !new "samples/builder.jol".
 pathSep := build pathSep.
+srcDir := "src/com/veryant/joe".
+
+@compileRaw := {
+   !if (build anythingNew srcDir,".java",srcDir,".class"), {
+      rc := build system ("javac -g -cp src "+srcDir+"/*.java").
+      !if (rc <> 0), {
+         !throw "Compilation failed!".
+      }.
+   }.
+}.
 
 compileJoe := {
-   dir := "src/com/veryant/joe".
-
-   !if (build anythingNew dir,".java",dir,".class"), {
+   !if (build anythingNew srcDir,".java",srcDir,".class"), {
       revision := "\$Revision: " +
                   (build systemGetOut "git describe --tag") + "\$".
-      build replaceFirstInFile (dir + "/Revision.java"),
+      build replaceFirstInFile (srcDir + "/Revision.java"),
                                "\$Revision.*\$",revision.
-      rc := build system ("javac -g -cp src "+dir+"/*.java").
+      rc := build system ("javac -g -cp src "+srcDir+"/*.java").
       !if (rc <> 0), {
          !throw "Compilation failed!".
       }.

@@ -74,6 +74,20 @@ public class WBoolean extends Wrapper {
       }
       return this;
    }
+   public WBoolean xor (WBoolean b) {
+      return new WBoolean (pValue ^ b.pValue);
+   }
+   public WBoolean xor (Boolean b) {
+      return new WBoolean (pValue ^ b.booleanValue());
+   }
+   public WBoolean xor (Block m) throws JOEException {
+      Object b = m.exec();
+      if (b instanceof WBoolean) {
+         return new WBoolean (pValue ^ ((WBoolean) b).booleanValue());
+      } else {
+         return new WBoolean (pValue ^ false);
+      }
+   }
    public WBoolean not () {
       return new WBoolean (!pValue);
    }
