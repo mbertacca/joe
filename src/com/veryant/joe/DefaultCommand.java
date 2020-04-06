@@ -489,18 +489,26 @@ public class DefaultCommand extends CommandBase {
       Process p = pb.start();
       return p.waitFor();
    }
+   private static String[] toStringArray (Object[] a) {
+      if (a instanceof String[])
+          return (String[]) a;
+      String Return[] = new String[a.length];
+      for (int i = 0; i < a.length; i++)
+          Return[i] = a[i].toString();
+      return Return;
+   }
    /**
     * Executes the specified command and returns its return code.
     */
-   public int exec (String...cmds) throws Exception {
-      return exec (new ProcessBuilder (cmds));
+   public int exec (Object...cmds) throws Exception {
+      return exec (new ProcessBuilder (toStringArray(cmds)));
    }
    /**
     * Executes the specified command from the specified directory
     * and returns its return code.
     */
-   public int execFromDir (File dir, String...cmds) throws Exception {
-      ProcessBuilder pb = new ProcessBuilder (cmds);
+   public int execFromDir (File dir, Object...cmds) throws Exception {
+      ProcessBuilder pb = new ProcessBuilder (toStringArray(cmds));
       pb.directory (dir);
       return exec (pb);
    }
@@ -508,16 +516,16 @@ public class DefaultCommand extends CommandBase {
     * Executes the specified command from the specified directory
     * and returns its return code.
     */
-   public int execFromDir (String dir, String...cmds) throws Exception {
+   public int execFromDir (String dir, Object...cmds) throws Exception {
       return execFromDir (new File (dir), cmds);
    }
    /**
     * Executes the specified command and returns its standard output
     * as a string.
     */
-   public String execGetOut (String...cmds) throws Exception {
+   public String execGetOut (Object...cmds) throws Exception {
       final Runtime rt = Runtime.getRuntime();
-      final Process proc = rt.exec(cmds);
+      final Process proc = rt.exec(toStringArray(cmds));
       BufferedReader bro = new BufferedReader(
                               new InputStreamReader (proc.getInputStream()));
       BufferedReader bre = new BufferedReader(
@@ -548,14 +556,14 @@ public class DefaultCommand extends CommandBase {
    /**
     * Executes the specified JOE script and returns its return code.
     */
-   public int runJoe (String...cmds) throws Exception {
-      return JavaObjectsExecutor.imain (cmds);
+   public int runJoe (Object...cmds) throws Exception {
+      return JavaObjectsExecutor.imain (toStringArray(cmds));
    }
    /** Stops the execution of the current script and executes the
     * script specified as argument.
     */
-   public int execJoe (String...cmds) throws ExecException {
-      throw new ExecException (cmds);
+   public int execJoe (Object...cmds) throws ExecException {
+      throw new ExecException (toStringArray(cmds));
    }
    /**
     * Reads the value of the specified environment variable.
