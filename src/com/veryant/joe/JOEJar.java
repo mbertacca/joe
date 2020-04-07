@@ -97,7 +97,7 @@ public class JOEJar {
          Block blk = sm.load (script, jarg);
          blk.init (jarg);
       } catch (BreakEndException ex) {
-         System.exit (0);
+         System.exit (ex.rc);
       } catch (ExecException ex) {
          throw ex;
       } catch (BreakCmdException ex) {

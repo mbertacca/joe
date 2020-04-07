@@ -217,6 +217,20 @@ public class CommandBase {
       return blk;
    }
    /**
+    * Executes the specified JOE script and returns its return code.
+    */
+   public int joe (Object...argv) throws Exception {
+      String fname = argv[0].toString();
+      argv[0] = ScriptManager.get(this).getEntryPoint().toString() + argv[0];
+      Object[] arg = new Object[] { argv };
+      Block blk = ScriptManager.load (this, fname, arg);
+      Object Return = blk.init (arg);
+      if (Return instanceof WNumber)
+         return ((WNumber) Return).intValue();
+      else
+         return 0;
+   }
+   /**
     * Convenience method for instanceof (obj, getClass(clazz)).
     */
    public boolean $instanceof (Object obj, String clazz) {

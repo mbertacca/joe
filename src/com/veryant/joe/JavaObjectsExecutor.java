@@ -65,24 +65,27 @@ public class JavaObjectsExecutor {
             sm = new ScriptManager(f.getParentFile(), exec, defCmd);
             Object[] jarg = new Object [] {new WArray (argv)};
             Block blk = sm.load (f.getName(), jarg);
-            blk.init (jarg);
+            Object rc  = blk.init (jarg);
+            if (rc instanceof WNumber) {
+               Return = ((WNumber) rc).intValue();
+            }
          } catch (BreakEndException ex) {
-            Return = 0;
+            Return = ex.rc;
          } catch (ExecException ex) {
             throw ex;
          } catch (BreakCmdException ex) {
             showException(defCmd, new BreakCmdException (
                           "Block name not found: " + ex.getMessage()));
-            Return = 2;
+            Return = 65;
          } catch (JOEException ex) {
             showException(defCmd, ex);
-            Return = 2;
+            Return = 66;
          } catch (FileNotFoundException ex) {
             showException(defCmd, ex);
-            Return = 3;
+            Return = 67;
          } catch (IOException ex) {
             showException(defCmd, ex);
-            Return = 4;
+            Return = 68;
          }
       } else {
          Return = 0;
@@ -104,7 +107,7 @@ public class JavaObjectsExecutor {
                line = readLine(defCmd);
             } catch (IOException ex) {
                showException(defCmd, ex);
-               Return = 4;
+               Return = 69;
                break;
             }
             ArrayDeque<Token> tokens = new ArrayDeque<Token>();
