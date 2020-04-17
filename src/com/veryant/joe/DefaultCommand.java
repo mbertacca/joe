@@ -573,6 +573,13 @@ public class DefaultCommand extends CommandBase {
    }
 
    /**
+    * Returns a Glob object that performs match operations on paths
+    * thru the method 'matches'.
+    */
+   public Glob getGlob (String glob, boolean caseInsensitive) {
+      return new Glob (glob, caseInsensitive);
+   }
+   /**
     * Shows the specified objects in a graphical window.
     */
    public void showMessageDialog(Object... message) {
