@@ -110,4 +110,7 @@ public class WBoolean extends Wrapper {
 
       return this;
    }
+   public String toString() {
+      return oValue.toString();
+   }
 }
