@@ -46,4 +46,3 @@ END := {
 }.
 
 awk := !new "awk.jol",!!,(args get 1).
-}

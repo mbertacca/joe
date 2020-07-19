@@ -25,4 +25,7 @@ public class BreakEndException extends BreakCmdException {
       super (null);
       this.rc = rc;
    }
+   public BreakEndException () {
+      this (0);
+   }
 }

@@ -44,6 +44,12 @@ public class OuterBlock extends Block {
             if ((wobj = Wrapper.newInstance (argv[i])) != null)
                argv[i] = wobj;
       }
+      if (tokens.size() > 0) {
+         Token tk = tokens.pop();
+         throw new JOEException (
+                "Token(s) external to any block `" + tk.word + "`",
+                tk, parser.fName);
+      }
       return Return;
    }
    public OuterBlock (Executor exec) {
