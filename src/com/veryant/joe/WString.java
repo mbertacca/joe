@@ -83,14 +83,14 @@ public class WString extends Wrapper {
    public WString toUpperCase () {
       return new WString (value.toUpperCase());
    }
-   public WLong length () {
-      return new WLong (value.length());
+   public WInteger length () {
+      return new WInteger (value.length());
    }
-   public WLong compareTo(String anotherString) {
-      return new WLong (value.compareTo (anotherString));
+   public WInteger compareTo(String anotherString) {
+      return new WInteger (value.compareTo (anotherString));
    }
-   public WLong compareToIgnoreCase(String anotherString) {
-      return new WLong (value.compareToIgnoreCase (anotherString));
+   public WInteger compareToIgnoreCase(String anotherString) {
+      return new WInteger (value.compareToIgnoreCase (anotherString));
    }
    public WBoolean contains (WString s) {
       return new WBoolean (value.contains(s.value));
@@ -101,20 +101,20 @@ public class WString extends Wrapper {
    public WBoolean equalsIgnoreCase (WString s) {
       return new WBoolean (value.equalsIgnoreCase(s.value));
    }
-   public WLong indexOf(WString str) {
-      return new WLong (value.indexOf (str.value));
+   public WInteger indexOf(WString str) {
+      return new WInteger (value.indexOf (str.value));
    }
-   public WLong indexOf (WString str, WNumber fromIndex) {
-      return new WLong (value.indexOf(str.value, fromIndex.intValue()));
+   public WInteger indexOf (WString str, WNumber fromIndex) {
+      return new WInteger (value.indexOf(str.value, fromIndex.intValue()));
    }
    public WBoolean isEmpty () {
       return new WBoolean (value.isEmpty());
    }
-   public WLong lastIndexOf(WString str) {
-      return new WLong (value.lastIndexOf (str.value));
+   public WInteger lastIndexOf(WString str) {
+      return new WInteger (value.lastIndexOf (str.value));
    }
-   public WLong lastIndexOf (WString str, WNumber fromIndex) {
-      return new WLong (value.lastIndexOf(str.value, fromIndex.intValue()));
+   public WInteger lastIndexOf (WString str, WNumber fromIndex) {
+      return new WInteger (value.lastIndexOf(str.value, fromIndex.intValue()));
    }
    public WBoolean matches (WString regex) {
       return new WBoolean (value.matches(regex.value));
