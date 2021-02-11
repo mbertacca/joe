@@ -30,7 +30,9 @@ import java.util.ArrayDeque;
 import java.util.HashMap;
 
 public class JavaObjectsExecutor {
-   private Block block;
+   static protected DefaultCommand command;
+   static protected Executor executor;
+   static protected String version;
 
    public static void showException (DefaultCommand cmd, Throwable ex) {
       cmd.println(ex.getMessage());
@@ -40,6 +42,11 @@ public class JavaObjectsExecutor {
       }
    }
    public static void main (String argv[]) {
+      command = new DefaultCommand();
+      executor = new StandardExecutor();
+      version = "JOE " + Revision.id 
+              + " ready, type 'exit' to exit the session";
+
       int rc = imain (argv);
       if (rc != 0)
          System.exit (rc);
@@ -56,9 +63,9 @@ public class JavaObjectsExecutor {
       int Return = 0;
       Console cons;
       String line;
-      Executor exec = new StandardExecutor();
+      Executor exec = executor;
+      DefaultCommand defCmd = command;
       if (argv.length > 0) {
-         DefaultCommand defCmd = new DefaultCommand();
          ScriptManager sm;
          try {
             final File f = new File (argv[0]).getCanonicalFile();
@@ -89,15 +96,12 @@ public class JavaObjectsExecutor {
          }
       } else {
          Return = 0;
-         DefaultCommand defCmd = new DefaultCommand();
          File cwd = new java.io.File (System.getProperty("user.dir"));
          ScriptManager sm = new ScriptManager(cwd, exec, defCmd);
 
          Object cmd = defCmd;
          line = "";
-         defCmd.println (
-             "JOE " + Revision.id 
-                    + " interactive ready, type 'exit' to exit the session");
+         defCmd.println (version);
          defCmd.println ();
          Parser prg = new Parser(cmd, exec,"<stdin>");
          Block b = null;

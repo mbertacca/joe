@@ -20,7 +20,7 @@
 package com.veryant.joe;
 
 public class BreakEndException extends BreakCmdException {
-   final int rc;
+   public final int rc;
    public BreakEndException (int rc) {
       super (null);
       this.rc = rc;

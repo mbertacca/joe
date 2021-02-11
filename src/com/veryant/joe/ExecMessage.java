@@ -156,6 +156,9 @@ public class ExecMessage implements Message {
    public int getCol() {
       return col;
    }
+   public String getFileName() {
+      return fName;
+   }
    private Object[] argsExec (Block blk) throws JOEException {
       Object[] Return = new Object[origArgs.length];
       for (int i = 0; i < origArgs.length; i++)

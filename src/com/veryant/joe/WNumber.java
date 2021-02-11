@@ -19,7 +19,7 @@
 
 package com.veryant.joe;
 
-interface WNumber {
+public interface WNumber {
    abstract byte byteValue();
    abstract char charValue();
    abstract short shortValue();

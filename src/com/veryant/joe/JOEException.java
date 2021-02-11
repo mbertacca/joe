@@ -33,7 +33,7 @@ public class JOEException extends Exception {
       sb.append (": ");
       return sb.toString();
    }
-   JOEException (String msg, int r, int c, String fileName) {
+   public JOEException (String msg, int r, int c, String fileName) {
       super (msg);
       if (r != 0)
          info = buildInfo(fileName, r, c);
@@ -46,7 +46,7 @@ public class JOEException extends Exception {
    public JOEException (String msg) {
       this (msg, 0, 0,  null);
    }
-   JOEException (Throwable ex, int r, int c, String fileName) {
+   public JOEException (Throwable ex, int r, int c, String fileName) {
       super (ex);
       if (r != 0 && ! (ex instanceof JOEException))
          info = buildInfo(fileName, r, c);
