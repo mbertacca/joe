@@ -19,7 +19,10 @@
 
 package com.veryant.joe;
 
-public class WDouble extends Wrapper implements WFloats {
+import java.math.BigDecimal;
+import java.math.MathContext;
+
+public class WDouble extends WBaseNumber implements WNumber {
    final double value;
 
    public WDouble (double n) {
@@ -55,73 +58,120 @@ public class WDouble extends Wrapper implements WFloats {
    public double doubleValue() {
       return (double) value;
    }
+   public BigDecimal bigDecimalValue() {
+      return new BigDecimal (value);
+   }
 
    public WDouble add (WDouble n) {
       return new WDouble (value + n.value);
    }
-   public WDouble add (WNumber n) {
-      return new WDouble (value + n.doubleValue());
+   public WDouble add (WInteger n) {
+      return new WDouble (value + n.value);
    }
+   public WDouble add (WLong n) {
+      return new WDouble (value + n.value);
+   }
+
    public WDouble subtract (WDouble n) {
       return new WDouble (value - n.value);
    }
-   public WDouble subtract (WNumber n) {
-      return new WDouble (value - n.doubleValue());
+   public WDouble subtract (WInteger n) {
+      return new WDouble (value - n.value);
    }
+   public WDouble subtract (WLong n) {
+      return new WDouble (value - n.value);
+   }
+
    public WDouble multiply (WDouble n) {
       return new WDouble (value * n.value);
    }
-   public WDouble multiply (WNumber n) {
-      return new WDouble (value * n.doubleValue());
+   public WDouble multiply (WInteger n) {
+      return new WDouble (value * n.value);
    }
+   public WDouble multiply (WLong n) {
+      return new WDouble (value * n.value);
+   }
+
    public WDouble divide (WDouble n) {
       return new WDouble (value / n.value);
    }
-   public WDouble divide (WNumber n) {
-      return new WDouble (value / n.doubleValue());
+   public WDouble divide (WInteger n) {
+      return new WDouble (value / n.value);
    }
-   public WDouble mod (WDouble n) {
+   public WDouble divide (WLong n) {
+      return new WDouble (value / n.value);
+   }
+
+   public WDouble remainder (WDouble n) {
       return new WDouble (value % n.value);
    }
-   public WDouble mod (WNumber n) {
-      return new WDouble (value % n.doubleValue());
+   public WDouble remainder (WInteger n) {
+      return new WDouble (value % n.value);
    }
+   public WDouble remainder (WLong n) {
+      return new WDouble (value % n.value);
+   }
+
    public WBoolean equals (WDouble n) {
       return new WBoolean (value == n.value);
    }
-   public WBoolean equals (WNumber n) {
-      return new WBoolean (value == n.doubleValue());
+   public WBoolean equals (WInteger n) {
+      return new WBoolean (value == n.value);
    }
+   public WBoolean equals (WLong n) {
+      return new WBoolean (value == n.value);
+   }
+
    public WBoolean lt (WDouble n) {
       return new WBoolean (value < n.value);
    }
-   public WBoolean lt (WNumber n) {
-      return new WBoolean (value < n.doubleValue());
+   public WBoolean lt (WInteger n) {
+      return new WBoolean (value < n.value);
    }
+   public WBoolean lt (WLong n) {
+      return new WBoolean (value < n.value);
+   }
+
    public WBoolean gt (WDouble n) {
       return new WBoolean (value > n.value);
    }
-   public WBoolean gt (WNumber n) {
-      return new WBoolean (value > n.doubleValue());
+   public WBoolean gt (WInteger n) {
+      return new WBoolean (value > n.value);
    }
+   public WBoolean gt (WLong n) {
+      return new WBoolean (value > n.value);
+   }
+
    public WBoolean ge (WDouble n) {
       return new WBoolean (value >= n.value);
    }
-   public WBoolean ge (WNumber n) {
-      return new WBoolean (value >= n.doubleValue());
+   public WBoolean ge (WInteger n) {
+      return new WBoolean (value >= n.value);
    }
+   public WBoolean ge (WLong n) {
+      return new WBoolean (value >= n.value);
+   }
+
    public WBoolean le (WDouble n) {
       return new WBoolean (value <= n.value);
    }
-   public WBoolean le (WNumber n) {
-      return new WBoolean (value <= n.doubleValue());
+   public WBoolean le (WInteger n) {
+      return new WBoolean (value <= n.value);
    }
+   public WBoolean le (WLong n) {
+      return new WBoolean (value <= n.value);
+   }
+
    public WBoolean ne (WDouble n) {
       return new WBoolean (value != n.value);
    }
-   public WBoolean ne (WNumber n) {
-      return new WBoolean (value != n.doubleValue());
+   public WBoolean ne (WInteger n) {
+      return new WBoolean (value != n.value);
    }
+   public WBoolean ne (WLong n) {
+      return new WBoolean (value != n.value);
+   }
+
    public String toString() {
       return Double.toString (value);
    }

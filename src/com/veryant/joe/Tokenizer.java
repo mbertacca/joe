@@ -39,17 +39,10 @@ public class Tokenizer {
       case _INIT:
          break;
       case _INTEGER:
-         tokens.add (newToken(word.toString(), TokenType._INTEGER));
-         word = null;
-         status = TokenType._INIT;
-         break;
       case _FLOAT:
-         tokens.add (newToken(word.toString(), TokenType._FLOAT));
-         word = null;
-         status = TokenType._INIT;
-         break;
+      case _DECIMAL:
       case _WORD:
-         tokens.add (newToken(word.toString(), TokenType._WORD));
+         tokens.add (newToken(word.toString(), status));
          word = null;
          status = TokenType._INIT;
          break;
@@ -188,7 +181,7 @@ public class Tokenizer {
             break;
          case '%':
             if (breakChar(line[idx]))
-               tokens.add (newToken("mod", TokenType._WORD));
+               tokens.add (newToken("remainder", TokenType._WORD));
             break;
          case '(':
             if (breakChar(line[idx]))
@@ -284,11 +277,20 @@ public class Tokenizer {
             break;
          case 'e':
          case 'E':
-            if ((status == TokenType._INTEGER || status == TokenType._FLOAT) &&
-                ila < line.length && line[ila] >= '0' && line[ila] <= '9') {
-               word.append ('e');
-               status = TokenType._FLOAT;
-               break;
+         case 'm':
+         case 'M':
+            if (status == TokenType._INTEGER || status == TokenType._FLOAT) {
+               if (line[idx] == 'e' || line[idx] == 'E') {
+                  if (ila < line.length && line[ila]>='0' && line[ila]<='9') {
+                     word.append ('e');
+                     status = TokenType._FLOAT;
+                     break;
+                  }
+               } else {
+                  status = TokenType._DECIMAL;
+                  breakChar('\000');
+                  break;
+               }
             }
             // PASSTHRU
          default:

@@ -73,28 +73,34 @@ public class DefaultCommand extends CommandBase {
     * Prints the specified objects.
     */
    public Object print (Object... b) {
-      String s = "";
-      for (int i = 0; i < b.length; i++) {
-         if (b[i] == null)
-            s += "(null)";
-         else
-            s += b[i].toString();
-      }
-      System.out.print (s);
+      if (b != null) {
+         String s = "";
+         for (int i = 0; i < b.length; i++) {
+            if (b[i] == null)
+               s += "(null)";
+            else
+               s += b[i].toString();
+         }
+         System.out.print (s);
+      } else
+         System.out.print ("(null)");
       return this;
    }
    /**
     * Prints the specified objects followed by a newline.
     */
    public Object println (Object... b) {
-      String s = "";
-      for (int i = 0; i < b.length; i++) {
-         if (b[i] == null)
-            s += "(null)";
-         else
-            s += b[i].toString();
-      }
-      System.out.println (s);
+      if (b != null) {
+         String s = "";
+         for (int i = 0; i < b.length; i++) {
+            if (b[i] == null)
+               s += "(null)";
+            else
+               s += b[i].toString();
+         }
+         System.out.println (s);
+      } else
+         System.out.println ("(null)");
       return this;
    }
    /**

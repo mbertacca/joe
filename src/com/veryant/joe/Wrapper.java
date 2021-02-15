@@ -20,6 +20,7 @@
 package com.veryant.joe;
 
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
 import java.util.HashMap;
 
 public abstract class Wrapper implements InternalObject {
@@ -32,6 +33,7 @@ public abstract class Wrapper implements InternalObject {
       LONG,
       FLOAT,
       DOUBLE,
+      DECIMAL,
       STRING,
       OBJECT_ARRAY
    }
@@ -46,6 +48,7 @@ public abstract class Wrapper implements InternalObject {
       mapping.put (Long.class, Type.LONG);
       mapping.put (Float.class, Type.FLOAT);
       mapping.put (Double.class, Type.DOUBLE);
+      mapping.put (BigDecimal.class, Type.DECIMAL);
       mapping.put (String.class, Type.STRING);
       mapping.put (Object[].class, Type.OBJECT_ARRAY);
    }
@@ -72,6 +75,8 @@ public abstract class Wrapper implements InternalObject {
                return new WDouble (((Float) obj).doubleValue());
             case DOUBLE:
                return new WDouble ((Double) obj);
+            case DECIMAL:
+               return new WBigDecimal((BigDecimal) obj);
             case STRING:
                return new WString ((String) obj);
             case OBJECT_ARRAY:

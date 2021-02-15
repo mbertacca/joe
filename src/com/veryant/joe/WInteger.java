@@ -44,7 +44,7 @@ public class WInteger extends WLong {
    public WInteger divide (WInteger n) {
       return new WInteger (value / n.intValue());
    }
-   public WInteger mod (WInteger n) {
+   public WInteger remainder (WInteger n) {
       return new WInteger (value % n.intValue());
    }
 }

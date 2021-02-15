@@ -19,12 +19,17 @@
 
 package com.veryant.joe;
 
+import java.math.BigDecimal;
+
 public class Literals {
    public static Object getInteger (String val) {
       return Wrapper.newInstance (Integer.parseInt(val));
    }
-   public static Object getDecimal (String val) {
+   public static Object getDouble (String val) {
       return Wrapper.newInstance (Double.parseDouble(val));
+   }
+   public static Object getDecimal (String val) {
+      return Wrapper.newInstance (new BigDecimal(val));
    }
    public static Object getString (String val) {
       return Wrapper.newInstance (val);

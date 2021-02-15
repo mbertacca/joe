@@ -19,6 +19,8 @@
 
 package com.veryant.joe;
 
+import java.math.BigDecimal;
+
 public interface WNumber {
    abstract byte byteValue();
    abstract char charValue();
@@ -27,4 +29,5 @@ public interface WNumber {
    abstract long longValue();
    abstract float floatValue();
    abstract double doubleValue();
+   abstract BigDecimal bigDecimalValue();
 }

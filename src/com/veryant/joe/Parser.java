@@ -352,6 +352,8 @@ public class Parser {
          case _INTEGER:
             return Literals.getInteger(tk.word);
          case _FLOAT:
+            return Literals.getDouble(tk.word);
+         case _DECIMAL:
             return Literals.getDecimal(tk.word);
          case _TRUE:
             return Literals.getBoolean(true);
