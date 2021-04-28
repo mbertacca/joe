@@ -32,6 +32,7 @@ import java.util.HashMap;
 public class JavaObjectsExecutor {
    static protected DefaultCommand command;
    static protected Executor executor;
+   static protected LineReader lineReader;
    static protected String version;
 
    public static void showException (DefaultCommand cmd, Throwable ex) {
@@ -44,6 +45,7 @@ public class JavaObjectsExecutor {
    public static void main (String argv[]) {
       command = new DefaultCommand();
       executor = new StandardExecutor();
+      lineReader = new BasicLineReader();
       version = "JOE " + Revision.id 
               + " ready, type 'exit' to exit the session";
 
@@ -65,11 +67,12 @@ public class JavaObjectsExecutor {
       String line;
       Executor exec = executor;
       DefaultCommand defCmd = command;
+      LineReader lr = lineReader;
       if (argv.length > 0) {
          ScriptManager sm;
          try {
             final File f = new File (argv[0]).getCanonicalFile();
-            sm = new ScriptManager(f.getParentFile(), exec, defCmd);
+            sm = new ScriptManager(f.getParentFile(), exec, defCmd, lr);
             Object[] jarg = new Object [] {new WArray (argv)};
             Block blk = sm.load (f.getName(), jarg);
             Object rc  = blk.init (jarg);
@@ -97,7 +100,7 @@ public class JavaObjectsExecutor {
       } else {
          Return = 0;
          File cwd = new java.io.File (System.getProperty("user.dir"));
-         ScriptManager sm = new ScriptManager(cwd, exec, defCmd);
+         ScriptManager sm = new ScriptManager(cwd, exec, defCmd, lr);
 
          Object cmd = defCmd;
          line = "";

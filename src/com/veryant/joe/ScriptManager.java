@@ -60,16 +60,18 @@ public class ScriptManager {
    protected final URL entryPoint;
    protected final Executor executor;
    protected final Object command;
+   protected final LineReader lineReader;
    protected final HashMap<String,Block> blocks=new HashMap<String,Block>();
 
-   public ScriptManager (URL ep, Executor exec, Object cmd) {
+   public ScriptManager (URL ep, Executor exec, Object cmd, LineReader lr) {
       entryPoint = ep;
       executor = exec;
       command = cmd;
+      lineReader = lr;
       scriptManagerMap.put (command, this);
    }
-   public ScriptManager (File ep, Executor exec, Object cmd) {
-      this (getURL (ep), exec, cmd);
+   public ScriptManager (File ep, Executor exec, Object cmd, LineReader lr) {
+      this (getURL (ep), exec, cmd, lr);
    }
    private InputStream getStreamFromJar (String name) throws IOException {
       ZipInputStream zip = new ZipInputStream(entryPoint.openStream());
@@ -120,9 +122,8 @@ public class ScriptManager {
                   argv[i] = wobj;
          }
       } else {
-         BufferedReader src =  new BufferedReader (
-                                  new InputStreamReader(getInputStream(name)));
-         Return = OuterBlock.get (name, src, argv, command, executor);
+         lineReader.open (new InputStreamReader(getInputStream(name)));
+         Return = OuterBlock.get (name, lineReader, argv, command, executor);
          blocks.put (name, Return);
       }
       return Return;

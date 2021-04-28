@@ -20,7 +20,6 @@
 package com.veryant.joe;
 
 import java.io.File;
-import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
@@ -91,9 +90,10 @@ public class JOEJar {
 
       Executor exec = new StandardExecutor();
       DefaultCommand defCmd = new DefaultCommand();
+      LineReader lread = new BasicLineReader();
       ScriptManager sm;
       try {
-         sm = new ScriptManager(jar, exec, defCmd);
+         sm = new ScriptManager(jar, exec, defCmd, lread);
          Block blk = sm.load (script, jarg);
          blk.init (jarg);
       } catch (BreakEndException ex) {
