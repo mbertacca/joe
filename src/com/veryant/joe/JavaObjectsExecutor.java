@@ -30,10 +30,11 @@ import java.util.ArrayDeque;
 import java.util.HashMap;
 
 public class JavaObjectsExecutor {
-   static protected DefaultCommand command;
-   static protected Executor executor;
-   static protected LineReader lineReader;
-   static protected String version;
+   static protected DefaultCommand command = new DefaultCommand();
+   static protected Executor executor = new StandardExecutor();
+   static protected LineReader lineReader = new BasicLineReader();
+   static protected String version = "JOE " + Revision.id 
+              + " ready, type 'exit' to exit the session";
 
    public static void showException (DefaultCommand cmd, Throwable ex) {
       cmd.println(ex.getMessage());
@@ -43,12 +44,6 @@ public class JavaObjectsExecutor {
       }
    }
    public static void main (String argv[]) {
-      command = new DefaultCommand();
-      executor = new StandardExecutor();
-      lineReader = new BasicLineReader();
-      version = "JOE " + Revision.id 
-              + " ready, type 'exit' to exit the session";
-
       int rc = imain (argv);
       if (rc != 0)
          System.exit (rc);
