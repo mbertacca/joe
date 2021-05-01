@@ -126,10 +126,12 @@ public class Block extends ArrayList<Message>
       Object Return = variables.get(name);
       if (Return == null && !variables.containsKey (name)) {
          Return = constants.get (name);
-         if (Return == null && parent != null)
-            Return = parent.getVariable (name);
-         else
-             throw new JOEException ("Variable not found: `" + name + "`");
+         if (Return == null) {
+            if (parent != null)
+               Return = parent.getVariable (name);
+            else
+               throw new JOEException ("Variable not found: `" + name + "`");
+         }
       }
       return Return;
    }
