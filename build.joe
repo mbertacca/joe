@@ -120,7 +120,7 @@ help := {
    }
 }.
 
-toExec := null.
+toExec := .
 
 !if ((args length) > 1),{
    toExec := !!getVariable (args get 1).

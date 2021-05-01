@@ -18,9 +18,9 @@ OpenTrunc := !getStaticField "java.nio.file.StandardOpenOption",
                               "TRUNCATE_EXISTING".
 charset := (!getClassRef "java.nio.charset.Charset") defaultCharset.
 
-system := system.
-systemGetOut := systemGetOut.
-pathSep := pathSep.
+system := .
+systemGetOut := .
+pathSep := .
 
 !if ((SystemClass getProperty "os.name") startsWith "Windows"),{
    pathSep := { ";" }.
