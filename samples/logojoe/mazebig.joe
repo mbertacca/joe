@@ -6,6 +6,8 @@ logo setTitle (args get 0).
 
 empty := logo colorunder.
 
+null := .
+
 dimx := 240.
 dimy := 180.
 
@@ -102,4 +104,4 @@ logo penup ;
      pendown ;
      seth 0.
 solve exec (endx - (step/2)), (endy - (step/2)).
-s
+

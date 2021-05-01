@@ -6,6 +6,8 @@ logo setTitle (args get 0).
 
 empty := logo colorunder.
 
+null := .
+
 step := 20.
 startx := -8 * step.
 starty := -8 * step.

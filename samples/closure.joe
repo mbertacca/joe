@@ -15,7 +15,7 @@ intSeq2 := getClos new 20.
 !println (intSeq2 exec).
 !println (intSeq2 exec).
 
-getClos exec.
+getClos exec 0.
 
 !println (intSeq1 exec).
 !println (intSeq2 exec).

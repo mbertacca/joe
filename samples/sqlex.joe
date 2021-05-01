@@ -4,9 +4,9 @@ JDBC_URL := "jdbc:derby:memory:testdb;create=true".
 USER := "".
 PASS := "".
 
-conn := conn.
-stmt := stmt.
-rs := rs.
+conn := .
+stmt := .
+rs := .
 
 exc := !try {
    !getClass JDBC_DRIVER.

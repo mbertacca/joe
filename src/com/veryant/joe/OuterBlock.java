@@ -54,16 +54,5 @@ public class OuterBlock extends Block {
    public OuterBlock (Executor exec) {
       super (exec, null);
    }
-   public String toString() {
-      Block joeToString = getMethod("toString");
-      if (joeToString != null)
-         try {
-            return joeToString.exec().toString();
-         } catch (JOEException _ex) {
-            return _ex.toString();
-         }
-      else
-         return name();
-   }
 }
 

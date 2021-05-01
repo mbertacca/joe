@@ -163,7 +163,8 @@ public class Parser {
    private Message assignment (TkStack tokens) throws JOEException {
       Message Return;
       Token tk = tokens.pop();
-      if (tokens.peek().type== TokenType._ASSIGN) {
+      Token peek = tokens.peek();
+      if (peek.type== TokenType._ASSIGN) {
          tokens.pop();
          final Object val = message (tokens, tokens.pop());
          final int row = tk.row, col = tk.col;
@@ -174,6 +175,28 @@ public class Parser {
             Return = null;
             unexpectedToken ( tk);
          }
+      } else if (peek.type == TokenType._DOT_ &&
+                   tk.type == TokenType._STRING) {
+         tokens.pop();
+         final int row = tk.row, col = tk.col;
+         final Object val = Literals.getString(tk.word);
+         Return = new SingleStringMessage() {
+            public Object exec (Block blk) throws JOEException {
+               return val;
+            }
+            public int getRow() {
+               return row;
+            }
+            public int getCol() {
+               return col;
+            }
+            public String getName () {
+               return val.toString();
+            }
+            public String toString () {
+               return val.toString();
+            }
+         };
       } else {
          final Object val = message (tokens, tk);
          if (val instanceof Message) {
@@ -361,7 +384,7 @@ public class Parser {
             return Literals.getBoolean(false);
          case _WORD:
             return new SingleVariableMessage()  {
-               public Object exec (Block blk) {
+               public Object exec (Block blk) throws JOEException {
                   return blk.getVariable(tk.word);
                }
                public int getRow() {

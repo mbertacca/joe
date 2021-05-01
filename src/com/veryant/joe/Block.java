@@ -119,15 +119,17 @@ public class Block extends ArrayList<Message>
       } else
          return null;
    }
-   public Object getVariable (WString name) {
+   public Object getVariable (WString name) throws JOEException {
       return getVariable (name.value);
    }
-   public Object getVariable (String name) {
+   public Object getVariable (String name) throws JOEException {
       Object Return = variables.get(name);
       if (Return == null && !variables.containsKey (name)) {
          Return = constants.get (name);
          if (Return == null && parent != null)
             Return = parent.getVariable (name);
+         else
+             throw new JOEException ("Variable not found: `" + name + "`");
       }
       return Return;
    }
@@ -152,7 +154,7 @@ public class Block extends ArrayList<Message>
    protected boolean isExecAsJoe () {
      return execAsJoe;
    }
-   Block getMethod (String name) {
+   Block getMethod (String name) throws JOEException {
       Object Return = getVariable (name);
       if (Return instanceof Block) {
           return (Block) Return;
@@ -213,15 +215,26 @@ public class Block extends ArrayList<Message>
    }
    public String toString() {
       String Return;
-      Block joeToString;
-      if (isExecAsJoe() && (joeToString = getMethod("toString")) != null)
+
+      if (isExecAsJoe()) {
+         Block joeToString;
          try {
-            Return = joeToString.exec().toString();
+            joeToString = getMethod("toString");
+            if (joeToString  != null)
+               try {
+                  Return = joeToString.exec().toString();
+               } catch (JOEException _ex) {
+                  Return = _ex.toString();
+               }
+            else
+               Return = "{" + super.toString() + "}";
          } catch (JOEException _ex) {
-            Return = _ex.toString();
+            Return = "{" + super.toString() + "}";
          }
-      else if ((Return = blockName) == null)
-         Return = "{" + super.toString() + "}";
+      } else {
+         if ((Return = blockName) == null)
+            Return = "{" + name() + "}";
+      }
       return Return;
    }
 }
