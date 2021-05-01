@@ -104,7 +104,7 @@ public class JavaObjectsExecutor {
          Parser prg = new Parser(cmd, exec,"<stdin>");
          Block b = null;
 
-         while (line != null && !"exit".equals (line)) {
+         for ( ; ; ) {
             try {
                line = readLine(defCmd);
             } catch (IOException ex) {
@@ -112,6 +112,8 @@ public class JavaObjectsExecutor {
                Return = 69;
                break;
             }
+            if (line == null || "exit".equals (line))
+               break;
             ArrayDeque<Token> tokens = new ArrayDeque<Token>();
             Tokenizer tkzer = new Tokenizer();
             tkzer.tokenize (line.toCharArray(), tokens);
