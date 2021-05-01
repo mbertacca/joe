@@ -383,9 +383,13 @@ public class Parser {
          case _FALSE:
             return Literals.getBoolean(false);
          case _WORD:
-            return new SingleVariableMessage()  {
+            return new Message()  {
                public Object exec (Block blk) throws JOEException {
-                  return blk.getVariable(tk.word);
+                  try {
+                     return blk.getVariable(tk.word);
+                  } catch (JOEException ex) {
+                     throw new JOEException(ex.getMessage(), tk, fName);
+                  }
                }
                public int getRow() {
                   return tk.row;

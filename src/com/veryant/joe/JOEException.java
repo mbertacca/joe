@@ -22,8 +22,7 @@ package com.veryant.joe;
 public class JOEException extends Exception {
    private final String info;
    private String buildInfo(String fName, int r, int c) {
-      StringBuilder sb = new StringBuilder ();
-      sb.append (this.getClass().getName());
+      StringBuilder sb = new StringBuilder ("JOEException");
       sb.append (" in ");
       sb.append (fName);
       sb.append (", line ");
