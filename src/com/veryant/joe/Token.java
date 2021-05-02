@@ -27,7 +27,7 @@ public class Token {
    Token (String w, TokenType t, int l, int c) {
       type = t;
       row = l;
-      col = c - w.length();
+      col = c;
       word = w;
    }
    public String toString() {

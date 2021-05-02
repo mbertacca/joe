@@ -424,6 +424,7 @@ public class Parser {
                       "Expected close brace, found " + tk.word, tk, fName);
    }
    private void unexpectedToken (Token tk) throws JOEException {
-      throw new JOEException ("Unexpected token `" + tk.word + "`", tk, fName);
+      throw new JOEException ("Unexpected token " + tk.type +
+                              " `" + tk.word + "`", tk, fName);
    }
 }

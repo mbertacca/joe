@@ -31,7 +31,10 @@ public class Tokenizer {
    private int cCol = 0;
 
    private Token newToken (String w, TokenType t) {
-      return new Token (w, t, cRow, cCol);
+      return new Token (w, t, cRow, cCol - w.length());
+   }
+   private Token newToken (String w, TokenType t, int col) {
+      return new Token (w, t, cRow, col);
    }
    private boolean breakChar (char c) {
       boolean Return = true;
@@ -103,31 +106,31 @@ public class Tokenizer {
                      tokens.add (newToken(word.toString(),TokenType._FLOAT));
                   word = null;
                   status = TokenType._INIT;
-                  tokens.add (newToken("multiply", TokenType._WORD));
+                  tokens.add (newToken("multiply", TokenType._WORD, cCol));
                }
             }
             break;
          case '=':
             if (breakChar(line[idx]))
-               tokens.add (newToken("equals", TokenType._WORD));
+               tokens.add (newToken("equals", TokenType._WORD, cCol));
             break;
          case '<':
             if (breakChar(line[idx])) {
                ++idx;
                if (idx < line.length && line[idx] == '=') {
-                  tokens.add (newToken("le", TokenType._WORD));
+                  tokens.add (newToken("le", TokenType._WORD, cCol));
                } else if (idx < line.length && line[idx] == '>') {
-                  tokens.add (newToken("ne", TokenType._WORD));
+                  tokens.add (newToken("ne", TokenType._WORD, cCol));
                } else if (idx + 1 < line.length && line[idx + 1] == '>' &&
                                     (line[idx] == '0' || line[idx] == '1')) {
                   if (line[idx] == '1')
-                     tokens.add (newToken("<1>", TokenType._TRUE));
+                     tokens.add (newToken("<1>", TokenType._TRUE, cCol));
                   else
-                     tokens.add (newToken("<0>", TokenType._FALSE));
+                     tokens.add (newToken("<0>", TokenType._FALSE, cCol));
                   idx++;
                } else {
                   --idx;
-                  tokens.add (newToken("lt", TokenType._WORD));
+                  tokens.add (newToken("lt", TokenType._WORD, cCol));
                }
             }
             break;
@@ -135,10 +138,10 @@ public class Tokenizer {
             if (breakChar(line[idx])) {
                ++idx;
                if (idx < line.length && line[idx] == '=') {
-                  tokens.add (newToken("ge", TokenType._WORD));
+                  tokens.add (newToken("ge", TokenType._WORD, cCol));
                } else {
                   --idx;
-                  tokens.add (newToken("gt", TokenType._WORD));
+                  tokens.add (newToken("gt", TokenType._WORD, cCol));
                }
             }
             break;
@@ -146,10 +149,10 @@ public class Tokenizer {
             if (breakChar(line[idx])) {
                ++idx;
                if (idx < line.length && line[idx] == '=') {
-                  tokens.add (newToken(":=", TokenType._ASSIGN));
+                  tokens.add (newToken(":=", TokenType._ASSIGN, cCol));
                } else {
                   --idx;
-                  tokens.add (newToken(":", TokenType._COLON_));
+                  tokens.add (newToken(":", TokenType._COLON_, cCol));
                }
             }
             break;
@@ -162,13 +165,13 @@ public class Tokenizer {
                   word = new StringBuilder (Character.toString(line[idx]));
                } else {
                   --idx;
-                  tokens.add (newToken("subtract", TokenType._WORD));
+                  tokens.add (newToken("subtract", TokenType._WORD, cCol));
                }
             }
             break;
          case '+':
             if (breakChar(line[idx]))
-               tokens.add (newToken("add", TokenType._WORD));
+               tokens.add (newToken("add", TokenType._WORD, cCol));
             break;
          case '/':
             if (breakChar(line[idx]))
@@ -176,36 +179,36 @@ public class Tokenizer {
                   status = TokenType._ML_COMMENT;
                else {
                   idx--;
-                  tokens.add (newToken("divide", TokenType._WORD));
+                  tokens.add (newToken("divide", TokenType._WORD, cCol));
                }
             break;
          case '%':
             if (breakChar(line[idx]))
-               tokens.add (newToken("remainder", TokenType._WORD));
+               tokens.add (newToken("remainder", TokenType._WORD, cCol));
             break;
          case '(':
             if (breakChar(line[idx]))
-               tokens.add (newToken("(", TokenType._PAR_OPEN_));
+               tokens.add (newToken("(", TokenType._PAR_OPEN_, cCol));
             break;
          case ')':
             if (breakChar(line[idx]))
-               tokens.add (newToken(")", TokenType._PAR_CLOSE_));
+               tokens.add (newToken(")", TokenType._PAR_CLOSE_, cCol));
             break;
          case '{':
             if (breakChar(line[idx]))
-               tokens.add (newToken("{", TokenType._BRACE_OPEN_));
+               tokens.add (newToken("{", TokenType._BRACE_OPEN_, cCol));
             break;
          case '}':
             if (breakChar(line[idx]))
-               tokens.add (newToken("}", TokenType._BRACE_CLOSE_));
+               tokens.add (newToken("}", TokenType._BRACE_CLOSE_, cCol));
             break;
          case ',':
             if (breakChar(line[idx]))
-               tokens.add (newToken(",", TokenType._COMMA_));
+               tokens.add (newToken(",", TokenType._COMMA_, cCol));
             break;
          case ';':
             if (breakChar(line[idx]))
-               tokens.add (newToken(";", TokenType._SEMICOLON_));
+               tokens.add (newToken(";", TokenType._SEMICOLON_, cCol));
             break;
          case '.':
             if (status == TokenType._INTEGER &&
@@ -214,16 +217,16 @@ public class Tokenizer {
                status = TokenType._FLOAT;
             } else {
                if (breakChar(line[idx]))
-                  tokens.add (newToken(".", TokenType._DOT_));
+                  tokens.add (newToken(".", TokenType._DOT_, cCol));
             }
             break;
          case '!':
             if (breakChar(line[idx]))
                if (ila < line.length && line[ila] == '!') {
-                  tokens.add (newToken("!!", TokenType._BANGBANG_));
+                  tokens.add (newToken("!!", TokenType._BANGBANG_, cCol));
                   idx++;
                } else
-                  tokens.add (newToken("!", TokenType._BANG_));
+                  tokens.add (newToken("!", TokenType._BANG_, cCol));
             break;
          case '"':
             switch (status) {
@@ -243,7 +246,8 @@ public class Tokenizer {
                   word.append(line[idx]);
                } else {
                   --idx;
-                  tokens.add (newToken(word.toString(), TokenType._STRING));
+                  tokens.add (newToken(word.toString(), TokenType._STRING,
+                                       cCol - word.length() - 1));
                   word = new StringBuilder();
                   status = TokenType._INIT;
                }
@@ -320,6 +324,7 @@ public class Tokenizer {
             break;
          }
       }
+      cCol++; // in case of errors
       switch (status) {
       case _ML_COMMENT:
       case _INIT:
