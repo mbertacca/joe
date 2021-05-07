@@ -23,32 +23,34 @@ public class JOEException extends Exception {
    private final String info;
    private String buildInfo(String fName, int r, int c) {
       StringBuilder sb = new StringBuilder ("JOEException");
-      sb.append (" in ");
-      sb.append (fName);
-      sb.append (", line ");
-      sb.append (r);
-      sb.append (", column ");
-      sb.append (c);
+      if (fName != null) {
+         sb.append (" in ");
+         sb.append (fName);
+         sb.append (", line ");
+         sb.append (r);
+         sb.append (", column ");
+         sb.append (c);
+      }
       sb.append (": ");
       return sb.toString();
    }
-   public JOEException (String msg, int r, int c, String fileName) {
+   private JOEException (String msg, int r, int c, String fileName) {
       super (msg);
       if (r != 0)
          info = buildInfo(fileName, r, c);
       else
          info = "";
    }
-   JOEException (String msg, Token tk, String fileName) {
-      this (msg, tk.row, tk.col, fileName);
+   JOEException (String msg, Token tk) {
+      this (msg, tk.row, tk.col, tk.fName);
    }
    public JOEException (String msg) {
       this (msg, 0, 0,  null);
    }
-   public JOEException (Throwable ex, int r, int c, String fileName) {
+   public JOEException (Throwable ex, Token tk) {
       super (ex);
-      if (r != 0 && ! (ex instanceof JOEException))
-         info = buildInfo(fileName, r, c);
+      if (tk != null && ! (ex instanceof JOEException))
+         info = buildInfo(tk.fName, tk.row, tk.col);
       else
          info = "";
    }

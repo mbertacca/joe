@@ -24,11 +24,13 @@ public class Token {
    final String word;
    final int row;
    final int col;
-   Token (String w, TokenType t, int l, int c) {
+   final String fName;
+   Token (String w, TokenType t, int l, int c, String fn) {
       type = t;
       row = l;
       col = c;
       word = w;
+      fName = fn;
    }
    public String toString() {
       return word + " [" +type.toString() + "]";

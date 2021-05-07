@@ -58,11 +58,9 @@ public class ExecMessage implements Message {
 
    private Object object;
    private Message receiver;
-   private final String selector;
+   private final Token selector;
    private Class clazz;
    private final Object origArgs[];
-   private final String fName;
-   private final int row, col;
    private final HashMap<Class,Method[]> methCache =
              new HashMap<Class,Method[]>();
 
@@ -136,12 +134,9 @@ public class ExecMessage implements Message {
          return s;
    }
 
-   ExecMessage (Object obj, Token sel, Object args[], String fn)
+   ExecMessage (Object obj, Token sel, Object args[])
                                               throws JOEException {
-      selector = sel.word;
-      row = sel.row;
-      col = sel.col;
-      fName = fn;
+      selector = sel;
       origArgs = args;
       if (obj instanceof Message) {
          receiver = (Message) obj;
@@ -151,13 +146,13 @@ public class ExecMessage implements Message {
    }
 
    public int getRow() {
-      return row;
+      return selector.row;
    }
    public int getCol() {
-      return col;
+      return selector.col;
    }
    public String getFileName() {
-      return fName;
+      return selector.fName;
    }
    private Object[] argsExec (Block blk) throws JOEException {
       Object[] Return = new Object[origArgs.length];
@@ -172,16 +167,17 @@ public class ExecMessage implements Message {
       Object[] argArray = null;
       if (origArgs != null) 
          argArray = argsExec(blk);
-      Block b = ob.getMethod (selector);
+      Block b = ob.getMethod (selector.word);
       if (b == null)
          throw new JOEException (
-            new NoSuchMethodException(selector+" in "+ob.name()),row,col,fName);
+            new NoSuchMethodException (selector.word+" in "+ob.name()),
+                                       selector);
       return new MethodWArgs (b, argArray);
    }
  
    private MethodWArgs check (Object actObj, Block blk) throws JOEException {
       MethodWArgs Return;
-      final String jSelector = getJSelector (selector);
+      final String jSelector = getJSelector (selector.word);
       Object[] argArray = null;
       if (actObj instanceof ClassReference)
          clazz = ((ClassReference) actObj).get();
@@ -210,7 +206,7 @@ public class ExecMessage implements Message {
             }
             Return = new MethodWArgs (m[0], argArray);
          } catch (NoSuchMethodException ex) {
-            throw new JOEException (ex, row, col, fName);
+            throw new JOEException (ex, selector);
          }
       }
       return Return;
@@ -315,7 +311,7 @@ public class ExecMessage implements Message {
                sb.append("(null)");
          }
          throw new JOEException (new NoSuchMethodException(sb.toString()),
-                                 row, col, fName);
+                                 selector);
       }
       if (bVarargs) {
          Object newArgs[] = new Object[bTypes.length];
@@ -345,7 +341,7 @@ public class ExecMessage implements Message {
             actObj = object;
          }
          if (actObj == null)
-            throw new JOEException ("null receiver", row, col, fName);
+            throw new JOEException ("null receiver", selector);
          MethodWArgs mwa;
          if (actObj instanceof Block && ((Block)actObj).isExecAsJoe())
             mwa = checkJO((Block) actObj, blk);
@@ -355,23 +351,23 @@ public class ExecMessage implements Message {
          if ((wobj = Wrapper.newInstance (Return)) != null)
             Return = wobj;
       } catch (IllegalAccessException ex) {
-         throw new JOEException (ex, row, col, fName);
+         throw new JOEException (ex, selector);
       } catch (InvocationTargetException ex) {
          Throwable ilex = ex.getCause();
          if (ilex instanceof JOEException)
             throw (JOEException) ilex;
          else
-            throw new JOEException (ilex, row, col, fName);
+            throw new JOEException (ilex, selector);
       } catch (IllegalArgumentException ex) {
-         throw new JOEException (ex, row, col, fName);
+         throw new JOEException (ex, selector);
       }
       return Return;
    }
    public String toString() {
       StringBuilder Return = new StringBuilder("<");
-      Return.append (row);
+      Return.append (selector.row);
       Return.append (",");
-      Return.append (col);
+      Return.append (selector.col);
       Return.append ("> ");
 
       if (object != null)
@@ -382,7 +378,7 @@ public class ExecMessage implements Message {
          Return.append("(null)");
 
       Return.append (" ");
-      Return.append (selector);
+      Return.append (selector.word);
 
       return Return.toString();
    }

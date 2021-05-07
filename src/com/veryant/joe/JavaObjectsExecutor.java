@@ -116,7 +116,7 @@ public class JavaObjectsExecutor {
                break;
             ArrayDeque<Token> tokens = new ArrayDeque<Token>();
             Tokenizer tkzer = new Tokenizer();
-            tkzer.tokenize (line.toCharArray(), tokens, 1);
+            tkzer.tokenize (line.toCharArray(), tokens, lineReader);
             try {
                b = prg.compile (tokens);
                try {

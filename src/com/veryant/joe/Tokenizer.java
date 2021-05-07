@@ -29,12 +29,13 @@ public class Tokenizer {
    private TokenType status = TokenType._INIT;
    private int cCol = 0;
    private int cRow = 0;
+   private String fname;
 
    private Token newToken (String w, TokenType t) {
-      return new Token (w, t, cRow, cCol - w.length());
+      return new Token (w, t, cRow, cCol - w.length(), fname);
    }
    private Token newToken (String w, TokenType t, int col) {
-      return new Token (w, t, cRow, col);
+      return new Token (w, t, cRow, col, fname);
    }
    private boolean breakChar (char c) {
       boolean Return = true;
@@ -60,9 +61,10 @@ public class Tokenizer {
       return Return;
    }
 
-   public boolean tokenize (char line[], ArrayDeque<Token> t, int row) {
+   public boolean tokenize (char line[], ArrayDeque<Token> t, FileInfo fi) {
       boolean Return = false;
-      cRow = row;
+      fname = fi.getName();
+      cRow = fi.getLineNumber();
 
       int idx = 0;
       int ila = 0;

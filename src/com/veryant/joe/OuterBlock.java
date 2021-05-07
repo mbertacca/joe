@@ -32,7 +32,7 @@ public class OuterBlock extends Block {
 
       final ArrayDeque<Token> tokens = new ArrayDeque<Token>();
       while ((line = src.readLine()) != null) {
-         tkzer.tokenize (line.toCharArray(), tokens, src.getLineNumber());
+         tkzer.tokenize (line.toCharArray(), tokens, src);
       }
       src.close();
       final Parser parser = new Parser(cmd, exec, src);
@@ -46,8 +46,7 @@ public class OuterBlock extends Block {
       if (tokens.size() > 0) {
          Token tk = tokens.pop();
          throw new JOEException (
-                "Token(s) external to any block `" + tk.word + "`",
-                tk, src.getName());
+                "Token(s) external to any block `" + tk.word + "`", tk);
       }
       return Return;
    }

@@ -25,8 +25,6 @@ import java.util.ArrayList;
 public class Parser {
    static class TkStack {
       private final ArrayDeque<Token> tokens;
-      private int lRow;
-      private int lCol;
 
       TkStack(ArrayDeque<Token> tks) {
          tokens = tks;
@@ -35,10 +33,8 @@ public class Parser {
         Token Return;
          try {
             Return = tokens.removeFirst();
-            lRow = Return.row;
-            lCol = Return.col;
          } catch (java.util.NoSuchElementException _ex) {
-            Return = new Token("(end stream)", TokenType._DOT_, lRow, lCol);
+            Return = new Token("(end stream)", TokenType._DOT_, 0, 0, "");
          }
          return Return;
       }
@@ -50,7 +46,7 @@ public class Parser {
          try {
             Return = tokens.getFirst();
          } catch (java.util.NoSuchElementException _ex) {
-            Return = new Token("(end stream)", TokenType._DOT_, lRow, lCol);
+            Return = new Token("(end stream)", TokenType._DOT_, 0, 0, "");
          }
          return Return;
       }
@@ -325,10 +321,10 @@ public class Parser {
          }
       }
       if (args.size() == 0) {
-         Return = new ExecMessage (receiver, selector, null, info.getName());
+         Return = new ExecMessage (receiver, selector, null);
       } else {
          Object argsAr[] = args.toArray();
-         Return = new ExecMessage (receiver, selector, argsAr, info.getName());
+         Return = new ExecMessage (receiver, selector, argsAr);
       }
       switch ((tk = tokens.pop()).type) {
       case _WORD:
@@ -388,7 +384,7 @@ public class Parser {
                   try {
                      return blk.getVariable(tk.word);
                   } catch (JOEException ex) {
-                     throw new JOEException(ex.getMessage(), tk, info.getName());
+                     throw new JOEException(ex.getMessage(), tk);
                   }
                }
                public int getRow() {
@@ -408,23 +404,23 @@ public class Parser {
             return tk;
          }
       } catch (Exception ex) {
-         throw new JOEException (ex.toString(), tk, info.getName());
+         throw new JOEException (ex.toString(), tk);
       }
    }
    private void parClose (TkStack tokens) throws JOEException {
       Token tk = tokens.pop();
       if (tk.type != TokenType._PAR_CLOSE_)
          throw new JOEException (
-           "Expected close parenthesis, found " + tk.word, tk, info.getName());
+           "Expected close parenthesis, found " + tk.word, tk);
    }
    private void braceClose (TkStack tokens) throws JOEException {
       Token tk = tokens.pop();
       if (tk.type != TokenType._BRACE_CLOSE_)
          throw new JOEException (
-               "Expected close brace, found " + tk.word, tk, info.getName());
+               "Expected close brace, found " + tk.word, tk);
    }
    private void unexpectedToken (Token tk) throws JOEException {
       throw new JOEException ("Unexpected token " + tk.type +
-                              " `" + tk.word + "`", tk, info.getName());
+                              " `" + tk.word + "`", tk);
    }
 }
