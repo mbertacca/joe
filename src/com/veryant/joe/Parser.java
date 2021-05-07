@@ -65,19 +65,19 @@ public class Parser {
    private Object command;
    final Block block;
    final OuterBlock outerBlock;
-   final String fName;
+   final FileInfo info;
 
-   public Parser (Object cmds, Executor exec, String fn) {
+   public Parser (Object cmds, Executor exec, FileInfo fi) {
       command = cmds;
       block = outerBlock = new OuterBlock (exec);
-      fName = fn;
-      block.setName (fn);
+      info = fi;
+      block.setName (info.getName());
    }
    private Parser (Parser parent) {
       command = parent.command;
       outerBlock = parent.outerBlock;
       block = new Block (outerBlock.executor, parent.block);
-      fName = parent.fName;
+      info = parent.info;
    }
    public Object getCommand() {
       return command;
@@ -325,10 +325,10 @@ public class Parser {
          }
       }
       if (args.size() == 0) {
-         Return = new ExecMessage (receiver, selector, null, fName);
+         Return = new ExecMessage (receiver, selector, null, info.getName());
       } else {
          Object argsAr[] = args.toArray();
-         Return = new ExecMessage (receiver, selector, argsAr, fName);
+         Return = new ExecMessage (receiver, selector, argsAr, info.getName());
       }
       switch ((tk = tokens.pop()).type) {
       case _WORD:
@@ -388,7 +388,7 @@ public class Parser {
                   try {
                      return blk.getVariable(tk.word);
                   } catch (JOEException ex) {
-                     throw new JOEException(ex.getMessage(), tk, fName);
+                     throw new JOEException(ex.getMessage(), tk, info.getName());
                   }
                }
                public int getRow() {
@@ -408,23 +408,23 @@ public class Parser {
             return tk;
          }
       } catch (Exception ex) {
-         throw new JOEException (ex.toString(), tk, fName);
+         throw new JOEException (ex.toString(), tk, info.getName());
       }
    }
    private void parClose (TkStack tokens) throws JOEException {
       Token tk = tokens.pop();
       if (tk.type != TokenType._PAR_CLOSE_)
          throw new JOEException (
-                     "Expected close parenthesis, found " + tk.word, tk, fName);
+           "Expected close parenthesis, found " + tk.word, tk, info.getName());
    }
    private void braceClose (TkStack tokens) throws JOEException {
       Token tk = tokens.pop();
       if (tk.type != TokenType._BRACE_CLOSE_)
          throw new JOEException (
-                      "Expected close brace, found " + tk.word, tk, fName);
+               "Expected close brace, found " + tk.word, tk, info.getName());
    }
    private void unexpectedToken (Token tk) throws JOEException {
       throw new JOEException ("Unexpected token " + tk.type +
-                              " `" + tk.word + "`", tk, fName);
+                              " `" + tk.word + "`", tk, info.getName());
    }
 }

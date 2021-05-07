@@ -122,7 +122,7 @@ public class ScriptManager {
                   argv[i] = wobj;
          }
       } else {
-         lineReader.open (new InputStreamReader(getInputStream(name)));
+         lineReader.open (name, new InputStreamReader(getInputStream(name)));
          Return = OuterBlock.get (name, lineReader, argv, command, executor);
          blocks.put (name, Return);
       }

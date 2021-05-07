@@ -101,7 +101,7 @@ public class JavaObjectsExecutor {
          line = "";
          defCmd.println (version);
          defCmd.println ();
-         Parser prg = new Parser(cmd, exec,"<stdin>");
+         Parser prg = new Parser(cmd, exec, lr);
          Block b = null;
 
          for ( ; ; ) {
@@ -116,7 +116,7 @@ public class JavaObjectsExecutor {
                break;
             ArrayDeque<Token> tokens = new ArrayDeque<Token>();
             Tokenizer tkzer = new Tokenizer();
-            tkzer.tokenize (line.toCharArray(), tokens);
+            tkzer.tokenize (line.toCharArray(), tokens, 1);
             try {
                b = prg.compile (tokens);
                try {

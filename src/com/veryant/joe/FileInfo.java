@@ -20,11 +20,8 @@
 package com.veryant.joe;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.Reader;
 
-public interface LineReader extends FileInfo {
-   public void open (String name, Reader reader) throws IOException;
-   public String readLine() throws IOException;
-   public void close () throws IOException;
+public interface FileInfo {
+   public String getName ();
+   public int getLineNumber ();
 }

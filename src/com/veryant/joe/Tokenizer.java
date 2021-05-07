@@ -27,8 +27,8 @@ public class Tokenizer {
    private ArrayDeque<Token> tokens;
    private StringBuilder word;
    private TokenType status = TokenType._INIT;
-   private int cRow = 0;
    private int cCol = 0;
+   private int cRow = 0;
 
    private Token newToken (String w, TokenType t) {
       return new Token (w, t, cRow, cCol - w.length());
@@ -60,12 +60,12 @@ public class Tokenizer {
       return Return;
    }
 
-   public boolean tokenize (char line[], ArrayDeque<Token> t) {
+   public boolean tokenize (char line[], ArrayDeque<Token> t, int row) {
       boolean Return = false;
+      cRow = row;
+
       int idx = 0;
       int ila = 0;
-
-      cRow++;
 
       tokens = t;
       word = null;

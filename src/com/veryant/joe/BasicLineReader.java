@@ -20,19 +20,35 @@
 package com.veryant.joe;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 
 public class BasicLineReader implements LineReader {
    protected BufferedReader reader;
+   protected File file;
+   protected int lineCount;
 
-   public void open (Reader r) {
-      reader = new BufferedReader (r);
+   public void open (String name, Reader reader) {
+      this.file = new File (name);
+      this.reader = new BufferedReader (reader);
+      lineCount = 0;
    }
    public String readLine () throws IOException {
+      lineCount++;
       return reader.readLine();
    }
    public void close () throws IOException {
       reader.close();
+   }
+   public String getName () {
+      if (file != null)
+         return file.getPath();
+      else
+         return "-";
+   }
+   public int getLineNumber () {
+      return lineCount;
    }
 }
