@@ -1,0 +1,10 @@
+fact :=
+{:n.
+   !if (n > 1), {
+      n * (fact exec (n - 1)).
+   } , {
+      n := 1.
+   }.
+}.
+             
+!println (fact exec 20m).
