@@ -22,14 +22,14 @@
 
 typedef joe_Object joe_Exception;
 extern joe_Class joe_Exception_Class;
-void joe_Exception_Init (joe_Exception self, char *desc);
-joe_Object joe_Exception_New (char *c);
-joe_Object joe_Exception_New_string (joe_String msg);
-void joe_Exception_addStack (joe_Exception self,
+JOEOBJ_API void joe_Exception_Init (joe_Exception self, char *desc);
+JOEOBJ_API joe_Object joe_Exception_New (char *c);
+JOEOBJ_API joe_Object joe_Exception_New_string (joe_String msg);
+JOEOBJ_API void joe_Exception_addStack (joe_Exception self,
                              char *fileName, int row, int col);
-int joe_Exception_toString (joe_Exception self,
+JOEOBJ_API int joe_Exception_toString (joe_Exception self,
                             int argc, joe_Object *argv, joe_Object *retval);
-int joe_Exception_getMessage (joe_Object self,
+JOEOBJ_API int joe_Exception_getMessage (joe_Object self,
                              int argc, joe_Object *argv, joe_Object *retval);
 
 # endif

@@ -27,6 +27,7 @@
 # include "joe_StringBuilder.h"
 # include "joe_Integer.h"
 # include "joe_Float.h"
+# include "joe_BigDecimal.h"
 # include "joe_Exception.h"
 # include "joe_JOEObject.h"
 # include "joe_LoadScript.h"
@@ -74,6 +75,7 @@ traceMemory (joe_Object obj)
    liveObjCount++;
 # endif
 # ifdef JOE_MEM_DEBUG
+
    if (allObjects == 0) {
       allObjects = calloc (1, sizeof (struct s_ObjectList));
       allObjects->prev = 0;
@@ -117,6 +119,7 @@ init ()
       joe_Class_registerClass (&joe_StringBuilder_Class);
       joe_Class_registerClass (&joe_Integer_Class);
       joe_Class_registerClass (&joe_Float_Class);
+      joe_Class_registerClass (&joe_BigDecimal_Class);
       joe_Class_registerClass (&joe_LoadScript_Class);
       joe_Class_registerClass (&joe_Exception_Class);
    }
@@ -244,10 +247,26 @@ joe_Object_Delete (joe_Object self)
       printf ("Memory not found! %p\n", (void*) self);
    }
 # endif
-   self->data.obj = 0;
-   self->color = 3;
-   self->refcount = 9;
    free (self);
+}
+
+void
+joe_Object_showLiveObject(joe_Object obj, int indent)
+{
+   while (indent-- > 0)
+      fputs (" ", stdout);
+   if (obj->clazz == &joe_String_Class) {
+      printf("[%s] %p %s %d\n", obj->clazz->name, (void*)obj,
+             joe_String_getCharStar(obj), obj->refcount);
+   } else if (obj->clazz == &joe_Integer_Class) {
+      printf("[%s] %p %ld %d\n", obj->clazz->name, (void*)obj,
+             joe_Integer_value(obj), obj->refcount);
+   } else if (obj->clazz == &joe_Float_Class) {
+      printf("[%s] %p %lf %d\n", obj->clazz->name, (void*)obj,
+             joe_Float_value(obj), obj->refcount);
+   } else {
+      printf("[%s] %p %d\n", obj->clazz->name, (void*)obj, obj->refcount);
+   }
 }
 
 void
@@ -257,18 +276,7 @@ joe_Object_showLiveObjects ()
       unsigned int Return;
       struct s_ObjectList *list;
       for (Return = 0, list = allObjects; list; Return++) {
-         if (list->obj->clazz == &joe_String_Class) {
-            printf ("[%s] %s\n", list->obj->clazz->name,
-                                 joe_String_getCharStar(list->obj));
-         } else if (list->obj->clazz == &joe_Integer_Class) {
-            printf ("[%s] %ld\n", list->obj->clazz->name,
-                                 joe_Integer_value(list->obj));
-         } else if (list->obj->clazz == &joe_Float_Class) {
-            printf ("[%s] %lf\n", list->obj->clazz->name,
-                                 joe_Float_value(list->obj));
-         } else {
-            printf ("[%s] %p\n", list->obj->clazz->name, (void*) list->obj);
-         }
+          joe_Object_showLiveObject (list->obj, 0);
          list = list->next;
       }
    }
@@ -354,7 +362,7 @@ markGray (joe_Object self)
 {
    self->color = GRAY;
    if (self->nItems) {
-      int idx;
+      unsigned int idx;
       joe_Object obj;
       for (idx = 0; idx < self->nItems; idx++) {
          if ((obj = self->data.obj[idx])) {
@@ -371,7 +379,7 @@ scanBlack (joe_Object self)
 {
    self->color = BLACK;
    if (self->nItems) {
-      int idx;
+      unsigned int idx;
       joe_Object obj;
       for (idx = 0; idx < self->nItems; idx++) {
          if ((obj = self->data.obj[idx])) {
@@ -391,7 +399,7 @@ scanGray (joe_Object self)
    } else {
       self->color = WHITE;
       if (self->nItems) {
-         int idx;
+         unsigned int idx;
          joe_Object obj;
          for (idx = 0; idx < self->nItems; idx++) {
             if ((obj = self->data.obj[idx])) {
@@ -404,21 +412,24 @@ scanGray (joe_Object self)
 }
 
 static void
-collectWhite (joe_Object self)
+collectWhite (joe_Object self, joe_Object *dellist)
 {
    if (self->color == WHITE) {
       self->color = BLACK;
       if (self->nItems) {
-         int idx;
+         unsigned int idx;
          joe_Object obj;
          for (idx = 0; idx < self->nItems; idx++) {
             if ((obj = self->data.obj[idx])) {
-               collectWhite (obj);
+               collectWhite (obj, dellist);
             }
          }
       }
-      joe_Object_Delete (self);
+      (*dellist)->data.mem = self;
+      self->data.mem = 0;
+      *dellist = self;
    }
+
 }
 
 void
@@ -427,7 +438,7 @@ joe_Object_unassign (joe_Object self)
    if (--self->refcount == 0) {
       if (self->nItems) {
          joe_Object obj;
-         int idx;
+         unsigned int idx;
          for (idx = 0; idx < self->nItems; idx++) {
             if ((obj = self->data.obj[idx])) {
                joe_Object_unassign (obj);
@@ -436,9 +447,20 @@ joe_Object_unassign (joe_Object self)
       }
       joe_Object_Delete (self);
    } else {
+      struct s_joe_Object firstdel = { 0, 0, 0, 0, {0} };
+      joe_Object scan = &firstdel;
+      joe_Object next;
+
       markGray (self);
       scanGray (self);
-      collectWhite (self);
+      collectWhite (self, &scan);
+
+      scan = firstdel.data.mem;
+      while (scan) {
+         next = scan->data.mem;
+         joe_Object_Delete(scan);
+         scan = next;
+      }
    }
 }
 

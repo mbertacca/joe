@@ -117,7 +117,9 @@ my_exec (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
          }
          joe_Object_assign (&lretval, 0);
       } else if (joe_Object_instanceOf (obj, &joe_Variable_Class)) {
-         joe_Object_assign (retval, joe_Block_getVar (self, obj)); 
+         joe_Object var = 0;
+         rc = joe_Block_getVar(self, obj, &var);
+         joe_Object_assign(retval, var);
       } else {
          joe_Object_assign (retval, obj);
       }
@@ -257,20 +259,28 @@ getVars (joe_Object self, joe_String name)
    return Return;
 }
 
-joe_Object
-joe_Block_getVar (joe_Object self, joe_String name)
+int
+joe_Block_getVar (joe_Object self, joe_String name, joe_Object* retval)
 {
-   joe_Object Return;
-
    joe_HashMap hash = *joe_Object_at (self,VARIABLES);
-   Return = joe_HashMap_get (hash, name);
-   if (!Return) {
+   *retval = joe_HashMap_get (hash, name);
+   if (*retval == 0 && !joe_HashMap_containsKey(hash, name)) {
       joe_Block parent = *joe_Object_at (self, PARENT);
-      if (parent)
-         Return = joe_Block_getVar (parent, name);
+      if (parent) {
+         return joe_Block_getVar (parent, name, retval);
+      } else {
+         joe_String msg = 0;
+         joe_Object_assign(&msg,
+                          joe_String_New3("Variable `",
+                                          joe_String_getCharStar(name),
+                                         "' not found"));
+         *retval = joe_Exception_New_string(msg);
+         joe_Object_assign(&msg, 0);
+          return JOE_FAILURE;
+      }
    }
 
-   return Return;
+   return JOE_SUCCESS;
 }
 
 void

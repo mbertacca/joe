@@ -7,17 +7,16 @@ exit:args.
     !println itm.
 }.
 
-!println "-----".
+!println "----- upper case".
 
 argc := args length.
 i := -1.
 
 !while { i := i + 1. i < argc }, {
-    !println (args get i).
-    args set i, (args get i toUpperCase).
+    !println (args get i toUpperCase).
 }.
 
-!println "----- upper case".
+!println "----- array scan".
 scan := !newInstance "joe_ArrayScan", args.
 
 !while {scan hasNext},{

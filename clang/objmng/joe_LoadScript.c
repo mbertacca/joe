@@ -28,7 +28,7 @@
 # include <stdlib.h>
 # include <string.h>
 
-# define isFileSeparator(c) (c=='/')
+# define isFileSeparator(c) (c=='/' || c=='\\')
 
 static char *variables[] = { 0 };
 static char *dirname = 0;

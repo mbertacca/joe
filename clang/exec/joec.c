@@ -58,10 +58,11 @@ main (int argc, char *argv[])
       joe_LoadScript block = 0;
       joe_Object retval = 0;
       joe_String scriptName = 0;
+      joe_Class* loadScriptClass = joe_Class_getClass("joe_LoadScript");
+      joe_Class* integerClass = joe_Class_getClass("joe_Integer");
 
       joe_Object_assign (&scriptName, joe_String_New (argv[1]));
-      rc=joe_Class_newInstance(&joe_LoadScript_Class, 1, &scriptName, &retval);
-      joe_Object_assign (&scriptName, 0);
+      rc=joe_Class_newInstance(loadScriptClass, 1, &scriptName, &retval);
       if (rc != JOE_SUCCESS) {
          showError (retval);
          return ERROR_GENERIC;
@@ -77,9 +78,10 @@ main (int argc, char *argv[])
       if ((rc = joe_Block_exec (block, 1, &argArray, &retval)) != JOE_SUCCESS){
          showError (retval);
       } else {
-         if (joe_Object_instanceOf (retval, &joe_Integer_Class))
+         if (joe_Object_instanceOf (retval, integerClass))
             rc = joe_Integer_value (retval);
       }
+      joe_Object_assign(&scriptName, 0);
       joe_Object_delIfUnassigned (&retval);
       joe_Object_assign (&block, 0);
       joe_Object_assign (&argArray, 0);

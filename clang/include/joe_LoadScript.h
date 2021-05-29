@@ -23,6 +23,6 @@
 
 typedef joe_Object joe_LoadScript;
 extern joe_Class joe_LoadScript_Class;
-joe_Block joe_LoadScript_New (joe_Block self, char *scriptName);
+JOEOBJ_API joe_Block joe_LoadScript_New (joe_Block self, char *scriptName);
 
 # endif

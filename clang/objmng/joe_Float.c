@@ -18,11 +18,25 @@
 
 # include "joe_Float.h"
 # include "joe_Integer.h"
+# include "joe_BigDecimal.h"
 # include "joe_Boolean.h"
 # include "joe_String.h"
 # include "joe_Exception.h"
 
 # include <stdio.h>
+
+static int
+operation (joe_Integer self, int argc, joe_Object *argv,
+           joe_Object *retval, enum joe_BigDecimal_ops op)
+{
+   int Return;
+   joe_BigDecimal bd = 0;
+   joe_Object_assign (&bd, 
+              joe_BigDecimal_New_dbl (*((double *) joe_Object_getMem (self))));
+   Return = joe_BigDecimal_oper (bd, argc, argv, retval, op);
+   joe_Object_assign (&bd, 0);
+   return Return;
+}
 
 static int
 add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -36,6 +50,8 @@ add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
          *retval = joe_Float_New (*((double *) joe_Object_getMem (self)) +
                                      *((long *) joe_Object_getMem (argv[0])));
          return JOE_SUCCESS;
+      } else if (joe_Object_instanceOf (argv[0], &joe_BigDecimal_Class)) {
+         return operation (self, argc, argv, retval, ADD);
       }
    }
    *retval = joe_Exception_New ("Float add: invalid argument");
@@ -54,6 +70,8 @@ subtract (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
          *retval = joe_Float_New (*((double *) joe_Object_getMem (self)) -
                                      *((long *) joe_Object_getMem (argv[0])));
          return JOE_SUCCESS;
+      } else if (joe_Object_instanceOf (argv[0], &joe_BigDecimal_Class)) {
+         return operation (self, argc, argv, retval, SUBTRACT);
       }
    }
    *retval = joe_Exception_New ("Float subtract: invalid argument");
@@ -72,6 +90,8 @@ multiply (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
          *retval = joe_Float_New (*((double *) joe_Object_getMem (self)) *
                                      *((long *) joe_Object_getMem (argv[0])));
          return JOE_SUCCESS;
+      } else if (joe_Object_instanceOf (argv[0], &joe_BigDecimal_Class)) {
+         return operation (self, argc, argv, retval, MULTIPLY);
       }
    }
    *retval = joe_Exception_New ("Float multiply: invalid argument");
@@ -90,9 +110,18 @@ divide (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
          *retval = joe_Float_New (*((double *) joe_Object_getMem (self)) /
                                      *((long *) joe_Object_getMem (argv[0])));
          return JOE_SUCCESS;
+      } else if (joe_Object_instanceOf (argv[0], &joe_BigDecimal_Class)) {
+         return operation (self, argc, argv, retval, DIVIDE);
       }
    }
    *retval = joe_Exception_New ("Float divide: invalid argument");
+   return JOE_FAILURE;
+}
+
+static int
+_remainder (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   *retval = joe_Exception_New ("Float remainder: operation not implemented");
    return JOE_FAILURE;
 }
 
@@ -112,6 +141,8 @@ equals (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
             *retval = joe_Boolean_New_true();
          else
             *retval = joe_Boolean_New_false();
+      } else if (joe_Object_instanceOf (argv[0], &joe_BigDecimal_Class)) {
+         return operation (self, argc, argv, retval, EQUALS);
      } else
         *retval = joe_Boolean_New_false();
      return JOE_SUCCESS;
@@ -138,6 +169,8 @@ ne (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
          else
             *retval = joe_Boolean_New_false();
          return JOE_SUCCESS;
+      } else if (joe_Object_instanceOf (argv[0], &joe_BigDecimal_Class)) {
+         return operation (self, argc, argv, retval, NE);
       } else {
         *retval = joe_Exception_New("!=: invalid argument");
          return JOE_FAILURE;
@@ -166,6 +199,8 @@ ge (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
          else
             *retval = joe_Boolean_New_false();
          return JOE_SUCCESS;
+      } else if (joe_Object_instanceOf (argv[0], &joe_BigDecimal_Class)) {
+         return operation (self, argc, argv, retval, GE);
       } else {
         *retval = joe_Exception_New(">=: invalid argument");
          return JOE_FAILURE;
@@ -194,6 +229,8 @@ gt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
          else
             *retval = joe_Boolean_New_false();
          return JOE_SUCCESS;
+      } else if (joe_Object_instanceOf (argv[0], &joe_BigDecimal_Class)) {
+         return operation (self, argc, argv, retval, GT);
       } else {
         *retval = joe_Exception_New(">: invalid argument");
          return JOE_FAILURE;
@@ -222,6 +259,8 @@ le (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
          else
             *retval = joe_Boolean_New_false();
          return JOE_SUCCESS;
+      } else if (joe_Object_instanceOf (argv[0], &joe_BigDecimal_Class)) {
+         return operation (self, argc, argv, retval, LE);
       } else {
         *retval = joe_Exception_New("<=: invalid argument");
          return JOE_FAILURE;
@@ -250,6 +289,8 @@ lt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
          else
             *retval = joe_Boolean_New_false();
          return JOE_SUCCESS;
+      } else if (joe_Object_instanceOf (argv[0], &joe_BigDecimal_Class)) {
+         return operation (self, argc, argv, retval, LT);
       } else {
         *retval = joe_Exception_New("!=: invalid argument");
          return JOE_FAILURE;
@@ -274,6 +315,7 @@ static joe_Method mthds[] = {
    {"subtract", subtract },
    {"multiply", multiply },
    {"divide", divide },
+   {"remainder", _remainder },
    {"equals", equals },
    {"ne", ne },
    {"gt", gt },

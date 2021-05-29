@@ -53,7 +53,7 @@ joe_Message_exec (joe_Object self, joe_Block block, joe_Object *retval)
    joe_Object lRet = 0;
    joe_Object lReceiver = 0;
    joe_Array lArgs = 0;
-   int i;
+   unsigned int i;
    int rc = JOE_SUCCESS;
    int isJOEObject = joe_Object_instanceOf (block, &joe_JOEObject_Class);
 
@@ -72,8 +72,15 @@ joe_Message_exec (joe_Object self, joe_Block block, joe_Object *retval)
             joe_Object_assign (&lRet, 0);
          }
       } else if (joe_Object_instanceOf (arg, &joe_Variable_Class)) {
-         *joe_Object_at(lArgs, i) = joe_Block_getVar (block, arg);
-
+         lRet = 0;
+         rc = joe_Block_getVar(block, arg, &lRet);
+         if (rc == JOE_FAILURE) {
+            *joe_Object_at(lArgs, i) = 0;
+            *retval = lRet;
+            break;
+         } else {
+            *joe_Object_at(lArgs, i) = lRet;
+         }
       } else if (isJOEObject && joe_Object_instanceOf (arg, &joe_Block_Class)) {
          joe_Object_assign (joe_Object_at(lArgs,i), 
                             joe_JOEObject_New (arg, block));
@@ -83,6 +90,7 @@ joe_Message_exec (joe_Object self, joe_Block block, joe_Object *retval)
    }
    if (rc == JOE_SUCCESS) {
       if (joe_Object_instanceOf (receiver, &joe_Message_Class)) {
+         lRet = 0;
          rc = joe_Message_exec (receiver , block, &lRet);
          if (rc == JOE_FAILURE) {
             lReceiver = 0;
@@ -95,7 +103,14 @@ joe_Message_exec (joe_Object self, joe_Block block, joe_Object *retval)
          lReceiver = receiver;
          *joe_Object_at(lArgs, 0) = block;
       } else if (joe_Object_instanceOf (receiver, &joe_Variable_Class)) {
-         lReceiver = joe_Block_getVar (block, receiver);
+         lRet = 0;
+         rc = joe_Block_getVar(block, receiver, &lRet);
+         if (rc == JOE_FAILURE) {
+            lReceiver = 0;
+            *retval = lRet;
+         } else {
+            lReceiver = lRet;
+         }
          if (isJOEObject && joe_Object_instanceOf(lReceiver,&joe_Block_Class)){
             joe_Object obj = 0;
             joe_Object_assign (&obj, joe_JOEObject_New (lReceiver, block));

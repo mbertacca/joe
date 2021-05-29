@@ -25,6 +25,8 @@
 # include "joe_String.h"
 # include "joe_Integer.h"
 # include "joe_Float.h"
+# include "joe_BigDecimal.h"
+# include "joe_Boolean.h"
 # include "joe_Variable.h"
 # include "joe_Exception.h"
 # include <stdlib.h>
@@ -98,10 +100,29 @@ getInteger (char *intgr)
 }
 
 joe_Object
-getFloat (char *intgr)
+getFloat(char* intgr)
 {
-   return joe_Float_New (atof(intgr));
+    return joe_Float_New(atof(intgr));
 }
+
+joe_Object
+getDecimal (char* num)
+{
+    return joe_BigDecimal_New_str(num);
+}
+
+joe_Object
+getTrue()
+{
+    return joe_Boolean_New_true();
+}
+
+joe_Object
+getFalse()
+{
+    return joe_Boolean_New_false();
+}
+
 
 int
 braceClose (JoeParser self, JoeArrayScan tokens)
@@ -137,7 +158,13 @@ getValue (JoeParser self, Token tk) {
    case _INTEGER:
       return getInteger(tk->word);
    case _FLOAT:
-      return getFloat(tk->word);
+       return getFloat(tk->word);
+   case _DECIMAL:
+       return getDecimal(tk->word);
+   case _TRUE:
+       return getTrue();
+   case _FALSE:
+       return getFalse();
    case _BANGBANG_:
    case _WORD:
       return joe_Variable_New(tk->word);

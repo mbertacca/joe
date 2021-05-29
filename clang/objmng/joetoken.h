@@ -20,9 +20,12 @@ enum TokenType {
    _UNCLOSED_STRING,
    _INTEGER,
    _FLOAT,
+   _DECIMAL,
    _ASSIGN,
    _ML_COMMENT,
-   _COMMENT
+   _COMMENT,
+   _TRUE,
+   _FALSE
 };
 
 typedef struct t_Token *Token;

@@ -23,7 +23,7 @@
 typedef joe_Object joe_Array;
 extern joe_Class joe_Array_Class;
 
-joe_Object joe_Array_New (unsigned int length);
-unsigned int joe_Array_length (joe_Array self);
+JOEOBJ_API joe_Object joe_Array_New (unsigned int length);
+JOEOBJ_API unsigned int joe_Array_length (joe_Array self);
 
 # endif

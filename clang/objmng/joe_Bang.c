@@ -24,6 +24,7 @@
 # include "joe_Boolean.h"
 # include "joe_Integer.h"
 # include "joe_String.h"
+# include "joe_StringBuilder.h"
 # include "joe_BreakBlockException.h"
 # include "joe_BreakLoopException.h"
 
@@ -170,6 +171,18 @@ Switch_end (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 static int
+version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   joe_StringBuilder msg = 0;
+   joe_Object_assign (&msg, joe_StringBuilder_New ());
+   joe_StringBuilder_appendCharStar (msg, "JOE Revision 0.5 ");
+   joe_StringBuilder_appendCharStar (msg, __DATE__);
+   *retval = joe_StringBuilder_toString (msg);
+   joe_Object_assign (&msg, 0);
+   return JOE_SUCCESS;
+}
+
+static int
 isNull (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1) {
@@ -227,7 +240,7 @@ readLine (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    int i;
    fgets (inbuff, sizeof(inbuff), stdin);
    i = strlen (inbuff);
-   for (i--; inbuff[i] < ' '; i--)
+   for (i--; i >= 0 && inbuff[i] < ' '; i--)
      inbuff[i] = 0;
    *retval = joe_String_New (inbuff);
    return JOE_SUCCESS;
@@ -505,6 +518,7 @@ static joe_Method mthds[] = {
   {"breakLoop", breakLoop},
   {"array", array},
   {"newArray", newArray},
+  {"version", version},
   {"loadSO", loadSO},
   {(void *) 0, (void *) 0}
 };

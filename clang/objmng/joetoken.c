@@ -179,13 +179,23 @@ Tokenizer_tokenize (Tokenizer self, char *line)
             ++c;
             if (*c == '=') {
                JoeStrBuild_appendStr (self->word, "le");
+               newToken(self, _WORD);
             } else if (*c == '>') {
                JoeStrBuild_appendStr (self->word, "ne");
+               newToken(self, _WORD);
+            } else if (*c == '0' && *(c + 1) == '>') {
+                c++;
+                JoeStrBuild_appendStr(self->word, "<0>");
+                newToken(self, _FALSE);
+            } else if (*c == '1' && *(c + 1) == '>') {
+                c++;
+                JoeStrBuild_appendStr(self->word, "<0>");
+                newToken(self, _TRUE);
             } else {
                --c;
                JoeStrBuild_appendStr (self->word, "lt");
+               newToken(self, _WORD);
             }
-            newToken(self, _WORD);
          }
          break;
       case '>':
@@ -235,7 +245,7 @@ Tokenizer_tokenize (Tokenizer self, char *line)
          break;
       case '%':
          if (breakChar(self, *c)) {
-            JoeStrBuild_appendStr (self->word, "mod");
+            JoeStrBuild_appendStr (self->word, "remainder");
             newToken(self, _WORD);
          }
          break;
@@ -346,15 +356,22 @@ Tokenizer_tokenize (Tokenizer self, char *line)
          break;
       case 'e':
       case 'E':
-         ++c;
-         if ((self->status == _INTEGER || self->status == _FLOAT) &&
-             *c >= '0' && *c <= '9') {
-            --c;
-            JoeStrBuild_appendChr (self->word, 'e');
-            self->status = _FLOAT;
-            break;
-         } else {
-            --c;
+      case 'm':
+      case 'M':
+         if (self->status == _INTEGER || self->status == _FLOAT) {
+            if (*c == 'e' || *c == 'E') {
+               c++;
+               if (*c >= '0' && *c <= '9') {
+                  JoeStrBuild_appendChr(self->word, 'e');
+                  self->status = _FLOAT;
+                  break;
+               }
+               --c;
+            } else {
+               newToken (self,_DECIMAL);
+               self->status = _INIT;
+               break;
+            }
          }
          // PASSTHRU
       default:
