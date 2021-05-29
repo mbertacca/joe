@@ -4,12 +4,13 @@ TARGET=libjoeobj
 LIB=../lib
 BIN=../bin
 
-INCL=-I../include
+INCL=-I../include -I.
 OBJS=joe_Object.o \
      joe_Array.o \
      joe_ArrayScan.o \
      joe_ArrayList.o \
      joe_Float.o \
+     joe_BigDecimal.o \
      joe_Integer.o \
      joe_String.o \
      joe_StringBuilder.o \
@@ -26,6 +27,7 @@ OBJS=joe_Object.o \
      joe_BreakLoopException.o \
      joe_LoadScript.o \
      joe_Exception.o \
+     ndecimal.o \
      joearray.o \
      joearrayscan.o \
      joeparser.o\

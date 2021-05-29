@@ -64,7 +64,6 @@ nDecimal_isZero (nDecimal self)
 int
 nDecimal_isOne (nDecimal self)
 {
-   int i;
    char *data = GETDATA(self);
    char *one = &data[self->precision - self->scale - 1];
    char *end = &data[self->precision];
@@ -148,8 +147,7 @@ nDecimal_assign (nDecimal self, nDecimal src)
 nDecimal
 nDecimal_assign_str (nDecimal self, const char * str)
 {
-   int i, j, iDot, xs;
-   int locLeft;
+   int i, j, iDot;
    char *data = GETDATA(self);
 
    setZero(self);
@@ -197,8 +195,7 @@ nDecimal
 nDecimal_new_str (const char * str)
 {
    nDecimal self;
-   int i, j, iDot, xs;
-   int locLeft;
+   int i, iDot;
 
    if (str != 0 && *str != 0) {
       int str_len = strlen (str);
@@ -293,32 +290,6 @@ nDecimal_assign_lng (nDecimal self, long lng)
    free (buffer);
    return self;
 }
-
-static nDecimal
-_minimize (nDecimal aNum)
-{
-   int precision = aNum->precision;
-   int scale = aNum->scale;
-   int intPart = precision - scale;
-   char *data = GETDATA(aNum);
-   int i;
-
-   for (i = precision - 1; scale > 0; i--, scale--, precision--)
-      if (data[i] != '0')
-         break;
-   for (i = 0; intPart > 1; i++, intPart--, precision--)
-      if (data[i] != '0')
-         break;
-   if (precision == aNum->precision) {
-      return aNum;
-   } else {
-      nDecimal newNum = nDecimal_new (precision, scale);
-      nDecimal_assign (newNum, aNum);
-      nDecimal_delete (aNum);
-      return newNum;
-   }
-}
-
 
 static nDecimal
 minimize (nDecimal aNum)
@@ -630,7 +601,7 @@ nDecimal_divide (nDecimal op1, nDecimal op2, int scale)
 {
    nDecimal Return;
    char *num1, *num2, *mval;
-   char *qptr, *n1ptr, *n2ptr, *ptr1, *ptr2;
+   char *qptr, *n2ptr, *ptr1, *ptr2;
    int prec1, prec2;
    int intPart1, scale1, intPart2, scale2;
    int extra, qdigits, norm, qdig, qguess, borrow, carry, val, count;

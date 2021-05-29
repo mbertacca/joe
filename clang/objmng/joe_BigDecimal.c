@@ -167,7 +167,7 @@ divide (joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 }
 
 static int
-remainder (joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
+_remainder (joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 {
 
    if (argc == 1) {
@@ -177,7 +177,7 @@ remainder (joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
          joe_Object tmp = 0;
          nDecimal abd = get_nDecimal (*retval);
          joe_Object_assign (&tmp, *retval);
-         res = nDecimal_remainder (sbd, abd, 16);
+         res = nDecimal_remainder (sbd, abd);
          *retval = joe_BigDecimal_New (res);
          nDecimal_delete (res);
          joe_Object_assign (&tmp, 0);
@@ -340,7 +340,7 @@ static joe_Method mthds[] = {
    {"subtract", subtract },
    {"multiply", multiply },
    {"divide", divide },
-   {"remainder", remainder },
+   {"remainder", _remainder },
    {"equals", equals },
    {"ne", ne },
    {"gt", gt },
@@ -437,7 +437,7 @@ int joe_BigDecimal_oper(joe_Object self, int argc, joe_Object* argv,
    case EQUALS:
       return equals (self, argc, argv, retval);
    case REMAINDER:
-      return remainder (self, argc, argv, retval);
+      return _remainder (self, argc, argv, retval);
    case LT:
       return lt (self, argc, argv, retval);
    case GT:
