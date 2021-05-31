@@ -23,6 +23,7 @@
 # include "joe_Integer.h"
 # include "joe_Variable.h"
 # include "joe_BreakBlockException.h"
+ #include <string.h>
 
 # define MESSAGES 0
 # define VARIABLES 1
@@ -63,7 +64,7 @@ my_exec (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
    unsigned int len = joe_ArrayList_length (messages);
    joe_ArrayList argsNames = *joe_Object_at (self, ARGS_NAMES);
    joe_HashMap argsVars = 0;
-   int argsNamesLen = joe_ArrayList_length (argsNames);
+   unsigned int argsNamesLen = joe_ArrayList_length (argsNames);
 
 
    argsNamesLen = argsNamesLen < argc ? argsNamesLen : argc;
@@ -160,8 +161,6 @@ joe_Block_exec (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
    joe_HashMap oldVar = 0;
    joe_HashMap newVar = joe_HashMap_New (8);
 
-   joe_HashMap_put (newVar, joe_String_New ("!!"), self);
-
    joe_Object_assign (&oldVar, *joe_Object_at (self, VARIABLES));
    joe_Object_assign (joe_Object_at (self, VARIABLES), newVar);
 
@@ -186,9 +185,65 @@ joe_Block_clone (joe_Block self, joe_Block parent)
 }
 
 static int
-name (joe_JOEObject self, int argc, joe_Object *argv, joe_Object *retval)
+name(joe_JOEObject self, int argc, joe_Object* argv, joe_Object* retval)
 {
-   *retval = joe_String_New (joe_Block_getName(self));
+   *retval = joe_String_New(joe_Block_getName(self));
+   return JOE_SUCCESS;
+}
+
+static void
+getVarCount (joe_JOEObject blk, int *count)
+{
+   joe_HashMap vars = *joe_Object_at(blk, VARIABLES);
+   joe_Block parent = *joe_Object_at(blk, PARENT);
+
+   *count += joe_HashMap_length(vars);
+   if (parent)
+      getVarCount (parent, count);
+}
+
+static void
+varsToArray(joe_JOEObject blk, joe_Array array, int *count)
+{
+   int i;
+   joe_HashMap vars = *joe_Object_at(blk, VARIABLES);
+   joe_Block parent = *joe_Object_at(blk, PARENT);
+   joe_Array varArray = 0;
+
+   joe_Object_assign(&varArray, joe_HashMap_keys (vars));
+   int len = joe_Array_length(varArray);
+   for (i = 0; i < len; i++) 
+      joe_Object_assign(joe_Object_at(array, (*count)++),
+                        *joe_Object_at(varArray, i));
+   if (parent)
+      varsToArray(parent, array, count);
+   joe_Object_assign(&varArray, 0);
+}
+
+static int
+getVariablesNames(joe_JOEObject self, int argc, joe_Object* argv, joe_Object* retval)
+{
+   int varCount = 0;
+   joe_HashMap vars = *joe_Object_at(self, VARIABLES);
+   joe_Array Return = 0;
+
+   getVarCount (self, &varCount);
+   Return = joe_Array_New (varCount);
+   varCount = 0;
+   varsToArray (self, Return, &varCount);
+   *retval = Return;
+   return JOE_SUCCESS;
+}
+
+static int
+getVariable(joe_JOEObject self, int argc, joe_Object* argv, joe_Object* retval)
+{
+   if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_String_Class)) {
+      return joe_Block_getVar(self, argv[0], retval);
+   } else {
+      *retval = joe_Exception_New("getVariable: invalid argument(s)");
+      return JOE_FAILURE;
+   }
    return JOE_SUCCESS;
 }
 
@@ -198,6 +253,8 @@ static joe_Method mthds[] = {
   {"exec", joe_Block_exec },
   {"assign", joe_Block_assign },
   {"name", name },
+  {"getVariable", getVariable },
+  {"getVariablesNames", getVariablesNames },
   {(void *) 0, (void *) 0}
 };
 
@@ -263,6 +320,11 @@ int
 joe_Block_getVar (joe_Object self, joe_String name, joe_Object* retval)
 {
    joe_HashMap hash = *joe_Object_at (self,VARIABLES);
+
+   if (!strcmp(joe_String_getCharStar (name), "!!")) {
+      *retval = self;
+      return JOE_SUCCESS;
+   }
    *retval = joe_HashMap_get (hash, name);
    if (*retval == 0 && !joe_HashMap_containsKey(hash, name)) {
       joe_Block parent = *joe_Object_at (self, PARENT);
@@ -378,7 +440,6 @@ joe_JOEObject_New (joe_Block block, joe_Block parent)
    if (parent)
       joe_Object_assign (joe_Object_at (self, PARENT), parent);
    joe_Object_assign (joe_Object_at (self, VARIABLES), newVar);
-   joe_HashMap_put (newVar, joe_String_New ("!!"), self);
 
    return self;
 }

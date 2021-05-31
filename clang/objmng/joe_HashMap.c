@@ -277,7 +277,7 @@ joe_HashMap_length (joe_HashMap self)
 }
 
 
-joe_Array
+static joe_Array
 getArray (joe_HashMap self, int keyOrValue)
 {
    joe_Object item = 0;
