@@ -143,12 +143,16 @@ pop (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       if (length > 0) {
          joe_ListItem item = *joe_Object_at (self, LAST);
          joe_ListItem prev = *joe_Object_at (item, PREV);
+
+         *retval = *joe_Object_at(item, OBJ);
+         joe_Object_incrReference(retval);
+
          if (prev)
             joe_Object_assign(joe_Object_at (prev, NEXT), 0);
          joe_Object_assign(joe_Object_at (self, LAST), prev);
          joe_Object_assign(joe_Object_at (self, LENGTH),
                              joe_Integer_New (--length));
-         *retval = *joe_Object_at (item, OBJ);
+         joe_Object_decrReference(retval);
       } else {
          *retval = joe_Exception_New ("List pop: empty list");
          return JOE_FAILURE;
