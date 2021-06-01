@@ -224,7 +224,6 @@ static int
 getVariablesNames(joe_JOEObject self, int argc, joe_Object* argv, joe_Object* retval)
 {
    int varCount = 0;
-   joe_HashMap vars = *joe_Object_at(self, VARIABLES);
    joe_Array Return = 0;
 
    getVarCount (self, &varCount);

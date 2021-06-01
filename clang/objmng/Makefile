@@ -20,6 +20,7 @@ OBJS=joe_Object.o \
      joe_Message.o \
      joe_Block.o \
      joe_HashMap.o \
+     joe_List.o \
      joe_Variable.o \
      joe_Assignment.o \
      joe_BreakException.o \

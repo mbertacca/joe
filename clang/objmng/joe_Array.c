@@ -19,6 +19,8 @@
 # include "joe_Array.h"
 # include "joe_Integer.h"
 # include "joe_Exception.h"
+# include "joe_Block.h"
+# include "joe_BreakLoopException.h"
 
 static int
 length (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -64,10 +66,49 @@ set (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+static int
+foreach (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1) {
+      if (joe_Object_instanceOf (argv[0], &joe_Block_Class)) {
+         int rc;
+         joe_Object lretval = 0;
+         int len = joe_Array_length (self);
+         int i;
+         for (i = 0; i < len; i++) {
+           if ((rc=joe_Object_invoke(argv[0],"exec",
+                                      1, joe_Object_at (self, i),
+                                                   &lretval)) != JOE_SUCCESS) {
+               if (joe_Object_instanceOf (lretval,
+                                            &joe_BreakLoopException_Class)) {
+                  joe_Object retobj = joe_BreakException_getReturnObj(lretval);
+                  if (retobj)
+                     *retval = retobj;
+                  joe_Object_delIfUnassigned (&lretval);
+                  return JOE_SUCCESS;
+               } else {
+                  *retval = lretval;
+                  return JOE_FAILURE;
+               }
+            } else {
+               *retval = lretval;
+            }
+         }
+         return JOE_SUCCESS;
+      } else {
+         *retval = joe_Exception_New ("Array foreach: block expected");
+         return JOE_FAILURE;
+      }
+   }
+   *retval = joe_Exception_New ("Array foreach: invalid argument number");
+   return JOE_FAILURE;
+}
+
 static joe_Method mthds[] = {
   {"length", length },
   {"get", get },
   {"set", set },
+  {"foreach", foreach },
   {(void *) 0, (void *) 0}
 };
 

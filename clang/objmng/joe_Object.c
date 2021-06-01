@@ -22,6 +22,7 @@
 
 # include "joe_Array.h"
 # include "joe_ArrayScan.h"
+# include "joe_List.h"
 # include "joe_Boolean.h"
 # include "joe_String.h"
 # include "joe_StringBuilder.h"
@@ -115,6 +116,7 @@ init ()
       registeredClasses->next = 0;
       joe_Class_registerClass (&joe_Array_Class);
       joe_Class_registerClass (&joe_ArrayScan_Class);
+      joe_Class_registerClass (&joe_List_Class);
       joe_Class_registerClass (&joe_String_Class);
       joe_Class_registerClass (&joe_StringBuilder_Class);
       joe_Class_registerClass (&joe_Integer_Class);

@@ -1,9 +1,15 @@
 /*
- * print the arguments on the command line using 3 approaches
+ * print the arguments on the command line using different approaches
  */
 exit:args.
 
 !foreach args,{:itm.
+    !println itm.
+}.
+
+!println "-----".
+
+args foreach {:itm.
     !println itm.
 }.
 

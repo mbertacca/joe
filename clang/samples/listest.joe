@@ -1,0 +1,35 @@
+list := !newInstance "joe_List".
+list add 1.
+list add "Two".
+list add "Three".
+list add "Four".
+
+listLen := list length.
+
+!while {listLen := listLen - 1. listLen >= 0.},{
+   !println ">",(list get listLen).
+}.
+
+list foreach {:obj.
+   !println "[",obj,"]".
+   !if (obj = "Two"),{
+      !breakLoop.
+   }. 
+}.
+!foreach list, {:obj.
+   !println "{",obj,"}".
+   !if (obj = "Two"),{
+      !breakLoop.
+   }. 
+}.
+!println "peek=",(list peek).
+list push "Five".
+!println "peek=",(list peek).
+
+!while {list length; > 0.},{
+   !println "pop=",(list pop).
+}.
+list push "One".
+!foreach list, {:obj..
+   !println "(",obj,")".
+}.

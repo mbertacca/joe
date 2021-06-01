@@ -20,6 +20,7 @@
 # include <string.h>
 # include "joe_Bang.h"
 # include "joe_Array.h"
+# include "joe_List.h"
 # include "joe_Block.h"
 # include "joe_Boolean.h"
 # include "joe_Integer.h"
@@ -317,33 +318,11 @@ _while (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 static int
 foreach (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   int rc;
-   joe_Object lretval = 0;
    if (argc == 2) {
-      if (joe_Object_instanceOf (argv[0], &joe_Array_Class) &&
+      if ((joe_Object_instanceOf (argv[0], &joe_Array_Class) ||
+           joe_Object_instanceOf (argv[0], &joe_List_Class)) &&
           joe_Object_instanceOf (argv[1], &joe_Block_Class)) {
-         int len = joe_Array_length (argv[0]);
-         int i;
-         for (i = 0; i < len; i++) {
-            if ((rc=joe_Object_invoke(argv[1],"exec",
-                                      1, joe_Object_at(argv[0],i),
-                                                   &lretval)) != JOE_SUCCESS) {
-               if (joe_Object_instanceOf (lretval,
-                                            &joe_BreakLoopException_Class)) {
-                  joe_Object retobj = joe_BreakException_getReturnObj(lretval);
-                  if (retobj)
-                     *retval = retobj;
-                  joe_Object_delIfUnassigned (&lretval);
-                  return JOE_SUCCESS;
-               } else {
-                  *retval = lretval;
-                  return JOE_FAILURE;
-               }
-            } else {
-               *retval = lretval;
-            }
-         }
-         return JOE_SUCCESS;
+         return joe_Object_invoke(argv[0],"foreach", 1, &argv[1], retval);
       } else {
          joe_String msg = joe_String_New4 ("foreach: invalid argument: ",
                                            joe_Object_getClassName(argv[0]),
