@@ -189,14 +189,14 @@ arguments (JoeParser self, joe_Block block, JoeArrayScan tokens,
            joe_Object receiver, Token selector)
 {
    joe_Message Return = 0;
-   joe_Object obj;
+   joe_Object obj = 0;
    Token tk;
    JoeArray args = JoeArray_new (sizeof (joe_Object), 16);
    int argsLen;
 
-    for ( ; ; ) {
-       tk = pop (tokens);
-       if (tk != 0 && (obj = getValue(self, tk)) == 0) {
+   for ( ; ; ) {
+      tk = pop (tokens);
+      if (tk != 0 && (obj = getValue(self, tk)) == 0) {
          switch (tk->type) {
 
          case _DOT_:

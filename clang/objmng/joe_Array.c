@@ -25,7 +25,7 @@
 static int
 length (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   *retval = joe_Integer_New (joe_Array_length (self));
+   joe_Object_assign (retval, joe_Integer_New (joe_Array_length (self)));
    return JOE_SUCCESS;
 }
 
@@ -34,15 +34,15 @@ get (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_Integer_Class)) {
       int idx = joe_Integer_value (argv[0]);
-      if (idx >= 0 && idx < joe_Array_length (self)) {
-         *retval = *joe_Object_at (self, idx);
+      if (idx >= 0 && idx < (int) joe_Array_length (self)) {
+         joe_Object_assign(retval, *joe_Object_at (self, idx));
          return JOE_SUCCESS;
       } else {
-         *retval = joe_Exception_New ("Array: index out of bound");
+         joe_Object_assign(retval, joe_Exception_New ("Array: index out of bound"));
          return JOE_FAILURE;
       }
    } else {
-      *retval = joe_Exception_New ("Array: invalid argument");
+      joe_Object_assign(retval, joe_Exception_New ("Array: invalid argument"));
       return JOE_FAILURE;
    }
 }
@@ -52,19 +52,32 @@ set (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 2 && joe_Object_instanceOf (argv[0], &joe_Integer_Class)) {
       int idx = joe_Integer_value (argv[0]);
-      if (idx >= 0 && idx < joe_Array_length (self)) {
+      if (idx >= 0 && idx < (int) joe_Array_length (self)) {
          joe_Object_assign (joe_Object_at (self, idx), argv[1]);
-         *retval = argv[1];
+         joe_Object_assign(retval, argv[1]);
          return JOE_SUCCESS;
       } else {
-         *retval = joe_Exception_New ("Array: index out of bound");
+         joe_Object_assign(retval, joe_Exception_New ("Array: index out of bound"));
          return JOE_FAILURE;
       }
    } else {
-      *retval = joe_Exception_New ("Array: invalid argument");
+      joe_Object_assign(retval, joe_Exception_New ("Array: invalid argument"));
       return JOE_FAILURE;
    }
 }
+
+static int
+clean(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
+{
+   if (argc == 0) {
+       joe_Object_assign (retval, joe_Array_clean(self));
+       return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New("Array: no argument expected"));
+      return JOE_FAILURE;
+   }
+}
+
 
 static int
 foreach (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -76,6 +89,7 @@ foreach (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
          int len = joe_Array_length (self);
          int i;
          for (i = 0; i < len; i++) {
+            joe_Object arg = *joe_Object_at(self, i);
            if ((rc=joe_Object_invoke(argv[0],"exec",
                                       1, joe_Object_at (self, i),
                                                    &lretval)) != JOE_SUCCESS) {
@@ -83,24 +97,28 @@ foreach (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
                                             &joe_BreakLoopException_Class)) {
                   joe_Object retobj = joe_BreakException_getReturnObj(lretval);
                   if (retobj)
-                     *retval = retobj;
-                  joe_Object_delIfUnassigned (&lretval);
+                     joe_Object_assign(retval, retobj);
+                  joe_Object_assign (&lretval, 0);
                   return JOE_SUCCESS;
                } else {
-                  *retval = lretval;
+                  joe_Object_assign(retval, lretval);
+                  joe_Object_assign(&lretval, 0);
                   return JOE_FAILURE;
                }
             } else {
-               *retval = lretval;
+              joe_Object_assign(retval, lretval);
+              joe_Object_assign(&lretval, 0);
             }
          }
          return JOE_SUCCESS;
       } else {
-         *retval = joe_Exception_New ("Array foreach: block expected");
+         joe_Object_assign(retval,
+                           joe_Exception_New ("Array foreach: block expected"));
          return JOE_FAILURE;
       }
    }
-   *retval = joe_Exception_New ("Array foreach: invalid argument number");
+   joe_Object_assign(retval,
+                   joe_Exception_New ("Array foreach: invalid argument number"));
    return JOE_FAILURE;
 }
 
@@ -109,6 +127,7 @@ static joe_Method mthds[] = {
   {"get", get },
   {"set", set },
   {"foreach", foreach },
+  {"clean", clean },
   {(void *) 0, (void *) 0}
 };
 
@@ -125,13 +144,23 @@ joe_Class joe_Array_Class = {
 };
 
 joe_Object
-joe_Array_New (unsigned int length)
+joe_Array_New(unsigned int length)
 {
-   return joe_Object_New (&joe_Array_Class, length);
+   return joe_Object_New(&joe_Array_Class, length);
 }
 
 unsigned int
 joe_Array_length (joe_Object self)
 {
    return joe_Object_length (self);
+}
+
+joe_Array
+joe_Array_clean(joe_Object self)
+{
+   int len = (int)joe_Array_length(self);
+   int i;
+   for (i = 0; i < len; i++)
+      joe_Object_assign(joe_Object_at(self, i), 0);
+   return self;
 }

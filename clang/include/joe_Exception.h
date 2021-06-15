@@ -22,7 +22,7 @@
 
 typedef joe_Object joe_Exception;
 extern joe_Class joe_Exception_Class;
-JOEOBJ_API void joe_Exception_Init (joe_Exception self, char *desc);
+JOEOBJ_API void joe_Exception_Init (joe_Exception self, joe_String desc);
 JOEOBJ_API joe_Object joe_Exception_New (char *c);
 JOEOBJ_API joe_Object joe_Exception_New_string (joe_String msg);
 JOEOBJ_API void joe_Exception_addStack (joe_Exception self,

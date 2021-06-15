@@ -16,14 +16,13 @@
  * limitations under the License.
  */
 
-# include "joe_String.h"
-# include "joe_Exception.h"
+# include "joe_Memory.h"
 
 static joe_Method mthds[] = {
   {(void *) 0, (void *) 0}
 };
 
-static joe_Class joe_Memory_Class = {
+joe_Class joe_Memory_Class = {
    "joe_Memory",
    0,
    0,
@@ -39,4 +38,35 @@ joe_Memory_New (unsigned int size) {
 
    self = joe_Object_New (&joe_Memory_Class, size);
    return self;
+}
+
+typedef struct s_WeakReference {
+   joe_Object obj;
+} WeakReference;
+
+joe_Class joe_WeakReference_Class = {
+   "joe_WeakReference",
+   0,
+   0,
+   mthds,
+   0,
+   &joe_Object_Class,
+   0
+};
+joe_Object
+joe_WeakReference_New(joe_Object obj)
+{
+   joe_WeakReference self;
+
+   self = joe_Object_New(&joe_WeakReference_Class,
+                        sizeof(struct s_WeakReference));
+   ((WeakReference*)joe_Object_getMem(self))->obj = obj;
+   return self;
+}
+
+joe_Object
+joe_WeakReference_get(joe_Object self)
+{
+   WeakReference* wr = (void*)joe_Object_getMem(self);
+   return wr->obj;
 }

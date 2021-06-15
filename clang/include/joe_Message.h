@@ -29,4 +29,5 @@ joe_Object joe_Message_New (joe_Object receiver, char *selector,
                             int argc, joe_Object *args,
                             char * fileName, int row, int col);
 int joe_Message_exec (joe_Object self, joe_Block block, joe_Object *retval);
+char* joe_Message_toString(joe_Message self);
 # endif

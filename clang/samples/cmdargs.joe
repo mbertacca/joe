@@ -3,8 +3,10 @@
  */
 exit:args.
 
+list := !newInstance "joe_List".
 !foreach args,{:itm.
     !println itm.
+    list push itm.
 }.
 
 !println "-----".
@@ -21,17 +23,9 @@ i := -1.
 !while { i := i + 1. i < argc }, {
     !println (args get i toUpperCase).
 }.
-
-!println "----- array scan".
-scan := !newInstance "joe_ArrayScan", args.
-
-!while {scan hasNext},{
-    !println (scan next).
-}.
 !println "----- reverse". 
-!while {scan hasPeek},{
-    !println (scan peek).
-    scan back.
+!while {list empty; not},{
+    !println (list pop).
 }.
 
 !println "----- end".

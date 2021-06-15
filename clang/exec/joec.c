@@ -44,7 +44,7 @@ showError (joe_Exception excpt)
    joe_Exception_toString (excpt, 0, 0, &msg);
 
    fprintf (stderr, "%s\n", joe_String_getCharStar(msg));
-   joe_Object_delIfUnassigned (&msg);
+   joe_Object_assign (&msg, 0);
 }
 
 int
@@ -65,26 +65,31 @@ main (int argc, char *argv[])
       rc=joe_Class_newInstance(loadScriptClass, 1, &scriptName, &retval);
       if (rc != JOE_SUCCESS) {
          showError (retval);
+         joe_Object_assign(&retval, 0);
          return ERROR_GENERIC;
       } else {
          joe_Object_assign(&block, retval);
       }
+      joe_Object_assign(&retval, 0);
 
       joe_Object_assign(&argArray, joe_Array_New (argc - 1));
       for (i = 1; i < argc; i++) {
          joe_Object_assign (joe_Object_at (argArray, i - 1),
                             joe_String_New(argv[i]));
       }
+
       if ((rc = joe_Block_exec (block, 1, &argArray, &retval)) != JOE_SUCCESS){
          showError (retval);
       } else {
          if (joe_Object_instanceOf (retval, integerClass))
             rc = joe_Integer_value (retval);
       }
+
       joe_Object_assign(&scriptName, 0);
-      joe_Object_delIfUnassigned (&retval);
-      joe_Object_assign (&block, 0);
+
+      joe_Object_assign(&block, 0);
       joe_Object_assign (&argArray, 0);
+      joe_Object_assign (&retval, 0);
       lObjs =joe_Object_getLiveObjectsCount ();
       if (lObjs) {
          printf ("debug: unallocated objects=%d\n", lObjs);

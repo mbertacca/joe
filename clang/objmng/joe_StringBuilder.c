@@ -60,10 +60,11 @@ add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1) {
       joe_StringBuilder_append (self, argv[0]);
-      *retval = self;
+      joe_Object_assign(retval, self);
       return JOE_SUCCESS;
    } else {
-      *retval = joe_Exception_New ("StringBuilder add: invalid argument");
+      joe_Object_assign(retval,
+                        joe_Exception_New ("StringBuilder add: invalid argument"));
       return JOE_FAILURE;
    }
 }
@@ -71,14 +72,14 @@ add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 static int
 length (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   *retval = joe_Integer_New (joe_StringBuilder_length(self));
+   joe_Object_assign(retval, joe_Integer_New (joe_StringBuilder_length(self)));
    return JOE_SUCCESS;
 }
 
 static int
 toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   *retval = joe_StringBuilder_toString (self);
+   joe_Object_assign(retval, joe_StringBuilder_toString (self));
    return JOE_SUCCESS;
 }
 
@@ -125,7 +126,7 @@ appendCharStar (joe_StringBuilder self, char *s, int len)
    joe_Memory mem = *joe_Object_at (self, 0);
    StrBuild *sb = (void *) joe_Object_getMem (mem) ;
    char *str = ((char*) sb) + sizeof (StrBuild);
-   int newLen = sb->length + len;
+   unsigned int newLen = sb->length + len;
    if (sb->maxLength <= newLen) {
       char *newstr;
       StrBuild *newsb;
@@ -179,14 +180,18 @@ joe_StringBuilder_appendInt (joe_StringBuilder self, int num)
 void
 joe_StringBuilder_append (joe_StringBuilder self, joe_Object obj)
 {
-   joe_String str = 0;
-   if (joe_Object_instanceOf(str, &joe_String_Class)) {
-      str = obj;
+   if (joe_Object_instanceOf(obj, &joe_String_Class)) {
+      joe_StringBuilder_appendCharStar(self, joe_String_getCharStar(obj));
    } else {
-      joe_Object_invoke (obj, "toString", 0, 0, &str);
+      if (obj) {
+         joe_String str = 0;
+         joe_Object_invoke (obj, "toString", 0, 0, &str);
+         joe_StringBuilder_appendCharStar(self, joe_String_getCharStar(str));
+         joe_Object_assign(&str, 0);
+      } else {
+         joe_StringBuilder_appendCharStar(self, "(null)");
+      }
    }
-   joe_StringBuilder_appendCharStar (self, joe_String_getCharStar (str));
-   joe_Object_delIfUnassigned (&str);
 }
 
 joe_Object

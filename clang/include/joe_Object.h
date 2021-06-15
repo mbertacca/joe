@@ -20,11 +20,7 @@
 # define joe_Object_h  "$Id$";
 
 #ifdef WIN32
-#ifdef JOEOBJ_EXPORTS
 #define JOEOBJ_API __declspec(dllexport)
-#else
-#define JOEOBJ_API __declspec(dllimport)
-#endif /*JOEOBJ_EXPORTS*/
 #else
 #define JOEOBJ_API
 #endif /*WIN32*/
@@ -66,6 +62,12 @@ extern joe_Class joe_Object_Class;
 extern joe_Object joe_Boolean_True;
 extern joe_Object joe_Boolean_False;
 
+typedef joe_Object joe_int;
+JOEOBJ_API joe_int joe_int_New0();
+JOEOBJ_API joe_int joe_int_New(int initval);
+JOEOBJ_API int joe_int_value(joe_int self);
+JOEOBJ_API int* joe_int_starValue(joe_int self);
+
 JOEOBJ_API void joe_Class_registerClass (joe_Class *c);
 JOEOBJ_API joe_Class *joe_Class_getClass (char *name);
 JOEOBJ_API int joe_Class_newInstance (joe_Class *cls,
@@ -74,13 +76,19 @@ JOEOBJ_API joe_Object joe_Object_New (joe_Class *clazz, unsigned int size);
 JOEOBJ_API int joe_Object_getVarIdx (joe_Object self, char *name);
 JOEOBJ_API joe_Object *joe_Object_getVar (joe_Object self, char *name);
 JOEOBJ_API unsigned int joe_Object_length (joe_Object self);
-JOEOBJ_API joe_Object *joe_Object_at (joe_Object self, unsigned int idx);
-JOEOBJ_API void joe_Object_assign (joe_Object *self, joe_Object value);
+JOEOBJ_API joe_Object* joe_Object_array(joe_Object self);
+JOEOBJ_API joe_Object* joe_Object_at(joe_Object self, unsigned int idx);
+JOEOBJ_API void joe_Object_assign(joe_Object* self, joe_Object value);
+JOEOBJ_API void joe_Object_transfer(joe_Object* self, joe_Object *value);
+JOEOBJ_API char* joe_Object_toString(joe_Object self);
 JOEOBJ_API void joe_Object_delIfUnassigned (joe_Object *self);
+/*
 JOEOBJ_API void joe_Object_incrReference (joe_Object *self);
 JOEOBJ_API void joe_Object_decrReference (joe_Object *self);
+*/
 JOEOBJ_API unsigned int joe_Object_getLiveObjectsCount ();
 JOEOBJ_API void joe_Object_showLiveObjects ();
+JOEOBJ_API void joe_Object_show(joe_Object obj, int indent);
 JOEOBJ_API void ** joe_Object_getMem (joe_Object self);
 JOEOBJ_API joe_Class * joe_Object_getClass (joe_Object self);
 JOEOBJ_API char * joe_Object_getClassName (joe_Object self);
@@ -91,10 +99,6 @@ JOEOBJ_API int joe_Object_invoke (joe_Object self, const char *name,
                        int argc, joe_Object *argv, joe_Object *retval);
 JOEOBJ_API int joe_Object_invokeSuper (joe_Object self, const char *name,
                        int argc, joe_Object *argv, joe_Object *retval);
-JOEOBJ_API int joe_Object_assignInvoke (joe_Object self, const char *name,
-                             int argc, joe_Object *argv, joe_Object *retval);
-JOEOBJ_API int joe_Object_assignInvokeSuper (joe_Object self, const char *name,
-                             int argc, joe_Object *argv, joe_Object *retval);
-JOEOBJ_API void joe_Object_extends (joe_Object self, joe_Class *childClass);
+JOEOBJ_API void joe_Object_extends(joe_Object self, joe_Class* childClass);
 
 # endif

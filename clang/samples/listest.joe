@@ -30,6 +30,6 @@ list push "Five".
    !println "pop=",(list pop).
 }.
 list push "One".
-!foreach list, {:obj..
+!foreach list, {:obj.
    !println "(",obj,")".
 }.

@@ -46,7 +46,7 @@ init_str (joe_Object self, char *num, joe_Object *retval)
    nDecimal bd = nDecimal_new_str (num);
 
    if (nDecimal_wrongAssignment (bd)) {
-      *retval = joe_Exception_New ("BigDecimal: not numeric format");
+      joe_Object_assign(retval, joe_Exception_New ("BigDecimal: not numeric format"));
       Return = JOE_FAILURE;
    } else {
       init (self, bd);
@@ -62,12 +62,12 @@ ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    switch (argc) {
    case 1:
       if (!joe_Object_instanceOf (argv[0], &joe_String_Class)) {
-         *retval = joe_Exception_New ("BigDecimal: invalid 1st argument");
+         joe_Object_assign(retval, joe_Exception_New ("BigDecimal: invalid 1st argument"));
          return JOE_FAILURE;
       }
       break;
    default:
-      *retval = joe_Exception_New ("BigDecimal: invalid argument number");
+      joe_Object_assign (retval, joe_Exception_New ("BigDecimal: invalid argument number"));
       return JOE_FAILURE;
    }
 
@@ -77,251 +77,67 @@ ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 static int
 add(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 {
-
-   if (argc == 1) {
-      nDecimal sbd =get_nDecimal (self);
-      if (joe_BigDecimal_bigDecimalValue (argv[0], retval) == JOE_SUCCESS) {
-         nDecimal res;
-         joe_Object tmp = 0;
-         nDecimal abd = get_nDecimal (*retval);
-         joe_Object_assign (&tmp, *retval);
-         res = nDecimal_add (sbd, abd);
-         *retval = joe_BigDecimal_New (res);
-         nDecimal_delete (res);
-         joe_Object_assign (&tmp, 0);
-         return JOE_SUCCESS;
-      }
-   } else {
-      *retval = joe_Exception_New("BigDecimal add: invalid argument number");
-   }
-   return JOE_FAILURE;
+   return joe_BigDecimal_oper(self, argc, argv, retval, ADD);
 }
 
 static int
 subtract(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 {
-
-   if (argc == 1) {
-      nDecimal sbd =get_nDecimal (self);
-      if (joe_BigDecimal_bigDecimalValue (argv[0], retval) == JOE_SUCCESS) {
-         nDecimal res;
-         joe_Object tmp = 0;
-         nDecimal abd = get_nDecimal (*retval);
-         joe_Object_assign (&tmp, *retval);
-         res = nDecimal_subtract (sbd, abd);
-         *retval = joe_BigDecimal_New (res);
-         nDecimal_delete (res);
-         joe_Object_assign (&tmp, 0);
-         return JOE_SUCCESS;
-      }
-   } else {
-      *retval = joe_Exception_New("BigDecimal subtract: invalid argument number");
-   }
-   return JOE_FAILURE;
+   return joe_BigDecimal_oper(self, argc, argv, retval, SUBTRACT);
 }
 
 static int
 multiply(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 {
-
-   if (argc == 1) {
-      nDecimal sbd =get_nDecimal (self);
-      if (joe_BigDecimal_bigDecimalValue (argv[0], retval) == JOE_SUCCESS) {
-         nDecimal res;
-         joe_Object tmp = 0;
-         nDecimal abd = get_nDecimal (*retval);
-         joe_Object_assign (&tmp, *retval);
-         res = nDecimal_multiply (sbd, abd);
-         *retval = joe_BigDecimal_New (res);
-         nDecimal_delete (res);
-         joe_Object_assign (&tmp, 0);
-         return JOE_SUCCESS;
-      }
-   } else {
-      *retval = joe_Exception_New("BigDecimal multiply: invalid argument number");
-   }
-   return JOE_FAILURE;
+   return joe_BigDecimal_oper(self, argc, argv, retval, MULTIPLY);
 }
 
 static int
 divide (joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 {
-
-   if (argc == 1) {
-      nDecimal sbd =get_nDecimal (self);
-      if (joe_BigDecimal_bigDecimalValue (argv[0], retval) == JOE_SUCCESS) {
-         nDecimal res;
-         joe_Object tmp = 0;
-         nDecimal abd = get_nDecimal (*retval);
-         joe_Object_assign (&tmp, *retval);
-         res = nDecimal_divide (sbd, abd, 16);
-         *retval = joe_BigDecimal_New (res);
-         nDecimal_delete (res);
-         joe_Object_assign (&tmp, 0);
-         return JOE_SUCCESS;
-      }
-   } else {
-      *retval = joe_Exception_New("BigDecimal divide: invalid argument number");
-   }
-   return JOE_FAILURE;
+   return joe_BigDecimal_oper(self, argc, argv, retval, DIVIDE);
 }
 
 static int
 _remainder (joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 {
-
-   if (argc == 1) {
-      nDecimal sbd =get_nDecimal (self);
-      if (joe_BigDecimal_bigDecimalValue (argv[0], retval) == JOE_SUCCESS) {
-         nDecimal res;
-         joe_Object tmp = 0;
-         nDecimal abd = get_nDecimal (*retval);
-         joe_Object_assign (&tmp, *retval);
-         res = nDecimal_remainder (sbd, abd);
-         *retval = joe_BigDecimal_New (res);
-         nDecimal_delete (res);
-         joe_Object_assign (&tmp, 0);
-         return JOE_SUCCESS;
-      }
-   } else {
-      *retval = joe_Exception_New("BigDecimal remainder: invalid argument number");
-   }
-   return JOE_FAILURE;
-}
-
-static int
-joe_BigDecimal_compareTo (joe_BigDecimal self, joe_BigDecimal bd)
-{
-   joe_Object tmp = 0;
-   nDecimal sbd = get_nDecimal (self);
-   nDecimal abd = get_nDecimal (bd);
-   return nDecimal_compareTo(sbd, abd);
+   return joe_BigDecimal_oper(self, argc, argv, retval, REMAINDER);
 }
 
 static int
 equals (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   if (argc == 1) {
-      if (joe_BigDecimal_bigDecimalValue (argv[0], retval) == JOE_SUCCESS) {
-         joe_Object tmp = 0;
-         joe_Object_assign (&tmp, *retval);
-         if (joe_BigDecimal_compareTo (self, tmp) == 0)
-            *retval = joe_Boolean_New_true();
-         else
-            *retval = joe_Boolean_New_false();
-         joe_Object_assign (&tmp, 0);
-      } else {
-         return JOE_FAILURE;
-      }
-   } else {
-      *retval = joe_Boolean_New_false();
-   }
-   return JOE_SUCCESS;
+   return joe_BigDecimal_oper(self, argc, argv, retval, EQUALS);
 }
 
 static int
 ne (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   if (argc == 1) {
-      if (joe_BigDecimal_bigDecimalValue (argv[0], retval) == JOE_SUCCESS) {
-         joe_Object tmp = 0;
-         joe_Object_assign (&tmp, *retval);
-         if (joe_BigDecimal_compareTo (self, tmp) != 0)
-            *retval = joe_Boolean_New_true();
-         else
-            *retval = joe_Boolean_New_false();
-         joe_Object_assign (&tmp, 0);
-      } else {
-         return JOE_FAILURE;
-      }
-   } else {
-      *retval = joe_Boolean_New_false();
-   }
-   return JOE_SUCCESS;
+   return joe_BigDecimal_oper(self, argc, argv, retval, NE);
 }
 
 static int
 ge (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   if (argc == 1) {
-      if (joe_BigDecimal_bigDecimalValue (argv[0], retval) == JOE_SUCCESS) {
-         joe_Object tmp = 0;
-         joe_Object_assign (&tmp, *retval);
-         if (joe_BigDecimal_compareTo (self, tmp) >= 0)
-            *retval = joe_Boolean_New_true();
-         else
-            *retval = joe_Boolean_New_false();
-         joe_Object_assign (&tmp, 0);
-      } else {
-         return JOE_FAILURE;
-      }
-   } else {
-      *retval = joe_Boolean_New_false();
-   }
-   return JOE_SUCCESS;
+   return joe_BigDecimal_oper(self, argc, argv, retval, GE);
 }
 
 static int
 le (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   if (argc == 1) {
-      if (joe_BigDecimal_bigDecimalValue (argv[0], retval) == JOE_SUCCESS) {
-         joe_Object tmp = 0;
-         joe_Object_assign (&tmp, *retval);
-         if (joe_BigDecimal_compareTo (self, tmp) <= 0)
-            *retval = joe_Boolean_New_true();
-         else
-            *retval = joe_Boolean_New_false();
-         joe_Object_assign (&tmp, 0);
-      } else {
-         return JOE_FAILURE;
-      }
-   } else {
-      *retval = joe_Boolean_New_false();
-   }
-   return JOE_SUCCESS;
+   return joe_BigDecimal_oper(self, argc, argv, retval, LE);
 }
 
 static int
 gt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   if (argc == 1) {
-      if (joe_BigDecimal_bigDecimalValue (argv[0], retval) == JOE_SUCCESS) {
-         joe_Object tmp = 0;
-         joe_Object_assign (&tmp, *retval);
-         if (joe_BigDecimal_compareTo (self, tmp) > 0)
-            *retval = joe_Boolean_New_true();
-         else
-            *retval = joe_Boolean_New_false();
-         joe_Object_assign (&tmp, 0);
-      } else {
-         return JOE_FAILURE;
-      }
-   } else {
-      *retval = joe_Boolean_New_false();
-   }
-   return JOE_SUCCESS;
+   return joe_BigDecimal_oper(self, argc, argv, retval, GT);
 }
 
 static int
 lt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   if (argc == 1) {
-      if (joe_BigDecimal_bigDecimalValue (argv[0], retval) == JOE_SUCCESS) {
-         joe_Object tmp = 0;
-         joe_Object_assign (&tmp, *retval);
-         if (joe_BigDecimal_compareTo (self, tmp) < 0)
-            *retval = joe_Boolean_New_true();
-         else
-            *retval = joe_Boolean_New_false();
-         joe_Object_assign (&tmp, 0);
-      } else {
-         return JOE_FAILURE;
-      }
-   } else {
-      *retval = joe_Boolean_New_false();
-   }
-   return JOE_SUCCESS;
+   return joe_BigDecimal_oper(self, argc, argv, retval, LT);
 }
 
 static int
@@ -330,7 +146,7 @@ toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    joe_Memory mem = *joe_Object_at (self, 0);
    nDecimal num = (nDecimal) joe_Object_getMem (mem);
    char* strNum = nDecimal_toString(num);
-   *retval = joe_String_New (nDecimal_toString (num));
+   joe_Object_assign (retval, joe_String_New (nDecimal_toString (num)));
    free(strNum);
    return JOE_SUCCESS;
 }
@@ -398,7 +214,7 @@ int
 joe_BigDecimal_bigDecimalValue (joe_Object self, joe_Object *retval)
 {
    if (joe_Object_instanceOf(self, &joe_BigDecimal_Class)) {
-      *retval = self;
+      joe_Object_assign(retval, self);
    } else {
       nDecimal bd;
       if (joe_Object_instanceOf(self, &joe_Integer_Class)) {
@@ -408,45 +224,113 @@ joe_BigDecimal_bigDecimalValue (joe_Object self, joe_Object *retval)
       } else if (joe_Object_instanceOf(self, &joe_String_Class)) {
          bd = nDecimal_new_str (joe_String_getCharStar(self));
          if (nDecimal_wrongAssignment (bd)) {
-            *retval = joe_Exception_New ("BigDecimal: not numeric format");
+            joe_Object_assign(retval,
+                              joe_Exception_New ("BigDecimal: not numeric format"));
             nDecimal_delete (bd);
             return JOE_FAILURE;
          }
       } else {
-         *retval = joe_Exception_New("BigDecimal: not numeric value");
+         joe_Object_assign(retval,
+                           joe_Exception_New("BigDecimal: not numeric value"));
          return JOE_FAILURE;
       }
-      *retval = joe_BigDecimal_New (bd);
+      joe_Object_assign(retval, joe_BigDecimal_New (bd));
       nDecimal_delete (bd);
    }
    return JOE_SUCCESS;
 }
-
-
 int joe_BigDecimal_oper(joe_Object self, int argc, joe_Object* argv,
-                        joe_Object* retval, enum joe_BigDecimal_ops op) {
-   switch (op) {
-   case ADD:
-      return add (self, argc, argv, retval);
-   case SUBTRACT:
-      return subtract (self, argc, argv, retval);
-   case MULTIPLY:
-      return multiply (self, argc, argv, retval);
-   case DIVIDE:
-      return divide (self, argc, argv, retval);
-   case EQUALS:
-      return equals (self, argc, argv, retval);
-   case REMAINDER:
-      return _remainder (self, argc, argv, retval);
-   case LT:
-      return lt (self, argc, argv, retval);
-   case GT:
-      return gt (self, argc, argv, retval);
-   case LE:
-      return le (self, argc, argv, retval);
-   case GE:
-      return ge (self, argc, argv, retval);
-   case NE:
-      return ne (self, argc, argv, retval);
+                        joe_Object* retval, enum joe_BigDecimal_ops op)
+{
+   if (argc == 1) {
+      nDecimal sbd = get_nDecimal (self);
+      if (joe_BigDecimal_bigDecimalValue (argv[0], retval) == JOE_SUCCESS) {
+         nDecimal res;
+         nDecimal abd = get_nDecimal (*retval);
+         switch (op) {
+         case ADD:
+            res = nDecimal_add(sbd, abd);
+            joe_Object_assign(retval, joe_BigDecimal_New(res));
+            nDecimal_delete(res);
+            break;
+         case SUBTRACT:
+            res = nDecimal_subtract(sbd, abd);
+            joe_Object_assign(retval, joe_BigDecimal_New(res));
+            nDecimal_delete(res);
+            break;
+         case MULTIPLY:
+            res = nDecimal_multiply(sbd, abd);
+            joe_Object_assign(retval, joe_BigDecimal_New(res));
+            nDecimal_delete(res);
+            break;
+         case DIVIDE:
+            if (nDecimal_isZero(abd)) {
+               joe_Object_assign(retval,
+                  joe_Exception_New("joe_BigDecimal /: division by 0"));
+               return JOE_FAILURE;
+            } else {
+               res = nDecimal_divide(sbd, abd, 16);
+               joe_Object_assign(retval, joe_BigDecimal_New(res));
+               nDecimal_delete(res);
+            }
+            break;
+         case REMAINDER:
+            if (nDecimal_isZero(abd)) {
+               joe_Object_assign(retval,
+                  joe_Exception_New("joe_BigDecimal %: division by 0"));
+               return JOE_FAILURE;
+            } else {
+               res = nDecimal_remainder(sbd, abd);
+               joe_Object_assign(retval, joe_BigDecimal_New(res));
+               nDecimal_delete(res);
+            }
+            break;
+         case EQUALS:
+            if (nDecimal_compareTo (sbd, abd) == 0)
+               joe_Object_assign(retval, joe_Boolean_New_true());
+            else
+               joe_Object_assign(retval, joe_Boolean_New_false());
+            break;
+         case LT:
+            if (nDecimal_compareTo(sbd, abd) < 0)
+               joe_Object_assign(retval, joe_Boolean_New_true());
+            else
+                  joe_Object_assign(retval, joe_Boolean_New_false());
+            break;
+         case GT:
+            if (nDecimal_compareTo(sbd, abd) > 0)
+               joe_Object_assign(retval, joe_Boolean_New_true());
+            else
+               joe_Object_assign(retval, joe_Boolean_New_false());
+            break;
+         case LE:
+            if (nDecimal_compareTo(sbd, abd) <= 0)
+               joe_Object_assign(retval, joe_Boolean_New_true());
+            else
+               joe_Object_assign(retval, joe_Boolean_New_false());
+            break;
+         case GE:
+            if (nDecimal_compareTo(sbd, abd) >= 0)
+               joe_Object_assign(retval, joe_Boolean_New_true());
+            else
+               joe_Object_assign(retval, joe_Boolean_New_false());
+            break;
+         case NE:
+            if (nDecimal_compareTo(sbd, abd) != 0)
+               joe_Object_assign(retval, joe_Boolean_New_true());
+            else
+               joe_Object_assign(retval, joe_Boolean_New_false());
+            break;
+         default:
+            joe_Object_assign(retval,
+               joe_Exception_New("Internal error on joe_BigDecimal_oper"));
+            return JOE_FAILURE;
+         }
+         return JOE_SUCCESS;
+      }
+   } else {
+      joe_Object_assign(retval,
+               joe_Exception_New("BigDecimal: invalid argument number"));
    }
+   return JOE_FAILURE;
 }

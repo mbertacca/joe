@@ -1,0 +1,243 @@
+script:args.
+aa :=.
+{
+  aa := !!.
+  a := !array 0.
+  a set 0,a.
+  p := {
+      !println aa,!!," ",a," ",(a get 0).
+  }. 
+  aa p.
+} new.
+ 
+aa p.
+
+System := {
+   currentTimeMillis :=.
+   !try {
+      currentTimeMillis := { !unixTime; * 1000m}.
+   },{:ex.
+      currentTimeMillis := !getClassRef "java.lang.System" currentTimeMillis.
+   }.
+} new.
+
+!println (System currentTimeMillis).
+
+parent := {Parent:. 
+   a := 7.
+   inc := {
+      a := a + 1.
+   }.
+   getA := { a. }.
+   toString := {
+      "Ciao " + a.
+   }
+}.
+
+child := {Child:.
+   super := parent new.
+   !! extends super.
+   !! inc.
+   !println (!! getA).
+   super inc.
+   !println (!!getA).
+   toString := {
+      "Hola " + (super toString).
+   }
+}.
+
+nephew := {Child:.
+   super := child new.
+   !! extends super.
+   !! inc.
+   !println (!! getA).
+   super inc.
+   !println (!!getA).
+}.
+
+obj := nephew new.
+
+blk := {:aObj.
+   !println (aObj getA).
+}.
+
+blk exec (child new).
+!println "... ", obj.
+
+!println "::::".
+{blk1name:.
+   !println "In block1".
+   {blk2name:.
+      !println "InIn block1".
+      !break "blk1name".
+      !println "InIn block2".
+   } exec.
+   !println "In block2".
+} exec.
+
+@obj := {aObj:n.
+   i := n.
+   mthd := {Mthd:.
+      i := i + 1.
+   }.
+} new 10.
+
+!println (@obj mthd).
+!println (@obj mthd).
+!println (@obj name).
+
+!println ({ a := 77 } exec). 
+
+sb := !newInstance "joe_StringBuilder".
+sb add "ABC.".
+sb add "DEF.".
+sb add "GHI".
+!println sb," ",(sb length).
+
+list := !newInstance "joe_List".
+args foreach {:i.
+   list add i.
+}.
+!println (list length).
+!println (list get 0).
+!println (list pop).
+!println (list peek).
+list foreach {:i.
+   !println i.
+}.
+
+
+!println (1.0 <> 1).
+!println (1.0 = 1).
+!println (1.1 <> 1.1).
+!println (1.1 = 1.1).
+!println (1.1 + 2).
+!println (3.3 + 4.4).
+!println (5.5 + 6.6m).
+!println (1.1 - 2).
+!println (3.3 - 4.4).
+!println (5.5 - 6.6m).
+
+!println (("Hello, " + "World!") substring 3, 9).
+!println (("Hello, " + "World!") substring 3).
+!println (("Hello, " + "World!") toUpperCase).
+!println (("Hello, " + "World!") toLowerCase).
+!println (("Hello, " + "World!") length).
+!println ("Hello, " + "World!").
+
+array := !newArray 3.
+array set 0,"One".
+array set 1,2.
+array set 2,"Three".
+
+a:=!foreach array,{:i.
+   !println i.
+   "foreach return value".
+}.
+!println a.
+
+a:=!foreach array,{:i.
+   !println i.
+   "foreach return value". 
+   !if (i = 2), {!breakLoop. }.
+}.
+!println a.
+
+a:=!for 2,5,{:i.
+   !println i.
+   i.
+}.
+!println a.
+
+a:=!for 2,6,2,{:i.
+   !println i.
+   !if (i = 4), { "for return value". !breakLoop. }.
+}.
+!println a.
+
+pippo := !newInstance "joe_List".
+!println pippo.
+b := <0>.
+!switch b
+case <0>, {
+   !println "Ok".
+}
+case <1>, {
+   !println "Ko".
+}
+endSwitch.
+!if b, {!println "Ko" },{!println "Ok"}.
+!if (b not), {!println "Ok" },{!println "Ko"}.
+!if {b}, {!println "Ko" },{!println "Ok"}.
+!if {b not}, {!println "Ok" },{!println "Ko"}.
+
+a:=!while { b not },{
+   b := <1>.
+   3 toString.
+}.
+
+!println a.
+
+a:=!while { <1> },{
+   "3".
+   !breakLoop.
+}.
+
+!println a.
+
+a:=!array 81.
+
+a set 0,a.
+!version.
+a:=.
+!println (!version).
+
+blk := {
+     88.
+}.
+
+!println (blk exec).
+
+aVar := "a variable".
+
+!println aVar.
+
+
+!if (7m + 3m > 5m),{
+   15+13.
+},{
+   27+31.
+}.
+
+!println 123.
+
+2m + 10.
+
+1 + 2.
+a := 3 + 4.
+!println (5 + 6)," ",a.
+
+1 + 2.1.
+a := 3 + 4.1m.
+!println (5 + 6.1m)," ", a.
+
+1 + 2.2m.
+a := 3 + 4.2m.
+!println (5 + 6.2m)," ", a.
+
+1m + 2.3m.
+a := 3m + 4.2m.
+!println (5m + 6.2m)," ", a.
+
+!println "--- Variables defined".
+vars := !! getVariablesNames.
+vars foreach {:i.
+   !println (i).
+}.
+!println "---".
+!println (!! getVariable "@obj"  mthd).
+
+null:=.
+!throw "Script ends here".
+
+!println "Don't executed".

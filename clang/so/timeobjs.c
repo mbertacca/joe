@@ -30,7 +30,7 @@ static int
 setHour (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_Object_assign (joe_Object_getVar (self, "hour"), argv[0]);
-   *retval = self;
+   joe_Object_assign(retval, self);
 
    return JOE_SUCCESS;
 }
@@ -39,7 +39,7 @@ static int
 setMin (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_Object_assign (joe_Object_getVar (self, "min"), argv[0]);
-   *retval = self;
+   joe_Object_assign(retval, self);
 
    return JOE_SUCCESS;
 }
@@ -48,7 +48,7 @@ static int
 setSec (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_Object_assign (joe_Object_getVar (self, "sec"), argv[0]);
-   *retval = self;
+   joe_Object_assign(retval, self);
 
    return JOE_SUCCESS;
 }
@@ -61,7 +61,7 @@ toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
                   joe_Integer_value(*joe_Object_getVar (self, "hour")),
                   joe_Integer_value(*joe_Object_getVar (self, "min")),
                   joe_Integer_value(*joe_Object_getVar (self, "sec")));
-   *retval = joe_String_New (buff);
+   joe_Object_assign(retval, joe_String_New (buff));
    free (buff);
    return JOE_SUCCESS;
 }
@@ -80,7 +80,7 @@ static joe_Class joe_Time_Class = {
    0,
    timeMthds,
    timeVariables,
-   &joe_Object_Class,
+   0 /* &joe_Object_Class */,
    0
 };
 
@@ -106,7 +106,7 @@ static int
 setYear (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_Object_assign (joe_Object_getVar (self, "year"), argv[0]);
-   *retval = self;
+   joe_Object_assign(retval, self);
 
    return JOE_SUCCESS;
 }
@@ -115,7 +115,7 @@ static int
 setMonth (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_Object_assign (joe_Object_getVar (self, "month"), argv[0]);
-   *retval = self;
+   joe_Object_assign(retval, self);
 
    return JOE_SUCCESS;
 }
@@ -124,7 +124,7 @@ static int
 setDay (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_Object_assign (joe_Object_getVar (self, "day"), argv[0]);
-   *retval = self;
+   joe_Object_assign(retval, self);
 
    return JOE_SUCCESS;
 }
@@ -141,7 +141,7 @@ ts_toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
                   joe_Integer_value(*joe_Object_getVar (self, "month")),
                   joe_Integer_value(*joe_Object_getVar (self, "day")));
 
-   joe_Object_assignInvokeSuper (self, "toString", 0, 0, &sup);
+   joe_Object_invokeSuper (self, "toString", 0, 0, &sup);
    joe_Object_assign (&msg, joe_String_New (buff));
    joe_Object_invoke (msg, "add", 1, &sup, retval);
    joe_Object_assign (&msg, 0);
@@ -181,7 +181,7 @@ timeStampCtor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 
-void
+JOEOBJ_API void
 joe_init ()
 {
    joe_Class_registerClass (&joe_Time_Class);

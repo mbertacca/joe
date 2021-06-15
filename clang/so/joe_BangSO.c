@@ -26,7 +26,7 @@
 # ifdef WIN32
 # include "windows.h"
 
-# define DLOPEN LoadLibrary
+# define DLOPEN LoadLibraryA
 # define DLOPEN_RETURN_TYPE HMODULE
 # define DLSYM GetProcAddress
 # define DLSYM_TYPE(x) FARPROC x
@@ -171,16 +171,16 @@ static joe_Class joe_BangSO_Class = {
 };
 
 int
-joe_BangSO_New (joe_String soName,void (regfun)(joe_Class*),joe_Object *retval)
+joe_BangSO_New (joe_String soName, joe_Object *retval)
 {
-   joe_Object self = 0;
    DLSYM_TYPE(pnt) = 0;
    const char* libName = joe_String_getCharStar (soName);
    struct LibData lib;
 
    if (libName == 0 || *libName == 0) {
 # ifdef WIN32
-      *retval = joe_Exception_New ("loadSO: invalid argument");
+      joe_Object_assign (retval,
+                         joe_Exception_New ("loadSO: null argument"));
       return JOE_FAILURE;
 # else
       libName = 0;
@@ -189,17 +189,18 @@ joe_BangSO_New (joe_String soName,void (regfun)(joe_Class*),joe_Object *retval)
    lib.pnt = DLOPEN(libName);
    lib.dllConv = 0;
    if (lib.pnt == 0) {
-      *retval = joe_Exception_New ("loadSO: object not found");
+      joe_Object_assign(retval,
+                        joe_Exception_New ("loadSO: object not found"));
       return JOE_FAILURE;
    }
    pnt = DLSYM(lib.pnt,"joe_init");
    if (pnt != 0) {
-      pnt(regfun);
+      pnt();
    }
 
-   self = joe_Object_New (&joe_BangSO_Class, sizeof(struct LibData));
-   memcpy (*joe_Object_getMem (self), &lib, sizeof(struct LibData));
-   *retval = self;
+   joe_Object_assign(retval,
+                     joe_Object_New (&joe_BangSO_Class, sizeof(struct LibData)));
+   memcpy (*joe_Object_getMem (*retval), &lib, sizeof(struct LibData));
 
    return JOE_SUCCESS;
 }

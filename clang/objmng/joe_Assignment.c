@@ -26,7 +26,7 @@ joe_Assignment_assign (joe_Object self,
                        int argc, joe_Object *args, joe_Object *retval)
 {
    joe_Block_setVar (args[0], args[1], args[2]);
-   *retval = args[2];
+   joe_Object_assign (retval, args[2]);
    return JOE_SUCCESS;
 }
 

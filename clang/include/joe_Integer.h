@@ -24,6 +24,7 @@ typedef joe_Object joe_Integer;
 extern joe_Class joe_Integer_Class;
 JOEOBJ_API joe_Object joe_Integer_New (long value);
 JOEOBJ_API long joe_Integer_value(joe_Integer self);
-JOEOBJ_API joe_Integer joe_Integer_addMe1 (joe_Object self);
+JOEOBJ_API joe_Integer joe_Integer_addMe(joe_Object self, long incr);
+JOEOBJ_API joe_Integer joe_Integer_addMe1(joe_Object self);
 JOEOBJ_API joe_Integer joe_Integer_subMe1 (joe_Object self);
 # endif

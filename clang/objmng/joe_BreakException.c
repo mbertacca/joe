@@ -38,7 +38,7 @@ joe_Object
 joe_BreakException_New (char *desc) {
    joe_Object self;
    self = joe_Object_New (&joe_BreakException_Class, 0);
-   joe_Exception_Init (self, desc);
+   joe_Exception_Init (self, joe_String_New(desc));
 
    return self;
 }

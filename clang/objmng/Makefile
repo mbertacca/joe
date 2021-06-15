@@ -7,7 +7,6 @@ BIN=../bin
 INCL=-I../include -I.
 OBJS=joe_Object.o \
      joe_Array.o \
-     joe_ArrayScan.o \
      joe_ArrayList.o \
      joe_Float.o \
      joe_BigDecimal.o \

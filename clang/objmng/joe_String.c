@@ -33,7 +33,7 @@ add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       joe_String tmp = 0;
       if (!joe_Object_instanceOf(argv[0], &joe_String_Class)) {
          if (argv[0])
-             joe_Object_assignInvoke (argv[0], "toString", 0, 0, &tmp);
+             joe_Object_invoke (argv[0], "toString", 0, 0, &tmp);
           else
              joe_Object_assign (&tmp, joe_String_New ("(null)"));
           str2 = *((char **) joe_Object_getMem(tmp));
@@ -42,7 +42,8 @@ add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       }
 
       str1 = *((char **) joe_Object_getMem(self));
-      *retval = joe_Object_New (&joe_String_Class, strlen(str1)+strlen(str2)+1);
+      joe_Object_assign (retval,
+             joe_Object_New (&joe_String_Class, strlen(str1)+strlen(str2)+1));
       str = (char **) joe_Object_getMem(*retval);
       strcat (*str, str1);
       strcat (*str, str2);
@@ -51,7 +52,7 @@ add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
     
       return JOE_SUCCESS;
    } else {
-      *retval = joe_Exception_New ("invalid argument");
+      joe_Object_assign(retval, joe_Exception_New ("joe_String add: invalid argument"));
       return JOE_FAILURE;
    }
 }
@@ -60,10 +61,10 @@ static int
 length (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
-      *retval = joe_Integer_New (joe_String_length(self));
+      joe_Object_assign(retval, joe_Integer_New (joe_String_length(self)));
       return JOE_SUCCESS;
    } else {
-      *retval = joe_Exception_New ("length: invalid argument");
+      joe_Object_assign(retval, joe_Exception_New ("length: invalid argument"));
       return JOE_FAILURE;
    }
 }
@@ -73,13 +74,14 @@ toLowerCase (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
       char *c;
-      *retval = joe_String_New (joe_String_getCharStar (self));
+      joe_Object_assign(retval, joe_String_New (joe_String_getCharStar (self)));
       c = joe_String_getCharStar (*retval);
       for ( ; *c; c++)
          *c = tolower (*c);
       return JOE_SUCCESS;
    } else {
-      *retval = joe_Exception_New ("toLowerCase: invalid argument");
+      joe_Object_assign(retval, joe_Exception_New (
+                                "joe_String toLowerCase: invalid argument"));
       return JOE_FAILURE;
    }
 }
@@ -89,13 +91,14 @@ toUpperCase (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
       char *c;
-      *retval = joe_String_New (joe_String_getCharStar (self));
+      joe_Object_assign(retval, joe_String_New (joe_String_getCharStar (self)));
       c = joe_String_getCharStar (*retval);
       for ( ; *c; c++)
          *c = toupper (*c);
       return JOE_SUCCESS;
    } else {
-      *retval = joe_Exception_New ("toUpperCase: invalid argument");
+      joe_Object_assign(retval, joe_Exception_New (
+                                "joe_String toUpperCase: invalid argument"));
       return JOE_FAILURE;
    }
 }
@@ -108,31 +111,77 @@ substring (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       unsigned int beginIndex = joe_Integer_value (argv[0]);
       if (argc == 1) {
          if (beginIndex < selfLen) {
-            *retval=joe_String_New(&joe_String_getCharStar (self)[beginIndex]);
+            joe_Object_assign(retval, joe_String_New(
+                              &joe_String_getCharStar (self)[beginIndex]));
          } else {
-            *retval=joe_String_New("");
+            joe_Object_assign(retval, joe_String_New(""));
          }
          return JOE_SUCCESS;
       } else if (argc==2 && joe_Object_instanceOf(argv[1],&joe_Integer_Class)) {
          int newLen = joe_Integer_value (argv[1]) - beginIndex;
          if (beginIndex < selfLen && newLen > 0) {
-            *retval = joe_String_New_len(
-                          &joe_String_getCharStar (self)[beginIndex],newLen);
+            joe_Object_assign(retval, joe_String_New_len(
+                              &joe_String_getCharStar (self)[beginIndex],newLen));
          } else {
-            *retval=joe_String_New("");
+            joe_Object_assign(retval, joe_String_New(""));
          }
          return JOE_SUCCESS;
       }
    }
 
-   *retval = joe_Exception_New ("substring: invalid argument");
+   joe_Object_assign(retval, joe_Exception_New (
+                             "joe_String substring: invalid argument"));
    return JOE_FAILURE;
 }
 
 static int
+charAt(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
+{
+   if (argc = 1 && joe_Object_instanceOf(argv[0], &joe_Integer_Class)) {
+      unsigned int selfLen = joe_String_length(self);
+      unsigned int index = joe_Integer_value(argv[0]);
+      if (index < selfLen) {
+         joe_Object_assign(retval, joe_String_New_len(
+                                   &joe_String_getCharStar(self)[index], 1));
+      } else {
+         joe_Object_assign(retval, joe_String_New(""));
+      }
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New(
+                               "joe_String charAt: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+startsWith(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
+{
+   if (argc = 1 && joe_Object_instanceOf(argv[0], &joe_String_Class)) {
+      unsigned int selfLen = joe_String_length(self);
+      unsigned int arglen = joe_String_length(argv[0]);
+      if (arglen <= selfLen) {
+          if (strncmp (joe_String_getCharStar(self),
+                       joe_String_getCharStar(argv[0]), arglen) == 0)
+             joe_Object_assign(retval, joe_Boolean_New_true());
+          else
+             joe_Object_assign(retval, joe_Boolean_New_false());
+      } else {
+         joe_Object_assign(retval, joe_Boolean_New_false());
+      }
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New(
+                                "joe_String startsWith: invalid argument"));
+         return JOE_FAILURE;
+   }
+}
+
+
+static int
 toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   *retval = self;
+   joe_Object_assign (retval, self);
    return JOE_SUCCESS;
 }
 
@@ -141,9 +190,9 @@ equals (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_String_Class)
                  && joe_String_compare (self, argv[0]) == 0)
-      *retval = joe_Boolean_New_true();
+      joe_Object_assign(retval, joe_Boolean_New_true());
    else
-      *retval = joe_Boolean_New_false();
+      joe_Object_assign(retval, joe_Boolean_New_false());
    return JOE_SUCCESS;
 }
 
@@ -152,12 +201,12 @@ ne (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_String_Class)) {
       if (joe_String_compare (self, argv[0]) != 0)
-         *retval = joe_Boolean_New_true();
+         joe_Object_assign(retval, joe_Boolean_New_true());
       else
-         *retval = joe_Boolean_New_false();
+         joe_Object_assign(retval, joe_Boolean_New_false());
       return JOE_SUCCESS;
    } else {
-      *retval = joe_Exception_New ("String <>: invalid argument");
+      joe_Object_assign(retval, joe_Exception_New ("joe_String <>: invalid argument"));
       return JOE_FAILURE;
    }
 }
@@ -167,12 +216,12 @@ ge (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_String_Class)) {
       if (joe_String_compare (self, argv[0]) >= 0)
-         *retval = joe_Boolean_New_true();
+         joe_Object_assign(retval, joe_Boolean_New_true());
       else
-         *retval = joe_Boolean_New_false();
+         joe_Object_assign(retval, joe_Boolean_New_false());
       return JOE_SUCCESS;
    } else {
-      *retval = joe_Exception_New ("String >=: invalid argument");
+      joe_Object_assign(retval, joe_Exception_New ("joe_String >=: invalid argument"));
       return JOE_FAILURE;
    }
 }
@@ -182,12 +231,12 @@ gt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_String_Class)) {
       if (joe_String_compare (self, argv[0]) > 0)
-         *retval = joe_Boolean_New_true();
+         joe_Object_assign(retval, joe_Boolean_New_true());
       else
-         *retval = joe_Boolean_New_false();
+         joe_Object_assign(retval, joe_Boolean_New_false());
       return JOE_SUCCESS;
    } else {
-      *retval = joe_Exception_New ("String >: invalid argument");
+      joe_Object_assign(retval, joe_Exception_New ("joe_String >: invalid argument"));
       return JOE_FAILURE;
    }
 }
@@ -197,12 +246,12 @@ le (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_String_Class)) {
       if (joe_String_compare (self, argv[0]) <= 0)
-         *retval = joe_Boolean_New_true();
+         joe_Object_assign(retval, joe_Boolean_New_true());
       else
-         *retval = joe_Boolean_New_false();
+         joe_Object_assign(retval, joe_Boolean_New_false());
       return JOE_SUCCESS;
    } else {
-      *retval = joe_Exception_New ("String <=: invalid argument");
+      joe_Object_assign(retval, joe_Exception_New ("joe_String <=: invalid argument"));
       return JOE_FAILURE;
    }
 }
@@ -212,12 +261,12 @@ lt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_String_Class)) {
       if (joe_String_compare (self, argv[0]) < 0)
-         *retval = joe_Boolean_New_true();
+         joe_Object_assign(retval, joe_Boolean_New_true());
       else
-         *retval = joe_Boolean_New_false();
+         joe_Object_assign(retval, joe_Boolean_New_false());
       return JOE_SUCCESS;
    } else {
-      *retval = joe_Exception_New ("String <: invalid argument");
+      joe_Object_assign(retval, joe_Exception_New ("joe_String <: invalid argument"));
       return JOE_FAILURE;
    }
 }
@@ -232,6 +281,8 @@ static joe_Method mthds[] = {
   {"lt", lt},
   {"length", length},
   {"substring", substring},
+  {"charAt", charAt},
+  {"startsWith", startsWith},
   {"toLowerCase", toLowerCase},
   {"toUpperCase", toUpperCase},
   {"toString", toString},

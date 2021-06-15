@@ -22,6 +22,11 @@
 
 typedef joe_Object joe_Memory;
 extern joe_Class joe_Memory_Class;
+typedef joe_Object joe_WeakReference;
+extern joe_Class joe_WeakReference_Class;
 
 joe_Object joe_Memory_New (unsigned int size);
+
+JOEOBJ_API joe_Object joe_WeakReference_New(joe_Object obj);
+JOEOBJ_API joe_Object joe_WeakReference_get(joe_Object obj);
 # endif

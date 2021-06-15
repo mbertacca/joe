@@ -20,8 +20,7 @@
 # include <stdlib.h>
 # include <string.h>
 
-# include "joe_Array.h"
-# include "joe_ArrayScan.h"
+# include "joe_Array.h" 
 # include "joe_List.h"
 # include "joe_Boolean.h"
 # include "joe_String.h"
@@ -32,27 +31,40 @@
 # include "joe_Exception.h"
 # include "joe_JOEObject.h"
 # include "joe_LoadScript.h"
+# include "joe_Memory.h"
 
 # define BLACK 0
 # define GRAY 1
 # define WHITE 2
 
 static struct s_ClassList *registeredClasses = 0;
-# define JOE_MEM_DEBUG
+
+/* # define JOE_MEM_DEBUG */
+# define JOE_MEM_DEBUG_FAST
 static struct s_ObjectList *allObjects = 0;
-/* # define JOE_MEM_DEBUG_FAST */
+#ifdef JOE_MEM_DEBUG
+#define TRACEMEMORY(a) traceMemory(a)
+#else
+#ifdef JOE_MEM_DEBUG_FAST
+#define TRACEMEMORY(a) liveObjCount++;
+#else
+#define TRACEMEMORY(a)
+#endif /* JOE_MEM_DEBUG_FAST */
+#endif /* JOE_MEM_DEBUG */
 static unsigned int liveObjCount = 0;
 
 union ptr {
    joe_Object * obj;
    void * mem;
    long  lng;
+   int   intg;
    double dbl;
+   char* str;
 };
 
 struct s_joe_Object {
-   unsigned int color:2;
-   unsigned int refcount:30;
+   unsigned char color;
+   unsigned int refcount;
    unsigned int nItems;
    joe_Class *clazz;
    union ptr data;
@@ -69,14 +81,10 @@ struct s_ObjectList {
    struct s_ObjectList * prev;
 };
 
+# ifdef JOE_MEM_DEBUG
 void
 traceMemory (joe_Object obj)
 {
-# ifdef JOE_MEM_DEBUG_FAST
-   liveObjCount++;
-# endif
-# ifdef JOE_MEM_DEBUG
-
    if (allObjects == 0) {
       allObjects = calloc (1, sizeof (struct s_ObjectList));
       allObjects->prev = 0;
@@ -89,8 +97,8 @@ traceMemory (joe_Object obj)
       allObjects->prev->prev = 0;
       allObjects = allObjects->prev;
    }
-# endif
 }
+# endif
 
 static void init ();
 
@@ -115,7 +123,6 @@ init ()
       registeredClasses->clazz = &joe_Object_Class;
       registeredClasses->next = 0;
       joe_Class_registerClass (&joe_Array_Class);
-      joe_Class_registerClass (&joe_ArrayScan_Class);
       joe_Class_registerClass (&joe_List_Class);
       joe_Class_registerClass (&joe_String_Class);
       joe_Class_registerClass (&joe_StringBuilder_Class);
@@ -146,19 +153,12 @@ int
 joe_Class_newInstance (joe_Class *cls,
                        int argc, joe_Object *args, joe_Object *retval)
 {
-   joe_Object newObj = joe_Object_New (cls, 0);
+   joe_Object_assign (retval, joe_Object_New (cls, 0));
+   int Return = JOE_SUCCESS;
    if (cls->ctor != 0) {
-      if (cls->ctor (newObj, argc, args, retval) == JOE_SUCCESS) {
-         *retval = newObj;
-         return JOE_SUCCESS;
-      } else {
-         joe_Object_delIfUnassigned (&newObj);
-         return JOE_FAILURE;
-      }
-   } else {
-      *retval = newObj;
-      return JOE_SUCCESS;
+      Return = cls->ctor (*retval, argc, args, retval);
    }
+   return Return;
 }
 
 joe_Object
@@ -187,9 +187,40 @@ joe_Object_New (joe_Class *clazz, unsigned int size)
    Return->nItems = size;
    Return->clazz = clazz;
 
-   traceMemory (Return);
+   TRACEMEMORY (Return);
 
    return Return;
+}
+
+joe_int
+joe_int_New0 ()
+{
+   joe_int Return = calloc(1, sizeof(struct s_joe_Object));
+
+   TRACEMEMORY(Return);
+
+   return Return;
+}
+
+joe_int
+joe_int_New(int initval)
+{
+   joe_int Return = joe_int_New0();
+   Return->data.intg = initval;
+
+   return Return;
+}
+
+int
+joe_int_value(joe_int self)
+{
+   return self->data.intg;
+}
+
+int*
+joe_int_starValue(joe_int self)
+{
+   return &self->data.intg;
 }
 
 joe_Object
@@ -207,7 +238,7 @@ joe_Object_clone (joe_Object self)
          if (Return->data.obj[size])
             Return->data.obj[size]->refcount++;
 
-      traceMemory (Return);
+      TRACEMEMORY (Return);
       return Return;
    } else {
       return 0;
@@ -257,17 +288,21 @@ joe_Object_showLiveObject(joe_Object obj, int indent)
 {
    while (indent-- > 0)
       fputs (" ", stdout);
-   if (obj->clazz == &joe_String_Class) {
-      printf("[%s] %p %s %d\n", obj->clazz->name, (void*)obj,
-             joe_String_getCharStar(obj), obj->refcount);
-   } else if (obj->clazz == &joe_Integer_Class) {
-      printf("[%s] %p %ld %d\n", obj->clazz->name, (void*)obj,
-             joe_Integer_value(obj), obj->refcount);
-   } else if (obj->clazz == &joe_Float_Class) {
-      printf("[%s] %p %lf %d\n", obj->clazz->name, (void*)obj,
-             joe_Float_value(obj), obj->refcount);
+   if (obj) {
+      if (obj->clazz == &joe_String_Class) {
+         printf("[%s] %p %s %d\n", obj->clazz->name, (void*)obj,
+                joe_String_getCharStar(obj), obj->refcount);
+      } else if (obj->clazz == &joe_Integer_Class) {
+         printf("[%s] %p %ld %d\n", obj->clazz->name, (void*)obj,
+                joe_Integer_value(obj), obj->refcount);
+      } else if (obj->clazz == &joe_Float_Class) {
+         printf("[%s] %p %lf %d\n", obj->clazz->name, (void*)obj,
+                joe_Float_value(obj), obj->refcount);
+      } else {
+         printf("[%s] %p %d\n", obj->clazz->name, (void*)obj, obj->refcount);
+      }
    } else {
-      printf("[%s] %p %d\n", obj->clazz->name, (void*)obj, obj->refcount);
+      printf("[null]\n");
    }
 }
 
@@ -298,6 +333,7 @@ joe_Object_getLiveObjectsCount ()
    }
 }
 
+
 void **
 joe_Object_getMem (joe_Object self)
 {
@@ -308,6 +344,12 @@ unsigned int
 joe_Object_length (joe_Object self)
 {
    return self->nItems;
+}
+
+joe_Object*
+joe_Object_array(joe_Object self)
+{
+   return self->data.obj;
 }
 
 joe_Object *
@@ -397,7 +439,7 @@ static void
 scanGray (joe_Object self)
 {
    if (self->refcount != 0) {
-       scanBlack (self);
+      scanBlack (self);
    } else {
       self->color = WHITE;
       if (self->nItems) {
@@ -437,6 +479,10 @@ collectWhite (joe_Object self, joe_Object *dellist)
 void
 joe_Object_unassign (joe_Object self)
 {
+# ifdef JOE_MEM_DEBUG
+   if (self->refcount <= 0)
+      printf ("debug: unassign internal error\n");
+# endif
    if (--self->refcount == 0) {
       if (self->nItems) {
          joe_Object obj;
@@ -467,20 +513,6 @@ joe_Object_unassign (joe_Object self)
 }
 
 void
-joe_Object_incrReference (joe_Object *self)
-{
-   if (*self)
-      (*self)->refcount++;
-}
-
-void
-joe_Object_decrReference (joe_Object *self)
-{
-   if (*self  && (*self)->refcount)
-      (*self)->refcount--;
-}
-
-void
 joe_Object_delIfUnassigned (joe_Object *self)
 {
    if (*self) {
@@ -490,22 +522,24 @@ joe_Object_delIfUnassigned (joe_Object *self)
 }
 
 void
-joe_Object_addReference (joe_Object self)
+joe_Object_assign (joe_Object *self, joe_Object value)
 {
-   self->refcount++;
+   joe_Object obj = *self;
+   *self = value;
+   if (value)
+      value->refcount++;
+   if (obj != 0)
+      joe_Object_unassign (obj);
 }
 
 void
-joe_Object_assign (joe_Object *self, joe_Object value)
+joe_Object_transfer(joe_Object* self, joe_Object* value)
 {
-   if (self) {
-      joe_Object obj = *self;
-      *self = value;
-      if (value)
-         value->refcount++;
-      if (obj != 0)
-         joe_Object_unassign (obj);
-   }
+   joe_Object obj = *self;
+   *self = *value;
+   *value = 0;
+   if (obj != 0)
+      joe_Object_unassign(obj);
 }
 
 joe_Class *
@@ -558,12 +592,28 @@ joe_Object_getMethod (joe_Class *clazz, const char *name)
 
 static char buffer[256];
 
+char *
+joe_Object_toString(joe_Object self)
+{
+   if (self)
+      snprintf(buffer, sizeof(buffer), "[%s 0x%p]",
+                       self->clazz->name, (void *) self);
+   else
+      snprintf(buffer, sizeof(buffer), "[null]");
+   return buffer;
+}
+
 static int
 invoke (joe_Object self, joe_Class *clazz, const char *name,
                    int argc, joe_Object *argv, joe_Object *retval)
 {
    int Return;
    joe_Method *mthd = 0;
+
+   if (clazz == &joe_WeakReference_Class) {
+      self = joe_WeakReference_get(self);
+      clazz = self->clazz;
+   }
    if (clazz == &joe_JOEObject_Class) {
       joe_Block receiver = joe_JOEObject_getReceiver (self, name);
       if (receiver != 0) {
@@ -578,7 +628,7 @@ invoke (joe_Object self, joe_Class *clazz, const char *name,
    } else {
       sprintf (buffer, "Method not found: %s in class %s",
                  name, clazz->name);
-      *retval = joe_Exception_New (buffer);
+      joe_Object_assign (retval, joe_Exception_New (buffer));
       Return = JOE_FAILURE;
    }
    return Return;
@@ -598,31 +648,10 @@ joe_Object_invokeSuper (joe_Object self, const char *name,
    return invoke (self, self->clazz->extends, name, argc, argv, retval);
 }
 
-int
-joe_Object_assignInvoke (joe_Object self, const char *name,
-                         int argc, joe_Object *argv, joe_Object *retval)
-{
-   joe_Object lRetval = 0;
-   int rc = joe_Object_invoke (self, name, argc, argv, &lRetval);
-   joe_Object_assign (retval, lRetval);
-   return rc;
-}
-
-int
-joe_Object_assignInvokeSuper (joe_Object self, const char *name,
-                         int argc, joe_Object *argv, joe_Object *retval)
-{
-   joe_Object lRetval = 0;
-   int rc = joe_Object_invokeSuper (self, name, argc, argv, &lRetval);
-   joe_Object_assign (retval, lRetval);
-   return rc;
-}
-
 static int
 toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   sprintf (buffer, "[%s 0x%lx]", self->clazz->name, (unsigned long) self);
-   *retval = joe_String_New (buffer);
+   joe_Object_assign (retval, joe_String_New (joe_Object_toString(self)));
    return JOE_SUCCESS;
 }
 
@@ -630,9 +659,9 @@ static int
 equals (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1 && argv[0] == self)
-      *retval = joe_Boolean_New_true();
+      joe_Object_assign(retval, joe_Boolean_New_true());
    else
-      *retval = joe_Boolean_New_false();
+      joe_Object_assign(retval, joe_Boolean_New_false());
    return JOE_SUCCESS;
 }
 
@@ -640,14 +669,14 @@ int
 clone (joe_Object self,int argc,joe_Object *argv,joe_Object *retval)
 {
    if (argc > 0) {
-      *retval = joe_Exception_New ("clone: invalid argument");
+      joe_Object_assign(retval, joe_Exception_New ("clone: invalid argument"));
       return JOE_FAILURE;
    } else {
-      *retval = joe_Object_clone (self);
+      joe_Object_assign(retval, joe_Object_clone (self));
       if (*retval) {
          return JOE_SUCCESS;
       } else {
-         *retval = joe_Exception_New ("cannot clone primitive objects");
+         joe_Object_assign(retval, joe_Exception_New ("cannot clone primitive objects"));
          return JOE_FAILURE;
       }
    }
@@ -677,9 +706,9 @@ static int
 boolToString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (self == joe_Boolean_True)
-      *retval = joe_String_New ("true");
+      joe_Object_assign (retval, joe_String_New ("true"));
    else
-      *retval = joe_String_New ("false");
+      joe_Object_assign(retval, joe_String_New ("false"));
    return JOE_SUCCESS;
 }
 
@@ -689,16 +718,16 @@ and (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    if (argc == 1) {
       if (argv[0] == joe_Boolean_True) {
          if (self == joe_Boolean_True)
-            *retval = joe_Boolean_True;
+            joe_Object_assign(retval, joe_Boolean_True);
          else
-            *retval = joe_Boolean_False;
+            joe_Object_assign(retval, joe_Boolean_False);
          return JOE_SUCCESS;
       } else if (argv[0] == joe_Boolean_False) {
-         *retval = joe_Boolean_False;
+         joe_Object_assign(retval, joe_Boolean_False);
          return JOE_SUCCESS;
       }
    }
-   *retval = joe_Exception_New ("and: invalid argument");
+   joe_Object_assign(retval, joe_Exception_New ("and: invalid argument"));
    return JOE_FAILURE;
 }
 
@@ -708,16 +737,16 @@ or (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    if (argc == 1) {
       if (argv[0] == joe_Boolean_False) {
          if (self == joe_Boolean_True)
-            *retval = joe_Boolean_True;
+            joe_Object_assign(retval, joe_Boolean_True);
          else
-            *retval = joe_Boolean_False;
+            joe_Object_assign(retval, joe_Boolean_False);
          return JOE_SUCCESS;
       } else if (argv[0] == joe_Boolean_True) {
-         *retval = joe_Boolean_True;
+         joe_Object_assign (retval, joe_Boolean_True);
          return JOE_SUCCESS;
       }
    }
-   *retval = joe_Exception_New ("or: invalid argument");
+   joe_Object_assign(retval, joe_Exception_New ("or: invalid argument"));
    return JOE_FAILURE;
 }
 
@@ -726,12 +755,12 @@ not (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
       if (self == joe_Boolean_False)
-         *retval = joe_Boolean_True;
+         joe_Object_assign(retval, joe_Boolean_True);
       else
-         *retval = joe_Boolean_False;
+         joe_Object_assign(retval, joe_Boolean_False);
       return JOE_SUCCESS;
    }
-   *retval = joe_Exception_New ("not: invalid argument");
+   joe_Object_assign(retval, joe_Exception_New ("not: invalid argument"));
    return JOE_FAILURE;
 }
 

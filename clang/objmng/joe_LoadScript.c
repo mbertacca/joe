@@ -39,16 +39,16 @@ ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    switch (argc) {
    case 1:
       if (!joe_Object_instanceOf (argv[0], &joe_String_Class)) {
-         *retval = joe_Exception_New ("LoadScript: invalid 1st argument");
+         joe_Object_assign(retval, joe_Exception_New ("LoadScript: invalid 1st argument"));
          return JOE_FAILURE;
       }
       break;
    default:
-      *retval = joe_Exception_New ("LoadScript: invalid argument number");
+      joe_Object_assign(retval, joe_Exception_New ("LoadScript: invalid argument number"));
       return JOE_FAILURE;
    }
 
-   *retval = joe_LoadScript_New (self, joe_String_getCharStar(argv[0]));
+   joe_Object_assign(retval, joe_LoadScript_New (self, joe_String_getCharStar(argv[0])));
 
    if (joe_Object_instanceOf (*retval, &joe_Exception_Class))
       return JOE_FAILURE;
@@ -75,7 +75,7 @@ joe_Class joe_LoadScript_Class = {
 joe_Block
 joe_LoadScript_New (joe_Block self, char *scriptName)
 {
-   joe_Object Return = 0;
+   joe_Object Return = self;
    char *path;
    FILE *scriptFile;
    JoeArray tokens = JoeArray_new (sizeof (struct t_Token), 256);

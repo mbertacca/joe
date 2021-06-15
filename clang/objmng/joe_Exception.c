@@ -33,13 +33,12 @@ ctor (joe_Exception self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc > 0) {
       joe_String msg = 0;
-      joe_Object_assignInvoke (argv[0], "toString", 0, 0, &msg);
-      joe_Exception_Init (self, joe_String_getCharStar(msg));
+      joe_Object_invoke (argv[0], "toString", 0, 0, &msg);
+      joe_Exception_Init (self, msg);
       joe_Object_assign (&msg, 0);
    } else {
-      joe_Exception_Init (self, "");
+      joe_Exception_Init (self, joe_String_New(""));
    }
-   *retval = self;
    return JOE_SUCCESS;
 }
 
@@ -48,22 +47,22 @@ joe_Exception_toString (joe_Object self, int argc, joe_Object *argv, joe_Object 
 {
    joe_ArrayList arList = *joe_Object_at (self,STACK);
    unsigned int arListLen = joe_ArrayList_length (arList);
-   joe_String tmp;
+   joe_String tmp = 0;
 
-   *retval = joe_String_New3 (joe_Object_getClassName(self), ": ",
-                         joe_String_getCharStar(*joe_Object_at (self,MESSAGE)));
+   joe_Object_assign (retval, joe_String_New3 (joe_Object_getClassName(self),
+               ": ", joe_String_getCharStar(*joe_Object_at (self,MESSAGE))));
 
    if (arListLen > 0) {
-      int i;
+      unsigned int i;
       joe_String newLine = joe_String_New ("\r\n");
 
       joe_Object_invoke (*retval, "add", 1, &newLine, &tmp);
-      joe_Object_delIfUnassigned (retval);
-      *retval = tmp;
+      joe_Object_assign(retval, tmp);
+      joe_Object_assign(&tmp, 0);
       for (i = 0; i < arListLen; i++) {
          joe_Object_invoke(*retval,"add",1,joe_ArrayList_at(arList,i),&tmp);
-         joe_Object_delIfUnassigned (retval);
-         *retval = tmp;
+         joe_Object_assign(retval, tmp);
+         joe_Object_assign(&tmp, 0);
       }
 
       joe_Object_delIfUnassigned (&newLine);
@@ -76,14 +75,14 @@ int
 joe_Exception_getMessage (joe_Object self,
                           int argc, joe_Object *argv, joe_Object *retval)
 {
-   *retval = *joe_Object_at (self,MESSAGE);
+   joe_Object_assign(retval, *joe_Object_at (self,MESSAGE));
    return JOE_SUCCESS;
 }
 
 static int
 _throw (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   *retval = self;
+   joe_Object_assign(retval, self);
    return JOE_FAILURE;
 }
 
@@ -105,30 +104,24 @@ joe_Class joe_Exception_Class = {
 };
 
 void
-joe_Exception_Init (joe_Exception self, char *msg)
+joe_Exception_Init (joe_Exception self, joe_String desc)
 {
-   joe_Object_assign (joe_Object_at (self,MESSAGE),
-                      joe_String_New (msg));
+   joe_Object_assign (joe_Object_at (self,MESSAGE), desc);
    joe_Object_assign (joe_Object_at (self,STACK),
                       joe_ArrayList_New (8));
 }
 
 joe_Object
 joe_Exception_New (char *desc) {
-   joe_Object self;
-   self = joe_Object_New (&joe_Exception_Class, 0);
-   joe_Exception_Init (self, desc);
-
-   return self;
+   return joe_Exception_New_string(joe_String_New(desc));
 }
 
 joe_Object
-joe_Exception_New_string (joe_String msg)
+joe_Exception_New_string (joe_String desc)
 {
    joe_Object self;
    self = joe_Object_New (&joe_Exception_Class, 0);
-   joe_Object_assign (joe_Object_at (self,MESSAGE), msg);
-   joe_Object_assign (joe_Object_at (self,STACK), joe_ArrayList_New (8));
+   joe_Exception_Init (self, desc);
    return self;
 }
 

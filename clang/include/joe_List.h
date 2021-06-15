@@ -24,4 +24,10 @@
 typedef joe_Object joe_List;
 extern joe_Class joe_List_Class;
 
+JOEOBJ_API joe_List joe_List_New();
+JOEOBJ_API void joe_List_push(joe_List self, joe_Object obj);
+JOEOBJ_API void joe_List_pop(joe_List self, joe_Object* retval);
+JOEOBJ_API int joe_List_empty(joe_List self);
+
+
 # endif

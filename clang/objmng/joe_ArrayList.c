@@ -18,7 +18,6 @@
 
 # include "joe_ArrayList.h"
 # include "joe_Array.h"
-# include "joe_Integer.h"
 
 /*
 static int
@@ -34,6 +33,9 @@ static joe_Method mthds[] = {
   {(void *) 0, (void *) 0}
 };
 
+# define ARRAY 0
+# define LENGTH 1
+# define MAXLENGTH 2
 static char *variables[] = { "array", "length", "maxLength", 0 };
 
 joe_Class joe_ArrayList_Class = {
@@ -52,24 +54,23 @@ joe_ArrayList_New (unsigned int maxLength)
 {
    joe_Object self;
    self = joe_Object_New (&joe_ArrayList_Class, 0);
-   joe_Object_assign (joe_Object_getVar(self,"array"),joe_Array_New(maxLength));
-   joe_Object_assign (joe_Object_getVar(self,"length"),joe_Integer_New (0));
-   joe_Object_assign (joe_Object_getVar(self,"maxLength"),
-                                                   joe_Integer_New (maxLength));
-
+   joe_Object_assign (joe_Object_at(self,ARRAY),joe_Array_New(maxLength));
+   joe_Object_assign (joe_Object_at(self,LENGTH),joe_int_New0 ());
+   joe_Object_assign (joe_Object_at(self,MAXLENGTH),
+                      joe_int_New (maxLength));
    return self;
 }
 
 unsigned int
 joe_ArrayList_length (joe_Object self)
 {
-   return joe_Integer_value (*joe_Object_getVar(self,"length"));
+   return (unsigned int) joe_int_value (*joe_Object_at(self,LENGTH));
 }
 
 unsigned int
 joe_ArrayList_maxLength (joe_Object self)
 {
-   return joe_Integer_value (*joe_Object_getVar(self,"maxLength"));
+   return (unsigned int) joe_int_value (*joe_Object_at(self,MAXLENGTH));
 }
 
 joe_Object *
@@ -77,7 +78,7 @@ joe_ArrayList_at (joe_Object self, unsigned int idx)
 {
    unsigned int len = joe_ArrayList_length (self);
    if (idx < len) 
-      return joe_Object_at (*joe_Object_getVar(self,"array"), idx);
+      return joe_Object_at (*joe_Object_at(self,ARRAY), idx);
    else
       return 0;
 }
@@ -85,22 +86,23 @@ joe_ArrayList_at (joe_Object self, unsigned int idx)
 void
 joe_ArrayList_add (joe_Object self, joe_Object item)
 {
-   joe_Integer objLen = *joe_Object_getVar(self,"length");
-   joe_Integer objMaxLen = *joe_Object_getVar(self,"maxLength");
-   joe_Object *array = joe_Object_getVar(self,"array");
-   unsigned int len = joe_Integer_value (objLen);
-   unsigned int maxLen = joe_Integer_value (objMaxLen);
+   joe_Object *selfVars = joe_Object_array (self);
+   joe_int objLen = selfVars[LENGTH];
+   joe_int objMaxLen = selfVars[MAXLENGTH];
+   joe_Object *theArray = &selfVars[ARRAY];
+   unsigned int *len = joe_int_starValue (objLen);
+   unsigned int *maxLen = joe_int_starValue (objMaxLen);
 
-   if (len == maxLen) {
-      int i;
-      joe_Array nArray = joe_Array_New(maxLen << 1);
-      for (i = 0; i < len; i++) {
-         *joe_Object_at(nArray, i) = *joe_Object_at(*array, i);
-         *joe_Object_at(*array, i) = 0;
-          joe_Integer_addMe1 (objMaxLen);
+   if (*len == *maxLen) {
+      unsigned int i;
+      joe_Array nArray = joe_Array_New(*maxLen << 1);
+      for (i = 0; i < *len; i++) {
+         *joe_Object_at(nArray, i) = *joe_Object_at(*theArray, i);
+         *joe_Object_at(*theArray, i) = 0;
+         (*maxLen)++;
       }
-      joe_Object_assign (array, nArray);
+      joe_Object_assign (theArray, nArray);
    }
-   joe_Object_assign (joe_Object_at(*array, len), item);
-   joe_Integer_addMe1 (objLen);
+   joe_Object_assign (joe_Object_at(*theArray, *len), item);
+   (*len)++;
 }
