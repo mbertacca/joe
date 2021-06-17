@@ -86,71 +86,73 @@ call (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
          }
          switch (argc) {
          case 1:
-            *retval = joe_Integer_New (pnt ());
+            joe_Object_assign(retval, joe_Integer_New (pnt ()));
             break;
          case 2:
-            *retval = joe_Integer_New (pnt (funcArg[0]));
+            joe_Object_assign(retval, joe_Integer_New (pnt (funcArg[0])));
             break;
          case 3:
-            *retval = joe_Integer_New (pnt (funcArg[0],
-                                            funcArg[1]));
+            joe_Object_assign(retval,joe_Integer_New (pnt (funcArg[0],
+                                                           funcArg[1])));
             break;
          case 4:
-            *retval = joe_Integer_New (pnt (funcArg[0],
-                                            funcArg[1],
-                                            funcArg[2]));
+            joe_Object_assign(retval,joe_Integer_New (pnt (funcArg[0],
+                                                           funcArg[1],
+                                                           funcArg[2])));
             break;
          case 5:
-            *retval = joe_Integer_New (pnt (funcArg[0],
-                                            funcArg[1],
-                                            funcArg[2],
-                                            funcArg[3]));
+            joe_Object_assign(retval,joe_Integer_New (pnt (funcArg[0],
+                                                           funcArg[1],
+                                                           funcArg[2],
+                                                           funcArg[3])));
             break;
          case 6:
-            *retval = joe_Integer_New (pnt (funcArg[0],
-                                            funcArg[1],
-                                            funcArg[2],
-                                            funcArg[3],
-                                            funcArg[4]));
+            joe_Object_assign(retval,joe_Integer_New (pnt (funcArg[0],
+                                                           funcArg[1],
+                                                           funcArg[2],
+                                                           funcArg[3],
+                                                           funcArg[4])));
             break;
          case 7:
-            *retval = joe_Integer_New (pnt (funcArg[0],
-                                            funcArg[1],
-                                            funcArg[2],
-                                            funcArg[3],
-                                            funcArg[4],
-                                            funcArg[5]));
+            joe_Object_assign(retval,joe_Integer_New (pnt (funcArg[0],
+                                                           funcArg[1],
+                                                           funcArg[2],
+                                                           funcArg[3],
+                                                           funcArg[4],
+                                                           funcArg[5])));
             break;
          case 8:
-            *retval = joe_Integer_New (pnt (funcArg[0],
-                                            funcArg[1],
-                                            funcArg[2],
-                                            funcArg[3],
-                                            funcArg[4],
-                                            funcArg[5],
-                                            funcArg[6]));
+            joe_Object_assign(retval,joe_Integer_New (pnt (funcArg[0],
+                                                           funcArg[1],
+                                                           funcArg[2],
+                                                           funcArg[3],
+                                                           funcArg[4],
+                                                           funcArg[5],
+                                                           funcArg[6])));
             break;
          case 9:
-            *retval = joe_Integer_New (pnt (funcArg[0],
-                                            funcArg[1],
-                                            funcArg[2],
-                                            funcArg[3],
-                                            funcArg[4],
-                                            funcArg[5],
-                                            funcArg[6],
-                                            funcArg[7]));
+            joe_Object_assign(retval,joe_Integer_New (pnt (funcArg[0],
+                                                           funcArg[1],
+                                                           funcArg[2],
+                                                           funcArg[3],
+                                                           funcArg[4],
+                                                           funcArg[5],
+                                                           funcArg[6],
+                                                           funcArg[7])));
             break;
          default:
-            *retval = joe_Exception_New ("call :too many arguments");
+            joe_Object_assign(retval,
+                              joe_Exception_New ("call :too many arguments"));
             return JOE_FAILURE;
          }
          return JOE_SUCCESS;
       } else {
-        *retval = joe_Exception_New ("call :function not found");
+        joe_Object_assign(retval,
+                          joe_Exception_New ("call :function not found"));
          return JOE_FAILURE;
       }
    } else {
-     *retval = joe_Exception_New ("call :invalid argument");
+     joe_Object_assign(retval, joe_Exception_New ("call :invalid argument"));
       return JOE_FAILURE;
    }
 }

@@ -12,6 +12,7 @@ so := !loadSO "".
 idx := 0.
 !while {idx := idx + 1. idx < (args length)}, {
    file := so call "fopen",(args get idx),"r".
+   !print file.
    rc := 1.
    !while {rc := so call "fgets",line,(line length; - 1), file. rc <> 0},
    {
