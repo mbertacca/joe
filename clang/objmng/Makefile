@@ -27,6 +27,7 @@ OBJS=joe_Object.o \
      joe_BreakLoopException.o \
      joe_LoadScript.o \
      joe_Exception.o \
+     joe_BangSO.o \
      ndecimal.o \
      joearray.o \
      joearrayscan.o \
