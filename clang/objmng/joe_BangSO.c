@@ -65,9 +65,11 @@ struct LibData {
 static int
 call (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
+   joe_Class* stringClass = joe_Class_getClass("joe_String");
+   joe_Class* integerClass = joe_Class_getClass("joe_Integer");
    struct LibData *lib = (struct LibData *) *joe_Object_getMem (self);
 
-   if (argc > 0 && joe_Object_instanceOf(argv[0], &joe_String_Class)) {
+   if (argc > 0 && joe_Object_instanceOf(argv[0], stringClass)) {
       char *funcName = joe_String_getCharStar (argv[0]);
       void **funcArg = calloc (sizeof(void*), argc - 1);
       DLSYM_TYPE(pnt) = DLSYM(lib->pnt,funcName);
@@ -76,9 +78,9 @@ call (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
          int i = 0;
 
          for (i = 1; i < argc; i++) {
-            if (joe_Object_instanceOf(argv[i], &joe_String_Class)) {
+            if (joe_Object_instanceOf(argv[i], stringClass)) {
                funcArg[i - 1] = joe_String_getCharStar (argv[i]);
-            } else if (joe_Object_instanceOf(argv[i], &joe_Integer_Class)) {
+            } else if (joe_Object_instanceOf(argv[i], integerClass)) {
                funcArg[i - 1] = (void*) joe_Integer_value (argv[i]);
             } else  {
                funcArg[i - 1] = joe_Object_getMem (argv[i]);
@@ -168,7 +170,7 @@ static joe_Class joe_BangSO_Class = {
    0,
    mthds,
    0,
-   &joe_Object_Class,
+   0,
    0
 };
 

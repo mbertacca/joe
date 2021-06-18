@@ -239,7 +239,7 @@ joe_Message_toString (joe_Message self)
          strncat (buffer, joe_String_getCharStar(msg), len);
          joe_Object_assign(&msg, 0);
          if (strlen (buffer) < sizeof(buffer))
-            strncat(buffer, " ", 1);
+            strcat(buffer, " ");
       } else {
          strncat(buffer, "[null]", len);
       }

@@ -1,0 +1,17 @@
+CC=gcc
+#CFLAGS=-g -Wall -rdynamic
+CFLAGS=-g -Wall -pedantic
+INCL=-I../objmng -I../include
+TARGET=../bin/joe.exe
+LIBS=-Wl,-rpath=\$$ORIGIN/. -L../bin -ljoeobj
+#all:joec testlib.so
+OBJS=joec.o
+
+$(TARGET):$(OBJS)
+	$(CC) $(CFLAGS) $(OBJS) $(LIBS) -o $(TARGET)
+
+.c.o:
+	$(CC) -c $(CFLAGS) $(INCL) $<
+
+clean:
+	rm -f $(TARGET) *.o
