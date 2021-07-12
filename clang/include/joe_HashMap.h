@@ -20,6 +20,7 @@
 # define joe_HashMap_h  "$Id$";
 # include "joe_Object.h"
 # include "joe_Array.h"
+# include "joe_String.h"
 
 typedef joe_Object joe_HashMap;
 extern joe_Class joe_HashMap_Class;
@@ -27,12 +28,17 @@ extern joe_Class joe_HashMap_Class;
 joe_Object joe_HashMap_New();
 joe_Object joe_HashMap_New_size(unsigned int len);
 joe_Object joe_HashMap_put (joe_HashMap self, joe_Object key, joe_Object value);
+joe_Object joe_HashMap_putHash (joe_HashMap self, unsigned int hash,
+                                joe_String strKey, joe_Object value);
 int joe_HashMap_get (joe_HashMap self, joe_Object key, joe_Object *retval);
+int joe_HashMap_getHash (joe_HashMap self, unsigned int hash,
+                         joe_Object key, joe_Object *retval);
 joe_Array joe_HashMap_keys (joe_HashMap self);
 joe_Array joe_HashMap_values (joe_HashMap self);
+int joe_HashMap_containsHashKey (joe_HashMap self, unsigned int hash, joe_Object key);
 int joe_HashMap_containsKey (joe_HashMap self, joe_Object key);
 int joe_HashMap_containsValue (joe_HashMap self, joe_Object value);
 unsigned int joe_HashMap_length(joe_HashMap self);
 void joe_HashMap_clean (joe_HashMap self);
-
+unsigned int joe_HashMap_hash(joe_String strKey);
 # endif

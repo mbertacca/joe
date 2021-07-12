@@ -18,14 +18,15 @@
 
 # include "joe_Assignment.h"
 # include "joe_Block.h"
+# include "joe_Variable.h"
 
-extern void joe_Block_setVar (joe_Block self,joe_String name,joe_Object value);
+extern void joe_Block_setVariable (joe_Block self,joe_Variable var,joe_Object value);
 
 int
 joe_Assignment_assign (joe_Object self,
                        int argc, joe_Object *args, joe_Object *retval)
 {
-   joe_Block_setVar (args[0], args[1], args[2]);
+   joe_Block_setVariable (args[0], args[1], args[2]);
    joe_Object_assign (retval, args[2]);
    return JOE_SUCCESS;
 }

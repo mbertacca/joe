@@ -61,6 +61,7 @@ typedef struct s_joe_Class {
 extern joe_Class joe_Object_Class;
 extern joe_Object joe_Boolean_True;
 extern joe_Object joe_Boolean_False;
+extern joe_Class joe_int_Class;
 
 typedef joe_Object joe_int;
 JOEOBJ_API joe_int joe_int_New0();
@@ -82,6 +83,7 @@ JOEOBJ_API void joe_Object_assign(joe_Object* self, joe_Object value);
 JOEOBJ_API void joe_Object_transfer(joe_Object* self, joe_Object *value);
 JOEOBJ_API char* joe_Object_toString(joe_Object self);
 JOEOBJ_API void joe_Object_delIfUnassigned (joe_Object *self);
+JOEOBJ_API joe_Object joe_Object_setAcyclic (joe_Object self);
 /*
 JOEOBJ_API void joe_Object_incrReference (joe_Object *self);
 JOEOBJ_API void joe_Object_decrReference (joe_Object *self);
@@ -89,6 +91,7 @@ JOEOBJ_API void joe_Object_decrReference (joe_Object *self);
 JOEOBJ_API unsigned int joe_Object_getLiveObjectsCount ();
 JOEOBJ_API void joe_Object_showLiveObjects ();
 JOEOBJ_API void joe_Object_show(joe_Object obj, int indent);
+JOEOBJ_API void joe_Object_gc ();
 JOEOBJ_API void ** joe_Object_getMem (joe_Object self);
 JOEOBJ_API joe_Class * joe_Object_getClass (joe_Object self);
 JOEOBJ_API char * joe_Object_getClassName (joe_Object self);

@@ -137,7 +137,7 @@ substring (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 static int
 charAt(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 {
-   if (argc = 1 && joe_Object_instanceOf(argv[0], &joe_Integer_Class)) {
+   if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_Integer_Class)) {
       unsigned int selfLen = joe_String_length(self);
       unsigned int index = joe_Integer_value(argv[0]);
       if (index < selfLen) {
@@ -157,7 +157,7 @@ charAt(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 static int
 startsWith(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 {
-   if (argc = 1 && joe_Object_instanceOf(argv[0], &joe_String_Class)) {
+   if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_String_Class)) {
       unsigned int selfLen = joe_String_length(self);
       unsigned int arglen = joe_String_length(argv[0]);
       if (arglen <= selfLen) {

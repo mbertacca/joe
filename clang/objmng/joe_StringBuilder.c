@@ -17,6 +17,7 @@
  */
 
 # include <string.h>
+# include <stdlib.h>
 # include <ctype.h>
 # include "joe_StringBuilder.h"
 # include "joe_Boolean.h"
@@ -24,7 +25,7 @@
 # include "joe_Exception.h"
 # include "joe_Memory.h"
 # include "joe_String.h"
-# include <stdlib.h>
+# include "joestrct.h"
 
 # define DEFMAXLENGTH 16
 
@@ -44,7 +45,7 @@ init (joe_Object self)
    sb->length = 0;
    sb->maxLength = DEFMAXLENGTH;
 
-   joe_Object_assign (joe_Object_at (self, 0), mem);
+   joe_Object_assign (JOE_AT(self, 0), mem);
    return JOE_SUCCESS;
 }
 
@@ -115,7 +116,7 @@ joe_StringBuilder_New ()
 unsigned int
 joe_StringBuilder_length (joe_StringBuilder self)
 {
-   joe_Memory mem = *joe_Object_at (self, 0);
+   joe_Memory mem = *JOE_AT(self, 0);
    StrBuild *sb = (void *) joe_Object_getMem (mem) ;
    return sb->length;
 }
@@ -123,7 +124,7 @@ joe_StringBuilder_length (joe_StringBuilder self)
 static void
 appendCharStar (joe_StringBuilder self, char *s, int len)
 {
-   joe_Memory mem = *joe_Object_at (self, 0);
+   joe_Memory mem = *JOE_AT(self, 0);
    StrBuild *sb = (void *) joe_Object_getMem (mem) ;
    char *str = ((char*) sb) + sizeof (StrBuild);
    unsigned int newLen = sb->length + len;
@@ -139,7 +140,7 @@ appendCharStar (joe_StringBuilder self, char *s, int len)
       newsb->maxLength = newMaxLen;
       sb = newsb;
       str = newstr;
-      joe_Object_assign (joe_Object_at (self, 0), newmem);
+      joe_Object_assign (JOE_AT(self, 0), newmem);
    }
    memcpy(&str[sb->length], s, len);
    sb->length += len;
@@ -197,7 +198,7 @@ joe_StringBuilder_append (joe_StringBuilder self, joe_Object obj)
 joe_Object
 joe_StringBuilder_toString (joe_Object self)
 {
-   joe_Memory mem = *joe_Object_at (self, 0);
+   joe_Memory mem = *JOE_AT(self, 0);
    char *str = ((char*) joe_Object_getMem (mem) + sizeof (StrBuild));
    return joe_String_New (str);
 }

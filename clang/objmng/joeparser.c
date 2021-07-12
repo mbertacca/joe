@@ -333,7 +333,7 @@ assignment (JoeParser self, joe_Block block, JoeArrayScan tokens)
 */
           joe_Object args[3];
           args[0] = 0;
-          args[1] = joe_String_New (tk->word);
+          args[1] = joe_Variable_New (tk->word);
           args[2] = message (self, block, tokens, pop(tokens));
           msg = joe_Message_New (joe_Assignment_New(), ":=",
                                  3, args, self->fileName, tk->row, tk->col);

@@ -18,6 +18,7 @@
 
 # include "joe_ArrayList.h"
 # include "joe_Array.h"
+# include "joestrct.h"
 
 /*
 static int
@@ -54,23 +55,25 @@ joe_ArrayList_New (unsigned int maxLength)
 {
    joe_Object self;
    self = joe_Object_New (&joe_ArrayList_Class, 0);
-   joe_Object_assign (joe_Object_at(self,ARRAY),joe_Array_New(maxLength));
-   joe_Object_assign (joe_Object_at(self,LENGTH),joe_int_New0 ());
-   joe_Object_assign (joe_Object_at(self,MAXLENGTH),
+   joe_Object_assign (JOE_AT(self,ARRAY),
+                      joe_Object_setAcyclic (joe_Array_New(maxLength)));
+   joe_Object_assign (JOE_AT(self,LENGTH),joe_int_New0 ());
+   joe_Object_assign (JOE_AT(self,MAXLENGTH),
                       joe_int_New (maxLength));
+   joe_Object_setAcyclic (self);
    return self;
 }
 
 unsigned int
 joe_ArrayList_length (joe_Object self)
 {
-   return (unsigned int) joe_int_value (*joe_Object_at(self,LENGTH));
+   return (unsigned int) joe_int_value (*JOE_AT(self,LENGTH));
 }
 
 unsigned int
 joe_ArrayList_maxLength (joe_Object self)
 {
-   return (unsigned int) joe_int_value (*joe_Object_at(self,MAXLENGTH));
+   return (unsigned int) joe_int_value (*JOE_AT(self,MAXLENGTH));
 }
 
 joe_Object *
@@ -78,7 +81,7 @@ joe_ArrayList_at (joe_Object self, unsigned int idx)
 {
    unsigned int len = joe_ArrayList_length (self);
    if (idx < len) 
-      return joe_Object_at (*joe_Object_at(self,ARRAY), idx);
+      return JOE_AT(*JOE_AT(self,ARRAY), idx);
    else
       return 0;
 }
@@ -90,19 +93,19 @@ joe_ArrayList_add (joe_Object self, joe_Object item)
    joe_int objLen = selfVars[LENGTH];
    joe_int objMaxLen = selfVars[MAXLENGTH];
    joe_Object *theArray = &selfVars[ARRAY];
-   unsigned int *len = joe_int_starValue (objLen);
-   unsigned int *maxLen = joe_int_starValue (objMaxLen);
+   unsigned int *len = (unsigned int *) joe_int_starValue (objLen);
+   unsigned int *maxLen = (unsigned int *) joe_int_starValue (objMaxLen);
 
    if (*len == *maxLen) {
       unsigned int i;
-      joe_Array nArray = joe_Array_New(*maxLen << 1);
+      joe_Array nArray = joe_Object_setAcyclic(joe_Array_New(*maxLen << 1));
       for (i = 0; i < *len; i++) {
-         *joe_Object_at(nArray, i) = *joe_Object_at(*theArray, i);
-         *joe_Object_at(*theArray, i) = 0;
+         *JOE_AT(nArray, i) = *JOE_AT(*theArray, i);
+         *JOE_AT(*theArray, i) = 0;
          (*maxLen)++;
       }
       joe_Object_assign (theArray, nArray);
    }
-   joe_Object_assign (joe_Object_at(*theArray, *len), item);
+   joe_Object_assign (JOE_AT(*theArray, *len), item);
    (*len)++;
 }

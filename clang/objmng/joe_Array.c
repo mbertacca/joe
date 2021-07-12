@@ -21,6 +21,7 @@
 # include "joe_Exception.h"
 # include "joe_Block.h"
 # include "joe_BreakLoopException.h"
+# include "joestrct.h"
 
 static int
 length (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -35,7 +36,7 @@ get (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_Integer_Class)) {
       int idx = joe_Integer_value (argv[0]);
       if (idx >= 0 && idx < (int) joe_Array_length (self)) {
-         joe_Object_assign(retval, *joe_Object_at (self, idx));
+         joe_Object_assign(retval, *JOE_AT (self, idx));
          return JOE_SUCCESS;
       } else {
          joe_Object_assign(retval, joe_Exception_New ("Array: index out of bound"));
@@ -53,7 +54,7 @@ set (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    if (argc == 2 && joe_Object_instanceOf (argv[0], &joe_Integer_Class)) {
       int idx = joe_Integer_value (argv[0]);
       if (idx >= 0 && idx < (int) joe_Array_length (self)) {
-         joe_Object_assign (joe_Object_at (self, idx), argv[1]);
+         joe_Object_assign (JOE_AT(self, idx), argv[1]);
          joe_Object_assign(retval, argv[1]);
          return JOE_SUCCESS;
       } else {
@@ -89,9 +90,8 @@ foreach (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
          int len = joe_Array_length (self);
          int i;
          for (i = 0; i < len; i++) {
-            joe_Object arg = *joe_Object_at(self, i);
-           if ((rc=joe_Object_invoke(argv[0],"exec",
-                                      1, joe_Object_at (self, i),
+            if ((rc=joe_Object_invoke(argv[0],"exec",
+                                      1, JOE_AT (self, i),
                                                    &lretval)) != JOE_SUCCESS) {
                if (joe_Object_instanceOf (lretval,
                                             &joe_BreakLoopException_Class)) {
@@ -161,6 +161,6 @@ joe_Array_clean(joe_Object self)
    int len = (int)joe_Array_length(self);
    int i;
    for (i = 0; i < len; i++)
-      joe_Object_assign(joe_Object_at(self, i), 0);
+      joe_Object_assign(JOE_AT(self, i), 0);
    return self;
 }

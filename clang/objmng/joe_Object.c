@@ -32,10 +32,16 @@
 # include "joe_JOEObject.h"
 # include "joe_LoadScript.h"
 # include "joe_Memory.h"
+# include "joestrct.h"
 
+/*
+A Pure Reference Counting Garbage Collector
+DAVID F. BACON, CLEMENT R. ATTANASIO, V.T. RAJAN, STEPHEN E. SMITH
+*/
 # define BLACK 0
 # define GRAY 1
 # define WHITE 2
+# define PURPLE 3
 
 static struct s_ClassList *registeredClasses = 0;
 
@@ -53,23 +59,6 @@ static struct s_ObjectList *allObjects = 0;
 #endif /* JOE_MEM_DEBUG */
 static unsigned int liveObjCount = 0;
 
-union ptr {
-   joe_Object * obj;
-   void * mem;
-   long  lng;
-   int   intg;
-   double dbl;
-   char* str;
-};
-
-struct s_joe_Object {
-   unsigned char color;
-   unsigned int refcount;
-   unsigned int nItems;
-   joe_Class *clazz;
-   union ptr data;
-};
-
 struct s_ClassList {
    joe_Class *clazz;
    struct s_ClassList * next;
@@ -80,6 +69,11 @@ struct s_ObjectList {
    struct s_ObjectList * next;
    struct s_ObjectList * prev;
 };
+
+
+static joe_Object roots[128];
+static int rootsCnt = 0;
+static int maxRoots = sizeof(roots) / sizeof(joe_Object);
 
 # ifdef JOE_MEM_DEBUG
 void
@@ -168,6 +162,7 @@ joe_Object_New (joe_Class *clazz, unsigned int size)
    if (clazz->varNames == 0) { /* primitive */
       Return = calloc (1, sizeof (struct s_joe_Object) + size);
       Return->data.mem = (char *) Return + sizeof (struct s_joe_Object);
+      Return->acyclic = 1;
       size = 0;
    } else {
       if (size == 0) {
@@ -196,10 +191,20 @@ joe_int
 joe_int_New0 ()
 {
    joe_int Return = calloc(1, sizeof(struct s_joe_Object));
+   Return->nItems = 0;
+   Return->acyclic = 1;
+   Return->clazz = &joe_int_Class;
 
    TRACEMEMORY(Return);
 
    return Return;
+}
+
+joe_Object
+joe_Object_setAcyclic (joe_Object self)
+{
+   self->acyclic = 1;
+   return self;
 }
 
 joe_int
@@ -306,6 +311,8 @@ joe_Object_showLiveObject(joe_Object obj, int indent)
    }
 }
 
+void dbgShowClasses();
+
 void
 joe_Object_showLiveObjects ()
 {
@@ -355,10 +362,7 @@ joe_Object_array(joe_Object self)
 joe_Object *
 joe_Object_at (joe_Object self, unsigned int idx)
 {
-   if (idx < self->nItems)
-      return &self->data.obj[idx];
-   else
-      return 0;
+   return &self->data.obj[idx];
 }
 
 static int
@@ -477,6 +481,50 @@ collectWhite (joe_Object self, joe_Object *dellist)
 }
 
 void
+joe_Object_gc ()
+{
+   int i;
+   joe_Object *obj;
+   struct s_joe_Object firstdel = { 0, 0, 0, 0, 0, 0, {0} };
+   joe_Object scan = &firstdel;
+   joe_Object next;
+
+   for (i = 0, obj = roots; i < rootsCnt; i++, obj++) {
+      if ((*obj)->color == PURPLE && (*obj)->refcount > 0) {
+         markGray (*obj);
+      } else {
+         if ((*obj)->color == BLACK && (*obj)->refcount == 0) {
+            joe_Object_Delete (*obj);
+         } else {
+            (*obj)->buffered = 0;
+         }
+         roots[i] = 0;
+      }
+   }
+
+   for (i = 0, obj = roots; i < rootsCnt; i++, obj++)
+      if (*obj)
+         scanGray (*obj);
+
+   for (i = 0, obj = roots; i < rootsCnt; i++, obj++) {
+      if (*obj) {
+         firstdel.data.mem = 0;
+         scan = &firstdel;
+         (*obj)->buffered = 0;
+         collectWhite (*obj, &scan);
+         scan = firstdel.data.mem;
+         while (scan) {
+            next = scan->data.mem;
+            joe_Object_Delete(scan);
+            scan = next;
+         }
+      }
+   }
+   rootsCnt = 0;
+    
+}
+
+void
 joe_Object_unassign (joe_Object self)
 {
 # ifdef JOE_MEM_DEBUG
@@ -493,11 +541,27 @@ joe_Object_unassign (joe_Object self)
             }
          }
       }
-      joe_Object_Delete (self);
-   } else {
-      struct s_joe_Object firstdel = { 0, 0, 0, 0, {0} };
+      self->color = BLACK;
+      if (!self->buffered)
+         joe_Object_Delete (self);
+   } else if (!self->acyclic) {
+      if (self->color != PURPLE) {
+         self->color = PURPLE;
+         if (!self->buffered) {
+            self->buffered = 1;
+            roots[rootsCnt++] = self;
+            if (rootsCnt == maxRoots)
+               joe_Object_gc ();
+         }
+      }
+   }
+}
+
+/*
+      struct s_joe_Object firstdel = { 0, 0, 0, 0, 0, 0, {0} };
       joe_Object scan = &firstdel;
       joe_Object next;
+      dbgCntClasses (self->clazz->name);
 
       markGray (self);
       scanGray (self);
@@ -511,7 +575,7 @@ joe_Object_unassign (joe_Object self)
       }
    }
 }
-
+*/
 void
 joe_Object_delIfUnassigned (joe_Object *self)
 {
@@ -558,6 +622,12 @@ joe_Object_getClassName (joe_Object self)
      return self->clazz->name;
   else
      return "(null)";
+}
+
+int
+joe_Object_isClass (joe_Object self, joe_Class *clazz)
+{
+   return self->clazz == clazz;
 }
 
 int
@@ -656,6 +726,13 @@ toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 static int
+getClassName (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   joe_Object_assign (retval, joe_String_New (joe_Object_getClassName(self)));
+   return JOE_SUCCESS;
+}
+
+static int
 equals (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1 && argv[0] == self)
@@ -685,12 +762,23 @@ clone (joe_Object self,int argc,joe_Object *argv,joe_Object *retval)
 static joe_Method mthds[] = {
   {"clone", clone},
   {"equals", equals},
+  {"getClassName", getClassName},
   {"toString", toString},
   {(void *) 0, (void *) 0}
 };
 
 joe_Class joe_Object_Class = {
    "joe_Object",
+   0,
+   0,
+   mthds,
+   0,
+   0,
+   0
+};
+
+joe_Class joe_int_Class = {
+   "joe_int_Object",
    0,
    0,
    mthds,
@@ -782,9 +870,9 @@ joe_Class joe_Boolean_Class = {
    0
 };
 
-static struct s_joe_Object obj_true = { 0, 1, 0, &joe_Boolean_Class, {0} };
+static struct s_joe_Object obj_true = { 0, 1, 0, 1, 0, &joe_Boolean_Class, {0} };
 joe_Object joe_Boolean_True = &obj_true;
-static struct s_joe_Object obj_false = { 0, 1, 0, &joe_Boolean_Class, {0} };
+static struct s_joe_Object obj_false = { 0, 1, 0, 1, 0, &joe_Boolean_Class, {0} };
 joe_Object joe_Boolean_False = &obj_false;
 
 /* test */

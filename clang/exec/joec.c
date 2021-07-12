@@ -90,6 +90,7 @@ main (int argc, char *argv[])
       joe_Object_assign(&block, 0);
       joe_Object_assign (&argArray, 0);
       joe_Object_assign (&retval, 0);
+      joe_Object_gc ();
       lObjs =joe_Object_getLiveObjectsCount ();
       if (lObjs) {
          printf ("debug: unallocated objects=%d\n", lObjs);

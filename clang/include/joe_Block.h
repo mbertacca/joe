@@ -19,7 +19,7 @@
 # ifndef joe_Block_h
 # define joe_Block_h  "$Id$";
 # include "joe_Message.h"
-# include "joe_String.h"
+# include "joe_Variable.h"
 
 typedef joe_Object joe_Block;
 extern joe_Class joe_Block_Class;
@@ -31,7 +31,7 @@ JOEOBJ_API int joe_Block_exec (joe_Block self,
                     int argc, joe_Object *args, joe_Object *retval);
 JOEOBJ_API int joe_Block_new (joe_Block self,
                    int argc, joe_Object *args, joe_Object *retval);
-JOEOBJ_API int joe_Block_getVar (joe_Block self, joe_String name,
+JOEOBJ_API int joe_Block_getVariable (joe_Block self, joe_Variable var,
                                                  joe_Object* retval);
 
 JOEOBJ_API void joe_Block_setName (joe_Block self, char *name);

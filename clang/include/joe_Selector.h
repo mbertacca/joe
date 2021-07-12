@@ -1,7 +1,7 @@
 /*
  * This source file is part of the "Joe Objects Executor" open source project
  *
- * Copyright 2017 Marco Bertacca (www.bertacca.eu)
+ * Copyright 2021 Marco Bertacca (www.bertacca.eu)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
  * limitations under the License.
  */
 
-# ifndef joe_Variable_h
-# define joe_Variable_h  "$Id$";
-# include "joe_String.h"
+# ifndef joe_Selector_h
+# define joe_Selector_h  "$Id$";
+# include "joe_Object.h"
 
-typedef joe_Object joe_Variable;
-extern joe_Class joe_Variable_Class;
-joe_Object joe_Variable_New (char *c);
-joe_String joe_Variable_name (joe_Variable self);
-char * joe_Variable_nameCharStar (joe_Variable self);
-unsigned int joe_Variable_hash (joe_Variable self);
+typedef joe_Object joe_Selector;
+extern joe_Class joe_Selector_Class;
+joe_Object joe_Selector_New (char *name);
+int joe_Selector_invoke (joe_Object self, joe_Object receiver,
+                         int argc, joe_Object *argv, joe_Object *retval);
+char * joe_Selector_name (joe_Object self);
+
 
 # endif

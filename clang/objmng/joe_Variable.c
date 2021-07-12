@@ -16,9 +16,12 @@
  * limitations under the License.
  */
 
+# include <stdio.h>
 # include <string.h>
 # include "joe_Variable.h"
 # include "joe_String.h"
+# include "joe_HashMap.h"
+# include "joestrct.h"
 
 static joe_Method mthds[] = {
   {(void *) 0, (void *) 0}
@@ -36,16 +39,42 @@ joe_Class joe_Variable_Class = {
 
 joe_Object
 joe_Variable_New (char *c) {
-   int len = strlen (c);
+   int len = strlen (c) + 1;
+   int hashOffs = len  +  sizeof(unsigned int) - (len % sizeof(unsigned int));
    joe_Object Return;
+   char *mem;
+   int *hash;
 
-   Return = joe_Object_New (&joe_Variable_Class, len + 1);
-   strcpy (*((char **) joe_Object_getMem(Return)), c);
+   Return = joe_Object_New (&joe_Variable_Class, hashOffs + sizeof(unsigned int));
+   mem = *((char **) joe_Object_getMem(Return));
+   strcpy (mem, c);
+   hash = (unsigned int *)(mem + hashOffs);
+   *hash = joe_HashMap_hash (Return);
    return Return;
 }
  
-char *
-joe_String_name (joe_String self)
+joe_String
+joe_Variable_name (joe_Variable self)
 {
-   return *((char **) joe_Object_getMem(self));
+   return self;
+}
+
+char *
+joe_Variable_nameCharStar (joe_Variable self)
+{
+   return joe_String_getCharStar(self);
+}
+
+unsigned int
+joe_Variable_hash (joe_Variable self)
+{
+   if (JOE_ISCLASS(self, &joe_Variable_Class)) {
+      char *mem = *((char **) joe_Object_getMem(self));
+      int len = strlen (mem) + 1;
+      int hashOffs = len  +  sizeof(unsigned int) - (len % sizeof(unsigned int));
+      return *((unsigned int *)(mem + hashOffs));
+   } else {
+      printf ("Not a joe_Variable class!\n");
+      return 0;
+   }
 }

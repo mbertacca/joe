@@ -16,9 +16,11 @@
  * limitations under the License.
  */
 
+# include <stdio.h>
 # include "joe_HashMap.h"
 # include "joe_Array.h"
 # include "joe_String.h"
+# include "joestrct.h"
 
 # define KEY 0
 # define VALUE 1
@@ -40,9 +42,9 @@ item_New (joe_Object strKey, joe_Object value)
 {
    joe_Object self;
    self = joe_Object_New (&item_clazz, 0);
-   joe_Object_assign (joe_Object_at (self, KEY), strKey);
-   joe_Object_assign (joe_Object_at (self, VALUE), value);
-   joe_Object_assign (joe_Object_at (self, SIBLING), joe_int_New (0));
+   joe_Object_assign (JOE_AT(self, KEY), strKey);
+   joe_Object_assign (JOE_AT(self, VALUE), value);
+   joe_Object_assign (JOE_AT(self, SIBLING), joe_int_New (0));
    return self;
 }
 
@@ -72,11 +74,11 @@ joe_Class joe_HashMap_Class = {
 
 struct s_cself {
    joe_Object* theArray;
-   int* nHash;
-   int* lastSibling;
-   int* len;
-   int* totLen;
-   int* threshold;
+   unsigned int* nHash;
+   unsigned int* lastSibling;
+   unsigned int* len;
+   unsigned int* totLen;
+   unsigned int* threshold;
 };
 
 static void
@@ -84,11 +86,11 @@ joe_HashMap_fillStruct(joe_HashMap self, struct s_cself *cself)
 {
    joe_Object *selfVars = joe_Object_array (self);
    cself->theArray = &selfVars[ARRAY];
-   cself->nHash = joe_int_starValue(selfVars[N_HASH]);
-   cself->lastSibling = joe_int_starValue(selfVars[LAST_SIB]);
-   cself->len = joe_int_starValue(selfVars[LEN]);
-   cself->totLen = joe_int_starValue(selfVars[TOT_LEN]);
-   cself->threshold = joe_int_starValue(selfVars[THRESHOLD]);
+   cself->nHash = (unsigned int *) joe_int_starValue(selfVars[N_HASH]);
+   cself->lastSibling = (unsigned int *) joe_int_starValue(selfVars[LAST_SIB]);
+   cself->len = (unsigned int *) joe_int_starValue(selfVars[LEN]);
+   cself->totLen = (unsigned int *) joe_int_starValue(selfVars[TOT_LEN]);
+   cself->threshold = (unsigned int *) joe_int_starValue(selfVars[THRESHOLD]);
 }
 
 static void
@@ -115,10 +117,10 @@ joe_HashMap_clean(joe_HashMap self)
 static joe_Array
 allocArray (joe_HashMap self, unsigned int size)
 {
-   joe_Array Return = joe_Array_New (size);
+   joe_Array Return = joe_Object_setAcyclic(joe_Array_New (size));
    struct s_cself cself;
 
-   joe_Object_assign(joe_Object_at(self, ARRAY), Return);
+   joe_Object_assign(JOE_AT(self, ARRAY), Return);
    joe_HashMap_fillStruct(self, &cself);
    *cself.totLen = size;
    joe_HashMap_init(self, size, &cself);
@@ -131,11 +133,11 @@ joe_HashMap_New_size(unsigned int size)
 {
    joe_Object self;
    self = joe_Object_New(&joe_HashMap_Class, 0);
-   joe_Object_assign(joe_Object_at(self, N_HASH), joe_int_New0());
-   joe_Object_assign(joe_Object_at(self, LEN), joe_int_New0());
-   joe_Object_assign(joe_Object_at(self, THRESHOLD), joe_int_New0());
-   joe_Object_assign(joe_Object_at(self, LAST_SIB), joe_int_New0());
-   joe_Object_assign(joe_Object_at(self, TOT_LEN), joe_int_New0());
+   joe_Object_assign(JOE_AT(self, N_HASH), joe_int_New0());
+   joe_Object_assign(JOE_AT(self, LEN), joe_int_New0());
+   joe_Object_assign(JOE_AT(self, THRESHOLD), joe_int_New0());
+   joe_Object_assign(JOE_AT(self, LAST_SIB), joe_int_New0());
+   joe_Object_assign(JOE_AT(self, TOT_LEN), joe_int_New0());
    allocArray(self, size << 1);
 
    return self;
@@ -147,14 +149,14 @@ joe_HashMap_New ()
    return joe_HashMap_New_size (12);
 }
 
-static unsigned int
-hash(joe_String strKey)
+unsigned int
+joe_HashMap_hash(joe_String strKey)
 {
    unsigned long hash = 5381;
-   unsigned char *str = joe_String_getCharStar(strKey);
+   unsigned char *str = (unsigned char *) joe_String_getCharStar(strKey);
    int c;
 
-   while (c = *str++)
+   while (c = *(str++))
       hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
 
    return hash;
@@ -185,12 +187,12 @@ checkKey (joe_Object item, joe_Object theArray, joe_String strKey)
    unsigned int sibling;
 
    for ( ; ; ) {
-      itmKey = *joe_Object_at (item, KEY);
+      itmKey = *JOE_AT(item, KEY);
       if (!joe_String_compare (itmKey, strKey))
          return item;
-      sibling = joe_int_value(*joe_Object_at (item, SIBLING));
+      sibling = joe_int_value(*JOE_AT(item, SIBLING));
       if (sibling)
-         item = *joe_Object_at (theArray, sibling);
+         item = *JOE_AT(theArray, sibling);
       else
          return 0;
    }
@@ -202,20 +204,20 @@ collision (joe_Object self, joe_Object strKey, joe_Object value,
 {
    joe_Object oldValue = 0;
 
-   joe_String itmKey = *joe_Object_at (*item, KEY);
+   joe_String itmKey = *JOE_AT(*item, KEY);
    if (!joe_String_compare (itmKey, strKey)) {
-      joe_Object_assign(joe_Object_at(*item, VALUE), value);
+      joe_Object_assign(JOE_AT(*item, VALUE), value);
       joe_Object_delIfUnassigned (&strKey);
    } else {
-      int sibling = joe_int_value (*joe_Object_at (*item, SIBLING));
+      int sibling = joe_int_value (*JOE_AT(*item, SIBLING));
       if (sibling == 0) {
-          joe_Object_assign (joe_Object_at (*item, SIBLING),
+          joe_Object_assign (JOE_AT(*item, SIBLING),
                              joe_int_New (*(cself->lastSibling)));
-          item = joe_Object_at (*(cself->theArray), *(cself->lastSibling));
+          item = JOE_AT(*(cself->theArray), *(cself->lastSibling));
           (*(cself->lastSibling))++;
           joe_Object_assign (item, item_New (strKey, value));
       } else {
-          item = joe_Object_at (*(cself->theArray), sibling);
+          item = JOE_AT(*(cself->theArray), sibling);
           oldValue = collision (self, strKey, value, item, cself);
       }
    }
@@ -223,14 +225,15 @@ collision (joe_Object self, joe_Object strKey, joe_Object value,
 }
 
 static joe_Object
-myput (joe_Object self, struct s_cself *cself, joe_Object strKey, joe_Object value)
+myput (joe_Object self, struct s_cself *cself,
+       unsigned int hash, joe_String strKey, joe_Object value)
 {
    joe_Object Return;
    joe_Object *item;
-   int idx;
+   unsigned int idx;
 
-   idx = hash (strKey) % *(cself->len);
-   item = joe_Object_at (*(cself->theArray), idx);
+   idx = hash % *(cself->len);
+   item = JOE_AT(*(cself->theArray), idx);
    if (*item) {
       Return = collision (self, strKey, value, item, cself);
    } else {
@@ -251,62 +254,78 @@ rehash (joe_HashMap self, struct s_cself *cself)
    joe_Array oArray = 0;
    int oldLen = *(cself->totLen);
 
-   joe_Object_assign (&oArray, *joe_Object_at (self, ARRAY));
+   joe_Object_assign (&oArray, *JOE_AT(self, ARRAY));
    allocArray (self, oldLen << 1);
 
    for (i = 0; i < oldLen; i++) {
-      item = joe_Object_at (oArray, i);
+      item = JOE_AT(oArray, i);
       if (*item) {
-         strKey = joe_Object_at (*item, KEY);
-         value = joe_Object_at (*item, VALUE);
-         myput (self, cself, *strKey, *value);
+         strKey = JOE_AT(*item, KEY);
+         value = JOE_AT(*item, VALUE);
+         myput (self, cself, joe_HashMap_hash (*strKey),
+                *strKey, *value);
       }
    }
    joe_Object_assign (&oArray, 0);
 }
 
 joe_Object
-joe_HashMap_put (joe_HashMap self, joe_Object key, joe_Object value)
+joe_HashMap_putHash (joe_HashMap self, unsigned int hash,
+                     joe_String strKey, joe_Object value)
 {
    joe_Object Return;
-   joe_String strKey = 0;
    struct s_cself cself;
 
    joe_HashMap_fillStruct(self, &cself);
-
-   joe_Object_invoke (key, "toString", 0, 0, &strKey);
 
    while (*(cself.nHash) >= *(cself.threshold) ||
           *(cself.lastSibling) >= *(cself.totLen)) {
       rehash (self, &cself);
    }
-   Return = myput (self, &cself, strKey, value);
+   Return = myput (self, &cself, hash, strKey, value);
+   return Return;
+}
+joe_Object
+joe_HashMap_put (joe_HashMap self, joe_Object key, joe_Object value)
+{
+   joe_String strKey = 0;
+   joe_Object_invoke (key, "toString", 0, 0, &strKey);
+   joe_Object Return = joe_HashMap_putHash (self, joe_HashMap_hash(strKey),
+                                            strKey, value);
    joe_Object_assign (&strKey, 0);
    joe_Object_delIfUnassigned (&key);
    return Return;
 }
 
 int
-joe_HashMap_get (joe_HashMap self, joe_Object key, joe_Object *retval)
+joe_HashMap_getHash (joe_HashMap self, unsigned int hash,
+                     joe_String strKey, joe_Object *retval)
 {
-   joe_Object item;
-   unsigned int idx;
-   int Return = 0; /* false */
-   joe_Object strKey = 0;
-   int len = joe_int_value (*joe_Object_at (self, LEN));
-   joe_Array theArray = *joe_Object_at (self, ARRAY);
-
-   joe_Object_invoke (key, "toString", 0, 0, &strKey);
-
-   idx = hash (strKey) % len;
-   item = *joe_Object_at (theArray, idx);
+   int len = joe_int_value (*JOE_AT(self, LEN));
+   joe_Array theArray = *JOE_AT(self, ARRAY);
+   unsigned int idx = hash % len;
+   joe_Object item = *JOE_AT(theArray, idx);
    if (item) {
       item = checkKey (item, theArray, strKey);
       if (item) {
-         *retval = *joe_Object_at (item, VALUE);
-         Return = 1;/* true */;
+         *retval = *JOE_AT(item, VALUE);
+         return JOE_TRUE;
       }
    }
+   return JOE_FALSE;
+}
+
+int
+joe_HashMap_get (joe_HashMap self, joe_Object key, joe_Object *retval)
+{
+   int Return = JOE_FALSE;
+   joe_Object strKey = 0;
+
+   joe_Object_invoke (key, "toString", 0, 0, &strKey);
+
+   Return = joe_HashMap_getHash (self, joe_HashMap_hash (strKey),
+                                 strKey, retval);
+
    joe_Object_assign (&strKey, 0);
    return Return;
 }
@@ -314,9 +333,9 @@ joe_HashMap_get (joe_HashMap self, joe_Object key, joe_Object *retval)
 unsigned int
 joe_HashMap_length (joe_HashMap self)
 {
-   long nHash = joe_int_value (*joe_Object_at (self, N_HASH));
-   long lastSib = joe_int_value (*joe_Object_at (self, LAST_SIB));
-   long len = joe_int_value (*joe_Object_at (self, LEN));
+   long nHash = joe_int_value (*JOE_AT(self, N_HASH));
+   long lastSib = joe_int_value (*JOE_AT(self, LAST_SIB));
+   long len = joe_int_value (*JOE_AT(self, LEN));
    return nHash + lastSib - len;
 }
 
@@ -328,15 +347,15 @@ getArray (joe_HashMap self, int keyOrValue)
    joe_String obj = 0;
    int i, j;
    long nItems = joe_HashMap_length (self);
-   long totLen = joe_int_value (*joe_Object_at (self, TOT_LEN));
-   joe_Array theArray = *joe_Object_at (self, ARRAY);
+   long totLen = joe_int_value (*JOE_AT(self, TOT_LEN));
+   joe_Array theArray = *JOE_AT(self, ARRAY);
    joe_Array Return = joe_Array_New (nItems);
 
    for (i = 0, j = 0; i < totLen; i++) {
-      item = *joe_Object_at (theArray, i);
+      item = *JOE_AT(theArray, i);
       if (item) {
-         obj = *joe_Object_at (item, keyOrValue);
-         joe_Object_assign (joe_Object_at (Return, j), obj);
+         obj = *JOE_AT(item, keyOrValue);
+         joe_Object_assign (JOE_AT(Return, j), obj);
          j++;
       }
    }
@@ -356,24 +375,31 @@ joe_HashMap_values (joe_HashMap self)
 }
 
 int
+joe_HashMap_containsHashKey (joe_HashMap self, unsigned int hash, joe_String key)
+{
+   int Return = JOE_FALSE;
+   joe_Array theArray = *JOE_AT(self, ARRAY);
+   int len = joe_int_value (*JOE_AT(self, LEN));
+   unsigned int idx = hash % len;
+   joe_Object item = *JOE_AT(theArray, idx);
+   if (item) {
+      item = checkKey (item, theArray, key); 
+      if (item)
+         Return = JOE_TRUE;
+   }
+   return Return;
+}
+
+int
 joe_HashMap_containsKey (joe_HashMap self, joe_Object key)
 {
-   joe_Object item;
-   unsigned int idx;
-   int Return = 0;
+   int Return = JOE_FALSE;
    joe_Object strKey = 0;
-   int len = joe_int_value (*joe_Object_at (self, LEN));
-   joe_Array theArray = *joe_Object_at (self, ARRAY);
 
    joe_Object_invoke (key, "toString", 0, 0, &strKey);
 
-   idx = hash (strKey) % len;
-   item = *joe_Object_at (theArray, idx);
-   if (item) {
-      item = checkKey (item, theArray, strKey);
-      if (item)
-         Return = 1;
-   }
+   Return = joe_HashMap_containsHashKey (self,joe_HashMap_hash(strKey),strKey);
+
    joe_Object_assign (&strKey, 0);
    return Return;
 }
@@ -381,15 +407,15 @@ joe_HashMap_containsKey (joe_HashMap self, joe_Object key)
 int
 joe_HashMap_containsValue (joe_HashMap self, joe_Object value)
 {
-   unsigned int lastSib = joe_int_value (*joe_Object_at (self, LAST_SIB));
-   joe_Array theArray = *joe_Object_at (self, ARRAY);
+   unsigned int lastSib = joe_int_value (*JOE_AT(self, LAST_SIB));
+   joe_Array theArray = *JOE_AT(self, ARRAY);
    joe_Object item = 0;
    joe_String itmVal;
    unsigned int i;
 
    for (i = 0; i < lastSib; i++) {
-      if ((item = *joe_Object_at (theArray, i))) {
-         itmVal = *joe_Object_at (item, VALUE);
+      if ((item = *JOE_AT(theArray, i))) {
+         itmVal = *JOE_AT(item, VALUE);
          if (itmVal == value)
              return 1;
       }
