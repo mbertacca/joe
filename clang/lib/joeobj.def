@@ -8,7 +8,7 @@ EXPORTS
     joe_Block_clone @7
     joe_Block_exec @8
     joe_Block_getName @9
-    joe_Block_getVar @10
+    joe_Block_getVariable @10
     joe_Block_new @11
     joe_Block_setName @12
     joe_Class_getClass @13
@@ -37,31 +37,33 @@ EXPORTS
     joe_Object_clone @36
     joe_Object_delIfUnassigned @37
     joe_Object_extends @38
-    joe_Object_getClass @39
-    joe_Object_getClassName @40
-    joe_Object_getLiveObjectsCount @41
-    joe_Object_getMem @42
-    joe_Object_getMethod @43
-    joe_Object_getVar @44
-    joe_Object_getVarIdx @45
-    joe_Object_instanceOf @46
-    joe_Object_invoke @47
-    joe_Object_invokeSuper @48
-    joe_Object_length @49
-    joe_Object_showLiveObjects @50
-    joe_Object_toString @51
-    joe_Object_transfer @52
-    joe_String_New @53
-    joe_String_New2 @54
-    joe_String_New3 @55
-    joe_String_New4 @56
-    joe_String_New_len @57
-    joe_String_compare @58
-    joe_String_getCharStar @59
-    joe_String_length @60
-    joe_WeakReference_New @61
-    joe_WeakReference_get @62
-    joe_int_New @63
-    joe_int_New0 @64
-    joe_int_starValue @65
-    joe_int_value @66
+    joe_Object_gc @39
+    joe_Object_getClass @40
+    joe_Object_getClassName @41
+    joe_Object_getLiveObjectsCount @42
+    joe_Object_getMem @43
+    joe_Object_getMethod @44
+    joe_Object_getVar @45
+    joe_Object_getVarIdx @46
+    joe_Object_instanceOf @47
+    joe_Object_invoke @48
+    joe_Object_invokeSuper @49
+    joe_Object_length @50
+    joe_Object_setAcyclic @51
+    joe_Object_showLiveObjects @52
+    joe_Object_toString @53
+    joe_Object_transfer @54
+    joe_String_New @55
+    joe_String_New2 @56
+    joe_String_New3 @57
+    joe_String_New4 @58
+    joe_String_New_len @59
+    joe_String_compare @60
+    joe_String_getCharStar @61
+    joe_String_length @62
+    joe_WeakReference_New @63
+    joe_WeakReference_get @64
+    joe_int_New @65
+    joe_int_New0 @66
+    joe_int_starValue @67
+    joe_int_value @68
