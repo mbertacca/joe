@@ -46,6 +46,30 @@ public class CommandBase {
       primitiveClasses.put (Double.class, double.class);
    }
    static final String eol = System.getProperty("line.separator", "\n");
+   private Constructor<?> getConstructorForArgs(Class<?> clazz, Class[] args) {
+      Constructor<?>[] constructors = clazz.getConstructors();
+      Constructor<?> Return = null;
+
+      for (Constructor<?> constructor : constructors) {
+         Class<?>[] types = constructor.getParameterTypes();
+         if (types.length == args.length) {               
+            boolean argumentsMatch = true;
+            for (int i = 0; i < args.length; i++) {
+               if (!types[i].isAssignableFrom(args[i])) {
+                  argumentsMatch = false;
+                  break;
+               }
+            }
+
+            if (argumentsMatch) {
+               Return = constructor;
+               break;
+            }
+         }
+      }
+
+      return Return;
+    }
    /**
     * Returns a new instance of the specified class.
     */
@@ -70,22 +94,21 @@ public class CommandBase {
             objType[i] = args[i].getClass();
          else
             objType[i] = null;
-      Constructor ctor;
-      try {
-         ctor = clazz.getConstructor (objType);
-      } catch (NoSuchMethodException _ex) {
+      Constructor ctor = getConstructorForArgs (clazz, objType);
+      if (ctor == null) {
          Class c;
          for (int i = 0; i < objType.length; i++)
             if ((c = primitiveClasses.get(objType[i])) != null)
                objType[i] = c;
-         try {
-            ctor = clazz.getConstructor (objType);
-         } catch (NoSuchMethodException ignore) {
-            return clazz.getConstructor (new Class[] { args.getClass() } )
-                        .newInstance (new Object[]{args});
+         ctor = getConstructorForArgs (clazz, objType);
+         if (ctor == null) {
+            ctor = getConstructorForArgs (clazz,new Class[] {args.getClass()});
          }
       }
-      return ctor.newInstance (args);
+      if (ctor == null)
+         return clazz.getConstructor (objType);
+      else
+         return ctor.newInstance (args);
    }
    /**
     * This is a convenience method for newInstance (getClass (clsName), args).
