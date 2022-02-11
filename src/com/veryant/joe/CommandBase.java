@@ -103,6 +103,8 @@ public class CommandBase {
          ctor = getConstructorForArgs (clazz, objType);
          if (ctor == null) {
             ctor = getConstructorForArgs (clazz,new Class[] {args.getClass()});
+            if (ctor != null)
+               return ctor.newInstance (new Object[]{args});
          }
       }
       if (ctor == null)
