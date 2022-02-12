@@ -25,6 +25,7 @@ import java.util.HashMap;
 
 public abstract class Wrapper implements InternalObject {
    enum Type {
+      NULL,
       BOOLEAN,
       BYTE,
       CHAR,
@@ -116,6 +117,8 @@ public abstract class Wrapper implements InternalObject {
             } 
             return new WArray ((Object[]) obj);
          }
+      } else {
+         return WNull.value;
       }
       return null;
    }

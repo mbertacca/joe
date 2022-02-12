@@ -55,7 +55,8 @@ public class CommandBase {
          if (types.length == args.length) {               
             boolean argumentsMatch = true;
             for (int i = 0; i < args.length; i++) {
-               if (!types[i].isAssignableFrom(args[i])) {
+               if (types[i] != null && args[i] != null &&
+                  !types[i].isAssignableFrom(args[i])) {
                   argumentsMatch = false;
                   break;
                }
@@ -87,6 +88,8 @@ public class CommandBase {
     * args to its constructor.
     */
    public Object newInstance (Class clazz, Object... args) throws Exception {
+      if (args == null)
+         args = new Object[] { null };
       Class objType[] = new Class[args.length];
       Object obj;
       for (int i = 0; i < args.length; i++)

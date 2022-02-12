@@ -43,6 +43,7 @@ enum TokenType {
    _ML_COMMENT,
    _COMMENT,
    _TRUE,
-   _FALSE
+   _FALSE,
+   _NULL
 }
 

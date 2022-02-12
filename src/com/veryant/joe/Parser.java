@@ -378,6 +378,8 @@ public class Parser {
             return Literals.getBoolean(true);
          case _FALSE:
             return Literals.getBoolean(false);
+         case _NULL:
+            return Literals.getNull();
          case _WORD:
             return new Message()  {
                public Object exec (Block blk) throws JOEException {

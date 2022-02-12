@@ -77,13 +77,13 @@ public class DefaultCommand extends CommandBase {
          String s = "";
          for (int i = 0; i < b.length; i++) {
             if (b[i] == null)
-               s += "(null)";
+               s += "()";
             else
                s += b[i].toString();
          }
          System.out.print (s);
       } else
-         System.out.print ("(null)");
+         System.out.print ("()");
       return this;
    }
    /**
@@ -94,13 +94,13 @@ public class DefaultCommand extends CommandBase {
          String s = "";
          for (int i = 0; i < b.length; i++) {
             if (b[i] == null)
-               s += "(null)";
+               s += "()";
             else
                s += b[i].toString();
          }
          System.out.println (s);
       } else
-         System.out.println ("(null)");
+         System.out.println ("()");
       return this;
    }
    /**
@@ -603,7 +603,7 @@ public class DefaultCommand extends CommandBase {
       String msg = "";
       for (int i = 0; i < message.length; i++)
          if (message[i] == null)
-            msg += "(null)";
+            msg += "()";
          else
             msg += message[i].toString();
       Return = javax.swing.JOptionPane.showInputDialog(null, msg);

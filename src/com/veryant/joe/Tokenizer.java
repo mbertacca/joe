@@ -190,7 +190,12 @@ public class Tokenizer {
             break;
          case '(':
             if (breakChar(line[idx]))
-               tokens.add (newToken("(", TokenType._PAR_OPEN_, cCol));
+               if (ila < line.length && line[ila] == ')') {
+                  tokens.add (newToken("()", TokenType._NULL, cCol));
+                  idx++;
+               } else {
+                  tokens.add (newToken("(", TokenType._PAR_OPEN_, cCol));
+               }
             break;
          case ')':
             if (breakChar(line[idx]))

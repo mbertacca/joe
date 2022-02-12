@@ -19,25 +19,21 @@
 
 package com.veryant.joe;
 
-import java.math.BigDecimal;
 
-public class Literals {
-   public static Object getInteger (String val) {
-      return Wrapper.newInstance (Integer.parseInt(val));
+public class WNull extends Wrapper {
+   static final WNull value = new WNull();
+   private WNull() {
    }
-   public static Object getDouble (String val) {
-      return Wrapper.newInstance (Double.parseDouble(val));
+   public boolean ne (Object b) {
+      return !equals (b);
    }
-   public static Object getDecimal (String val) {
-      return Wrapper.newInstance (new BigDecimal(val));
+   public Object getWrapped () {
+      return null;
    }
-   public static Object getString (String val) {
-      return Wrapper.newInstance (val);
+   public Type type() {
+      return Type.NULL;
    }
-   public static Object getBoolean (boolean val) {
-      return Wrapper.newInstance (val);
-   }
-   public static Object getNull () {
-      return Wrapper.newInstance (null);
+   public String toString() {
+      return "()";
    }
 }

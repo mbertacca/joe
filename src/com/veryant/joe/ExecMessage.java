@@ -272,7 +272,7 @@ public class ExecMessage implements Message {
                   int k;
                   for (k = 0; k < nArgLen; k++) {
                      if (argClasses[fixed+k] == null)
-                        break;
+                        continue;
                      else if (!arCls.isAssignableFrom (argClasses[fixed+k]))
                         break;
                   }
@@ -302,13 +302,13 @@ public class ExecMessage implements Message {
                if (argArray[i] != null)
                   sb.append(argArray[i].getClass().getName());
                else
-                  sb.append("(null)");
+                  sb.append("()");
                sb.append(",");
             }
             if (argArray[i] != null)
                sb.append(argArray[i].getClass().getName());
             else
-               sb.append("(null)");
+               sb.append("()");
          }
          throw new JOEException (new NoSuchMethodException(sb.toString()),
                                  selector);
@@ -375,7 +375,7 @@ public class ExecMessage implements Message {
       else if (receiver != null)
          Return.append(receiver.toString());
       else 
-         Return.append("(null)");
+         Return.append("()");
 
       Return.append (" ");
       Return.append (selector.word);

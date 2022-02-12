@@ -97,6 +97,8 @@ public class Block extends ArrayList<Message>
          return null;
    }
    public Object setConstant (String name, Object val) {
+      if (val == null)
+         val = WNull.value;
       if (constants.get (name) == null) {
          constants.put (name, val);
          return val;
@@ -105,6 +107,8 @@ public class Block extends ArrayList<Message>
    }
 
    public Object setVariable (String name, Object val) {
+      if (val == null)
+         val = WNull.value;
       if (constants.get (name) == null) {
          if (execAsJoe) {
             variables.put (name, val);
