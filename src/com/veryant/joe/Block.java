@@ -25,6 +25,7 @@ import java.util.HashMap;
 
 public class Block extends ArrayList<Message>
                 implements InternalObject {
+   static final Object[] voidArgs = {};
    final Executor executor;
    private Block parent;
    private HashMap<String,Object> variables;
@@ -49,13 +50,13 @@ public class Block extends ArrayList<Message>
       argName = argn;
    }
    public Object exec () throws JOEException {
-      return vExec (new HashMap<String,Object>(), (Object[]) null);
+      return vExec (new HashMap<String,Object>(), voidArgs);
    }
    public Object exec (Object...argv) throws JOEException {
       return vExec (new HashMap<String,Object>(), argv);
    }
    public Object init () throws JOEException {
-      return init ((Object[]) null);
+      return init (voidArgs);
    }
    public Object init (Object...argv) throws JOEException {
       if (variables == null)
@@ -74,16 +75,19 @@ public class Block extends ArrayList<Message>
       HashMap<String,Object> saveVar = variables;
       variables = vars;
 
-      if (argv != null) {
-         argArray = argv;
-         if (argName != null) {
-            final int nArgs = Math.min (argv.length, argName.length);
-            for (int i = 0; i < nArgs; i++)
-               variables.put (argName[i], argv[i]);
-         }
-      } else {
-         argArray = new Object[] {};
+      if (argv == null)
+         argv = voidArgs;
+
+      argArray = argv;
+      if (argName != null) {
+         int i;
+         final int nArgs = Math.min (argv.length, argName.length);
+         for (i = 0; i < nArgs; i++)
+            variables.put (argName[i], argv[i]);
+         for ( ; i < argName.length; i++)
+            variables.put (argName[i], WNull.value);
       }
+
       Object Return = executor.run (this);
       variables = saveVar;
       return Return;
@@ -185,7 +189,7 @@ public class Block extends ArrayList<Message>
       return Return;
    }
    public Block $new() throws JOEException {
-      return $new ((Object[]) null);
+      return $new (voidArgs);
    }
    public Block $new(Object...args) throws JOEException {
       Block Return = (Block) clone();
