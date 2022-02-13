@@ -251,8 +251,15 @@ Tokenizer_tokenize (Tokenizer self, char *line)
          break;
       case '(':
          if (breakChar(self, *c)) {
-            JoeStrBuild_appendChr (self->word, *c);
-            newToken(self, _PAR_OPEN_);
+            ++c;
+            if (*c == ')') {
+               JoeStrBuild_appendStr(self->word, "()");
+               newToken(self, _NULL);
+            } else {
+               c--;
+               JoeStrBuild_appendChr (self->word, *c);
+               newToken(self, _PAR_OPEN_);
+            }
          }
          break;
       case ')':

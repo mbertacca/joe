@@ -32,6 +32,7 @@
 # include "joe_JOEObject.h"
 # include "joe_LoadScript.h"
 # include "joe_Memory.h"
+# include "joe_Null.h"
 # include "joestrct.h"
 
 /*
@@ -874,6 +875,64 @@ static struct s_joe_Object obj_true = { 0, 1, 0, 1, 0, &joe_Boolean_Class, {0} }
 joe_Object joe_Boolean_True = &obj_true;
 static struct s_joe_Object obj_false = { 0, 1, 0, 1, 0, &joe_Boolean_Class, {0} };
 joe_Object joe_Boolean_False = &obj_false;
+
+/* Null */
+joe_Object joe_Null_value;
+
+static int
+nullToString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   joe_Object_assign(retval, joe_String_New ("()"));
+   return JOE_SUCCESS;
+}
+
+static int
+nullEq (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1) {
+      if (argv[0] == self)
+         joe_Object_assign(retval, joe_Boolean_True);
+      else
+         joe_Object_assign(retval, joe_Boolean_False);
+      return JOE_SUCCESS;
+   }
+   joe_Object_assign(retval, joe_Exception_New ("eq: missing argument"));
+   return JOE_FAILURE;
+}
+
+static int
+nullNe (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1) {
+      if (argv[0] != self)
+         joe_Object_assign(retval, joe_Boolean_True);
+      else
+         joe_Object_assign(retval, joe_Boolean_False);
+      return JOE_SUCCESS;
+   }
+   joe_Object_assign(retval, joe_Exception_New ("ne: missing argument"));
+   return JOE_FAILURE;
+}
+
+static joe_Method nullMthds[] = {
+   {"equals", nullEq },
+   {"ne", nullNe },
+   {"toString", nullToString },
+  {(void *) 0, (void *) 0}
+};
+
+joe_Class joe_Null_Class = {
+   "joe_Null",
+   0,
+   0,
+   nullMthds,
+   0,
+   &joe_Object_Class,
+   0
+};
+
+static struct s_joe_Object obj_null = { 0, 1, 0, 1, 0, &joe_Null_Class, {0} };
+joe_Null joe_Null_value = &obj_null;
 
 /* test */
 

@@ -24,6 +24,7 @@
 # include "joe_Variable.h"
 # include "joe_BreakBlockException.h"
 # include "joe_Memory.h"
+# include "joe_Null.h"
 # include "joestrct.h"
 
 # define MESSAGES 0
@@ -67,13 +68,17 @@ my_exec (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
    joe_ArrayList argsNames = *JOE_AT(self, ARGS_NAMES);
    joe_HashMap argsVars = 0;
    unsigned int argsNamesLen = joe_ArrayList_length (argsNames);
+   unsigned int validArgsLen = argsNamesLen < argc ? argsNamesLen : argc;
 
-
-   argsNamesLen = argsNamesLen < argc ? argsNamesLen : argc;
    if (argsNamesLen) {
       argsVars = *JOE_AT(self, VARIABLES);
-      for (i = 0; i < argsNamesLen; i++) {
+      for (i = 0; i < validArgsLen; i++) {
          obj=joe_HashMap_put(argsVars,*joe_ArrayList_at(argsNames, i),args[i]);
+         joe_Object_delIfUnassigned (&obj);
+      }
+      for ( ; i < argsNamesLen; i++) {
+         obj=joe_HashMap_put(argsVars,*joe_ArrayList_at(argsNames, i),
+                             joe_Null_value);
          joe_Object_delIfUnassigned (&obj);
       }
    }
@@ -367,6 +372,8 @@ joe_Block_setVariable (joe_Block self, joe_Variable var, joe_Object value)
    joe_HashMap vars = getVars (self, var, hash);
    if (!vars)
       vars = *JOE_AT(self, VARIABLES);
+   if (value == NULL)
+      value = joe_Null_value;
 
    oldValue = joe_HashMap_putHash (vars, hash, joe_Variable_name(var), value);
    joe_Object_delIfUnassigned (&oldValue);

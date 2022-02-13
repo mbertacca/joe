@@ -25,6 +25,7 @@
 # include "joe_Block.h"
 # include "joe_Boolean.h"
 # include "joe_Integer.h"
+# include "joe_Null.h"
 # include "joe_String.h"
 # include "joe_StringBuilder.h"
 # include "joe_BreakBlockException.h"
@@ -205,7 +206,7 @@ static int
 isNull (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1) {
-      if (argv[0] == 0)
+      if (argv[0] == joe_Null_value || argv[0] == 0)
          joe_Object_assign(retval, joe_Boolean_New_true());
       else
          joe_Object_assign(retval, joe_Boolean_New_false());

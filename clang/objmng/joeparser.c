@@ -29,6 +29,7 @@
 # include "joe_Boolean.h"
 # include "joe_Variable.h"
 # include "joe_Exception.h"
+# include "joe_Null.h"
 # include <stdlib.h>
 
 # define pop(t) ((Token)JoeArrayScan_next(t))
@@ -165,6 +166,8 @@ getValue (JoeParser self, Token tk) {
        return getTrue();
    case _FALSE:
        return getFalse();
+   case _NULL:
+       return joe_Null_value;
    case _BANGBANG_:
    case _WORD:
       return joe_Variable_New(tk->word);
