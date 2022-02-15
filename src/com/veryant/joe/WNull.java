@@ -21,7 +21,7 @@ package com.veryant.joe;
 
 
 public class WNull extends Wrapper {
-   static final WNull value = new WNull();
+   public static final WNull value = new WNull();
    private WNull() {
    }
    public boolean ne (Object b) {

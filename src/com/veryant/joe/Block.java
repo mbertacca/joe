@@ -131,8 +131,8 @@ public class Block extends ArrayList<Message>
       return getVariable (name.value);
    }
    public Object getVariable (String name) throws JOEException {
-      Object Return = variables.get(name);
-      if (Return == null && !variables.containsKey (name)) {
+      Object Return = (variables == null) ? null : variables.get(name);
+      if (Return == null) {
          Return = constants.get (name);
          if (Return == null) {
             if (parent != null)

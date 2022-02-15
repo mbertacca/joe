@@ -1,0 +1,17 @@
+CL := {cl:.
+   CPYF := {cpfy:.
+      obj := {obj:.
+         self :=!!.
+         print := {:s. !print s. self.}.
+         / := { !println "". self}.
+      } new.
+   }.
+}.
+
+/ := CL new.
+/CPYF;  print "Hi" /; print "guys" /.
+!try {
+   /CPYF;  p__ "Hi".
+},{
+!println "Ok".
+}.
