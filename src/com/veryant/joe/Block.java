@@ -95,7 +95,7 @@ public class Block extends ArrayList<Message>
    private HashMap<String,Object> getDataContaining (String name) {
       if (variables != null && variables.containsKey (name))
          return variables;
-      else if (parent != null)
+      else if (!execAsJoe && parent != null)
          return parent.getDataContaining (name);
       else 
          return null;
@@ -114,15 +114,11 @@ public class Block extends ArrayList<Message>
       if (val == null)
          val = WNull.value;
       if (constants.get (name) == null) {
-         if (execAsJoe) {
+         HashMap<String,Object> var = getDataContaining (name);
+         if (var != null)
+            var.put (name, val);
+         else
             variables.put (name, val);
-         } else {
-            HashMap<String,Object> var = getDataContaining (name);
-            if (var != null)
-               var.put (name, val);
-            else
-               variables.put (name, val);
-         }
          return val;
       } else
          return null;

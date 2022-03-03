@@ -1,6 +1,5 @@
 script:args.
-aa :=.
-{
+aa := {
   aa := !!.
   a := !array 0.
   a set 0,a.

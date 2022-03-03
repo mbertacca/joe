@@ -1,8 +1,7 @@
 /*
+ * This source file is part of the "Joe Objects Executor" open source project
  *
- * This source file is part of the "Java Objects Executor" open source project
- *
- * Copyright 2017 Veryant and Marco Bertacca
+ * Copyright 2017 Marco Bertacca (www.bertacca.eu)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +16,12 @@
  * limitations under the License.
  */
 
-package com.veryant.joe;
+# ifndef joe_GotoException_h
+# define joe_GotoException_h  "$Id$";
+# include "joe_BreakException.h"
 
-public class Revision {
-   public static final String id = "$Revision: v1.12-6-g1b912f4$";
-   public static void main (String argv[]) {
-      System.out.println (id);
-   }
-}
+typedef joe_Object joe_GotoException;
+extern joe_Class joe_GotoException_Class;
+joe_Object joe_GotoException_New (char *c);
 
+# endif

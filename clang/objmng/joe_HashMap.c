@@ -301,15 +301,17 @@ int
 joe_HashMap_getHash (joe_HashMap self, unsigned int hash,
                      joe_String strKey, joe_Object *retval)
 {
-   int len = joe_int_value (*JOE_AT(self, LEN));
-   joe_Array theArray = *JOE_AT(self, ARRAY);
-   unsigned int idx = hash % len;
-   joe_Object item = *JOE_AT(theArray, idx);
-   if (item) {
-      item = checkKey (item, theArray, strKey);
+   if (self) {
+      int len = joe_int_value (*JOE_AT(self, LEN));
+      joe_Array theArray = *JOE_AT(self, ARRAY);
+      unsigned int idx = hash % len;
+      joe_Object item = *JOE_AT(theArray, idx);
       if (item) {
-         *retval = *JOE_AT(item, VALUE);
-         return JOE_TRUE;
+         item = checkKey (item, theArray, strKey);
+         if (item) {
+            *retval = *JOE_AT(item, VALUE);
+            return JOE_TRUE;
+         }
       }
    }
    return JOE_FALSE;
@@ -319,14 +321,16 @@ int
 joe_HashMap_get (joe_HashMap self, joe_Object key, joe_Object *retval)
 {
    int Return = JOE_FALSE;
-   joe_Object strKey = 0;
+   if (self) {
+      joe_Object strKey = 0;
 
-   joe_Object_invoke (key, "toString", 0, 0, &strKey);
+      joe_Object_invoke (key, "toString", 0, 0, &strKey);
 
-   Return = joe_HashMap_getHash (self, joe_HashMap_hash (strKey),
-                                 strKey, retval);
+      Return = joe_HashMap_getHash (self, joe_HashMap_hash (strKey),
+                                    strKey, retval);
 
-   joe_Object_assign (&strKey, 0);
+      joe_Object_assign (&strKey, 0);
+   }
    return Return;
 }
 
@@ -378,14 +382,16 @@ int
 joe_HashMap_containsHashKey (joe_HashMap self, unsigned int hash, joe_String key)
 {
    int Return = JOE_FALSE;
-   joe_Array theArray = *JOE_AT(self, ARRAY);
-   int len = joe_int_value (*JOE_AT(self, LEN));
-   unsigned int idx = hash % len;
-   joe_Object item = *JOE_AT(theArray, idx);
-   if (item) {
-      item = checkKey (item, theArray, key); 
-      if (item)
-         Return = JOE_TRUE;
+   if (self) {
+      joe_Array theArray = *JOE_AT(self, ARRAY);
+      int len = joe_int_value (*JOE_AT(self, LEN));
+      unsigned int idx = hash % len;
+      joe_Object item = *JOE_AT(theArray, idx);
+      if (item) {
+         item = checkKey (item, theArray, key); 
+         if (item)
+            Return = JOE_TRUE;
+      }
    }
    return Return;
 }

@@ -78,7 +78,7 @@ main (int argc, char *argv[])
                             joe_String_New(argv[i]));
       }
 
-      if ((rc = joe_Block_exec (block, 1, &argArray, &retval)) != JOE_SUCCESS){
+      if ((rc = joe_Block_outer_exec (block, 1, &argArray, &retval)) != JOE_SUCCESS){
          showError (retval);
       } else {
          if (joe_Object_instanceOf (retval, integerClass))

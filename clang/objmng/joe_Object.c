@@ -890,7 +890,7 @@ static int
 nullEq (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1) {
-      if (argv[0] == self)
+      if (argv[0] == NULL || argv[0] == self)
          joe_Object_assign(retval, joe_Boolean_True);
       else
          joe_Object_assign(retval, joe_Boolean_False);

@@ -22,6 +22,7 @@
 # include "joe_Integer.h"
 # include "joe_Exception.h"
 # include "joe_BreakLoopException.h"
+# include "joe_Null.h"
 
 #define OBJ 0
 #define NEXT 1
@@ -118,7 +119,7 @@ peek (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       if (item)
          joe_Object_assign(retval, *joe_Object_at (item, OBJ));
       else
-         joe_Object_assign(retval, 0);
+         joe_Object_assign(retval, joe_Null_value);
    } else {
       joe_Object_assign(retval,
                         joe_Exception_New ("List peek: invalid argument"));
@@ -292,6 +293,6 @@ joe_List_pop(joe_List self, joe_Object *retval)
 int
 joe_List_empty(joe_List self)
 {
-   return !joe_Integer_value(*joe_Object_at(self, LENGTH)) > 0;
+   return !(joe_Integer_value(*joe_Object_at(self, LENGTH)) > 0);
 }
 

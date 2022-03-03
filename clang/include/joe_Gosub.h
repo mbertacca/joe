@@ -1,8 +1,7 @@
 /*
+ * This source file is part of the "Joe Objects Executor" open source project
  *
- * This source file is part of the "Java Objects Executor" open source project
- *
- * Copyright 2017 Veryant and Marco Bertacca
+ * Copyright 2017 Marco Bertacca (www.bertacca.eu)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +16,18 @@
  * limitations under the License.
  */
 
-package com.veryant.joe;
+# ifndef joe_Gosub_h
+# define joe_Gosub_h  "$Id$";
+# include "joe_String.h"
 
-public class Revision {
-   public static final String id = "$Revision: v1.12-6-g1b912f4$";
-   public static void main (String argv[]) {
-      System.out.println (id);
-   }
-}
+typedef joe_Object joe_Gosub;
+extern joe_Class joe_Gosub_Class;
 
+joe_Object joe_Gosub_New (joe_String msg);
+void joe_Gosub_setReturnObj (joe_Object self, joe_Object obj);
+char * joe_Gosub_getLabelCharStar (joe_Object self);
+joe_Object joe_Gosub_getReturnObj (joe_Object self);
+int  joe_Gosub_hasReturnObj (joe_Object self);
+
+
+# endif

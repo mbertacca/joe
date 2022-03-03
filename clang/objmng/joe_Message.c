@@ -99,9 +99,14 @@ joe_Message_exec (joe_Object self, joe_Block block, joe_Object *retval)
          } else {
             lArgs[i] = lRet;
          }
-      } else if (isJOEObject && JOE_ISCLASS (arg, &joe_Block_Class)) {
-         joe_Object_assign (&lArgs[i], 
-                            joe_JOEObject_New (arg, block));
+      } else if (JOE_ISCLASS (arg, &joe_Block_Class)) {
+         if (isJOEObject) {
+            joe_Object_assign (&lArgs[i], 
+                               joe_Block_clone (arg, block));
+         } else {
+            joe_Block_setParent (arg, block);
+            lArgs[i] = arg;
+         }
       } else {
          /* joe_Object_assign (JOE_AT(lArgs, i), arg); */
          lArgs[i] = arg;

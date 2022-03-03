@@ -1,6 +1,6 @@
 cat:args.
 
-!if ((args length) = 1), {
+!if ((args length) <> 2), {
    !println "usage: ",(args get 0), " <file-name>".
    !break "cat".
 }.

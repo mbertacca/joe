@@ -16,16 +16,21 @@
  * limitations under the License.
  */
 
- #include <string.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 # include "joe_Block.h"
 # include "joe_JOEObject.h"
 # include "joe_ArrayList.h"
 # include "joe_HashMap.h"
 # include "joe_Variable.h"
 # include "joe_BreakBlockException.h"
+# include "joe_GotoException.h"
+# include "joe_Gosub.h"
 # include "joe_Memory.h"
 # include "joe_Null.h"
 # include "joestrct.h"
+# include "joearray.h"
 
 # define MESSAGES 0
 # define VARIABLES 1
@@ -33,9 +38,9 @@
 # define NAME 3
 # define ARGS_NAMES 4
 # define SUPER 5
-# define NESTING 6
+
 static char *variables[] = { "messages", "variables", "parent",
-                             "name", "argsNames", "super", "nesting", 0};
+                             "name", "argsNames", "super", 0};
 
 void joe_Block_setVariable(joe_Block self, joe_Variable var, joe_Object value);
 
@@ -52,12 +57,88 @@ joe_Block_assign (joe_Object self,int argc,joe_Object *args,joe_Object *retval)
    }
 }
 
-/*
-int
-joe_Block_exec (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
-*/
 static int
-my_exec (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
+findLabel (joe_Block *blk, char* name) {
+   joe_Object obj;
+   joe_Block parent = 0;
+   joe_ArrayList messages;
+   unsigned int len;
+   int i;
+
+   for (parent = joe_WeakReference_get(*JOE_AT(*blk, PARENT));
+        parent != NULL;
+        parent = joe_WeakReference_get(*JOE_AT(*blk, PARENT))) {
+       *blk = parent;
+   }
+
+   messages = *JOE_AT(*blk, MESSAGES);
+   len = joe_ArrayList_length (messages);
+   for (i = 0; i < len; i++) {
+      obj = *joe_ArrayList_at(messages,i);
+      if (JOE_ISCLASS(obj,&joe_String_Class)) {
+/*
+         printf ("[%d][%s] ? [%d]\n", i, joe_String_getCharStar(obj),
+                   strcmp (joe_String_getCharStar(obj), name));
+*/
+         if (strcmp (joe_String_getCharStar(obj), name) == 0)
+            return i;
+      }
+   }
+   return -1;
+}
+
+
+static int my_exec_sub (joe_Object self, int startMsg, joe_Object *retval);
+
+
+static int transfer_flow (joe_Block blk, char *label, joe_Object *retval) {
+   int Return;
+   int newExecIdx;
+
+   for ( ; ; ) {
+      newExecIdx = findLabel (&blk, label);
+      if (newExecIdx < 0) {
+         char *error = calloc (1, 32 + strlen(label));
+         strcpy (error, "label not found: ");
+         strcat (error, label);
+         joe_Object_assign(retval, joe_Exception_New(error));
+         Return = JOE_FAILURE;
+         free (error);
+         break;
+      } else {
+         Return = my_exec_sub (blk, newExecIdx, retval);
+         if (joe_Object_instanceOf (*retval, &joe_GotoException_Class)) {
+            joe_String msg = 0;
+            joe_Exception_getMessage (*retval, 0, 0, &msg);
+            label = joe_String_getCharStar(msg);
+            joe_Object_assign (&msg, 0);
+         } else {
+            break;
+         }
+      }
+   }
+   return Return;
+}
+
+static int
+gosub (joe_Block blk, joe_Gosub gsb, joe_Object *retval) {
+   char *label = joe_Gosub_getLabelCharStar(gsb);
+   int Return;
+   joe_Object_assign (&gsb, 0);
+   Return = transfer_flow (blk, label, retval);
+   if (Return != JOE_SUCCESS &&
+       JOE_ISCLASS((*retval),&joe_BreakException_Class)) {
+      joe_Object retobj = joe_BreakException_getReturnObj(*retval);
+      if (retobj)
+         joe_Object_assign(retval, retobj);
+      Return = JOE_SUCCESS;
+   }
+
+   return Return;
+}
+
+static int
+my_exec_sub (joe_Object self, int startMsg, joe_Object *retval)
 {
    unsigned int i;
    joe_Object obj;
@@ -65,27 +146,10 @@ my_exec (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
    int rc = JOE_SUCCESS;
    joe_ArrayList messages = *JOE_AT(self,MESSAGES);
    unsigned int len = joe_ArrayList_length (messages);
-   joe_ArrayList argsNames = *JOE_AT(self, ARGS_NAMES);
-   joe_HashMap argsVars = 0;
-   unsigned int argsNamesLen = joe_ArrayList_length (argsNames);
-   unsigned int validArgsLen = argsNamesLen < argc ? argsNamesLen : argc;
-
-   if (argsNamesLen) {
-      argsVars = *JOE_AT(self, VARIABLES);
-      for (i = 0; i < validArgsLen; i++) {
-         obj=joe_HashMap_put(argsVars,*joe_ArrayList_at(argsNames, i),args[i]);
-         joe_Object_delIfUnassigned (&obj);
-      }
-      for ( ; i < argsNamesLen; i++) {
-         obj=joe_HashMap_put(argsVars,*joe_ArrayList_at(argsNames, i),
-                             joe_Null_value);
-         joe_Object_delIfUnassigned (&obj);
-      }
-   }
 
    joe_Object_assign(retval, 0);
    lretval = 0;
-   for (i = 0; i < len; i++) {
+   for (i = startMsg; i < len; i++) {
       obj = *joe_ArrayList_at(messages,i);
       if (joe_Object_instanceOf (obj, &joe_Message_Class)) {
          // joe_Object_assign (retval, 0);
@@ -120,6 +184,9 @@ my_exec (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
                joe_Object_transfer(retval, &lretval);
             }
             break;
+         } else if (joe_Object_instanceOf (lretval, &joe_Gosub_Class)) {
+             if ((rc = gosub (self, lretval, retval)) != JOE_SUCCESS)
+                break;
          } else {
             joe_Object_transfer(retval, &lretval);
          }
@@ -129,6 +196,81 @@ my_exec (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
          joe_Object_assign (retval, obj);
       }
    }
+   return rc;
+}
+
+
+static int
+my_exec (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
+{
+   unsigned int i;
+   joe_Object obj;
+   int rc = JOE_SUCCESS;
+   joe_ArrayList argsNames = *JOE_AT(self, ARGS_NAMES);
+   joe_HashMap argsVars = 0;
+   unsigned int argsNamesLen = joe_ArrayList_length (argsNames);
+   unsigned int validArgsLen = argsNamesLen < argc ? argsNamesLen : argc;
+
+   if (argsNamesLen) {
+      argsVars = *JOE_AT(self, VARIABLES);
+      if (!argsVars) {
+         argsVars = joe_HashMap_New_size (4);
+         joe_Object_assign (JOE_AT(self, VARIABLES), argsVars);
+      }
+      for (i = 0; i < validArgsLen; i++) {
+         obj=joe_HashMap_put(argsVars,*joe_ArrayList_at(argsNames, i),args[i]);
+         joe_Object_delIfUnassigned (&obj);
+      }
+      for ( ; i < argsNamesLen; i++) {
+         obj=joe_HashMap_put(argsVars,*joe_ArrayList_at(argsNames, i),
+                             joe_Null_value);
+         joe_Object_delIfUnassigned (&obj);
+      }
+   }
+   rc = my_exec_sub (self, 0, retval);
+   if (argsVars)
+      for (i = 0; i < argsNamesLen; i++) {
+         obj=joe_HashMap_put (argsVars, *joe_ArrayList_at(argsNames, i), 0);
+         joe_Object_delIfUnassigned (&obj);
+      }
+   return rc;
+}
+
+int
+joe_Block_outer_exec (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
+{
+   unsigned int i;
+   joe_Object obj;
+   int rc = JOE_SUCCESS;
+   joe_ArrayList argsNames = *JOE_AT(self, ARGS_NAMES);
+   joe_HashMap argsVars = 0;
+   unsigned int argsNamesLen = joe_ArrayList_length (argsNames);
+   unsigned int validArgsLen = argsNamesLen < argc ? argsNamesLen : argc;
+
+   if (argsNamesLen) {
+      argsVars = *JOE_AT(self, VARIABLES);
+      for (i = 0; i < validArgsLen; i++) {
+         obj=joe_HashMap_put(argsVars,*joe_ArrayList_at(argsNames, i),args[i]);
+         joe_Object_delIfUnassigned (&obj);
+      }
+      for ( ; i < argsNamesLen; i++) {
+         obj=joe_HashMap_put(argsVars,*joe_ArrayList_at(argsNames, i),
+                             joe_Null_value);
+         joe_Object_delIfUnassigned (&obj);
+      }
+   }
+
+   rc = my_exec_sub (self, 0, retval);
+   if (rc != JOE_SUCCESS &&
+       joe_Object_instanceOf (*retval, &joe_GotoException_Class)) {
+      joe_String msg = 0;
+      char *label;
+      joe_Exception_getMessage (*retval, 0, 0, &msg);
+      label = joe_String_getCharStar(msg);
+      joe_Object_assign (&msg, 0);
+      rc = transfer_flow (self, label, retval);
+   }
+
    if (argsVars)
       for (i = 0; i < argsNamesLen; i++) {
          obj=joe_HashMap_put (argsVars, *joe_ArrayList_at(argsNames, i), 0);
@@ -160,37 +302,40 @@ joe_Block_exec (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
    int rc;
    joe_Object* thisVars = joe_Object_array(self);
-   int *nesting = joe_int_starValue(thisVars[NESTING]);
 
-   if ((*nesting)++ == 0) {
-      rc = my_exec(self, argc, args, retval);
-   } else {
-      joe_HashMap oldVar = 0;
-      joe_HashMap newVar = joe_HashMap_New_size (4);
+   joe_HashMap oldVar = 0;
 
-      joe_Object_assign (&oldVar, thisVars[VARIABLES]);
-      joe_Object_assign (&thisVars[VARIABLES], newVar);
+   joe_Object_assign (&oldVar, thisVars[VARIABLES]);
+   joe_Object_assign (&thisVars[VARIABLES], 0);
 
-      rc = my_exec (self, argc, args, retval);
+   rc = my_exec (self, argc, args, retval);
 
-      joe_Object_assign (&thisVars[VARIABLES], oldVar);
-      joe_Object_assign (&oldVar, 0);
-   }
-
-   (*nesting)--;
-
+   joe_Object_assign (&thisVars[VARIABLES], oldVar);
+   joe_Object_assign (&oldVar, 0);
    return rc;
 }
+
+void
+joe_Block_setParent (joe_Block self, joe_Block parent)
+{
+   joe_Block currParent = joe_WeakReference_get(*JOE_AT(self, PARENT));
+   if (currParent != parent)
+       joe_Object_assign (JOE_AT(self, PARENT), joe_WeakReference_New(parent));
+}
+
 
 joe_Block
 joe_Block_clone (joe_Block self, joe_Block parent)
 {
-   joe_Block Return = joe_Object_clone (self);
-   joe_HashMap newVars = joe_HashMap_New (8);
+   joe_Block Return = joe_WeakReference_get(*JOE_AT(self, PARENT));
+   if (parent && Return != parent) {
+       Return = joe_Object_clone (self);
+       joe_HashMap newVars = joe_HashMap_New (8);
 
-   joe_Object_assign (JOE_AT(Return, PARENT),
+       joe_Object_assign (JOE_AT(Return, PARENT),
                                      joe_WeakReference_New(parent));
-   joe_Object_assign (JOE_AT(Return, VARIABLES), newVars);
+       joe_Object_assign (JOE_AT(Return, VARIABLES), newVars);
+   }
    return Return;
 }
 
@@ -296,7 +441,6 @@ joe_Block_Init (joe_Block self, joe_Block parent)
                     joe_WeakReference_New(parent));
    joe_Object_assign(&thisVars[NAME], 0);
    joe_Object_assign(&thisVars[ARGS_NAMES], joe_ArrayList_New(8));
-   joe_Object_assign(&thisVars[NESTING], joe_int_New0());
    joe_Object_setAcyclic (self);
 }
 
@@ -323,7 +467,7 @@ getVars (joe_Object self, joe_Variable var, unsigned int hash)
    Return = *JOE_AT(self,VARIABLES);
    if (!joe_HashMap_containsHashKey(Return, hash, joe_Variable_name(var))) {
       joe_Block parent = joe_WeakReference_get(*JOE_AT(self, PARENT));
-      if (parent)
+      if (parent && !joe_Object_instanceOf (self, &joe_JOEObject_Class))
          Return = getVars (parent, var, hash);
       else
          Return = 0;
@@ -370,11 +514,15 @@ joe_Block_setVariable (joe_Block self, joe_Variable var, joe_Object value)
    joe_Object oldValue;
    unsigned int hash = joe_Variable_hash (var);
    joe_HashMap vars = getVars (self, var, hash);
-   if (!vars)
+   if (!vars) {
       vars = *JOE_AT(self, VARIABLES);
+      if (!vars) {
+         vars = joe_HashMap_New_size (4);
+         joe_Object_assign (JOE_AT(self, VARIABLES), vars);
+      }
+   }
    if (value == NULL)
       value = joe_Null_value;
-
    oldValue = joe_HashMap_putHash (vars, hash, joe_Variable_name(var), value);
    joe_Object_delIfUnassigned (&oldValue);
 }

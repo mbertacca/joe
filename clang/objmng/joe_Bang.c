@@ -30,6 +30,8 @@
 # include "joe_StringBuilder.h"
 # include "joe_BreakBlockException.h"
 # include "joe_BreakLoopException.h"
+# include "joe_GotoException.h"
+# include "joe_Gosub.h"
 
 static int Switch_case (joe_Object self,
                         int argc, joe_Object *argv, joe_Object *retval);
@@ -195,7 +197,7 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_StringBuilder msg = 0;
    joe_Object_assign (&msg, joe_StringBuilder_New ());
-   joe_StringBuilder_appendCharStar (msg, "JOE Revision 0.7 ");
+   joe_StringBuilder_appendCharStar (msg, "JOE Revision 0.8 ");
    joe_StringBuilder_appendCharStar (msg, __DATE__);
    joe_Object_assign(retval, joe_StringBuilder_toString (msg));
    joe_Object_assign (&msg, 0);
@@ -562,6 +564,37 @@ breakLoop (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 }
 
 static int
+_goto (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
+{
+   if (argc == 1 && joe_Object_instanceOf (args[0], &joe_String_Class)) {
+      joe_Object_assign(retval, joe_GotoException_New (
+                                          joe_String_getCharStar(args[0])));
+   } else {
+      joe_Object_assign(retval, joe_Exception_New("goto: Invalid argument(s)"));
+   }
+   return JOE_FAILURE;
+}
+
+static int
+gosub (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
+{
+   if (argc == 1 && joe_Object_instanceOf (args[0], &joe_String_Class)) {
+      joe_Object_assign(retval, joe_Gosub_New (args[0]));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New("gosub: Invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+_return (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
+{
+   joe_Object_assign(retval, joe_BreakException_New ("return without gosub"));
+   return JOE_FAILURE;
+}
+
+static int
 newArray (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
    if (argc == 1 && joe_Object_instanceOf (args[0], &joe_Integer_Class)) {
@@ -612,6 +645,9 @@ static joe_Method mthds[] = {
   {"throw", _throw},
   {"break", _break},
   {"breakLoop", breakLoop},
+  {"goto", _goto},
+  {"gosub", gosub},
+  {"return", _return},
   {"array", array},
   {"newArray", newArray},
   {"version", version},
