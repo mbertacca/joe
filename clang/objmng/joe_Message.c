@@ -149,6 +149,9 @@ joe_Message_exec (joe_Object self, joe_Block block, joe_Object *retval)
          rc = joe_Selector_invoke (selector, lReceiver, argc, lArgs, retval);
       }
    }
+   if (*retval && JOE_ISCLASS ((*retval), &joe_WeakReference_Class)) {
+      joe_Object_assign(retval, joe_WeakReference_get (*retval));
+   }
 
    if (isAssignment) {
       lArgs[0] = 0;
