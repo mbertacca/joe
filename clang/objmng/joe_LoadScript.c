@@ -86,9 +86,13 @@ joe_LoadScript_New (joe_Block self, char *scriptName)
    if (dirname == 0 || *dirname == 0) {
       path = scriptName;
    } else {
-      path = calloc (1, strlen (dirname) + strlen (scriptName) + 1);
-      strcat (path, dirname);
-      strcat (path, scriptName);
+      if (isFileSeparator(scriptName[0])) {
+         path = strdup(scriptName);
+      } else {
+         path = calloc (1, strlen (dirname) + strlen (scriptName) + 1);
+         strcat (path, dirname);
+         strcat (path, scriptName);
+      }
    }
 
    scriptFile = fopen (path, "r");
@@ -96,7 +100,7 @@ joe_LoadScript_New (joe_Block self, char *scriptName)
    if (scriptFile == NULL) {
       joe_StringBuilder msg = joe_StringBuilder_New ();
       joe_StringBuilder_appendCharStar (msg, "cannot access ");
-      joe_StringBuilder_appendCharStar (msg, scriptName);
+      joe_StringBuilder_appendCharStar (msg, path);
       joe_StringBuilder_appendCharStar (msg, " (errno=");
       joe_StringBuilder_appendInt (msg, errno);
       joe_StringBuilder_appendChar (msg, ')');

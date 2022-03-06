@@ -563,7 +563,17 @@ public class DefaultCommand extends CommandBase {
     * Executes the specified JOE script and returns its return code.
     */
    public int runJoe (Object...cmds) throws Exception {
-      return JavaObjectsExecutor.imain (toStringArray(cmds));
+      int Return = 0;
+      // return JavaObjectsExecutor.imain (toStringArray(cmds));
+
+      Object args[] = toStringArray (cmds);
+      Object[] jarg = new Object [] {new WArray (cmds)};
+      Block blk = ScriptManager.load (this, args[0].toString(), jarg);
+      Object rc  = blk.init (jarg);
+      if (rc instanceof WNumber)
+         Return = ((WNumber) rc).intValue();
+
+      return Return;
    }
    /** Stops the execution of the current script and executes the
     * script specified as argument.

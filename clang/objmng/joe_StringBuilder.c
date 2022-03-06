@@ -202,3 +202,11 @@ joe_StringBuilder_toString (joe_Object self)
    char *str = ((char*) joe_Object_getMem (mem) + sizeof (StrBuild));
    return joe_String_New (str);
 }
+
+char *
+joe_StringBuilder_getCharStar (joe_Object self)
+{
+   joe_Memory mem = *JOE_AT(self, 0);
+   return ((char*) joe_Object_getMem (mem) + sizeof (StrBuild));
+}
+

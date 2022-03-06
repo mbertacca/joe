@@ -19,6 +19,8 @@
 # include <stdio.h>
 # include <time.h>
 # include <string.h>
+# include <stdlib.h>
+# include <unistd.h>
 # include "joe_Bang.h"
 # include "joe_Array.h"
 # include "joe_List.h"
@@ -32,6 +34,7 @@
 # include "joe_BreakLoopException.h"
 # include "joe_GotoException.h"
 # include "joe_Gosub.h"
+# include "joe_LoadScript.h"
 
 static int Switch_case (joe_Object self,
                         int argc, joe_Object *argv, joe_Object *retval);
@@ -191,6 +194,57 @@ args2String(int argc, joe_Object* argv, joe_Object* retval)
    joe_Object_assign(&msg, 0);
 }
 
+static int
+exec (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc > 0) {
+      int i, rc;
+      joe_StringBuilder msg = 0;
+      joe_Object_assign(&msg, joe_StringBuilder_New());
+
+      for (i = 0; i < argc; i++) {
+         joe_StringBuilder_append(msg, argv[i]);
+         joe_StringBuilder_appendChar(msg, ' ');
+      }
+
+      rc = system (joe_StringBuilder_getCharStar(msg));
+      if (rc != 0 && (rc & 0x00FF) == 0)
+         rc >>= 8;
+      joe_Object_assign(retval, joe_Integer_New (rc));
+
+      joe_Object_assign(&msg, 0);
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("exec: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+execFromDir (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc > 1 && joe_Object_instanceOf (argv[0], &joe_String_Class)) {
+      int rc;
+      int pathLen = 64;
+      char *currpath = calloc (1, pathLen);
+      while (getcwd (currpath, pathLen) == NULL) {
+         pathLen <<= 1;
+         currpath = realloc (currpath, pathLen);
+      }
+      if (chdir (joe_String_getCharStar(argv[0])) == 0) {
+         rc = exec (self, (argc - 1), &argv[1], retval);
+         chdir (currpath);
+      } else {
+         joe_Object_assign(retval, joe_Exception_New ("execFromDir: cannot change directory"));
+         rc = JOE_FAILURE;
+      }
+      free (currpath);
+      return rc;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("execFromDir: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
 
 static int
 version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -202,6 +256,55 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    joe_Object_assign(retval, joe_StringBuilder_toString (msg));
    joe_Object_assign (&msg, 0);
    return JOE_SUCCESS;
+}
+
+static int
+systemGetenv (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_String_Class)) {
+      char *var = joe_String_getCharStar (argv[0]);
+      char *val = getenv(var);
+      if (val) {
+         joe_Object_assign (retval, joe_StringBuilder_New ());
+         joe_StringBuilder_appendCharStar (*retval, val);
+      } else {
+         joe_Object_assign(retval, joe_Null_value);
+      } 
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("systemGetenv: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+chr (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_Integer_Class)) {
+      int code = joe_Integer_value (argv[0]);
+      joe_StringBuilder str = 0;
+      joe_Object_assign (&str, joe_StringBuilder_New ());
+      joe_StringBuilder_appendChar (str, (char) code);
+      joe_Object_assign(retval, joe_StringBuilder_toString (str));
+      joe_Object_assign (&str, 0);
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("chr: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+asc (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_String_Class)) {
+      char *chr = joe_String_getCharStar (argv[0]);
+      joe_Object_assign(retval, joe_Integer_New ((unsigned char) chr[0]));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("asc: invalid argument"));
+      return JOE_FAILURE;
+   }
 }
 
 static int
@@ -595,6 +698,61 @@ _return (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 }
 
 static int
+loadScript (joe_String scriptName, joe_Object *retval)
+{
+   joe_Class* loadScriptClass = joe_Class_getClass("joe_LoadScript");
+   return joe_Class_newInstance(loadScriptClass, 1, &scriptName, retval);
+}
+
+static int
+_new (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
+{
+   if (argc > 0 && joe_Object_instanceOf (args[0], &joe_String_Class)) {
+      int rc;
+      rc =loadScript (args[0], retval);
+      if (rc == JOE_SUCCESS) {
+         joe_LoadScript block = 0;
+         joe_Object_transfer(&block, retval);
+         rc = joe_Block_new (block, (argc - 1), &args[1], retval);
+         joe_Object_assign(&block, 0);
+         return rc;
+      }
+   } else {
+      joe_Object_assign(retval, joe_Exception_New("new: Invalid argument(s)"));
+   }
+   return JOE_FAILURE;
+}
+
+static int
+runJoe (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
+{
+   if (argc > 0 && joe_Object_instanceOf (args[0], &joe_String_Class)) {
+      int rc;
+      rc =loadScript (args[0], retval);
+      if (rc == JOE_SUCCESS) {
+         int i;
+         joe_LoadScript block = 0;
+         joe_Array argArray = 0;
+         joe_Object_transfer(&block, retval);
+
+         joe_Object_assign(&argArray, joe_Array_New (argc));
+         for (i = 0; i < argc; i++) {
+            joe_Object_assign (joe_Object_at (argArray, i), args[i]);
+         }
+
+         rc = joe_Block_outer_exec (block, 1, &argArray, retval);
+         joe_Object_assign(&block, 0);
+         joe_Object_assign(&argArray, 0);
+         return rc;
+      }
+   } else {
+      joe_Object_assign(retval, joe_Exception_New("new: Invalid argument(s)"));
+   }
+   return JOE_FAILURE;
+}
+
+
+static int
 newArray (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
    if (argc == 1 && joe_Object_instanceOf (args[0], &joe_Integer_Class)) {
@@ -649,8 +807,15 @@ static joe_Method mthds[] = {
   {"gosub", gosub},
   {"return", _return},
   {"array", array},
+  {"new", _new},
+  {"runJoe", runJoe},
   {"newArray", newArray},
   {"version", version},
+  {"asc", asc},
+  {"chr", chr},
+  {"systemGetenv", systemGetenv},
+  {"exec", exec},
+  {"execFromDir", execFromDir},
   {"unixTime", unixTime},
   {"loadSO", loadSO},
   {(void *) 0, (void *) 0}

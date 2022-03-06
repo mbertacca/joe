@@ -29,5 +29,6 @@ void joe_StringBuilder_appendInt (joe_StringBuilder self, int n);
 void joe_StringBuilder_append (joe_StringBuilder self, joe_Object obj);
 unsigned int joe_StringBuilder_length (joe_StringBuilder self);
 joe_Object joe_StringBuilder_toString (joe_StringBuilder self);
+char * joe_StringBuilder_getCharStar (joe_Object self);
 
 # endif
