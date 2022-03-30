@@ -86,11 +86,11 @@ joe_HashMap_fillStruct(joe_HashMap self, struct s_cself *cself)
 {
    joe_Object *selfVars = joe_Object_array (self);
    cself->theArray = &selfVars[ARRAY];
-   cself->nHash = (unsigned int *) joe_int_starValue(selfVars[N_HASH]);
-   cself->lastSibling = (unsigned int *) joe_int_starValue(selfVars[LAST_SIB]);
-   cself->len = (unsigned int *) joe_int_starValue(selfVars[LEN]);
-   cself->totLen = (unsigned int *) joe_int_starValue(selfVars[TOT_LEN]);
-   cself->threshold = (unsigned int *) joe_int_starValue(selfVars[THRESHOLD]);
+   cself->nHash = (unsigned int *) JOE_INT_STAR(selfVars[N_HASH]);
+   cself->lastSibling = (unsigned int *) JOE_INT_STAR(selfVars[LAST_SIB]);
+   cself->len = (unsigned int *) JOE_INT_STAR(selfVars[LEN]);
+   cself->totLen = (unsigned int *) JOE_INT_STAR(selfVars[TOT_LEN]);
+   cself->threshold = (unsigned int *) JOE_INT_STAR(selfVars[THRESHOLD]);
 }
 
 static void
@@ -156,7 +156,7 @@ joe_HashMap_hash(joe_String strKey)
    unsigned char *str = (unsigned char *) joe_String_getCharStar(strKey);
    int c;
 
-   while (c = *(str++))
+   while ((c = *(str++)))
       hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
 
    return hash;
@@ -190,7 +190,7 @@ checkKey (joe_Object item, joe_Object theArray, joe_String strKey)
       itmKey = *JOE_AT(item, KEY);
       if (!joe_String_compare (itmKey, strKey))
          return item;
-      sibling = joe_int_value(*JOE_AT(item, SIBLING));
+      sibling = JOE_INT(*JOE_AT(item, SIBLING));
       if (sibling)
          item = *JOE_AT(theArray, sibling);
       else
@@ -209,7 +209,7 @@ collision (joe_Object self, joe_Object strKey, joe_Object value,
       joe_Object_assign(JOE_AT(*item, VALUE), value);
       joe_Object_delIfUnassigned (&strKey);
    } else {
-      int sibling = joe_int_value (*JOE_AT(*item, SIBLING));
+      int sibling = JOE_INT (*JOE_AT(*item, SIBLING));
       if (sibling == 0) {
           joe_Object_assign (JOE_AT(*item, SIBLING),
                              joe_int_New (*(cself->lastSibling)));
@@ -302,7 +302,7 @@ joe_HashMap_getHash (joe_HashMap self, unsigned int hash,
                      joe_String strKey, joe_Object *retval)
 {
    if (self) {
-      int len = joe_int_value (*JOE_AT(self, LEN));
+      int len = JOE_INT (*JOE_AT(self, LEN));
       joe_Array theArray = *JOE_AT(self, ARRAY);
       unsigned int idx = hash % len;
       joe_Object item = *JOE_AT(theArray, idx);
@@ -337,9 +337,9 @@ joe_HashMap_get (joe_HashMap self, joe_Object key, joe_Object *retval)
 unsigned int
 joe_HashMap_length (joe_HashMap self)
 {
-   long nHash = joe_int_value (*JOE_AT(self, N_HASH));
-   long lastSib = joe_int_value (*JOE_AT(self, LAST_SIB));
-   long len = joe_int_value (*JOE_AT(self, LEN));
+   long nHash = JOE_INT (*JOE_AT(self, N_HASH));
+   long lastSib = JOE_INT (*JOE_AT(self, LAST_SIB));
+   long len = JOE_INT (*JOE_AT(self, LEN));
    return nHash + lastSib - len;
 }
 
@@ -351,7 +351,7 @@ getArray (joe_HashMap self, int keyOrValue)
    joe_String obj = 0;
    int i, j;
    long nItems = joe_HashMap_length (self);
-   long totLen = joe_int_value (*JOE_AT(self, TOT_LEN));
+   long totLen = JOE_INT (*JOE_AT(self, TOT_LEN));
    joe_Array theArray = *JOE_AT(self, ARRAY);
    joe_Array Return = joe_Array_New (nItems);
 
@@ -384,7 +384,7 @@ joe_HashMap_containsHashKey (joe_HashMap self, unsigned int hash, joe_String key
    int Return = JOE_FALSE;
    if (self) {
       joe_Array theArray = *JOE_AT(self, ARRAY);
-      int len = joe_int_value (*JOE_AT(self, LEN));
+      int len = JOE_INT (*JOE_AT(self, LEN));
       unsigned int idx = hash % len;
       joe_Object item = *JOE_AT(theArray, idx);
       if (item) {
@@ -413,7 +413,7 @@ joe_HashMap_containsKey (joe_HashMap self, joe_Object key)
 int
 joe_HashMap_containsValue (joe_HashMap self, joe_Object value)
 {
-   unsigned int lastSib = joe_int_value (*JOE_AT(self, LAST_SIB));
+   unsigned int lastSib = JOE_INT (*JOE_AT(self, LAST_SIB));
    joe_Array theArray = *JOE_AT(self, ARRAY);
    joe_Object item = 0;
    joe_String itmVal;

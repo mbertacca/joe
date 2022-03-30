@@ -43,7 +43,7 @@ joe_Variable_New (char *c) {
    int hashOffs = len  +  sizeof(unsigned int) - (len % sizeof(unsigned int));
    joe_Object Return;
    char *mem;
-   int *hash;
+   unsigned int *hash;
 
    Return = joe_Object_New (&joe_Variable_Class, hashOffs + sizeof(unsigned int));
    mem = *((char **) joe_Object_getMem(Return));

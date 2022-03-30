@@ -58,7 +58,7 @@ joe_Block_assign (joe_Object self,int argc,joe_Object *args,joe_Object *retval)
 }
 
 static int
-findLabel (joe_Block *blk, char* name) {
+findLabel (joe_Block *blk, joe_String name) {
    joe_Object obj;
    joe_Block parent = 0;
    joe_ArrayList messages;
@@ -75,13 +75,12 @@ findLabel (joe_Block *blk, char* name) {
    len = joe_ArrayList_length (messages);
    for (i = 0; i < len; i++) {
       obj = *joe_ArrayList_at(messages,i);
-      if (JOE_ISCLASS(obj,&joe_String_Class)) {
+      if (joe_Message_isLabel (obj, name)) {
 /*
          printf ("[%d][%s] ? [%d]\n", i, joe_String_getCharStar(obj),
                    strcmp (joe_String_getCharStar(obj), name));
 */
-         if (strcmp (joe_String_getCharStar(obj), name) == 0)
-            return i;
+         return i;
       }
    }
    return -1;
@@ -91,16 +90,16 @@ findLabel (joe_Block *blk, char* name) {
 static int my_exec_sub (joe_Object self, int startMsg, joe_Object *retval);
 
 
-static int transfer_flow (joe_Block blk, char *label, joe_Object *retval) {
+static int transfer_flow (joe_Block blk, joe_String label, joe_Object *retval) {
    int Return;
    int newExecIdx;
 
    for ( ; ; ) {
       newExecIdx = findLabel (&blk, label);
       if (newExecIdx < 0) {
-         char *error = calloc (1, 32 + strlen(label));
+         char *error = calloc (1, 32 + joe_String_length(label));
          strcpy (error, "label not found: ");
-         strcat (error, label);
+         strcat (error, joe_String_getCharStar(label));
          joe_Object_assign(retval, joe_Exception_New(error));
          Return = JOE_FAILURE;
          free (error);
@@ -110,7 +109,7 @@ static int transfer_flow (joe_Block blk, char *label, joe_Object *retval) {
          if (joe_Object_instanceOf (*retval, &joe_GotoException_Class)) {
             joe_String msg = 0;
             joe_Exception_getMessage (*retval, 0, 0, &msg);
-            label = joe_String_getCharStar(msg);
+            label = msg;
             joe_Object_assign (&msg, 0);
          } else {
             break;
@@ -122,8 +121,9 @@ static int transfer_flow (joe_Block blk, char *label, joe_Object *retval) {
 
 static int
 gosub (joe_Block blk, joe_Gosub gsb, joe_Object *retval) {
-   char *label = joe_Gosub_getLabelCharStar(gsb);
+   joe_String label = joe_Gosub_getLabel(gsb);
    int Return;
+
    joe_Object_assign (&gsb, 0);
    Return = transfer_flow (blk, label, retval);
    if (Return != JOE_SUCCESS &&
@@ -152,7 +152,6 @@ my_exec_sub (joe_Object self, int startMsg, joe_Object *retval)
    for (i = startMsg; i < len; i++) {
       obj = *joe_ArrayList_at(messages,i);
       if (joe_Object_instanceOf (obj, &joe_Message_Class)) {
-         // joe_Object_assign (retval, 0);
          lretval = 0;
          rc = joe_Message_exec (obj, self, &lretval);
          if (rc != JOE_SUCCESS) {
@@ -264,9 +263,9 @@ joe_Block_outer_exec (joe_Object self, int argc, joe_Object *args, joe_Object *r
    if (rc != JOE_SUCCESS &&
        joe_Object_instanceOf (*retval, &joe_GotoException_Class)) {
       joe_String msg = 0;
-      char *label;
+      joe_String label;
       joe_Exception_getMessage (*retval, 0, 0, &msg);
-      label = joe_String_getCharStar(msg);
+      label = msg;
       joe_Object_assign (&msg, 0);
       rc = transfer_flow (self, label, retval);
    }
@@ -285,7 +284,7 @@ joe_Block_new (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
    int rc;
    joe_JOEObject jobj = 0;
 
-   joe_Object_assign(&jobj, joe_JOEObject_New(self, 0));
+   joe_Object_assign(&jobj, joe_JOEObject_New(self, self));
 
    rc = my_exec (jobj, argc, args, retval);
 
@@ -327,14 +326,27 @@ joe_Block_setParent (joe_Block self, joe_Block parent)
 joe_Block
 joe_Block_clone (joe_Block self, joe_Block parent)
 {
-   joe_Block Return = joe_WeakReference_get(*JOE_AT(self, PARENT));
-   if (parent && Return != parent) {
-       Return = joe_Object_clone (self);
-       joe_HashMap newVars = joe_HashMap_New (8);
+   joe_Block Return;
+   joe_ArrayList messNew, messOld;
+   unsigned int len;
+   int i;
+   if (parent == 0)
+      parent = self;
 
-       joe_Object_assign (JOE_AT(Return, PARENT),
-                                     joe_WeakReference_New(parent));
-       joe_Object_assign (JOE_AT(Return, VARIABLES), newVars);
+   Return = joe_Object_clone (self);
+   joe_HashMap newVars = joe_HashMap_New (8);
+
+   joe_Object_assign (JOE_AT(Return, PARENT),
+                                  joe_WeakReference_New(parent));
+   joe_Object_assign (JOE_AT(Return, VARIABLES), newVars);
+
+   messOld = *JOE_AT(self, MESSAGES);
+   len = joe_ArrayList_length (messOld);   
+   joe_Object_assign (JOE_AT(Return, MESSAGES),
+                       messNew = joe_ArrayList_New(len));
+   for (i = 0; i < len; i++) {
+      joe_ArrayList_add (messNew,
+                joe_Message_clone (*joe_ArrayList_at(messOld,i), Return));
    }
    return Return;
 }
@@ -432,10 +444,11 @@ joe_Class joe_Block_Class = {
 void
 joe_Block_Init (joe_Block self, joe_Block parent)
 {
+   joe_HashMap dbg;
    joe_Object* thisVars = joe_Object_array(self);
    joe_Object_assign(&thisVars[MESSAGES], joe_ArrayList_New(8));
 
-   joe_Object_assign(&thisVars[VARIABLES], joe_HashMap_New(8));
+   joe_Object_assign(&thisVars[VARIABLES], dbg = joe_HashMap_New(8));
 
    joe_Object_assign(&thisVars[PARENT],
                     joe_WeakReference_New(parent));
@@ -460,15 +473,15 @@ joe_Block_addMessage (joe_Block self, joe_Message msg)
 }
 
 static joe_HashMap
-getVars (joe_Object self, joe_Variable var, unsigned int hash)
+getVars (joe_Object self, joe_String varname, unsigned int hash)
 {
    joe_HashMap Return = 0;
 
    Return = *JOE_AT(self,VARIABLES);
-   if (!joe_HashMap_containsHashKey(Return, hash, joe_Variable_name(var))) {
+   if (!joe_HashMap_containsHashKey(Return, hash, varname)) {
       joe_Block parent = joe_WeakReference_get(*JOE_AT(self, PARENT));
       if (parent && !joe_Object_instanceOf (self, &joe_JOEObject_Class))
-         Return = getVars (parent, var, hash);
+         Return = getVars (parent, varname, hash);
       else
          Return = 0;
    }
@@ -476,28 +489,29 @@ getVars (joe_Object self, joe_Variable var, unsigned int hash)
    return Return;
 }
 
-int
-joe_Block_getVariable (joe_Object self, joe_Variable var, joe_Object* retval)
+static int
+getVar (joe_Object self, unsigned int hash, joe_String varname,
+                   joe_Object* retval)
 {
    joe_Object lretval;
    joe_HashMap hashmap = *JOE_AT(self,VARIABLES);
 
-   if (!strcmp(joe_Variable_nameCharStar (var), "!!")) {
+   if (!strcmp(joe_String_getCharStar (varname), "!!")) {
       joe_Object_assign(retval, joe_WeakReference_New(self));
       return JOE_SUCCESS;
    }
-   if (joe_HashMap_getHash(hashmap, joe_Variable_hash(var),
-                                    joe_Variable_name(var), &lretval)) {
+
+   if (joe_HashMap_getHash(hashmap, hash, varname, &lretval)) {
       joe_Object_assign (retval, lretval);
    } else {
       joe_Block parent = joe_WeakReference_get(*JOE_AT(self, PARENT));
       if (parent) {
-         return joe_Block_getVariable (parent, var, retval);
+         return getVar (parent, hash, varname, retval);
       } else {
          joe_String msg = 0;
          joe_Object_assign(&msg,
                           joe_String_New3("Variable `",
-                                          joe_Variable_nameCharStar(var),
+                                          joe_String_getCharStar(varname),
                                          "' not found"));
          joe_Object_assign(retval, joe_Exception_New_string(msg));
          joe_Object_assign(&msg, 0);
@@ -508,12 +522,20 @@ joe_Block_getVariable (joe_Object self, joe_Variable var, joe_Object* retval)
    return JOE_SUCCESS;
 }
 
+int
+joe_Block_getVariable (joe_Object self, joe_Variable var, joe_Object* retval)
+{
+   return getVar (self, joe_Variable_hash(var), joe_Variable_name(var),
+                  retval);
+}
+
 void
 joe_Block_setVariable (joe_Block self, joe_Variable var, joe_Object value)
 {
    joe_Object oldValue;
    unsigned int hash = joe_Variable_hash (var);
-   joe_HashMap vars = getVars (self, var, hash);
+   joe_String varname = joe_Variable_name (var);
+   joe_HashMap vars = getVars (self, varname, hash);
    if (!vars) {
       vars = *JOE_AT(self, VARIABLES);
       if (!vars) {
@@ -598,20 +620,10 @@ joe_JOEObject
 joe_JOEObject_New (joe_Block block, joe_Block parent)
 {
    joe_Object self;
-   joe_HashMap newVar;
-   if (joe_Object_instanceOf (block, &joe_JOEObject_Class)) {
-      return block;
-   }
 
-   self = joe_Object_clone (block);
-   newVar = joe_HashMap_New (8);
-
+   self = joe_Block_clone (block, parent);
    if (!joe_Object_instanceOf (block, &joe_JOEObject_Class))
       joe_Object_extends (self, &joe_JOEObject_Class);
-   if (parent)
-      joe_Object_assign (JOE_AT(self, PARENT),
-                         joe_WeakReference_New(parent));
-   joe_Object_assign (JOE_AT(self, VARIABLES), newVar);
 
    return self;
 }

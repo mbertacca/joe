@@ -104,6 +104,11 @@ JoeArray_length (JoeArray self)
    return self->length;
 }
 
+void
+JoeArray_clear (JoeArray self)
+{
+   self->length = 0;
+}
 
 /* test
 struct s {

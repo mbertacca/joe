@@ -43,10 +43,10 @@ joe_Gosub_New (joe_String label) {
    return self;
 }
 
-char *
-joe_Gosub_getLabelCharStar (joe_Object self)
+joe_String
+joe_Gosub_getLabel (joe_Object self)
 {
-   return joe_String_getCharStar (*joe_Object_getVar (self, "label"));
+   return *joe_Object_getVar (self, "label");
 }
 
 void

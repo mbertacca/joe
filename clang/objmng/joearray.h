@@ -9,6 +9,7 @@ extern void JoeArray_add (JoeArray self, void *itm);
 extern void * JoeArray_get (JoeArray self, int idx);
 extern void * JoeArray_set (JoeArray self, int idx, void *item);
 extern int JoeArray_length (JoeArray self);
+extern void JoeArray_clear (JoeArray self);
 extern void JoeArray_realloc (JoeArray self, int newLength);
 void * JoeArray_getMem (JoeArray self);
 

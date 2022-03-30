@@ -18,16 +18,17 @@
 
 # ifndef joe_Message_h
 # define joe_Message_h  "$Id$";
-# include "joe_Object.h"
+# include "joe_String.h"
 
 typedef joe_Object joe_Message;
 typedef joe_Object joe_Block;
 
 extern joe_Class joe_Message_Class;
 
-joe_Object joe_Message_New (joe_Object receiver, char *selector,
-                            int argc, joe_Object *args,
-                            char * fileName, int row, int col);
+joe_Object joe_Message_New (joe_Object assign2, int argc, joe_Object *argv,
+                            char *fileName, int row, int col);
+joe_Message joe_Message_clone (joe_Message self, joe_Block parent);
 int joe_Message_exec (joe_Object self, joe_Block block, joe_Object *retval);
+int joe_Message_isLabel (joe_Message self, joe_String name);
 char* joe_Message_toString(joe_Message self);
 # endif

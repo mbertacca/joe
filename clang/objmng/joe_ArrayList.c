@@ -67,13 +67,13 @@ joe_ArrayList_New (unsigned int maxLength)
 unsigned int
 joe_ArrayList_length (joe_Object self)
 {
-   return (unsigned int) joe_int_value (*JOE_AT(self,LENGTH));
+   return (unsigned int) JOE_INT (*JOE_AT(self,LENGTH));
 }
 
 unsigned int
 joe_ArrayList_maxLength (joe_Object self)
 {
-   return (unsigned int) joe_int_value (*JOE_AT(self,MAXLENGTH));
+   return (unsigned int) JOE_INT (*JOE_AT(self,MAXLENGTH));
 }
 
 joe_Object *
@@ -93,8 +93,8 @@ joe_ArrayList_add (joe_Object self, joe_Object item)
    joe_int objLen = selfVars[LENGTH];
    joe_int objMaxLen = selfVars[MAXLENGTH];
    joe_Object *theArray = &selfVars[ARRAY];
-   unsigned int *len = (unsigned int *) joe_int_starValue (objLen);
-   unsigned int *maxLen = (unsigned int *) joe_int_starValue (objMaxLen);
+   unsigned int *len = (unsigned int *) JOE_INT_STAR (objLen);
+   unsigned int *maxLen = (unsigned int *) JOE_INT_STAR (objMaxLen);
 
    if (*len == *maxLen) {
       unsigned int i;

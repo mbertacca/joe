@@ -21,7 +21,6 @@ OBJS=joe_Object.o \
      joe_HashMap.o \
      joe_List.o \
      joe_Variable.o \
-     joe_Assignment.o \
      joe_BreakException.o \
      joe_BreakBlockException.o \
      joe_BreakLoopException.o \

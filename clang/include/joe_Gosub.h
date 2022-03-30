@@ -25,7 +25,7 @@ extern joe_Class joe_Gosub_Class;
 
 joe_Object joe_Gosub_New (joe_String msg);
 void joe_Gosub_setReturnObj (joe_Object self, joe_Object obj);
-char * joe_Gosub_getLabelCharStar (joe_Object self);
+joe_String joe_Gosub_getLabel (joe_Object self);
 joe_Object joe_Gosub_getReturnObj (joe_Object self);
 int  joe_Gosub_hasReturnObj (joe_Object self);
 

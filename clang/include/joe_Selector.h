@@ -22,10 +22,12 @@
 
 typedef joe_Object joe_Selector;
 extern joe_Class joe_Selector_Class;
-joe_Object joe_Selector_New (char *name);
+joe_Object joe_Selector_New (char *name, int argc);
 int joe_Selector_invoke (joe_Object self, joe_Object receiver,
                          int argc, joe_Object *argv, joe_Object *retval);
 char * joe_Selector_name (joe_Object self);
+char * joe_Selector_toString (joe_Object self);
+int joe_Selector_getArgc (joe_Selector self);
 
 
 # endif

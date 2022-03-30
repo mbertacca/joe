@@ -30,6 +30,8 @@
 # include "joe_Variable.h"
 # include "joe_Exception.h"
 # include "joe_Null.h"
+# include "joe_Selector.h"
+# include <stdio.h>
 # include <stdlib.h>
 
 # define pop(t) ((Token)JoeArrayScan_next(t))
@@ -176,6 +178,23 @@ getValue (JoeParser self, Token tk) {
    }
 }
 
+static void addObjToRpn (JoeArray rpn, joe_Object obj)
+{
+   joe_Object item = 0;
+   joe_Object_assign (&item, obj);
+   JoeArray_add (rpn, &item);
+}
+
+static void clrRpnArray (JoeArray rpn)
+{
+
+   int rpnc = JoeArray_length (rpn);
+   int i;
+   for (i = 0; i < rpnc; i++)
+      joe_Object_assign ((joe_Object*)JoeArray_get (rpn, i), 0);
+   JoeArray_clear (rpn);
+}
+
 static void compile (JoeParser self, joe_Block block, JoeArrayScan tokens);
 
 static joe_Block
@@ -187,21 +206,22 @@ newBlock (JoeParser self, JoeArrayScan tokens, joe_Block parent)
    return block;
 }
 
-joe_Message
-arguments (JoeParser self, joe_Block block, JoeArrayScan tokens,
-           joe_Object receiver, Token selector)
+
+static void parseReceiver (JoeParser self, joe_Block block,
+                                 JoeArray rpn, JoeArrayScan tokens);
+
+static void
+parseArguments (JoeParser self, joe_Block block, JoeArray rpn, JoeArrayScan tokens, Token tk)
 {
-   joe_Message Return = 0;
+   char *selectorName = tk->word;
    joe_Object obj = 0;
-   Token tk;
-   JoeArray args = JoeArray_new (sizeof (joe_Object), 16);
-   int argsLen;
+   joe_Selector selector;
+   int argc = 0;
 
    for ( ; ; ) {
       tk = pop (tokens);
       if (tk != 0 && (obj = getValue(self, tk)) == 0) {
          switch (tk->type) {
-
          case _DOT_:
             push(tokens);
             // PASSTHRU
@@ -214,141 +234,131 @@ arguments (JoeParser self, joe_Block block, JoeArrayScan tokens,
          case _PAR_OPEN_:
             if (peek(tokens) == _PAR_CLOSE_) {
                pop(tokens);
-               goto exitFor;
+               addObjToRpn (rpn, joe_Null_value);
             } else {
-               Token tk1 = pop (tokens);
-               joe_Object msg = message (self, block, tokens, tk1);
-               JoeArray_add (args, &msg);
+               parseReceiver (self, block, rpn, tokens);
                parClose (self, tokens);
             }
+            argc++;
             break;
          case _BRACE_OPEN_:
             obj = newBlock (self, tokens, block);
-            JoeArray_add (args, &obj);
             braceClose (self, tokens);
+            addObjToRpn (rpn, obj);
+            argc++;
             break;
          default:
             unexpectedToken (self, tokens, tk);
          }
       } else {
-         JoeArray_add (args, &obj);
+         addObjToRpn (rpn, obj);
+         argc++;
       }
       tk = pop(tokens);
       if (tk == 0) {
-         goto exitFor;
+         break;
       } else if (tk->type != _COMMA_) {
          push(tokens);
-         goto exitFor;
+         break;
       }
    }
 exitFor:
-
-   argsLen = JoeArray_length (args);
-   Return = joe_Message_New ((joe_Object) receiver, selector->word,
-                             argsLen, (joe_Object *)JoeArray_getMem (args),
-                             self->fileName, selector->row, selector->col);
-/*
-   if (args.size() == 0) {
-      Return = new ExecMessage (receiver, selector, null, fName);
-   } else {
-      Object argsAr[] = args.toArray();
-      Return = new ExecMessage (receiver, selector, argsAr, fName);
-   }
-*/
-   tk = pop(tokens);
-   if (tk != 0) {
-      switch (tk->type) {
-      case _WORD:
-         Return = arguments (self, block, tokens, Return, tk);
-         break;
-      case _DOT_:
-      case _SEMICOLON_:
-         break;
-      case _BRACE_CLOSE_:
-      case _PAR_CLOSE_:
-         push(tokens);
-         break;
-      default:
-         unexpectedToken (self, tokens, tk);
-      }
-   }
-
-   JoeArray_delete (args);
-   return Return;
+   selector = joe_Selector_New (selectorName, argc);
+   addObjToRpn (rpn, selector);
+   return;
 }
 
-joe_Object
-message (JoeParser self, joe_Block block, JoeArrayScan tokens, Token tk)
+static void
+parseSelector (JoeParser self, joe_Block block, JoeArray rpn, JoeArrayScan tokens)
 {
+   Token tk;
+
+   do {
+      tk = pop(tokens);
+      if (tk != 0) {
+         switch (tk->type) {
+         case _WORD:
+            parseArguments (self, block, rpn, tokens, tk);
+            break;
+         case _PAR_CLOSE_:
+         case _BRACE_CLOSE_:
+            push (tokens);
+            //PASSTHRU
+         case _SEMICOLON_:
+         case _DOT_:
+            return;
+         default:
+            unexpectedToken (self, tokens, tk);
+            return;
+         }
+      }
+   } while (tk);
+}
+
+static void
+parseReceiver (JoeParser self, joe_Block block, JoeArray rpn, JoeArrayScan tokens)
+{
+   Token tk = pop(tokens);
    joe_Object receiver = 0;
 
    if ((receiver = getValue(self, tk)) == 0) {
      switch (tk->type) {
       case _PAR_OPEN_:
-         receiver = message (self, block, tokens, pop(tokens));
+         parseReceiver (self, block, rpn, tokens);
          parClose(self, tokens);
-         break;
+         parseSelector (self, block, rpn, tokens);
+         return;
       case _BRACE_OPEN_:
          receiver = newBlock (self, tokens, block);
          braceClose(self, tokens);
          break;
       case _DOT_:
-         return 0;
-      default:
-         unexpectedToken (self, tokens, tk);
-      }
-   }
-
-   tk = pop(tokens);
-   if (tk != 0) {
-      switch (tk->type) {
-      case _WORD:
-         return arguments (self, block, tokens, receiver, tk);
-      case _PAR_CLOSE_:
-      case _BRACE_CLOSE_:
          push (tokens);
-         //PASSTHRU
-      case _SEMICOLON_:
-      case _DOT_:
-         return receiver;
+         receiver = joe_Null_value;
+         break;
       default:
          unexpectedToken (self, tokens, tk);
       }
    }
-   return (joe_Object) receiver;
+   addObjToRpn (rpn, receiver);
+   parseSelector (self, block, rpn, tokens);
+   return;
 }
 
 static void
-assignment (JoeParser self, joe_Block block, JoeArrayScan tokens)
+parseStart (JoeParser self, joe_Block block, JoeArray rpn, JoeArrayScan tokens)
 {
    Token tk = pop (tokens);
-   joe_Message msg;
+   // joe_Message msg;
+   joe_Variable assignee = 0;
 
    if (peek(tokens) == _ASSIGN) {
       pop(tokens);
       if (tk->type == _WORD) {
+         joe_Object_assign (&assignee, joe_Variable_New (tk->word));
+         parseReceiver (self, block, rpn, tokens);
+         joe_Block_addMessage (block,
+                   joe_Message_New (assignee, JoeArray_length(rpn),JoeArray_getMem(rpn),
+                                    self->fileName, tk->row, tk->col));
+         joe_Object_assign (&assignee, 0);
 /*
-          joe_Object args[2];
-          args[0] = joe_String_New (tk->word);
-          args[1] = message (self, block, tokens, pop(tokens));
-          msg = joe_Message_New (block, "assign",
-                                 2, args, self->fileName, tk->row, tk->col);
-*/
-          joe_Object args[3];
-          args[0] = 0;
-          args[1] = joe_Variable_New (tk->word);
           args[2] = message (self, block, tokens, pop(tokens));
           msg = joe_Message_New (joe_Assignment_New(), ":=",
                                  3, args, self->fileName, tk->row, tk->col);
           joe_Block_addMessage (block, msg);
+*/
       } else {
          unexpectedToken (self, tokens, tk);
       }
-   } else {
-      msg = message (self, block, tokens, tk);
-      joe_Block_addMessage (block, msg);
+   } else if (tk) {
+      push(tokens);
+      parseReceiver (self, block, rpn, tokens);
+      joe_Block_addMessage (block,
+                            joe_Message_New (0, JoeArray_length(rpn),JoeArray_getMem(rpn),
+                                             self->fileName, tk->row, tk->col));
    }
 }
+
 
 void
 setBlockArguments (JoeParser self, joe_Block block, JoeArrayScan tokens)
@@ -367,6 +377,7 @@ static void
 compile (JoeParser self, joe_Block block, JoeArrayScan tokens)
 {
    Token tk;
+   JoeArray rpn = JoeArray_new (sizeof(joe_Object), 16);
 
    if (peek(tokens) == _WORD) {
       Token name = pop (tokens);
@@ -387,8 +398,10 @@ compile (JoeParser self, joe_Block block, JoeArrayScan tokens)
       setBlockArguments (self, block, tokens);
    }
    while ((tk = JoeArrayScan_peek(tokens)) && tk->type != _BRACE_CLOSE_) {
-      assignment (self, block, tokens);
+      parseStart (self, block, rpn, tokens);
+      clrRpnArray (rpn);
    }
+   JoeArray_delete (rpn);
 }
 joe_Object
 JoeParser_getException (JoeParser self)

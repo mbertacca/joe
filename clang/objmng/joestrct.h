@@ -39,10 +39,12 @@ struct s_joe_Object {
 };
 
 
-#define JOE_ISCLASS(self,clzz) (self->clazz==clzz)
+#define JOE_ISCLASS(self,clzz) ((self)->clazz==clzz)
 #define JOE_AT(self,index) (&(self)->data.obj[index])
 #define JOE_MEM(self) (&((self)->data.mem))
-#define JOE_LEN(self) (self->nItems)
-#define JOE_ARRAY(self) (self->data.obj)
+#define JOE_LEN(self) ((self)->nItems)
+#define JOE_ARRAY(self) ((self)->data.obj)
+#define JOE_INT(self) ((self)->data.intg)
+#define JOE_INT_STAR(self) (&(self)->data.intg)
 
 # endif

@@ -17,6 +17,7 @@
  */
 
 # include <stdio.h>
+# include <stdlib.h>
 # include "joe_Message.h"
 # include "joe_Assignment.h"
 # include "joe_Memory.h"
@@ -24,6 +25,7 @@
 # include "joe_JOEObject.h"
 # include "joe_String.h"
 # include "joe_Array.h"
+# include "joe_ArrayList.h"
 # include "joe_Variable.h"
 # include "joe_Exception.h"
 # include "joe_BreakBlockException.h"
@@ -31,157 +33,97 @@
 # include "joestrct.h"
 # include <string.h>
 
-# define MAX_IDENTIFIER_LEN 31
-
 struct s_srcInfo {
    char *fileName;
    int row;
    int col;
 };
 
-# define RECEIVER 0
-# define SELECTOR 1
-# define ARGS     2
-# define EXECARGS 3
-# define SRC_INFO 4
+# define SRC_INFO  0
+# define ASSIGNEE  1
+# define RPN       2
 
-static char *variables[] = {"receiver","selector","args","execArgs","srcInfo", 0};
+static joe_Object execStack[4096];
+static int execIdx = 0;
+static int execSize = sizeof (execStack) / sizeof(execStack[0]);
+
+static char *variables[] = {"srcInfo", "assignee", "rpn", 0};
+
+extern void joe_Block_setVariable (joe_Block self,joe_Variable var,joe_Object value);
+
+joe_Message
+joe_Message_clone (joe_Message self, joe_Block parent)
+{
+   joe_Message Return = Return = joe_Object_clone (self);
+   joe_Array rpnOld = *JOE_AT(self, RPN), rpnNew;
+   int rpnc = joe_Array_length (rpnOld);
+   joe_Object *rpnItOld;
+   int i;
+
+   joe_Object_assign (JOE_AT(Return,RPN), rpnNew = joe_Array_New(rpnc));
+
+   for (i = 0; i < rpnc; i++) {
+      rpnItOld = JOE_AT(rpnOld, i);
+      if (JOE_ISCLASS ((*rpnItOld), &joe_Block_Class))
+         joe_Object_assign (JOE_AT(rpnNew, i), joe_Block_clone(*rpnItOld, parent));
+      else
+         joe_Object_assign (JOE_AT(rpnNew, i), *rpnItOld);
+   }
+   return Return;
+}
 
 int
 joe_Message_exec (joe_Object self, joe_Block block, joe_Object *retval)
 {
-   joe_Object *selfVars = joe_Object_array (self);
-   joe_Object receiver = selfVars[RECEIVER];
-   joe_Selector selector = selfVars[SELECTOR];
-   joe_Array argsobj = selfVars[ARGS];
-   unsigned int argc = joe_Array_length (argsobj);
-   joe_Object *args = *JOE_MEM(argsobj);
-   joe_Object arg = 0;
-   joe_Object lRet = 0;
-   joe_Object lReceiver = 0;
-   joe_Array *lArgs;
-   unsigned int i;
+   joe_Array rpn = *JOE_AT(self, RPN);
+   int rpnc = joe_Array_length (rpn);
+   int i;
    int rc = JOE_SUCCESS;
-   int isJOEObject = JOE_ISCLASS(block,&joe_JOEObject_Class);
-   int isAssignment = JOE_ISCLASS(receiver,&joe_Assignment_Class);
-/*
-   printf("%s\n", joe_Message_toString(self));
-*/
-   lArgs = *JOE_MEM(selfVars[EXECARGS]);
-   if (isAssignment) {
-      lReceiver = receiver;
-      lArgs[0] = block;
-      lArgs[1] = args[1];
-      i = 2;
+   joe_Object rpnItem;
+   int idx0 = execIdx;
+   int topIdx = 0;
+   joe_Object receiver;
+   int argc;
+   joe_Object *argv;
+   joe_Object lretval = 0;
+   joe_Variable assignee = *JOE_AT(self,ASSIGNEE);
+
+    /* joe_Message_toString(self); */
+
+   if (execIdx + rpnc > execSize) {
+      joe_Object_assign(retval, joe_Exception_New ("Stack Overflow Error"));
+      return JOE_FAILURE;
+   }
+
+   for (i = 0; i < rpnc && rc == JOE_SUCCESS; i++) {
+      rpnItem = *JOE_AT(rpn, i);
+      if (JOE_ISCLASS (rpnItem, &joe_Selector_Class)) {
+         argc = joe_Selector_getArgc (rpnItem);
+         topIdx = execIdx;
+         topIdx -= argc;
+         argv = &execStack[topIdx];
+         topIdx --;
+         receiver = execStack[topIdx];
+         lretval = 0;
+         rc = joe_Selector_invoke (rpnItem, receiver, argc, argv, &lretval);
+         for ( ;topIdx < execIdx; execIdx--)
+             joe_Object_assign (&execStack[execIdx], 0);
+         joe_Object_transfer (&execStack[execIdx++], &lretval);
+      } else if (JOE_ISCLASS (rpnItem, &joe_Variable_Class)) {
+         rc = joe_Block_getVariable(block, rpnItem, &execStack[execIdx++]);
+      } else {
+         joe_Object_assign (&execStack[execIdx++], rpnItem);
+      }
+   }
+   joe_Object_transfer (retval, &execStack[--execIdx]);
+   if (rc == JOE_SUCCESS) {
+      if (assignee) {
+         joe_Block_setVariable (block, assignee, *retval);
+      }
    } else {
-      i = 0;
-   }
-   for ( ; i < argc && rc == JOE_SUCCESS; i++) {
-      if ((arg = args[i]) == 0) {
-         lArgs[i] = 0;
-      } else if (JOE_ISCLASS(arg,&joe_Message_Class)) {
-         lRet = 0;
-         rc = joe_Message_exec (arg, block, &lRet);
-         if (rc == JOE_FAILURE) {
-            lArgs[i] = 0;
-            *retval = lRet;
-            break;
-         } else {
-            joe_Object_transfer (&lArgs[i], &lRet);
-         }
-      } else if (JOE_ISCLASS (arg, &joe_Variable_Class)) {
-         lRet = 0;
-         rc = joe_Block_getVariable(block, arg, &lRet);
-         if (rc == JOE_FAILURE) {
-            lArgs[i] = 0;
-            *retval = lRet;
-            break;
-         } else {
-            lArgs[i] = lRet;
-         }
-      } else if (JOE_ISCLASS (arg, &joe_Block_Class)) {
-         if (isJOEObject) {
-            joe_Object_assign (&lArgs[i], 
-                               joe_Block_clone (arg, block));
-         } else {
-            joe_Block_setParent (arg, block);
-            lArgs[i] = arg;
-         }
-      } else {
-         /* joe_Object_assign (JOE_AT(lArgs, i), arg); */
-         lArgs[i] = arg;
-      }
-   }
-   if (rc == JOE_SUCCESS) {
-      if (JOE_ISCLASS (receiver, &joe_Message_Class)) {
-         lRet = 0;
-         rc = joe_Message_exec (receiver , block, &lRet);
-         if (rc == JOE_FAILURE) {
-            lReceiver = 0;
-            *retval = lRet;
-         } else {
-            joe_Object_transfer (&lReceiver, &lRet);
-         }
-      } else if (JOE_ISCLASS (receiver, &joe_Variable_Class)) {
-         lRet = 0;
-         rc = joe_Block_getVariable(block, receiver, &lRet);
-         if (rc == JOE_FAILURE) {
-            lReceiver = 0;
-            joe_Object_transfer(retval, &lRet);
-         } else {
-            lReceiver = lRet;
-         }
-         if (isJOEObject && joe_Object_instanceOf(lReceiver,&joe_Block_Class)){
-            joe_Object obj = 0;
-            joe_Object_assign (&obj, joe_JOEObject_New (lReceiver, block));
-            joe_Object_transfer(&lReceiver, &obj);
-         }
-      } else {
-         lReceiver = receiver;
-      }
-   }
-   if (rc == JOE_SUCCESS) {
-      if (lReceiver == 0) {
-         joe_Object_assign(retval, joe_Exception_New ("exec: null receiver"));
-         rc = JOE_FAILURE;
-      } else {
-         /* rc = joe_Object_invoke(lReceiver, selector, argc,lArgs, retval); */
-         rc = joe_Selector_invoke (selector, lReceiver, argc, lArgs, retval);
-      }
-   }
-   if (*retval && JOE_ISCLASS ((*retval), &joe_WeakReference_Class)) {
-      joe_Object_assign(retval, joe_WeakReference_get (*retval));
-   }
-
-   if (isAssignment) {
-      lArgs[0] = 0;
-   } else if (lReceiver != receiver) {
-      joe_Object_assign(&lReceiver, 0);
-   }
-   for (i = 0; i < argc; i++)
-      if (lArgs[i] == args[i])
-         lArgs[i] = 0;
-      else
-         joe_Object_assign (&lArgs[i],0);
-/*
-   for (i = 0; i < argc; i++)
-      joe_Object_assign (JOE_AT(lArgs,i), 0);
-*/
-/*
-   for (i = 0; i < argc; i++) {
-      arg = *JOE_AT(args, i);
-      if (joe_Object_instanceOf (arg, &joe_Message_Class)
-          || (isJOEObject && joe_Object_instanceOf (arg, &joe_Block_Class)))
-         joe_Object_assign (JOE_AT(lArgs,i), 0);
-      else
-         *JOE_AT(lArgs, i) = 0;
-   }
-   if (joe_Object_instanceOf (receiver, &joe_Message_Class)
-       || (isJOEObject && joe_Object_instanceOf (lReceiver, &joe_Block_Class)))
-      joe_Object_assign (&lReceiver, 0);
-*/
-
-   if (rc != JOE_SUCCESS) {
+      for ( ; execIdx >= idx0; execIdx--)
+          joe_Object_assign (&execStack[execIdx], 0);
+      execIdx++;
       if (!joe_Object_instanceOf(*retval, &joe_BreakBlockException_Class)) {
          struct s_srcInfo *srcInfo;
          srcInfo = (struct s_srcInfo *)
@@ -190,8 +132,27 @@ joe_Message_exec (joe_Object self, joe_Block block, joe_Object *retval)
                               srcInfo->fileName, srcInfo->row, srcInfo->col);
       }
    }
-
+   if (idx0 != execIdx) { printf ("\nErrore Stack %d != %d\n", idx0, execIdx); }
+   if (*retval && JOE_ISCLASS ((*retval), &joe_WeakReference_Class)) {
+      lretval = 0;
+      joe_Object_assign (&lretval, joe_WeakReference_get (*retval));
+      joe_Object_transfer (retval, &lretval);
+   }
    return rc;
+}
+
+int
+joe_Message_isLabel (joe_Message self, joe_String name)
+{
+   joe_Array rpn = *JOE_AT(self, RPN);
+
+   if (joe_Array_length (rpn) == 1) {
+       joe_Object obj = *JOE_AT(rpn, 0);
+       if (JOE_ISCLASS (obj, &joe_String_Class) &&
+           joe_String_compare (obj, name) == 0)
+          return JOE_TRUE;
+   }
+   return JOE_FALSE;
 }
 
 static joe_Method mthds[] = {
@@ -210,24 +171,18 @@ joe_Class joe_Message_Class = {
 };
 
 joe_Object
-joe_Message_New (joe_Object receiver, char *selector,
-                 int argc, joe_Object *args, char *fileName, int row, int col) {
+joe_Message_New (joe_Variable assignee, int argc, joe_Object *argv,
+                  char *fileName, int row, int col) {
    int i;
    struct s_srcInfo *srcInfo;
    joe_Memory info = 0;
    joe_Object self = 0;
-   joe_Array argsArray = 0;
-   joe_Array execArgs = 0;
+   joe_Object rpn = 0;
+
    self = joe_Object_New (&joe_Message_Class, 0);
 
-   joe_Object_assign (JOE_AT(self,RECEIVER), receiver);
-   joe_Object_assign (JOE_AT(self,SELECTOR), joe_Selector_New(selector));
-   argsArray = joe_Object_setAcyclic(joe_Array_New (argc));
-   joe_Object_assign (JOE_AT(self,ARGS), argsArray);
-   for (i = 0; i < argc; i++)
-      joe_Object_assign (JOE_AT(argsArray,i), args[i]);
-   execArgs = joe_Object_setAcyclic(joe_Array_New (argc));
-   joe_Object_assign (JOE_AT(self,EXECARGS), execArgs);
+   joe_Object_assign (JOE_AT(self,ASSIGNEE), assignee);
+
    info = joe_Memory_New (sizeof(struct s_srcInfo));
    joe_Object_assign (JOE_AT(self,SRC_INFO), info);
    srcInfo = (struct s_srcInfo *) *JOE_MEM(info);
@@ -235,35 +190,45 @@ joe_Message_New (joe_Object receiver, char *selector,
    srcInfo->row = row;
    srcInfo->col = col;
 
+   joe_Object_assign (JOE_AT(self,RPN), rpn = joe_Array_New(argc));
+
+   for (i = 0; i < argc; i++) {
+      joe_Object_assign(JOE_AT(rpn, i), argv[i]);
+   };
+
+   /* joe_Message_toString(self); */
    return self;
 }
 
-static char buffer[512];
-char *
-joe_Message_toString (joe_Message self)
-{
-   unsigned int i, len;
-   joe_Array args = *JOE_AT(self, ARGS);
-   unsigned int argc = joe_Array_length(args);
-   joe_Object obj;
-   joe_String msg = 0;
 
-   snprintf(buffer, sizeof(buffer), "0x%p %s %s ",
-                                    (void*)self,
-                                    joe_Object_toString (*JOE_AT(self, RECEIVER)),
-                                    joe_Selector_name(*JOE_AT(self, SELECTOR)));
-   for (i = 0; i < argc && (len = sizeof(buffer) - strlen(buffer)) > 0; i++) {
-      obj = *JOE_AT(args, i);
+char*
+joe_Message_toString(joe_Message self)
+{
+   joe_Array rpn = *JOE_AT(self, RPN);
+   int rpnc = joe_Array_length (rpn);
+   joe_Object obj;
+   int i;
+   struct s_srcInfo *srcInfo = (struct s_srcInfo *)
+                                *JOE_MEM(*JOE_AT(self,SRC_INFO));
+
+   for (i = 0; i < rpnc; i++) {
+      obj = *JOE_AT(rpn, i);
       if (obj) {
+         joe_Object msg = 0;
          joe_Object_invoke(obj, "toString", 0, 0, &msg);
-         strncat (buffer, joe_String_getCharStar(msg), len);
+         if (i == 0)
+            printf ("%d, %d>> %s",
+                     srcInfo->row, srcInfo->col, joe_String_getCharStar(msg));
+         else
+            printf (", %s",joe_String_getCharStar(msg));
          joe_Object_assign(&msg, 0);
-         if (strlen (buffer) < sizeof(buffer))
-            strcat(buffer, " ");
       } else {
-         strncat(buffer, "[null]", len);
+         if (i == 0)
+            printf ("%d, %d>> (nil)", srcInfo->row, srcInfo->col);
+         else
+            printf (", (nil)");
       }
    }
-   
-   return buffer;
+   printf ("<<\n");
+   return NULL;
 }
