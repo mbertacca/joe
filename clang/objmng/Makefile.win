@@ -30,6 +30,7 @@ OBJS=joe_Object.o \
      joe_Exception.o \
      joe_Selector.o \
      joe_BangSO.o \
+     joe_Execute.o \
      ndecimal.o \
      joearray.o \
      joearrayscan.o \

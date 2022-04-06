@@ -33,6 +33,7 @@
 # include "joe_LoadScript.h"
 # include "joe_Memory.h"
 # include "joe_Null.h"
+# include "joe_Execute.h"
 # include "joestrct.h"
 
 /*
@@ -46,8 +47,8 @@ DAVID F. BACON, CLEMENT R. ATTANASIO, V.T. RAJAN, STEPHEN E. SMITH
 
 static struct s_ClassList *registeredClasses = 0;
 
-/* # define JOE_MEM_DEBUG */
-# define JOE_MEM_DEBUG_FAST
+# define JOE_MEM_DEBUG
+/* # define JOE_MEM_DEBUG_FAST */
 static struct s_ObjectList *allObjects = 0;
 #ifdef JOE_MEM_DEBUG
 #define TRACEMEMORY(a) traceMemory(a)
@@ -125,6 +126,7 @@ init ()
       joe_Class_registerClass (&joe_Float_Class);
       joe_Class_registerClass (&joe_BigDecimal_Class);
       joe_Class_registerClass (&joe_LoadScript_Class);
+      joe_Class_registerClass (&joe_Execute_Class);
       joe_Class_registerClass (&joe_Exception_Class);
    }
 }

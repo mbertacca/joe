@@ -19,13 +19,11 @@
 # include <stdio.h>
 # include <unistd.h>
 # include <string.h>
-# include "joetoken.h"
-# include "joeparser.h"
-# include "joe_Array.h"
 # include "joe_LoadScript.h"
 # include "joe_String.h"
 # include "joe_Integer.h"
 # include "joe_Exception.h"
+# include "joe_Execute.h"
 
 # define ERROR_CMDLINE 2
 # define ERROR_GENERIC 3
@@ -108,8 +106,8 @@ main (int argc, char *argv[])
 {
    int rc = 0;
    int lObjs;
-   joe_Block block = 0;
    joe_Object retval = 0;
+   joe_Block block = 0;
    int i;
 
    if (argc > 1) {
@@ -154,41 +152,35 @@ main (int argc, char *argv[])
       static char *ps1 = "joe> ";
       char ps2[6] = { ' ', '.', ' ', '>', ' ', '\0'};
       char *prompt = ps1;
-      JoeParser parser = JoeParser_new ("<stdin>");
-      JoeArray tokens = JoeArray_new (sizeof (struct t_Token), 8);
-      Tokenizer tokenizer = Tokenizer_new (tokens);
+      joe_Execute exec = 0;
       int braces = 0;
+      char lc;
       void (*putPrompt)(char*) = isatty(0) ? showPrompt : showNoPrompt;
 
       joe_LoadScript_setCWD();
       joe_Object_assign (&block, joe_Block_New (0));
+      joe_Object_assign (&exec, joe_Execute_New (0));
       strcpy (line,"!println (!version),\"; type 'exit' to exit the session\".");
       do {
          i = strlen (line);
          while (i > 0 && line[--i] <= ' ')
             line[i] = 0;
+         lc = line[i];
          if (!strcmp (line,"exit"))
             break;
          if (prompt == ps1) {
-            JoeArray_clear (tokens);
-            joe_Block_removeMessages(block);
+            joe_Execute_clear (exec);
          }
-         Tokenizer_tokenize (tokenizer, line);
-         i = JoeArray_length (tokens);
+         joe_Execute_add (exec, line);
          braces = countBraces (line, braces);
          if (braces == 0 &&
-             (!line[0] || ((Token) JoeArray_get(tokens, --i))->type == _DOT_)) {
-            if (JoeParser_compile (parser, block, tokens) != JOE_SUCCESS) {
-               joe_Object_assign (&retval, JoeParser_getException (parser));
+             (!line[0] || lc == '.')) {
+            if (joe_Execute_exec (exec, &retval) != JOE_SUCCESS) {
                showError (retval);
-               prompt = ps1;
             } else {
-               if (joe_Block_outer_exec (block, 0, 0, &retval) != JOE_SUCCESS)
-                  showError (retval);
-               else
-                  showValue (retval);
-               prompt = ps1;
+               showValue (retval);
             }
+            prompt = ps1;
           } else {
             if (braces > 0) {
                ps2[0] = (braces / 100) + '0';
@@ -204,8 +196,8 @@ main (int argc, char *argv[])
          putPrompt (prompt);
       } while (fgets (line, MAXLINELEN, stdin) != NULL);
       joe_Object_assign(&retval, 0);
+      joe_Object_assign(&exec, 0);
       joe_Object_assign(&block, 0);
-      JoeParser_delete (parser);
    }
    joe_Object_gc ();
    lObjs =joe_Object_getLiveObjectsCount ();
