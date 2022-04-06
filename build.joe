@@ -21,7 +21,9 @@ srcDir := "src/com/veryant/joe".
 compileJoe := {
    !if (build anythingNew srcDir,".java",srcDir,".class"), {
       revision := "\$Revision: " +
-                  (build systemGetOut "git describe --tag") + "\$".
+                  (build systemGetOut "git describe --tag") + " " +
+                  (!newInstance "java.text.SimpleDateFormat","dd-MM-yyyy"
+                   format (!newInstance "java.util.Date")) + "\$".
       build replaceFirstInFile (srcDir + "/Revision.java"),
                                "\$Revision.*\$",revision.
       rc := build system ("javac -g -cp src "+srcDir+"/*.java").

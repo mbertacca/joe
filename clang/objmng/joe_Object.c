@@ -667,10 +667,10 @@ char *
 joe_Object_toString(joe_Object self)
 {
    if (self)
-      snprintf(buffer, sizeof(buffer), "[%s 0x%p]",
+      snprintf(buffer, sizeof(buffer), "[%s %p]",
                        self->clazz->name, (void *) self);
    else
-      snprintf(buffer, sizeof(buffer), "[null]");
+      snprintf(buffer, sizeof(buffer), "()");
    return buffer;
 }
 
@@ -795,9 +795,9 @@ static int
 boolToString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (self == joe_Boolean_True)
-      joe_Object_assign (retval, joe_String_New ("true"));
+      joe_Object_assign (retval, joe_String_New ("<1>"));
    else
-      joe_Object_assign(retval, joe_String_New ("false"));
+      joe_Object_assign(retval, joe_String_New ("<0>"));
    return JOE_SUCCESS;
 }
 
@@ -840,6 +840,21 @@ or (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 static int
+xor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1) {
+      if ((argv[0] == joe_Boolean_True) ^ (self == joe_Boolean_True))
+         joe_Object_assign(retval, joe_Boolean_True);
+      else
+         joe_Object_assign(retval, joe_Boolean_False);
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("or: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
 not (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
@@ -853,11 +868,59 @@ not (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_FAILURE;
 }
 
+static int
+iif (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 2) {
+      if (self == joe_Boolean_True)
+         joe_Object_assign (retval, argv[0]);
+      else
+         joe_Object_assign (retval, argv[1]);
+     return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("iif: invalid arguments"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+ifTrue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if ((argc == 1 && argv[0]->clazz == &joe_Block_Class) ||
+       (argc == 2 && argv[0]->clazz == &joe_Block_Class
+                  && argv[1]->clazz == &joe_Block_Class)) {
+      joe_Method *mthd = joe_Object_getMethod (&joe_Block_Class, "exec");
+      if (self == joe_Boolean_True) {
+         return mthd->mthd (argv[0], 0, NULL, retval);
+      } else if (argc == 2) {
+         return mthd->mthd (argv[1], 0, NULL, retval);
+      } else {
+         joe_Object_assign(retval, joe_Null_value);
+         return JOE_SUCCESS;
+      }
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("invalid arguments"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+ifFalse (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (self == joe_Boolean_True)
+      return ifTrue (joe_Boolean_False, argc, argv, retval);
+   else
+      return ifTrue (joe_Boolean_True, argc, argv, retval);
+}
 
 static joe_Method boolMthds[] = {
    {"and", and },
    {"or", or },
+   {"xor", xor },
    {"not", not },
+   {"iif", iif },
+   {"ifTrue", ifTrue },
+   {"ifFalse", ifFalse },
    {"toString", boolToString },
   {(void *) 0, (void *) 0}
 };

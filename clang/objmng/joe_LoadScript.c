@@ -72,6 +72,14 @@ joe_Class joe_LoadScript_Class = {
 
 # define MAXLINELEN 256
 
+void
+joe_LoadScript_setCWD ()
+{
+   if (dirname == 0) {
+      dirname = "./";
+   }
+}
+
 joe_Block
 joe_LoadScript_New (joe_Block self, char *scriptName)
 {

@@ -52,8 +52,14 @@ public class Block extends ArrayList<Message>
    public Object exec () throws JOEException {
       return vExec (new HashMap<String,Object>(), voidArgs);
    }
+   public Object multiply () throws JOEException {
+      return exec ();
+   }
    public Object exec (Object...argv) throws JOEException {
       return vExec (new HashMap<String,Object>(), argv);
+   }
+   public Object multiply (Object...argv) throws JOEException {
+      return exec (argv);
    }
    public Object init () throws JOEException {
       return init (voidArgs);
@@ -187,11 +193,17 @@ public class Block extends ArrayList<Message>
    public Block $new() throws JOEException {
       return $new (voidArgs);
    }
+   public Block add() throws JOEException {
+      return $new ();
+   }
    public Block $new(Object...args) throws JOEException {
       Block Return = (Block) clone();
       Return.execAsJoe = true;
       Return.init (args);
       return Return;
+   }
+   public Block add(Object...args) throws JOEException {
+      return $new(args);
    }
    int getLastChild() {
       return children.size() - 1;

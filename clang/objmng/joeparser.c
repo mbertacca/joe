@@ -406,7 +406,9 @@ compile (JoeParser self, joe_Block block, JoeArrayScan tokens)
 joe_Object
 JoeParser_getException (JoeParser self)
 {
-   return self->exception;
+   joe_Object Return = self->exception;
+   self->exception = 0;
+   return Return;
 }
 
 int

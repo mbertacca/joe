@@ -38,6 +38,7 @@ JOEOBJ_API int joe_Block_getVariable (joe_Block self, joe_Variable var,
 
 JOEOBJ_API void joe_Block_setName (joe_Block self, char *name);
 JOEOBJ_API char * joe_Block_getName (joe_Block self);
+JOEOBJ_API void joe_Block_removeMessages (joe_Block self);
 
 void joe_Block_addArgName (joe_Block self, char *name);
 void joe_Block_setParent (joe_Block self, joe_Block parent);

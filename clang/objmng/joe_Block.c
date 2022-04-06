@@ -44,19 +44,6 @@ static char *variables[] = { "messages", "variables", "parent",
 
 void joe_Block_setVariable(joe_Block self, joe_Variable var, joe_Object value);
 
-int
-joe_Block_assign (joe_Object self,int argc,joe_Object *args,joe_Object *retval)
-{
-   if (argc == 2 && joe_Object_instanceOf (args[0], &joe_Variable_Class)) {
-      joe_Block_setVariable (self, args[0], args[1]);
-      *retval = args[1];
-      return JOE_SUCCESS;
-   } else {
-      *retval = joe_Exception_New ("assignment: invalid argument");
-      return JOE_FAILURE;
-   }
-}
-
 static int
 findLabel (joe_Block *blk, joe_String name) {
    joe_Object obj;
@@ -421,9 +408,10 @@ getVariable(joe_JOEObject self, int argc, joe_Object* argv, joe_Object* retval)
 
 
 static joe_Method mthds[] = {
-  {"exec", joe_Block_exec },
-  {"assign", joe_Block_assign },
+  {"exec",     joe_Block_exec },
+  {"multiply", joe_Block_exec },
   {"new", joe_Block_new },
+  {"add", joe_Block_new },
   {"name", _name },
   {"getVariable", getVariable },
   {"getVariablesNames", getVariablesNames },
@@ -572,6 +560,11 @@ joe_Block_addArgName (joe_Block self, char *name)
    joe_ArrayList_add (argsNames,  joe_String_New (name));
 }
 
+void
+joe_Block_removeMessages (joe_Block self)
+{
+   joe_Object_assign (JOE_AT(self, MESSAGES), joe_ArrayList_New(1));
+}
 
 /* JOEObject */
 

@@ -98,17 +98,30 @@ public class WBoolean extends Wrapper {
       else
          return oFalse;
    }
-   public WBoolean ifTrue (Block m) throws JOEException {
+   public Object ifTrue (Block bTrue) throws JOEException {
       if (pValue)
-         m.exec();
-
-      return this;
+         return bTrue.exec();
+      else
+         return WNull.value;
    }
-   public WBoolean ifFalse (Block m) throws JOEException {
+   public Object ifTrue (Block bTrue, Block bFalse) throws JOEException {
+      if (pValue)
+         return bTrue.exec();
+      else
+         return bFalse.exec();
+   }
+   public Object ifFalse (Block bTrue, Block bFalse) throws JOEException {
       if (!pValue)
-         m.exec();
-
-      return this;
+         return bTrue.exec();
+      else
+         return bFalse.exec();
+   }
+   public Object ifFalse (Block bTrue) throws JOEException {
+      if (!pValue)
+         return bTrue.exec();
+      else
+         return WNull.value;
+   
    }
    public String toString() {
       return oValue.toString();

@@ -259,6 +259,23 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 static int
+getOSType (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   joe_StringBuilder msg = 0;
+   joe_Object_assign (&msg, joe_StringBuilder_New ());
+#ifdef WIN32
+   joe_StringBuilder_appendCharStar (msg, "Windows");
+#elif __unix__
+   joe_StringBuilder_appendCharStar (msg, "Unix");
+#else
+   joe_StringBuilder_appendCharStar (msg, "Unknown");
+# endif
+   joe_Object_assign(retval, joe_StringBuilder_toString (msg));
+   joe_Object_assign (&msg, 0);
+   return JOE_SUCCESS;
+}
+
+static int
 systemGetenv (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_String_Class)) {
@@ -327,6 +344,8 @@ print (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
    joe_String msg = 0;
    args2String(argc, args, &msg);
    fputs (joe_String_getCharStar (msg), stdout);
+   fflush (stdout);
+
    joe_Object_assign(&msg, 0);
    joe_Object_assign(retval, self);
    return JOE_SUCCESS;
@@ -336,9 +355,10 @@ static int
 println (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    int rc;
-   if ((rc = print (self, argc, argv, retval)) == JOE_SUCCESS)
+   if ((rc = print (self, argc, argv, retval)) == JOE_SUCCESS) {
       fputs ("\r\n", stdout);
-
+      fflush (stdout);
+   }
    return rc;
 }
 
@@ -488,6 +508,21 @@ _for(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
    return JOE_SUCCESS;
 }
 
+static int
+systemExit (joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
+{
+   int exitCode = 0;
+
+   if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_Integer_Class)) {
+      exitCode = (int) joe_Integer_value (argv[0]);
+   } else if (argc != 0) {
+      joe_Object_assign(retval,
+              joe_Exception_New("systemExit: invalid argument"));
+      return JOE_FAILURE;
+   }
+   exit (exitCode);
+   return JOE_SUCCESS;
+}
 
 static int
 unixTime (joe_Object self, int argc, joe_Object* argv, joe_Object* retval){
@@ -499,7 +534,7 @@ unixTime (joe_Object self, int argc, joe_Object* argv, joe_Object* retval){
       return JOE_FAILURE;
    }
 }
- 
+
 static int
 foreach (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -811,12 +846,14 @@ static joe_Method mthds[] = {
   {"runJoe", runJoe},
   {"newArray", newArray},
   {"version", version},
+  {"getOSType", getOSType},
   {"asc", asc},
   {"chr", chr},
   {"systemGetenv", systemGetenv},
   {"exec", exec},
   {"execFromDir", execFromDir},
   {"unixTime", unixTime},
+  {"systemExit", systemExit},
   {"loadSO", loadSO},
   {(void *) 0, (void *) 0}
 };
