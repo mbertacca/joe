@@ -29,6 +29,7 @@
 # include "joe_Gosub.h"
 # include "joe_Memory.h"
 # include "joe_Null.h"
+# include "joe_Bang.h"
 # include "joestrct.h"
 # include "joearray.h"
 
@@ -38,9 +39,10 @@
 # define NAME 3
 # define ARGS_NAMES 4
 # define SUPER 5
+# define BANG 6
 
 static char *variables[] = { "messages", "variables", "parent",
-                             "name", "argsNames", "super", 0};
+                             "name", "argsNames", "super", "bang", 0};
 
 void joe_Block_setVariable(joe_Block self, joe_Variable var, joe_Object value);
 
@@ -429,6 +431,18 @@ joe_Class joe_Block_Class = {
    0
 };
 
+joe_Object
+joe_Block_getBang (joe_Block self)
+{
+   return *JOE_AT(self, BANG);
+}
+
+void
+joe_Block_setBang (joe_Block self, joe_Object bang)
+{
+   joe_Object_assign (JOE_AT(self, BANG), bang);
+}
+
 void
 joe_Block_Init (joe_Block self, joe_Block parent)
 {
@@ -440,6 +454,11 @@ joe_Block_Init (joe_Block self, joe_Block parent)
 
    joe_Object_assign(&thisVars[PARENT],
                     joe_WeakReference_New(parent));
+   if (parent) {
+      joe_Object_assign(&thisVars[BANG], joe_Block_getBang(parent));
+   } else {
+      joe_Object_assign(&thisVars[BANG], joe_Bang_New());
+   }
    joe_Object_assign(&thisVars[NAME], 0);
    joe_Object_assign(&thisVars[ARGS_NAMES], joe_ArrayList_New(8));
    joe_Object_setAcyclic (self);

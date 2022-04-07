@@ -414,6 +414,7 @@ JoeParser_getException (JoeParser self)
 int
 JoeParser_compile (JoeParser self, joe_Block block, JoeArray tks) {
    JoeArrayScan tokens = JoeArrayScan_new (tks);
+   self->command = joe_Block_getBang (block);
    compile (self, block, tokens);
    JoeArrayScan_delete (tokens);
    if (self->exception == 0)
@@ -426,7 +427,6 @@ JoeParser
 JoeParser_new (char *fileName)
 {
    JoeParser self = calloc (1, sizeof (struct t_JoeParser));
-   joe_Object_assign (&self->command, joe_Bang_New ());
    self->fileName = fileName;
    
    return self;
@@ -434,6 +434,5 @@ JoeParser_new (char *fileName)
 void
 JoeParser_delete (JoeParser self)
 {
-   joe_Object_assign (&self->command, 0);
    free (self);
 }

@@ -107,12 +107,12 @@ main (int argc, char *argv[])
    int rc = 0;
    int lObjs;
    joe_Object retval = 0;
-   joe_Block block = 0;
    int i;
 
    if (argc > 1) {
       joe_Array argArray = 0;
       joe_String scriptName = 0;
+      joe_Block block = 0;
       joe_Class* loadScriptClass = joe_Class_getClass("joe_LoadScript");
       joe_Class* integerClass = joe_Class_getClass("joe_Integer");
 
@@ -158,7 +158,6 @@ main (int argc, char *argv[])
       void (*putPrompt)(char*) = isatty(0) ? showPrompt : showNoPrompt;
 
       joe_LoadScript_setCWD();
-      joe_Object_assign (&block, joe_Block_New (0));
       joe_Object_assign (&exec, joe_Execute_New (0));
       strcpy (line,"!println (!version),\"; type 'exit' to exit the session\".");
       do {
@@ -197,7 +196,6 @@ main (int argc, char *argv[])
       } while (fgets (line, MAXLINELEN, stdin) != NULL);
       joe_Object_assign(&retval, 0);
       joe_Object_assign(&exec, 0);
-      joe_Object_assign(&block, 0);
    }
    joe_Object_gc ();
    lObjs =joe_Object_getLiveObjectsCount ();
