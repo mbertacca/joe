@@ -120,7 +120,7 @@ public class JavaObjectsExecutor {
             try {
                b = prg.compile (tokens);
                try {
-                  b.init();
+                  defCmd.println ("---> ",b.init());
                   cmd = prg.getCommand();
                } catch (ExecException ex) {
                   throw ex;

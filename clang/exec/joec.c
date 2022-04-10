@@ -172,7 +172,7 @@ main (int argc, char *argv[])
          }
          joe_Execute_add (exec, line);
          braces = countBraces (line, braces);
-         if (braces == 0 &&
+         if (braces <= 0 &&
              (!line[0] || lc == '.')) {
             if (joe_Execute_exec (exec, &retval) != JOE_SUCCESS) {
                showError (retval);
