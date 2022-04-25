@@ -28,8 +28,7 @@
 #define NEXT 1
 #define PREV 2
 
-typedef joe_Object joe_ListItem;
-static char *item_vars[] = { "obj", "next", "prev" };
+static char *item_vars[] = { "obj", "next", "prev", 0 };
 
 static joe_Class item_clazz = {
    "joe_List$Item",
@@ -49,6 +48,18 @@ item_New ()
    joe_Object_assign (joe_Object_at (self, PREV), 0);
    joe_Object_assign (joe_Object_at (self, NEXT), 0);
    return self;
+}
+
+joe_ListItem
+joe_ListItem_next (joe_ListItem self)
+{
+   return *joe_Object_at (self, NEXT);
+}
+
+joe_Object
+joe_ListItem_value (joe_ListItem self)
+{
+   return *joe_Object_at (self, OBJ);
 }
 
 # define FIRST  0
@@ -91,7 +102,7 @@ get (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
             for (idx = length - idx - 1; idx > 0; idx--) {
                item = *joe_Object_at (item, PREV);
             }
-         } else {	
+         } else {
             item = *joe_Object_at (self, FIRST);
             for (  ; idx > 0; idx--) {
                item = *joe_Object_at (item, NEXT);
@@ -181,42 +192,46 @@ empty (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 static int
 foreach (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   if (argc == 1) {
-      if (joe_Object_instanceOf (argv[0], &joe_Block_Class)) {
-         int rc;
-         joe_Object lretval = 0;
-         joe_ListItem item = *joe_Object_at (self, FIRST);
-         while (item != 0) {
-            if ((rc=joe_Object_invoke(argv[0],"exec",
-                                      1, joe_Object_at (item, OBJ),
-                                                   &lretval)) != JOE_SUCCESS) {
-               if (joe_Object_instanceOf (lretval,
-                                            &joe_BreakLoopException_Class)) {
-                  joe_Object retobj = joe_BreakException_getReturnObj(lretval);
-                  if (retobj)
-                     joe_Object_assign(retval, retobj);
-                  joe_Object_assign (&lretval, 0);
-                  return JOE_SUCCESS;
-               } else {
-                  joe_Object_assign(retval, lretval);
-                  joe_Object_assign(&lretval, 0);
-               }
+   int start;
+   joe_Block blk;
+   int cnt;
+   joe_Object *obj;
+   int rc;
+   joe_ListItem item = *joe_Object_at (self, FIRST);
+
+   if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_Block_Class)) {
+      start = 0;
+      blk = argv[0];
+   } else if (argc == 2 
+              && joe_Object_instanceOf (argv[0], &joe_Integer_Class)
+              && joe_Object_instanceOf (argv[1], &joe_Block_Class)) {
+      start = joe_Integer_value (argv[0]);
+      blk = argv[1];
+   } else {
+      joe_Object_assign(retval,
+                   joe_Exception_New ("List foreach: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+
+   for (item = *joe_Object_at (self, FIRST), cnt = 0; item != 0;
+        item = *joe_Object_at (item, NEXT), cnt++) {
+      obj = joe_Object_at (item, OBJ);
+      if (cnt >= start) {
+         if ((rc=joe_Object_invoke(blk,"exec", 1, obj,
+                                                  retval)) != JOE_SUCCESS) {
+            if (joe_Object_instanceOf (*retval,
+                                       &joe_BreakLoopException_Class)) {
+               joe_Object retobj = joe_BreakException_getReturnObj(*retval);
+               if (retobj)
+                  joe_Object_assign(retval, retobj);
+               return JOE_SUCCESS;
             } else {
-              joe_Object_assign(retval, lretval);
-              joe_Object_assign(&lretval, 0);
+               return JOE_FAILURE;
             }
-            item = *joe_Object_at (item, NEXT);
          }
-         return JOE_SUCCESS;
-      } else {
-         joe_Object_assign(retval,
-                           joe_Exception_New ("List foreach: block expected"));
-         return JOE_FAILURE;
       }
    }
-   joe_Object_assign(retval,
-                   joe_Exception_New ("List foreach: invalid argument number"));
-   return JOE_FAILURE;
+   return JOE_SUCCESS;
 }
 static joe_Method mthds[] = {
   {"add", add },
@@ -296,3 +311,8 @@ joe_List_empty(joe_List self)
    return !(joe_Integer_value(*joe_Object_at(self, LENGTH)) > 0);
 }
 
+joe_ListItem
+joe_List_getFirstItem(joe_List self)
+{
+   return *joe_Object_at (self, FIRST);
+}

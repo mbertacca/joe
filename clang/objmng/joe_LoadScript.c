@@ -19,6 +19,7 @@
 # include "joe_LoadScript.h"
 # include "joe_StringBuilder.h"
 # include "joe_String.h"
+# include "joe_Files.h"
 # include "joe_Exception.h"
 # include "joetoken.h"
 # include "joearray.h"
@@ -70,8 +71,6 @@ joe_Class joe_LoadScript_Class = {
    0
 };
 
-# define MAXLINELEN 256
-
 void
 joe_LoadScript_setCWD ()
 {
@@ -86,9 +85,10 @@ joe_LoadScript_New (joe_Block self, char *scriptName)
    joe_Object Return = self;
    char *path;
    FILE *scriptFile;
+   char *line = 0;
+   ssize_t lineLen = 0;
    JoeArray tokens = JoeArray_new (sizeof (struct t_Token), 256);
    Tokenizer tokenizer = Tokenizer_new (tokens);
-   char *line = calloc (1, MAXLINELEN);
    JoeParser parser = JoeParser_new (scriptName);
 
    if (dirname == 0 || *dirname == 0) {
@@ -128,7 +128,7 @@ joe_LoadScript_New (joe_Block self, char *scriptName)
          else
             dirname[0] = 0;
       }
-      while (fgets (line, MAXLINELEN, scriptFile) != NULL) {
+      while (joe_Files_getline (&line, &lineLen, scriptFile) >= 0) {
          Tokenizer_tokenize (tokenizer, line);
       }
       fclose (scriptFile);
@@ -142,6 +142,10 @@ joe_LoadScript_New (joe_Block self, char *scriptName)
 
    if (path != scriptName)
       free (path);
-   free (line);
+   if (line) {
+      free (line);
+      line = 0;
+      lineLen = 0;
+   }
    return Return;
 }

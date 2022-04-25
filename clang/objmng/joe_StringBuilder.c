@@ -121,8 +121,8 @@ joe_StringBuilder_length (joe_StringBuilder self)
    return sb->length;
 }
 
-static void
-appendCharStar (joe_StringBuilder self, char *s, int len)
+void
+joe_StringBuilder_appendCharStar_len (joe_StringBuilder self, char *s, int len)
 {
    joe_Memory mem = *JOE_AT(self, 0);
    StrBuild *sb = (void *) joe_Object_getMem (mem) ;
@@ -149,33 +149,36 @@ appendCharStar (joe_StringBuilder self, char *s, int len)
 void
 joe_StringBuilder_appendCharStar (joe_StringBuilder self, char *s)
 {
-   appendCharStar (self, s, strlen (s));
+   joe_StringBuilder_appendCharStar_len (self, s, strlen (s));
 }
 
 void
 joe_StringBuilder_appendChar (joe_StringBuilder self, char c)
 {
-   appendCharStar (self, &c, 1);
+   joe_StringBuilder_appendCharStar_len (self, &c, 1);
 }
 
 void
 joe_StringBuilder_appendInt (joe_StringBuilder self, int num)
 {
-   char *str = calloc (1, sizeof (num) << 2);
    int i;
 
-   if (num < 0) {
-      joe_StringBuilder_appendChar (self, '-');
-      num = -num;
-   }
-   for (i = 0; num; i++) {
-      str[i] = '0' + (num % 10);
-      num /= 10;
-   }
-   for (--i; i >= 0; i--)
-      joe_StringBuilder_appendChar (self, str[i]);
+   if (num == 0) {
+      joe_StringBuilder_appendChar (self, '0'	);
 
-   free (str);
+   } else {
+      char str[20];
+      if (num < 0) {
+         joe_StringBuilder_appendChar (self, '-');
+         num = -num;
+      }
+      for (i = 0; num; i++) {
+         str[i] = '0' + (num % 10);
+         num /= 10;
+      }
+      for (--i; i >= 0; i--)
+         joe_StringBuilder_appendChar (self, str[i]);
+   }
 }
 
 void

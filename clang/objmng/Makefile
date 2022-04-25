@@ -31,6 +31,8 @@ OBJS=joe_Object.o \
      joe_Selector.o \
      joe_BangSO.o \
      joe_Execute.o \
+     joe_Files.o \
+     joe_Glob.o \
      ndecimal.o \
      joearray.o \
      joearrayscan.o \

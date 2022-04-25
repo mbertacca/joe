@@ -24,6 +24,20 @@
 # include "joestrct.h"
 
 static int
+ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_Integer_Class)) {
+      unsigned int size = joe_Integer_value (argv[0]);
+      joe_Object_assign (retval,  joe_Array_New(size));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+           joe_Exception_New ("Array ctor: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
 length (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_Object_assign (retval, joe_Integer_New (joe_Array_length (self)));
@@ -83,43 +97,44 @@ clean(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 static int
 foreach (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   if (argc == 1) {
-      if (joe_Object_instanceOf (argv[0], &joe_Block_Class)) {
-         int rc;
-         joe_Object lretval = 0;
-         int len = joe_Array_length (self);
-         int i;
-         for (i = 0; i < len; i++) {
-            if ((rc=joe_Object_invoke(argv[0],"exec",
+   int start;
+   joe_Block blk;
+   int rc;
+   int len = joe_Array_length (self);
+   int i;
+
+   if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_Block_Class)) {
+      start = 0;
+      blk = argv[0];
+   } else if (argc == 2 
+              && joe_Object_instanceOf (argv[0], &joe_Integer_Class)
+              && joe_Object_instanceOf (argv[1], &joe_Block_Class)) {
+      start = joe_Integer_value (argv[0]);
+      blk = argv[1];
+   } else {
+      joe_Object_assign(retval,
+                   joe_Exception_New ("Array foreach: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+
+   for (i = 0; i < len; i++) {
+      if (i >= start) {
+         if ((rc=joe_Object_invoke(blk,"exec",
                                       1, JOE_AT (self, i),
-                                                   &lretval)) != JOE_SUCCESS) {
-               if (joe_Object_instanceOf (lretval,
-                                            &joe_BreakLoopException_Class)) {
-                  joe_Object retobj = joe_BreakException_getReturnObj(lretval);
-                  if (retobj)
-                     joe_Object_assign(retval, retobj);
-                  joe_Object_assign (&lretval, 0);
-                  return JOE_SUCCESS;
-               } else {
-                  joe_Object_assign(retval, lretval);
-                  joe_Object_assign(&lretval, 0);
-                  return JOE_FAILURE;
-               }
+                                             retval)) != JOE_SUCCESS) {
+            if (joe_Object_instanceOf (*retval,
+                                         &joe_BreakLoopException_Class)) {
+               joe_Object retobj = joe_BreakException_getReturnObj(*retval);
+               if (retobj)
+                  joe_Object_assign(retval, retobj);
+               return JOE_SUCCESS;
             } else {
-              joe_Object_assign(retval, lretval);
-              joe_Object_assign(&lretval, 0);
+               return JOE_FAILURE;
             }
          }
-         return JOE_SUCCESS;
-      } else {
-         joe_Object_assign(retval,
-                           joe_Exception_New ("Array foreach: block expected"));
-         return JOE_FAILURE;
       }
    }
-   joe_Object_assign(retval,
-                   joe_Exception_New ("Array foreach: invalid argument number"));
-   return JOE_FAILURE;
+   return JOE_SUCCESS;
 }
 
 static joe_Method mthds[] = {
@@ -135,7 +150,7 @@ static char *variables[] = { 0 };
 
 joe_Class joe_Array_Class = {
    "joe_Array",
-   0,
+   ctor,
    0,
    mthds,
    variables,

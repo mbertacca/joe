@@ -28,12 +28,14 @@
 # include "joe_Boolean.h"
 # include "joe_Integer.h"
 # include "joe_Null.h"
+# include "joe_Files.h"
 # include "joe_String.h"
 # include "joe_StringBuilder.h"
 # include "joe_BreakBlockException.h"
 # include "joe_BreakLoopException.h"
 # include "joe_GotoException.h"
 # include "joe_Gosub.h"
+# include "joe_Glob.h"
 # include "joe_LoadScript.h"
 
 static int Switch_case (joe_Object self,
@@ -251,7 +253,7 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_StringBuilder msg = 0;
    joe_Object_assign (&msg, joe_StringBuilder_New ());
-   joe_StringBuilder_appendCharStar (msg, "JOE Revision 0.9a ");
+   joe_StringBuilder_appendCharStar (msg, "JOE Revision 0.9b ");
    joe_StringBuilder_appendCharStar (msg, __DATE__);
    joe_Object_assign(retval, joe_StringBuilder_toString (msg));
    joe_Object_assign (&msg, 0);
@@ -356,19 +358,20 @@ println (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    int rc;
    if ((rc = print (self, argc, argv, retval)) == JOE_SUCCESS) {
-      fputs ("\r\n", stdout);
+      fputs ("\n", stdout);
       fflush (stdout);
    }
    return rc;
 }
 
-static char inbuff[255];
+static char* inbuff = 0;
+static ssize_t inbufflen = 0;
+
 static int
 readLine (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   int i;
-   fgets (inbuff, sizeof(inbuff), stdin);
-   i = strlen (inbuff);
+   int i = joe_Files_getline (&inbuff, &inbufflen, stdin);
+
    for (i--; i >= 0 && inbuff[i] < ' '; i--)
      inbuff[i] = 0;
    joe_Object_assign(retval, joe_String_New (inbuff));
@@ -538,22 +541,13 @@ unixTime (joe_Object self, int argc, joe_Object* argv, joe_Object* retval){
 static int
 foreach (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   if (argc == 2) {
-      if ((joe_Object_instanceOf (argv[0], &joe_Array_Class) ||
-           joe_Object_instanceOf (argv[0], &joe_List_Class)) &&
-          joe_Object_instanceOf (argv[1], &joe_Block_Class)) {
-         return joe_Object_invoke(argv[0],"foreach", 1, &argv[1], retval);
-      } else {
-         joe_String msg = joe_String_New4 ("foreach: invalid argument: ",
-                                           joe_Object_getClassName(argv[0]),
-                                           ",",
-                                           joe_Object_getClassName(argv[1]));
-         joe_Object_assign(retval, joe_Exception_New_string (msg));
-         return JOE_FAILURE;
-      }
+   if (argc > 1) {
+      return joe_Object_invoke(argv[0],"foreach", argc-1, &argv[1], retval);
+   } else {
+      joe_Object_assign(retval, joe_Exception_New (
+                                    "foreach: invalid argument number"));
+      return JOE_FAILURE;
    }
-   joe_Object_assign(retval, joe_Exception_New ("forwach: invalid argument number"));
-   return JOE_FAILURE;
 }
 
 static int
@@ -809,6 +803,13 @@ array (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
    return JOE_SUCCESS;
 }
 
+
+static int
+getGlob (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
+{
+   return joe_Class_newInstance (&joe_Glob_Class, argc, args, retval);
+}
+
 extern int joe_BangSO_New(joe_String soName, joe_Object* obj);
 
 static int
@@ -854,6 +855,7 @@ static joe_Method mthds[] = {
   {"execFromDir", execFromDir},
   {"unixTime", unixTime},
   {"systemExit", systemExit},
+  {"getGlob", getGlob},
   {"loadSO", loadSO},
   {(void *) 0, (void *) 0}
 };

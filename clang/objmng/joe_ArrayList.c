@@ -18,30 +18,62 @@
 
 # include "joe_ArrayList.h"
 # include "joe_Array.h"
+# include "joe_Exception.h"
+# include "joe_Integer.h"
 # include "joestrct.h"
-
-/*
-static int
-lenght (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
-{
-   return JOE_SUCCESS;
-}
-*/
-
-
-static joe_Method mthds[] = {
-  /* {"length", length } */
-  {(void *) 0, (void *) 0}
-};
 
 # define ARRAY 0
 # define LENGTH 1
 # define MAXLENGTH 2
 static char *variables[] = { "array", "length", "maxLength", 0 };
 
+static int
+ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      joe_Object_assign (retval,  joe_Array_New(8));
+      return JOE_SUCCESS;
+    } else if (argc == 1 && joe_Object_instanceOf (argv[0],&joe_Integer_Class)) {
+      unsigned int size = joe_Integer_value (argv[0]);
+      joe_Object_assign (retval,  joe_Array_New(size));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+           joe_Exception_New ("ArrayList ctor: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+length (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      joe_Object_assign(retval,
+                        *joe_Object_at (self, LENGTH));
+   } else {
+      joe_Object_assign(retval,
+                     joe_Exception_New ("ArrayList length: invalid argument"));
+      return JOE_FAILURE;
+   }
+   return JOE_SUCCESS;
+}
+
+static joe_Method mthds[] = {
+// {"add", add },
+// {"push", add },
+// {"pop", pop },
+// {"peek", peek },
+// {"get", get },
+// {"empty", empty },
+   {"length", length },
+// {"foreach", foreach },
+// {(void *) 0, (void *) 0}
+   {(void *) 0, (void *) 0}
+};
+
 joe_Class joe_ArrayList_Class = {
    "joe_ArrayList",
-   0,
+   ctor,
    0,
    mthds,
    variables,

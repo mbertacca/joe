@@ -1,0 +1,430 @@
+!println (!version) println;println;println "Ok";.
+
+re := ".*".
+
+mre := {:str.
+   rx := re;
+   !println str," matches ",rx," ? ",(str matches rx iif "True","False").
+   rx := "(?i)" + re;
+   !println str," matches ",rx," ? ",(str matches rx iif "True","False").
+}.
+
+sre := {:str.
+   rx := re;
+   split := str split rx.
+   !foreach split,{:s.
+      !print "[",s,"]".
+   }.
+   !println.
+   rx := "(?i)" + re;
+   split := str split rx.
+   !foreach split,{:s.
+      !print "[",s,"]".
+   }.
+   !println.
+}.
+
+tre := {:str.
+   mre exec str.
+   sre exec str.
+}.
+
+re := "A".
+tre exec "A".
+tre exec "A2".
+
+re := "A2".
+tre exec "A2".
+
+re := "abc".
+tre exec "abc".
+tre exec "xabcy".
+tre exec "ababc".
+tre exec "xbc".
+tre exec "axc".
+tre exec "abx".
+tre exec "b".
+
+re := "ab?".
+tre exec "abc".
+tre exec "a".
+tre exec "ab".
+tre exec "ac".
+
+re :=" a.*bc".
+tre exec "abc".
+
+re :=" a.[abc]*bc".
+tre exec "abc".
+
+re := "[adq]+".
+tre exec "bcaddxqy".
+
+re := "a*b".
+tre exec "aaadaabaaa".
+tre exec "xxx".
+
+re:= "[^abc]def[abc]+".
+tre exec "abxdefbb".
+
+re := "a*baa".
+tre exec "ccdaaabaxaabaa".
+tre exec "aabaa".
+
+re := "qa*bb*q".
+tre exec "xxqababqyy".
+
+re := "a.[^d]c*".
+mre exec "adcaxc".
+
+re := "a*b".
+tre exec "abaaaxaabaayy".
+tre exec "cccdaaabaxaabaayy".
+tre exec "cccdaaabqxaabaayy".
+
+re := "x1g".
+tre exec "x1g".
+
+re:= "x".
+tre exec "x412".
+.
+re:= "34".
+tre exec "343443444".
+
+re:= "l".
+tre exec "hello".
+
+re := "a[a-z]".
+tre exec "abcdefghi".
+
+re := "[abc]*".
+tre exec "aabaac".
+
+re := "a+".
+tre exec "aaaaaaaaaa".
+
+
+re := "za+b+c*".
+tre exec "zaacbbbcac".
+tre exec "zaabbbcc".
+
+re := "c*".
+mre exec "bbc".
+tre exec "b".
+mre exec "cb".
+re := "a*b+".
+tre exec "baaaac".
+
+re := "ab*c".
+tre exec "abc".
+
+re := "ab*bc".
+tre exec "abc".
+tre exec "acbc".
+tre exec "abbc".
+tre exec "abbbbc".
+
+re := "ab?bc".
+tre exec "abc".
+tre exec "acbc".
+tre exec "abbc".
+tre exec "abbbbc".
+
+re :=".".
+mre exec "abbbbc".
+
+re := ".....".
+tre exec "abbbbc".
+
+re := "ab+bc".
+tre exec "abbc".
+tre exec "abbbbc".
+tre exec "abc".
+tre exec "abq".
+tre exec "abc".
+tre exec "abq".
+
+
+re :="..".
+tre exec "1".
+tre exec "12".
+tre exec "123".
+
+re := "ab?bc".
+tre exec "abbc".
+tre exec "abc".
+tre exec "abbbbc".
+
+re := "ab?c".
+tre exec "abc".
+
+re := "a.c".
+tre exec "abc".
+tre exec "axc".
+
+re := "a.*c".
+tre exec "axyzc".
+tre exec "axyzd".
+
+re := "a[bc]d".
+tre exec "abd".
+tre exec "abc".
+tre exec "axyzd".
+
+re := "a[b-d]e".
+tre exec "ace".
+tre exec "abd".
+
+re := "a[b-d]".
+tre exec "aac".
+
+re := "a[-b]".
+tre exec "a-".
+
+re := "a[b-]".
+tre exec "a-".
+
+re:="a]".
+tre exec "a]".
+
+re:="a[^bc]d".
+tre exec "aed".
+tre exec "abd".
+
+re :="a[^-b]c".
+tre exec "adc".
+tre exec "a-c".
+
+re:= "a+b+c".
+tre exec "aabbabc".
+
+re := "a.+c".
+tre exec "abcabc".
+
+re := "[^ab]*".
+tre exec "cde".
+
+re := "[abc]*d".
+tre exec "abbbcd".
+
+re := "[abc]*bcd".
+tre exec "abcd".
+
+re := "abcd*efg".
+tre exec "abcdefg".
+
+re:= "ab*".
+tre exec "xabyabbbz".
+tre exec "xayabbbz".
+
+re:="[abhgefdc]ij".
+tre exec "hij".
+
+re:="a[bcd]*dcdcde".
+tre exec "adcdcde".
+
+re:="[a-zA-Z_][a-zA-Z0-9_]*".
+tre exec "alpha".
+
+re:= "ef*g.".
+tre exec "effgz".
+tre exec "reffgz".
+tre exec "effg".
+
+re:= ".*c.*".
+tre exec "abcde".
+tre exec "abcd".
+
+re:= "a[-]?c".
+tre exec "ac".
+
+re:="[a-c]*".
+tre exec "abcabc".
+
+re:="ab*c".
+tre exec "ABC".
+
+re:="ab*bc".
+tre exec "ABC".
+tre exec "ABBC".
+
+re:="ab*?bc".
+tre exec "ABBBBC".
+
+re:="ab".
+tre exec "ABBBBC".
+
+re:="ab+?bc".
+tre exec "ABBC".
+
+re:="toys?".
+tre exec "aatoys".
+
+re:="[_-~]".
+tre exec "A".
+tre exec "a".
+
+re:="[!-_]".
+tre exec "A".
+tre exec "a".
+
+re:="ab+bc".
+tre exec "ABBBBC".
+tre exec "ABC".
+tre exec "ABQ".
+tre exec "ABC".
+tre exec "ABQ".
+
+re:="ab?bc".
+tre exec "ABBC".
+tre exec "ABC".
+tre exec "ABBBBC".
+
+re:="ab??c".
+tre exec "ABC".
+
+re := "a.c".
+tre exec "ABC".
+tre exec "AXC".
+
+re:="a.*?c".
+tre exec "AXYZC".
+tre exec "ABCABC".
+
+re:="a[bc]d".
+tre exec "ABD".
+tre exec "ABC".
+
+re:="a[b-d]e".
+tre exec "ACE".
+tre exec "ABD".
+tre exec "ABC".
+
+re:="a[b-d]".
+tre exec "AAC".
+
+re:="a[-b]".
+tre exec "A-".
+
+re:="a[b-]".
+tre exec "A-".
+
+re:="a]".
+tre exec "A]".
+
+re := "a[^bc]d".
+tre exec "AED".
+tre exec "ABD".
+
+re:="a[^-b]c".
+tre exec "ADC".
+tre exec "A-C".
+tre exec "ABD".
+
+re:="a+b+c".
+tre exec "AABBABC".
+
+re:="[^ab]*".
+tre exec "CDE".
+
+re:="[abc]*d".
+tre exec "ABBBCD".
+
+re:="[abc]*bcd".
+tre exec "ABCD".
+
+re:="abcd*efg".
+tre exec "ABCDEFG".
+
+re:="ab*".
+tre exec "XABYABBBZ".
+tre exec "XAYABBBZ".
+
+re:="[abhgefdc]ij".
+tre exec "HIJ".
+
+re:="a[bc]*c*".
+tre exec "ABC".
+
+re:="a[bc]*c*d".
+tre exec "ABCD".
+
+re:="a[bc]+c*d".
+tre exec "ABCD".
+
+re:="a[bc]*c+d".
+tre exec "ABCD".
+
+re:="a[bcd]*dcdcde".
+tre exec "ADCDCDE".
+re:="[a-zA-Z_][a-zA-Z0-9_]*".
+tre exec "ALPHA".
+
+re:= "ef*g.".
+tre exec "EFFGZ".
+tre exec "IJ".
+tre exec "REFFGZ".
+tre exec "EFFG".
+tre exec "BCDD".
+tre exec "ADCDCDE".
+tre exec "EFFG".
+tre exec "BCDD".
+
+re:=".*c.*".
+tre exec "ABCDE".
+
+re:="abcd".
+tre exec "ABCD".
+
+re:= "a[-]?c".
+tre exec "AC".
+
+re:= "[a-c]*".
+mre exec "ABCABC".
+
+re := "a*b+".
+tre exec "caab".
+re := "[\[:]+".
+tre exec "a:[b]:".
+
+re := "[\[=]+".
+tre exec "a=[b]=".
+
+re := "[\[.]+".
+tre exec "a.[b].".
+
+re:= "foo.bart".
+tre exec "foo.bart".
+
+re:="d[x][x][x]".
+tre exec "abcd-dxxx".
+
+re:= "[0-9]+\.[0-9]+".
+tre exec "3.1415926".
+
+re:= "a[^\]b]c".
+tre exec "a]c".
+tre exec "abc".
+tre exec "adc".
+
+re:= "a[bcd]+dcdcde".
+tre exec "adcdcde".
+tre exec "abcde".
+tre exec "adcdcde".
+
+re:="[k]".
+tre exec "ab".
+
+re:="a.*c".
+tre exec "AXYZD".
+tre exec "AABC".
+tre exec "AXYZD".
+
+re:="a[^\]b]c".
+tre exec "A]C".
+
+re:= "a[bcd]+dcdcde".
+tre exec "ADCDCDE".
+
+re:="a+ab".
+tre exec "aaab".
