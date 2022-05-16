@@ -1,6 +1,6 @@
 CC=cc
 #CFLAGS=-g -Wall -rdynamic
-CFLAGS=-g -Wall -fPIC
+CFLAGS=-Og -Wall -fPIC
 INCL=-I../include
 
 BIN=../bin

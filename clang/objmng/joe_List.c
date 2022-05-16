@@ -30,11 +30,42 @@
 
 static char *item_vars[] = { "obj", "next", "prev", 0 };
 
+static int
+hasNext (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   
+   if (*joe_Object_at (self, NEXT) != 0)
+      joe_Object_assign(retval, joe_Boolean_New_true());
+   else
+      joe_Object_assign(retval, joe_Boolean_New_false());
+   return JOE_SUCCESS;
+}
+
+static int
+next (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{   
+   joe_ListItem item = *joe_Object_at (self, NEXT);
+   if (item != 0) {
+      joe_Object_assign(retval, *joe_Object_at (item, OBJ));
+      joe_Object_assign(joe_Object_at (self, NEXT), *joe_Object_at (item,NEXT));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,joe_Exception_New ("iterator: no more items"));
+      return JOE_FAILURE;
+   }
+}
+
+static joe_Method item_mthds[] = {
+  {"hasNext", hasNext },
+  {"next", next },
+  {(void *) 0, (void *) 0}
+};
+
 static joe_Class item_clazz = {
    "joe_List$Item",
    0,
    0,
-   0,
+   item_mthds,
    item_vars,
    &joe_Object_Class,
    0
@@ -233,6 +264,16 @@ foreach (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
    return JOE_SUCCESS;
 }
+
+static int
+iterator (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   joe_ListItem item = item_New();
+   joe_Object_assign(joe_Object_at(item, NEXT), *joe_Object_at (self, FIRST));
+   joe_Object_assign(retval, item);
+   return JOE_SUCCESS;
+}
+
 static joe_Method mthds[] = {
   {"add", add },
   {"push", add },
@@ -242,6 +283,7 @@ static joe_Method mthds[] = {
   {"empty", empty },
   {"length", length },
   {"foreach", foreach },
+  {"iterator", iterator },
   {(void *) 0, (void *) 0}
 };
 

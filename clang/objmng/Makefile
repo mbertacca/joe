@@ -1,5 +1,5 @@
 CC=cc
-CFLAGS=-g -fPIC -Wall -pedantic
+CFLAGS=-Og -fPIC -Wall -pedantic
 TARGET=libjoeobj
 LIB=../lib
 BIN=../bin
