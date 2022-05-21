@@ -25,5 +25,5 @@ The syntax can be summarized in the following 2 lines:
 
 *block* is an object itself therefore it can be put wherever an object can. Parenthesis can be used to alter the default left-to-right evaluation  order.
 
-I developed also a version using C language that could be used in small devices (automation, robotics, Internet of things) in order to allow the use of an object oriented interpreter with garbage collection and a small memory footprint. Currently it is just a proof-of-concept developed on Linux, however it should be easy to compile it on any other platform.
+I also developed a C language version that could be used in small devices (automation, robotics, Internet of Things) in order to allow the use of an object oriented interpreter with garbage collection and a small memory footprint. It is currently little more than a proof-of-concept but retains almost all the functionality of the Java version. It is compiled on Linux and Windows, but it should be easy to compile on any other platform.
 
