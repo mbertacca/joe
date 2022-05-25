@@ -820,6 +820,26 @@ and (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       } else if (argv[0] == joe_Boolean_False) {
          joe_Object_assign(retval, joe_Boolean_False);
          return JOE_SUCCESS;
+      } else if (argv[0]->clazz == &joe_Block_Class) {
+         if (self == joe_Boolean_True) {
+            joe_Object lretval = 0;
+            joe_Method *mthd = joe_Object_getMethod (&joe_Block_Class, "exec");
+            int rc = mthd->mthd (argv[0], 0, NULL, &lretval);
+            if (rc == JOE_SUCCESS) {
+               if (lretval == joe_Boolean_False)
+                  joe_Object_assign(retval, joe_Boolean_False);
+               else
+                  joe_Object_assign(retval, joe_Boolean_True);
+               joe_Object_assign (&lretval, 0);
+               return JOE_SUCCESS;
+            } else {
+               joe_Object_transfer (retval, &lretval);
+               return JOE_FAILURE;
+            }
+         } else {
+            joe_Object_assign(retval, joe_Boolean_False);
+            return JOE_SUCCESS;
+         }
       }
    }
    joe_Object_assign(retval, joe_Exception_New ("and: invalid argument"));
@@ -839,6 +859,26 @@ or (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       } else if (argv[0] == joe_Boolean_True) {
          joe_Object_assign (retval, joe_Boolean_True);
          return JOE_SUCCESS;
+      } else if (argv[0]->clazz == &joe_Block_Class) {
+         if (self == joe_Boolean_False) {
+            joe_Object lretval = 0;
+            joe_Method *mthd = joe_Object_getMethod (&joe_Block_Class, "exec");
+            int rc = mthd->mthd (argv[0], 0, NULL, &lretval);
+            if (rc == JOE_SUCCESS) {
+               if (lretval == joe_Boolean_True)
+                  joe_Object_assign(retval, joe_Boolean_True);
+               else
+                  joe_Object_assign(retval, joe_Boolean_False);
+               joe_Object_assign (&lretval, 0);
+               return JOE_SUCCESS;
+            } else {
+               joe_Object_transfer (retval, &lretval);
+               return JOE_FAILURE;
+            }
+         } else {
+            joe_Object_assign(retval, joe_Boolean_True);
+            return JOE_SUCCESS;
+         }
       }
    }
    joe_Object_assign(retval, joe_Exception_New ("or: invalid argument"));
@@ -983,9 +1023,20 @@ nullNe (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_FAILURE;
 }
 
+static int
+nullCmp (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   joe_Object_assign(retval, joe_Boolean_False);
+   return JOE_SUCCESS;
+}
+
 static joe_Method nullMthds[] = {
    {"equals", nullEq },
    {"ne", nullNe },
+   {"gt", nullCmp },
+   {"ge", nullEq },
+   {"lt", nullCmp },
+   {"le", nullEq },
    {"toString", nullToString },
   {(void *) 0, (void *) 0}
 };

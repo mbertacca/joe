@@ -18,11 +18,14 @@
 
 # include <string.h>
 # include <ctype.h>
+# include <stdlib.h>
 # include "joe_Boolean.h"
+# include "joe_Float.h"
 # include "joe_Integer.h"
 # include "joe_String.h"
 # include "joe_List.h"
 # include "joe_StringBuilder.h"
+# include "joe_Null.h"
 # include "joe_Exception.h"
 
 /* Basic regex matcher
@@ -615,6 +618,58 @@ replaceFirst (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+static int
+intValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      char * const str = joe_String_getCharStar (self);
+      long val = atol(str);
+      if (val == 0) {
+         int len = joe_String_length (self);
+         if (len == 0) {
+             joe_Object_assign(retval, joe_Null_value);
+         } else {
+            if (str[0] != '0')
+               joe_Object_assign(retval, joe_Null_value);
+            else
+               joe_Object_assign(retval, joe_Integer_New (val));
+         }
+      } else {
+         joe_Object_assign(retval, joe_Integer_New (val));
+      }
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("intValue: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+floatValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      char * const str = joe_String_getCharStar (self);
+      double val = atof(str);
+      if (val == 0) {
+         int len = joe_String_length (self);
+         if (len == 0) {
+             joe_Object_assign(retval, joe_Null_value);
+         } else {
+            if (str[0] != '0' && str[0] != '.')
+               joe_Object_assign(retval, joe_Null_value);
+            else
+               joe_Object_assign(retval, joe_Float_New (val));
+         }
+      } else {
+         joe_Object_assign(retval, joe_Float_New (val));
+      }
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("floatValue: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
 
 static joe_Method mthds[] = {
   {"add", add},
@@ -634,6 +689,10 @@ static joe_Method mthds[] = {
   {"split", split},
   {"replaceAll", replaceAll},
   {"replaceFirst", replaceFirst},
+  {"intValue", intValue},
+  {"longValue", intValue},
+  {"floatValue", floatValue},
+  {"doubleValue", floatValue},
   {"toString", toString},
   {(void *) 0, (void *) 0}
 };

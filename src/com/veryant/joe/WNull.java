@@ -27,6 +27,18 @@ public class WNull extends Wrapper {
    public boolean ne (Object b) {
       return !equals (b);
    }
+   public boolean gt (Object b) {
+      return false;
+   }
+   public boolean ge (Object b) {
+      return equals (b);
+   }
+   public boolean lt (Object b) {
+      return false;
+   }
+   public boolean le (Object b) {
+      return equals (b);
+   }
    public Object getWrapped () {
       return null;
    }
