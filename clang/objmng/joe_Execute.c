@@ -64,10 +64,7 @@ ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_Block block = 0;
    if (argc == 1 && (block = argv[0]) &&
-          (JOE_ISCLASS(argv[0], &joe_Block_Class) ||
-           (JOE_ISCLASS(argv[0], &joe_WeakReference_Class) &&
-            joe_Object_instanceOf(block = joe_WeakReference_get(argv[0]),
-                                  &joe_Block_Class)))) {
+          (joe_Object_instanceOf(argv[0], &joe_Block_Class))) {
    } else if (argc != 0) {
       joe_Object_assign(retval,
                         joe_Exception_New ("execute ctor: invalid argument"));

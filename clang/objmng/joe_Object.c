@@ -245,6 +245,8 @@ joe_Object_clone (joe_Object self)
       memcpy (Return, self, size);
       Return->data.mem = (char *) Return + sizeof (struct s_joe_Object);
       Return->refcount = 0;
+      Return->color = BLACK;
+      Return->buffered = 0;
 
       for (size = 0; size < Return->nItems; size++)
          if (Return->data.obj[size])
