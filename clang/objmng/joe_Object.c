@@ -515,22 +515,22 @@ joe_Object_gc ()
       if (*obj)
          scanGray (*obj);
 
+   firstdel.data.mem = 0;
+   scan = &firstdel;
    for (i = 0, obj = roots; i < rootsCnt; i++, obj++) {
       if (*obj) {
-         firstdel.data.mem = 0;
-         scan = &firstdel;
          (*obj)->buffered = 0;
          collectWhite (*obj, &scan);
-         scan = firstdel.data.mem;
-         while (scan) {
-            next = scan->data.mem;
-            joe_Object_Delete(scan);
-            scan = next;
-         }
       }
    }
+
+   scan = firstdel.data.mem;
+   while (scan) {
+      next = scan->data.mem;
+      joe_Object_Delete(scan);
+      scan = next;
+   }
    rootsCnt = 0;
-    
 }
 
 void

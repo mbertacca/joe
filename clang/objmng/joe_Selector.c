@@ -104,11 +104,6 @@ joe_Selector_invoke (joe_Object self, joe_Object receiver,
          receiver = joe_WeakReference_get(receiver);
          clazz = joe_Object_getClass(receiver);
       }
-      if (selector->actualRcvr && clazz != &joe_JOEObject_Class &&
-          JOE_ISCLASS(selector->actualRcvr, clazz)) {
-          selector->actualRcvr = receiver;
-         return selector->method (selector->actualRcvr, argc, argv, retval);
-      }
 
       selName = ((char *) selector) + sizeof(Selector);
       if (clazz == &joe_JOEObject_Class) {
