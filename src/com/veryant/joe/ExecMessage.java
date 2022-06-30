@@ -168,10 +168,13 @@ public class ExecMessage implements Message {
       if (origArgs != null) 
          argArray = argsExec(blk);
       Block b = ob.getMethod (selector.word);
-      if (b == null)
+      if (b == null) {
+         if ("toString".equals (selector.word))
+            return check (ob, blk);
          throw new JOEException (
             new NoSuchMethodException (selector.word+" in "+ob.name()),
                                        selector);
+      }
       return new MethodWArgs (b, argArray);
    }
  

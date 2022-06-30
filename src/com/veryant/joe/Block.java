@@ -116,6 +116,12 @@ public class Block extends ArrayList<Message>
          return null;
    }
 
+   public Object setVariable (WString name, Object val)throws JOEException {
+      if (variables == null)
+         throw new JOEException (
+             "Cannot set a variable while the block is not executing");
+      return setVariable (name.value, val);
+   }
    public Object setVariable (String name, Object val) {
       if (val == null)
          val = WNull.value;
@@ -132,16 +138,19 @@ public class Block extends ArrayList<Message>
    public Object getVariable (WString name) throws JOEException {
       return getVariable (name.value);
    }
-   public Object getVariable (String name) throws JOEException {
+   private Object getVar (String name) {
       Object Return = (variables == null) ? null : variables.get(name);
       if (Return == null) {
          Return = constants.get (name);
-         if (Return == null) {
-            if (parent != null)
-               Return = parent.getVariable (name);
-            else
-               throw new JOEException ("Variable not found: `" + name + "`");
-         }
+         if (Return == null && parent != null)
+            Return = parent.getVar (name);
+      }
+      return Return;
+   }
+   public Object getVariable (String name) throws JOEException {
+      Object Return = getVar(name);
+      if (Return == null) {
+         throw new JOEException ("Variable not found: `" + name + "`");
       }
       return Return;
    }
@@ -167,7 +176,7 @@ public class Block extends ArrayList<Message>
      return execAsJoe;
    }
    Block getMethod (String name) throws JOEException {
-      Object Return = getVariable (name);
+      Object Return = getVar (name);
       if (Return instanceof Block) {
           return (Block) Return;
       } else {
