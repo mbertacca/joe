@@ -36,6 +36,7 @@
 # include "joe_Execute.h"
 # include "joe_Files.h"
 # include "joe_Glob.h"
+# include "joe_Class.h"
 # include "joestrct.h"
 
 /*
@@ -735,10 +736,9 @@ toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 static int
-getClassName (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+getClass (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   joe_Object_assign (retval, joe_String_New (joe_Object_getClassName(self)));
-   return JOE_SUCCESS;
+   return joe_Class_newInstance (&joe_Class_Class, 1, &self, retval);
 }
 
 static int
@@ -771,7 +771,7 @@ clone (joe_Object self,int argc,joe_Object *argv,joe_Object *retval)
 static joe_Method mthds[] = {
   {"clone", clone},
   {"equals", equals},
-  {"getClassName", getClassName},
+  {"getClass", getClass},
   {"toString", toString},
   {(void *) 0, (void *) 0}
 };

@@ -58,7 +58,7 @@ public class ExecMessage implements Message {
 
    private Object object;
    private Message receiver;
-   private final Token selector;
+   private Token selector;
    private Class clazz;
    private final Object origArgs[];
    private final HashMap<Class,Method[]> methCache =
@@ -171,6 +171,14 @@ public class ExecMessage implements Message {
       if (b == null) {
          if ("toString".equals (selector.word))
             return check (ob, blk);
+         else if ("getClass".equals (selector.word)) {
+            selector=new Token ("getJoeClass",
+                                selector.type,
+                                selector.row,
+                                selector.col,
+                                selector.fName);
+            return check (ob, blk);
+         }
          throw new JOEException (
             new NoSuchMethodException (selector.word+" in "+ob.name()),
                                        selector);

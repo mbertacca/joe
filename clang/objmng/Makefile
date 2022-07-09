@@ -15,6 +15,7 @@ OBJS=joe_Object.o \
      joe_StringBuilder.o \
      joe_Boolean.o \
      joe_Bang.o \
+     joe_Class.o \
      joe_Memory.o \
      joe_Message.o \
      joe_Block.o \

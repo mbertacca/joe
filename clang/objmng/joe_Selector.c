@@ -113,12 +113,6 @@ joe_Selector_invoke (joe_Object self, joe_Object receiver,
             selector->method = mthd->mthd;
             selector->actualRcvr = actualRcvr;
             return selector->method (selector->actualRcvr, argc, argv, retval);
-         } else if (strcmp(selName,"toString")) {
-            char buffer[128];
-            snprintf (buffer, sizeof(buffer), "Method not found: %s in class %s",
-                      selName, clazz->name);
-            joe_Object_assign (retval, joe_Exception_New (buffer));
-            return JOE_FAILURE;
          }
       }
       mthd = joe_Object_getMethod (clazz, selName);

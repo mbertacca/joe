@@ -192,6 +192,7 @@ public class Block extends ArrayList<Message>
    }
    public Object clone() {
       Block Return = (Block) super.clone();
+      Return.blockName = name();
       Return.variables = null;
       Return.children = new ArrayList<Block>();
       final int size = children.size();
@@ -223,9 +224,8 @@ public class Block extends ArrayList<Message>
    }
    public String name() {
       if (blockName == null)
-         return "block-" + hashCode();
-      else
-         return blockName;
+         blockName = "block-" + System.identityHashCode(this);
+      return blockName;
    }
    void setName(String n) {
       blockName = n;
@@ -239,6 +239,13 @@ public class Block extends ArrayList<Message>
    public Block $extends(Block b) {
       parent = b;
       return this;
+   }
+   public Object getJoeClass () {
+      return new Object () {
+         public String getName() {
+            return name();
+         }
+      };
    }
    public String toString() {
       String Return;

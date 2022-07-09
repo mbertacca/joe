@@ -331,9 +331,16 @@ joe_Block_clone (joe_Block self, joe_Block parent)
 }
 
 static int
-_name(joe_JOEObject self, int argc, joe_Object* argv, joe_Object* retval)
+getName(joe_JOEObject self, int argc, joe_Object* argv, joe_Object* retval)
 {
-   joe_Object_assign(retval, joe_String_New(joe_Block_getName(self)));
+   joe_String name = *JOE_AT(self,NAME);
+   if (!name) {
+      char buffer[32];
+      snprintf (buffer, sizeof(buffer),"block-%p", (void *) self);
+      joe_Block_setName (self, buffer);
+      name = *JOE_AT(self,NAME);
+   }
+   joe_Object_assign(retval, name);
    return JOE_SUCCESS;
 }
 
@@ -422,7 +429,8 @@ static joe_Method mthds[] = {
   {"multiply", joe_Block_exec },
   {"new", joe_Block_new },
   {"add", joe_Block_new },
-  {"name", _name },
+  {"name", getName },
+  {"getName", getName },
   {"getVariable", getVariable },
   {"getVariablesNames", getVariablesNames },
   {"setVariable", setVariable },
@@ -569,16 +577,6 @@ joe_Block_setName (joe_Block self, char *name)
    joe_Object_assign (JOE_AT(self,NAME), joe_String_New (name));
 }
 
-char *
-joe_Block_getName (joe_Block self)
-{
-   joe_String name = *JOE_AT(self,NAME);
-   if (name)
-      return joe_String_getCharStar (*JOE_AT(self,NAME));
-   else
-      return "(null)";
-}
-
 void
 joe_Block_addArgName (joe_Block self, char *name)
 {
@@ -611,15 +609,14 @@ static int extends (joe_JOEObject self,
 }
 
 static int
-parent (joe_JOEObject self, int argc, joe_Object *argv, joe_Object *retval)
+getClass (joe_JOEObject self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_Object_assign(retval, *JOE_AT(self,PARENT));
    return JOE_SUCCESS;
 }
 
 static joe_Method JOEObject_mthds[] = {
-  {"name", _name },
-  {"parent", parent },
+  {"getClass", getClass },
   {"extends", extends },
   {(void *) 0, (void *) 0}
 };
@@ -630,7 +627,7 @@ joe_Class joe_JOEObject_Class = {
    0,
    JOEObject_mthds,
    JOEObject_variables,
-   &joe_Block_Class,
+   &joe_Object_Class,
    0
 };
 

@@ -1,8 +1,7 @@
 /*
+ * This source file is part of the "Joe Objects Executor" open source project
  *
- * This source file is part of the "Java Objects Executor" open source project
- *
- * Copyright 2017 Veryant and Marco Bertacca
+ * Copyright 2017 Marco Bertacca (www.bertacca.eu)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +16,10 @@
  * limitations under the License.
  */
 
-package com.veryant.joe;
+# ifndef joe_Class_h
+# define joe_Class_h  "$Id$";
+# include "joe_Object.h"
 
-public class Revision {
-   public static final String id = "$Revision: v1.12-42-gb7a3500 09-07-2022$";
-   public static void main (String argv[]) {
-      System.out.println (id);
-   }
-}
+extern joe_Class joe_Class_Class;
 
+# endif
