@@ -2,7 +2,7 @@
  *
  * This source file is part of the "Java Objects Executor" open source project
  *
- * Copyright 2017 Veryant and Marco Bertacca
+ * Copyright 2022 Marco Bertacca
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,13 @@
 
 package com.veryant.joe;
 
-public class Revision {
-   public static final String id = "$Revision: v1.12-44-ga6e455e 17-07-2022$";
-   public static void main (String argv[]) {
-      System.out.println (id);
+public class DoDebugException extends JOEException {
+
+   public DoDebugException () {
+      super ("DoDebugException");
+   }
+   Debugger getDebugger () {
+      return new Debugger();
    }
 }
 

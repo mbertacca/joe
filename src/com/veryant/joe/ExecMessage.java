@@ -374,22 +374,32 @@ public class ExecMessage implements Message {
       }
       return Return;
    }
+
    public String toString() {
-      StringBuilder Return = new StringBuilder("<");
+      StringBuilder Return = new StringBuilder();
+      if (receiver != null) {
+         Return.append (receiver.toString());
+         Return.append (" ");
+      }
+
+      Return.append ("<");
       Return.append (selector.row);
       Return.append (",");
       Return.append (selector.col);
       Return.append ("> ");
 
-      if (object != null)
-         Return.append(object.getClass().getName());
-      else if (receiver != null)
-         Return.append(receiver.toString());
-      else 
-         Return.append("()");
-
-      Return.append (" ");
+      if (object != null) {
+         Return.append(object);
+         Return.append (" ");
+      }
       Return.append (selector.word);
+
+      if (origArgs != null)
+         for (Object arg :origArgs) {
+            Return.append (" ");
+            Return.append (arg);
+         }
+         
 
       return Return.toString();
    }

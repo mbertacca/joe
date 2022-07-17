@@ -20,11 +20,38 @@
 package com.veryant.joe;
 
 public class StandardExecutor implements Executor {
+   private static Debugger debug = null;
    public Object run (Block blk) throws JOEException {
       Object Return = null;
+      int i = 0;
+      int len = blk.size();
       try {
-         for (Message msg : blk)
-            Return = msg.exec(blk);
+         try {
+            if (debug != null && debug.isOn()) {
+               i--;
+               throw new DoDebugException();
+            }
+            for ( ; i < len; i++)
+               Return = blk.get(i).exec(blk);
+         } catch (DoDebugException _ex) {
+            if (debug == null)
+               debug = _ex.getDebugger();
+            debug.on();
+            i++;
+            for ( ; i < len; i++) {
+               if (debug.isOn()) {
+                  Return = debug.breakpoint (blk.get(i), blk);
+               } else {
+                  try {
+                     Return = blk.get(i).exec(blk);
+                  } catch (DoDebugException _ex1) {
+                     if (debug == null)
+                        debug = _ex1.getDebugger();
+                     debug.on();
+                  }
+               }
+            }
+         }
       } catch (BreakLoopException ex) {
          if (!ex.hasReturnObject())
             ex.setReturnObject(Return);

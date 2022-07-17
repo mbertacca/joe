@@ -60,19 +60,23 @@ public class Parser {
 
    private Object command;
    final Block block;
-   final OuterBlock outerBlock;
    final FileInfo info;
 
+   public Parser (Object cmds, Block blk, FileInfo fi) {
+      command = cmds;
+      block = blk;
+      info = fi;
+      block.setName (info.getName());
+   }
    public Parser (Object cmds, Executor exec, FileInfo fi) {
       command = cmds;
-      block = outerBlock = new OuterBlock (exec);
+      block = new OuterBlock (exec);
       info = fi;
       block.setName (info.getName());
    }
    private Parser (Parser parent) {
       command = parent.command;
-      outerBlock = parent.outerBlock;
-      block = new Block (outerBlock.executor, parent.block);
+      block = new Block (parent.block.executor, parent.block);
       info = parent.info;
    }
    public Object getCommand() {
@@ -233,7 +237,7 @@ public class Parser {
             braceClose(tokens);
             break;
          case _DOT_:
-            return null;
+            return Literals.getNull();
          default:
             unexpectedToken ( tk);
          }

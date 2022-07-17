@@ -306,4 +306,13 @@ public class CommandBase {
    public String version () {
       return Revision.id;
    }
+   /**
+    * Turns on the debugger.
+    */
+   public String debug () throws JOEException {
+      throw new DoDebugException();
+   }
+   public String toString () {
+      return "!";
+   }
 }
