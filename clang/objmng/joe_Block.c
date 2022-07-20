@@ -26,6 +26,7 @@
 # include "joe_Variable.h"
 # include "joe_BreakBlockException.h"
 # include "joe_GotoException.h"
+# include "joe_DoDebugException.h"
 # include "joe_Gosub.h"
 # include "joe_Memory.h"
 # include "joe_Null.h"
@@ -126,6 +127,8 @@ gosub (joe_Block blk, joe_Gosub gsb, joe_Object *retval) {
    return Return;
 }
 
+static int debug = 0;
+
 static int
 my_exec_sub (joe_Object self, int startMsg, joe_Object *retval)
 {
@@ -142,7 +145,10 @@ my_exec_sub (joe_Object self, int startMsg, joe_Object *retval)
       obj = *joe_ArrayList_at(messages,i);
       if (joe_Object_instanceOf (obj, &joe_Message_Class)) {
          lretval = 0;
-         rc = joe_Message_exec (obj, self, &lretval);
+         if (debug)
+            rc = joe_Message_debug (obj, &debug, self, &lretval);
+         else
+            rc = joe_Message_exec (obj, self, &lretval);
          if (rc != JOE_SUCCESS) {
             if (joe_Object_instanceOf (lretval, &joe_BreakException_Class)) {
                joe_Object retobj = joe_BreakException_getReturnObj(lretval);
@@ -168,6 +174,12 @@ my_exec_sub (joe_Object self, int startMsg, joe_Object *retval)
                } else {
                   joe_Object_transfer(retval, &lretval);
                }
+            } else if (joe_Object_instanceOf (
+                       lretval, &joe_DoDebugException_Class)) {
+               debug = 1;
+               joe_Object_assign (&lretval, 0);
+               rc = JOE_SUCCESS;
+               continue;
             } else {
                joe_Object_transfer(retval, &lretval);
             }

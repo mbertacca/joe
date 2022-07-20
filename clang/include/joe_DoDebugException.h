@@ -16,21 +16,11 @@
  * limitations under the License.
  */
 
-# ifndef joe_Message_h
-# define joe_Message_h  "$Id$";
-# include "joe_String.h"
+# ifndef joe_DoDebugException_h
+# define joe_DoDebugException_h  "$Id$";
+# include "joe_Exception.h"
 
-typedef joe_Object joe_Message;
-typedef joe_Object joe_Block;
-
-extern joe_Class joe_Message_Class;
-
-joe_Object joe_Message_New (joe_Object assign2, int argc, joe_Object *argv,
-                            char *fileName, int row, int col);
-joe_Message joe_Message_clone (joe_Message self, joe_Block parent);
-int joe_Message_exec (joe_Object self, joe_Block block, joe_Object *retval);
-int joe_Message_debug (joe_Object self, int *debug,
-                      joe_Block block, joe_Object *retval);
-int joe_Message_isLabel (joe_Message self, joe_String name);
-int joe_Message_toString(joe_Message self, joe_String *retval);
+typedef joe_Object joe_DoDebugException;
+extern joe_Class joe_DoDebugException_Class;
+joe_Object joe_DoDebugException_New ();
 # endif

@@ -382,22 +382,20 @@ public class ExecMessage implements Message {
          Return.append (" ");
       }
 
-      Return.append ("<");
-      Return.append (selector.row);
-      Return.append (",");
-      Return.append (selector.col);
-      Return.append ("> ");
-
       if (object != null) {
          Return.append(object);
          Return.append (" ");
       }
       Return.append (selector.word);
 
+      String sep = " ";
       if (origArgs != null)
          for (Object arg :origArgs) {
-            Return.append (" ");
+            Return.append (sep);
+            Return.append ('(');
             Return.append (arg);
+            Return.append (')');
+            sep = ",";
          }
          
 

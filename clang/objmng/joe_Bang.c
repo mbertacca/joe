@@ -37,6 +37,7 @@
 # include "joe_Gosub.h"
 # include "joe_Glob.h"
 # include "joe_LoadScript.h"
+# include "joe_DoDebugException.h"
 
 static int Switch_case (joe_Object self,
                         int argc, joe_Object *argv, joe_Object *retval);
@@ -253,7 +254,7 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_StringBuilder msg = 0;
    joe_Object_assign (&msg, joe_StringBuilder_New ());
-   joe_StringBuilder_appendCharStar (msg, "JOE Revision 0.9h ");
+   joe_StringBuilder_appendCharStar (msg, "JOE Revision 0.9i ");
    joe_StringBuilder_appendCharStar (msg, __DATE__);
    joe_Object_assign(retval, joe_StringBuilder_toString (msg));
    joe_Object_assign (&msg, 0);
@@ -708,6 +709,13 @@ _goto (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 }
 
 static int
+debug (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
+{
+   joe_Object_assign(retval, joe_DoDebugException_New ());
+   return JOE_FAILURE;
+}
+
+static int
 gosub (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
    if (argc == 1 && joe_Object_instanceOf (args[0], &joe_String_Class)) {
@@ -824,6 +832,12 @@ loadSO(joe_Object self, int argc, joe_Object* args, joe_Object* retval)
    }
 }
 
+static int
+toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   joe_Object_assign(retval, joe_String_New ("!"));
+   return JOE_SUCCESS;
+}
 static joe_Method mthds[] = {
   {"if", _if},
   {"try", TRY},
@@ -857,6 +871,8 @@ static joe_Method mthds[] = {
   {"systemExit", systemExit},
   {"getGlob", getGlob},
   {"loadSO", loadSO},
+  {"toString", toString},
+  {"debug", debug},
   {(void *) 0, (void *) 0}
 };
 

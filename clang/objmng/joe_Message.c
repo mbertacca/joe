@@ -24,12 +24,15 @@
 # include "joe_Block.h"
 # include "joe_JOEObject.h"
 # include "joe_String.h"
+# include "joe_StringBuilder.h"
 # include "joe_Array.h"
 # include "joe_ArrayList.h"
 # include "joe_Variable.h"
 # include "joe_Exception.h"
 # include "joe_BreakBlockException.h"
 # include "joe_Selector.h"
+# include "joe_Execute.h"
+# include "joe_Null.h"
 # include "joestrct.h"
 # include <string.h>
 
@@ -141,6 +144,86 @@ joe_Message_exec (joe_Object self, joe_Block block, joe_Object *retval)
    return rc;
 }
 
+static void
+show (joe_Object value)
+{
+   fflush (stdout);
+   if (value) {
+      joe_String str = 0;
+      joe_Object_invoke (value, "toString", 0, 0, &str);
+
+      fprintf (stderr, "---> %s\n", joe_String_getCharStar(str));
+      joe_Object_assign (&str, 0);
+   }
+   fflush (stderr);
+}
+
+# define MAXLINELEN 256
+static char *line = 0;
+
+int
+joe_Message_debug (joe_Object self, int *debug,
+                   joe_Block block, joe_Object *retval)
+{
+   joe_String toString = 0;
+   int i;
+
+   if (line == 0) {
+      line = calloc (MAXLINELEN, 1);
+      fprintf (stderr, "* JOE debugger *\n");
+      fprintf (stderr, "<enter> run current message;\n");
+      fprintf (stderr, ".       run current message stepping over blocks;\n");
+      fprintf (stderr, ".s      skip current message;\n");
+      fprintf (stderr, ".e      exit debug mode;\n");
+      fprintf (stderr, ".q      quit program.\n\n");
+      fprintf (stderr, "otherwise run the command you enter.\n\n");
+   }
+   for ( ; ; ) {
+      int rc;
+      joe_Message_toString (self, &toString);
+      fprintf (stderr, "***  %s\n", joe_String_getCharStar (toString));
+      joe_Object_assign (&toString, 0);
+
+      fprintf (stderr, "dbg: ");
+      fflush (stderr);
+      if (fgets (line, MAXLINELEN, stdin) == NULL)
+         strcpy (line,".q");
+      i = strlen (line);
+      while (i > 0 && line[--i] <= ' ')
+         line[i] = 0;
+      if (*line == 0) {
+         rc = joe_Message_exec (self, block, retval);
+         if (rc == JOE_SUCCESS) {
+            show (*retval);
+         }
+         return rc;
+      } else if (strcmp (line,".") == 0) {
+         *debug = 0;
+         rc = joe_Message_exec (self, block, retval);
+         *debug = 1;
+         return rc;
+      } else if (strcmp (line,".s") == 0) {
+         joe_Object_assign (retval, joe_Null_value);
+         return JOE_SUCCESS;
+      } else if (strcmp (line,".e") == 0) {
+         *debug = 0;
+         return joe_Message_exec (self, block, retval);
+      } else if (strcmp (line,".q") == 0) {
+         *debug = 0;
+         exit (0);
+      } else {
+         joe_Execute exec = 0;
+         joe_Object_assign (&exec, joe_Execute_New (block));
+         joe_Execute_add (exec, line);
+         *debug = 0;
+         joe_Execute_exec (exec, retval);
+         show (*retval);
+         *debug = 1;
+         joe_Object_assign (&exec, 0);
+      }
+   }
+}
+
 int
 joe_Message_isLabel (joe_Message self, joe_String name)
 {
@@ -196,39 +279,49 @@ joe_Message_New (joe_Variable assignee, int argc, joe_Object *argv,
       joe_Object_assign(JOE_AT(rpn, i), argv[i]);
    };
 
-   /* joe_Message_toString(self); */
    return self;
 }
 
-
-char*
-joe_Message_toString(joe_Message self)
+int
+joe_Message_toString(joe_Message self, joe_String *retval)
 {
    joe_Array rpn = *JOE_AT(self, RPN);
+   joe_Variable assignee = *JOE_AT(self,ASSIGNEE);
    int rpnc = joe_Array_length (rpn);
    joe_Object obj;
    int i;
    struct s_srcInfo *srcInfo = (struct s_srcInfo *)
                                 *JOE_MEM(*JOE_AT(self,SRC_INFO));
+   joe_StringBuilder Return = 0;
+   joe_Object_assign (&Return, joe_StringBuilder_New ());
+
+   joe_StringBuilder_appendChar (Return, '<');
+   joe_StringBuilder_appendInt (Return, srcInfo->row);
+   joe_StringBuilder_appendChar (Return, ',');
+   joe_StringBuilder_appendInt (Return, srcInfo->col);
+   joe_StringBuilder_appendChar (Return, '>');
+
+   if (assignee) {
+      joe_StringBuilder_appendChar (Return, ' ');
+      joe_StringBuilder_appendCharStar (Return,
+                                    joe_Variable_nameCharStar (assignee));
+      joe_StringBuilder_appendCharStar (Return, ":=");
+   }
 
    for (i = 0; i < rpnc; i++) {
       obj = *JOE_AT(rpn, i);
       if (obj) {
          joe_Object msg = 0;
          joe_Object_invoke(obj, "toString", 0, 0, &msg);
-         if (i == 0)
-            printf ("%d, %d>> %s",
-                     srcInfo->row, srcInfo->col, joe_String_getCharStar(msg));
-         else
-            printf (", %s",joe_String_getCharStar(msg));
+         joe_StringBuilder_appendChar (Return, ' ');
+         joe_StringBuilder_appendCharStar (Return, joe_String_getCharStar(msg));
          joe_Object_assign(&msg, 0);
       } else {
-         if (i == 0)
-            printf ("%d, %d>> (nil)", srcInfo->row, srcInfo->col);
-         else
-            printf (", (nil)");
+         joe_StringBuilder_appendCharStar (Return, "()");
       }
    }
-   printf ("<<\n");
-   return NULL;
+   joe_Object_assign (retval, joe_StringBuilder_toString (Return));
+   joe_Object_assign (&Return, 0);
+
+   return JOE_SUCCESS;
 }

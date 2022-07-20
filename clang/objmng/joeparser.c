@@ -251,8 +251,10 @@ parseArguments (JoeParser self, joe_Block block, JoeArray rpn, JoeArrayScan toke
             unexpectedToken (self, tokens, tk);
          }
       } else {
-         addObjToRpn (rpn, obj);
-         argc++;
+         if (obj) {
+            addObjToRpn (rpn, obj);
+            argc++;
+         }
       }
       tk = pop(tokens);
       if (tk == 0) {

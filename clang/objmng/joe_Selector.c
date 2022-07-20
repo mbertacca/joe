@@ -172,7 +172,7 @@ joe_Selector_toString (joe_Object self)
    joe_Memory mem = *JOE_AT(self, 0);
    Selector *selector = (Selector*) joe_Object_getMem (mem) ;
 
-   snprintf (buffer, sizeof(buffer), "%s(%d)",
+   snprintf (buffer, sizeof(buffer), "%s#%d",
             ((char *) selector) + sizeof(Selector),
             selector->argc);
    return buffer;

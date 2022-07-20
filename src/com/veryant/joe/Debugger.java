@@ -30,17 +30,26 @@ public class Debugger {
       String line;
       if (firstTime) {
          cmd.println ("* JOE debugger *");
-         cmd.println ("<enter>   execute next message;");
-         cmd.println (".         execute without entering in blocks;");
-         cmd.println ("..        exit debug mode;");
-         cmd.println ("otherwise execute the command you enter.");
+         cmd.println ("<enter> run current message;");
+         cmd.println (".       run current message stepping over blocks;");
+         cmd.println (".s      skip current message;");
+         cmd.println (".e      exit debug mode;");
+         cmd.println (".q      quit program.");
+         cmd.println ("");
+         cmd.println ("otherwise run the command you enter.");
+         cmd.println ("");
          firstTime = false;
       }
       for ( ; ; ) {
          Return = null;
          try {
-            cmd.println ("***  [", msg,"]");
-            line =  JavaObjectsExecutor.readLine (cmd).trim();
+            cmd.println ("***  <"+msg.getRow()+","+msg.getCol()+"> " + msg);
+            cmd.print ("dbg: ");
+            line =  cmd.readLine();
+            if (line == null)
+               line = ".q";
+            else
+               line = line.trim();
          } catch (IOException ex) {
             JavaObjectsExecutor.showException (cmd, ex);
             line = ".";
@@ -62,13 +71,19 @@ public class Debugger {
             }
             isOn = true;
             return Return;
-         case "..":
+         case ".s":
+            Return = WNull.value;
+            return Return;
+         case ".e":
             isOn = false;
             try {
                Return = msg.exec (blk);
             } catch (DoDebugException ignore) {
             }
             return Return;
+         case ".q":
+            System.exit (0);
+            break;
          default:
             isOn = false;
             try {

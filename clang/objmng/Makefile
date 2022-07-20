@@ -26,6 +26,7 @@ OBJS=joe_Object.o \
      joe_BreakBlockException.o \
      joe_BreakLoopException.o \
      joe_GotoException.o \
+     joe_DoDebugException.o \
      joe_Gosub.o \
      joe_LoadScript.o \
      joe_Exception.o \
