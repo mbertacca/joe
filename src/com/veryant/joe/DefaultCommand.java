@@ -363,6 +363,15 @@ public class DefaultCommand extends CommandBase {
          prevCondition |= cfrt1.equals (cfrt2);
          return this;
       }
+      public Object $case (Block blk2) throws JOEException {
+         if (!(alreadyDone || prevCondition)) {
+            Object cfrt2 =  blk2.exec();
+            if (cfrt2 instanceof Wrapper)
+               cfrt2 = ((Wrapper) cfrt2).getWrapped();
+            return $case (cfrt2);
+         } else
+            return this;
+      }
       /**
        * This method executes block under the following conditions:
        * - any previous invocation of this method on this object
@@ -372,7 +381,7 @@ public class DefaultCommand extends CommandBase {
        *   specified in the constructor.
        */
 
-      public Object $case (Object cfrt2, Block block) throws Exception {
+      public Object $case (Object cfrt2, Block block) throws JOEException {
          if (!alreadyDone && (prevCondition || cfrt1.equals (cfrt2))) {
             alreadyDone = true;
             Return = block.exec();
@@ -380,6 +389,15 @@ public class DefaultCommand extends CommandBase {
             prevCondition = false;
          }
          return this;
+      }
+      public Object $case (Block blk2, Block block) throws JOEException {
+         if (!(alreadyDone || prevCondition)) {
+            Object cfrt2 =  blk2.exec();
+            if (cfrt2 instanceof Wrapper)
+               cfrt2 = ((Wrapper) cfrt2).getWrapped();
+            return $case (cfrt2, block);
+         } else
+            return $case ((Object) null, block);
       }
       /**
        * This method executes block if any previous invocation
