@@ -197,15 +197,12 @@ static void clrRpnArray (JoeArray rpn)
 
 static void compile (JoeParser self, joe_Block block, JoeArrayScan tokens);
 
-static joe_Block
-newBlock (JoeParser self, JoeArrayScan tokens, joe_Block parent)
+static void
+newBlock (JoeParser self, JoeArrayScan tokens, joe_Block parent, joe_Block *block)
 {
-   joe_Block block = joe_Block_New (parent);
-   compile (self, block, tokens);
-
-   return block;
+   joe_Object_assign(block, joe_Block_New (parent));
+   compile (self, *block, tokens);
 }
-
 
 static void parseReceiver (JoeParser self, joe_Block block,
                                  JoeArray rpn, JoeArrayScan tokens);
@@ -219,6 +216,7 @@ parseArguments (JoeParser self, joe_Block block, JoeArray rpn, JoeArrayScan toke
    int argc = 0;
 
    for ( ; ; ) {
+      obj = 0;
       tk = pop (tokens);
       if (tk != 0 && (obj = getValue(self, tk)) == 0) {
          switch (tk->type) {
@@ -242,9 +240,10 @@ parseArguments (JoeParser self, joe_Block block, JoeArray rpn, JoeArrayScan toke
             argc++;
             break;
          case _BRACE_OPEN_:
-            obj = newBlock (self, tokens, block);
+            newBlock (self, tokens, block, &obj);
             braceClose (self, tokens);
             addObjToRpn (rpn, obj);
+            joe_Object_assign (&obj, 0);
             argc++;
             break;
          default:
@@ -302,6 +301,7 @@ parseReceiver (JoeParser self, joe_Block block, JoeArray rpn, JoeArrayScan token
 {
    Token tk = pop(tokens);
    joe_Object receiver = 0;
+   joe_Block blockRcvr = 0;
 
    if ((receiver = getValue(self, tk)) == 0) {
      switch (tk->type) {
@@ -311,7 +311,7 @@ parseReceiver (JoeParser self, joe_Block block, JoeArray rpn, JoeArrayScan token
          parseSelector (self, block, rpn, tokens);
          return;
       case _BRACE_OPEN_:
-         receiver = newBlock (self, tokens, block);
+         newBlock (self, tokens, block, &blockRcvr);
          braceClose(self, tokens);
          break;
       case _DOT_:
@@ -322,7 +322,12 @@ parseReceiver (JoeParser self, joe_Block block, JoeArray rpn, JoeArrayScan token
          unexpectedToken (self, tokens, tk);
       }
    }
-   addObjToRpn (rpn, receiver);
+   if (blockRcvr) {
+      addObjToRpn (rpn, blockRcvr);
+      joe_Object_assign (&blockRcvr, 0);
+   } else {
+      addObjToRpn (rpn, receiver);
+   }
    parseSelector (self, block, rpn, tokens);
    return;
 }

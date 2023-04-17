@@ -269,7 +269,7 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_StringBuilder msg = 0;
    joe_Object_assign (&msg, joe_StringBuilder_New ());
-   joe_StringBuilder_appendCharStar (msg, "JOE Revision 0.9j ");
+   joe_StringBuilder_appendCharStar (msg, "JOE Revision 0.9k ");
    joe_StringBuilder_appendCharStar (msg, __DATE__);
    joe_Object_assign(retval, joe_StringBuilder_toString (msg));
    joe_Object_assign (&msg, 0);
