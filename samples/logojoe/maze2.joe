@@ -19,6 +19,8 @@ endy :=   (dimy /  2) * step.
 
 logo setpensize (step / 4).
 logo setDelay 0.
+exitx := .
+exity := .
 
 logo penup ;
      setxy startx,starty

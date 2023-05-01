@@ -3,7 +3,7 @@
 :args.
 logo := !newInstance "Logo".
 logo setTitle (args get 0).
-
+tri:=.
 sq := {:size.
    !if (size > 5), {
       logo forward size

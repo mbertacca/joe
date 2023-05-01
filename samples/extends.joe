@@ -21,10 +21,10 @@ Timestamp := {:y,mo,d,h,m,s.
    day := d.
 
    super := Time new h,m,s.
-   !extends !!,super.
+   !! extends super.
 
    setDate := {:y,mo,d,h,m,s.
-      parent setTime h,m,s.
+      super setTime h,m,s.
       year := y.
       month := mo.
       day := d.

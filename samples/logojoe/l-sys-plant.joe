@@ -12,6 +12,9 @@ len := 20 / iteration.
 
 angle := 25.
 savePos := !newInstance "java.util.Stack".
+show:=.
+X:=.
+F:=.
 
 [ := {[:.
    !if show,{

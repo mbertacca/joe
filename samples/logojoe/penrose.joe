@@ -29,6 +29,11 @@ iteration := 6.
 
 angle := 36.
 savePos := !newInstance "java.util.Stack".
+show:=.
+_7 := .
+_8 := .
+_1 := .
+_9 := .
 
 [ := {[:.
    !if show,{
