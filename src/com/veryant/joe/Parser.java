@@ -96,8 +96,7 @@ public class Parser {
       }
       if (tk.type != TokenType._DOT_)
          unexpectedToken (tk);
-      String args[] = new String[argv.size()];
-      block.setArguments (argv.toArray(args));
+      block.setLocalVariables (argv);
    }
    public Block compile (TkStack tokens) throws JOEException {
       Object msg;
@@ -123,14 +122,15 @@ public class Parser {
       return block;
    }
 
-   private Message assgnDyMsg (final String name, final Object val,
-                                      final int row, final int col) {
+   private Message assgnDyMsg (final Variable var, final Object val,
+                                      final int row, final int col)
+                                               throws JOEException  {
       Message Return;
       if (val instanceof Message) {
          final Message msg = (Message) val;
          Return = new Message() {
             public Object exec (Block blk) throws JOEException {
-               return blk.setVariable(name, msg.exec(blk));
+               return blk.setVariable(var, msg.exec(blk));
             }
             public int getRow() {
                return row;
@@ -139,13 +139,13 @@ public class Parser {
                return col;
             }
             public String toString () {
-               return name + ":={"+ val + "}";
+               return var.getName() + ":={"+ val + "}";
             }
          };
       } else {
          Return = new Message() {
             public Object exec (Block blk) throws JOEException {
-               return blk.setVariable(name, val);
+               return blk.setVariable(var, val);
             }
             public int getRow() {
                return row;
@@ -154,7 +154,7 @@ public class Parser {
                return col;
             }
             public String toString () {
-               return name + ":=" + val;
+               return var.getName() + ":=" + val;
             }
          };
       }
@@ -165,12 +165,11 @@ public class Parser {
       Token tk = tokens.pop();
       Token peek = tokens.peek();
       if (peek.type== TokenType._ASSIGN) {
-         tokens.pop();
-         final Object val = message (tokens, tokens.pop());
-         final int row = tk.row, col = tk.col;
+         tokens.pop();;
          if (tk.type==TokenType._WORD) {
-            final String name = tk.word;
-            Return = assgnDyMsg (name, val, row, col);
+            final Variable var = block.getSetVariable (tk.word);
+            final Object val = message (tokens, tokens.pop());
+            Return = assgnDyMsg (var, val, tk.row, tk.col);
          } else {
             Return = null;
             unexpectedToken ( tk);
@@ -348,6 +347,7 @@ public class Parser {
    }
 
    private Object getValue (final Token tk) throws JOEException {
+      final Variable var;
       try {
          switch (tk.type) {
          case _BANG_:
@@ -385,13 +385,12 @@ public class Parser {
          case _NULL:
             return Literals.getNull();
          case _WORD:
+            var = block.lookForVariable (tk.word);
+            if (var == null)
+               throw new JOEException ("Variable not found: " + tk.word, tk);
             return new Message()  {
                public Object exec (Block blk) throws JOEException {
-                  try {
-                     return blk.getVariable(tk.word);
-                  } catch (JOEException ex) {
-                     throw new JOEException(ex.getMessage(), tk);
-                  }
+                  return blk.getVariable(var);
                }
                public int getRow() {
                   return tk.row;

@@ -22,9 +22,12 @@
 
 typedef joe_Object joe_Variable;
 extern joe_Class joe_Variable_Class;
-joe_Object joe_Variable_New (char *c);
+/* joe_Object joe_Variable_New (char *c); */
+joe_Object joe_Variable_New_String (joe_String name, int depth, int index);
 joe_String joe_Variable_name (joe_Variable self);
 char * joe_Variable_nameCharStar (joe_Variable self);
+int joe_Variable_getDepth (joe_Variable self);
+int joe_Variable_getIndex (joe_Variable self);
 unsigned int joe_Variable_hash (joe_Variable self);
 
 # endif

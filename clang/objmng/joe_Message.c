@@ -52,7 +52,7 @@ static int execSize = sizeof (execStack) / sizeof(execStack[0]);
 
 static char *variables[] = {"srcInfo", "assignee", "rpn", 0};
 
-extern void joe_Block_setVariable (joe_Block self,joe_Variable var,joe_Object value);
+extern void joe_Block_setVarValue (joe_Block self,joe_Variable var,joe_Object value);
 
 joe_Message
 joe_Message_clone (joe_Message self, joe_Block parent)
@@ -113,7 +113,7 @@ joe_Message_exec (joe_Object self, joe_Block block, joe_Object *retval)
              joe_Object_assign (&execStack[execIdx], 0);
          joe_Object_transfer (&execStack[execIdx++], &lretval);
       } else if (JOE_ISCLASS (rpnItem, &joe_Variable_Class)) {
-         rc = joe_Block_getVariable(block, rpnItem, &execStack[execIdx++]);
+         rc = joe_Block_getVarValue(block, rpnItem, &execStack[execIdx++]);
       } else {
          joe_Object_assign (&execStack[execIdx++], rpnItem);
       }
@@ -121,7 +121,7 @@ joe_Message_exec (joe_Object self, joe_Block block, joe_Object *retval)
    joe_Object_transfer (retval, &execStack[--execIdx]);
    if (rc == JOE_SUCCESS) {
       if (assignee) {
-         joe_Block_setVariable (block, assignee, *retval);
+         joe_Block_setVarValue (block, assignee, *retval);
       }
    } else {
       for ( ; execIdx >= idx0; execIdx--)

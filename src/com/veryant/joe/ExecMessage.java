@@ -42,6 +42,7 @@ public class ExecMessage implements Message {
          _block = b;
          _args = a;
       }
+
       Object invoke (Object obj) throws JOEException,
                                         IllegalAccessException,
                                         InvocationTargetException {
@@ -59,6 +60,7 @@ public class ExecMessage implements Message {
    private Object object;
    private Message receiver;
    private Token selector;
+   private final String jSelector;
    private Class clazz;
    private final Object origArgs[];
    private final HashMap<Class,Method[]> methCache =
@@ -138,6 +140,7 @@ public class ExecMessage implements Message {
                                               throws JOEException {
       selector = sel;
       origArgs = args;
+      jSelector = getJSelector (selector.word);
       if (obj instanceof Message) {
          receiver = (Message) obj;
       } else {
@@ -169,7 +172,8 @@ public class ExecMessage implements Message {
          argArray = argsExec(blk);
       Block b = ob.getMethod (selector.word);
       if (b == null) {
-         if ("toString".equals (selector.word))
+         if ("toString".equals (selector.word) ||
+             "extends".equals (selector.word))
             return check (ob, blk);
          else if ("getClass".equals (selector.word)) {
             selector=new Token ("getJoeClass",
@@ -188,7 +192,6 @@ public class ExecMessage implements Message {
  
    private MethodWArgs check (Object actObj, Block blk) throws JOEException {
       MethodWArgs Return;
-      final String jSelector = getJSelector (selector.word);
       Object[] argArray = null;
       if (actObj instanceof ClassReference)
          clazz = ((ClassReference) actObj).get();
@@ -206,7 +209,7 @@ public class ExecMessage implements Message {
                argClasses[i] = null;
             else
                argClasses[i] = argArray[i].getClass();
-         Return = getMethod(jSelector, argClasses, argArray);
+         Return = getMethod(argClasses, argArray);
       }  else {
          try {
             Method m[] = methCache.get(clazz);
@@ -239,8 +242,8 @@ public class ExecMessage implements Message {
       return currFit;
    }
 
-   private MethodWArgs getMethod(String jSelector, Class argClasses[],
-           Object[] argArray) throws JOEException {
+   private MethodWArgs getMethod(Class argClasses[], Object[] argArray)
+                                                     throws JOEException {
       Method method = null;
       MethodWArgs Return;
       int bestFit = -1;

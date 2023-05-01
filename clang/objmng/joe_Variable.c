@@ -18,10 +18,17 @@
 
 # include <stdio.h>
 # include <string.h>
+# include "joe_Null.h"
 # include "joe_Variable.h"
 # include "joe_String.h"
 # include "joe_HashMap.h"
 # include "joestrct.h"
+
+# define NAME  0
+# define HASH  1
+# define DEPTH 2
+# define INDEX 3
+static char *item_vars[] = { "name", "hash","depth", "index",  0 };
 
 static joe_Method mthds[] = {
   {(void *) 0, (void *) 0}
@@ -32,49 +39,55 @@ joe_Class joe_Variable_Class = {
    0,
    0,
    mthds,
-   0,
-   &joe_String_Class,
+   item_vars,
+   &joe_Object_Class,
    0
 };
 
 joe_Object
-joe_Variable_New (char *c) {
-   int len = strlen (c) + 1;
-   int hashOffs = len  +  sizeof(unsigned int) - (len % sizeof(unsigned int));
-   joe_Object Return;
-   char *mem;
-   unsigned int *hash;
+joe_Variable_New_String (joe_String name, int depth, int index) {
+   joe_Object self = joe_Object_New (&joe_Variable_Class, 0);
+   unsigned int hash = joe_HashMap_hash (name);
 
-   Return = joe_Object_New (&joe_Variable_Class, hashOffs + sizeof(unsigned int));
-   mem = *((char **) joe_Object_getMem(Return));
-   strcpy (mem, c);
-   hash = (unsigned int *)(mem + hashOffs);
-   *hash = joe_HashMap_hash (Return);
-   return Return;
+   joe_Object_assign (JOE_AT(self, NAME), name);
+   joe_Object_assign (JOE_AT(self, HASH), joe_int_New (hash));
+   joe_Object_assign (JOE_AT(self, DEPTH), joe_int_New(depth));
+   joe_Object_assign (JOE_AT(self, INDEX), joe_int_New(index));
+
+   return self;
 }
- 
+/*
+joe_Object
+joe_Variable_New (char *c) {
+   return joe_Variable_New_String (joe_String_New (c));
+}
+ */
 joe_String
 joe_Variable_name (joe_Variable self)
 {
-   return self;
+   return *JOE_AT(self, NAME);
 }
 
 char *
 joe_Variable_nameCharStar (joe_Variable self)
 {
-   return joe_String_getCharStar(self);
+   return joe_String_getCharStar(*JOE_AT(self, NAME));
 }
 
 unsigned int
 joe_Variable_hash (joe_Variable self)
 {
-   if (JOE_ISCLASS(self, &joe_Variable_Class)) {
-      char *mem = *((char **) joe_Object_getMem(self));
-      int len = strlen (mem) + 1;
-      int hashOffs = len  +  sizeof(unsigned int) - (len % sizeof(unsigned int));
-      return *((unsigned int *)(mem + hashOffs));
-   } else {
-      printf ("Not a joe_Variable class!\n");
-      return 0;
-   }
+   return  JOE_INT(*JOE_AT(self, HASH));
+}
+
+int
+joe_Variable_getDepth (joe_Variable self)
+{
+   return  JOE_INT(*JOE_AT(self, DEPTH));
+}
+
+int
+joe_Variable_getIndex (joe_Variable self)
+{
+   return  JOE_INT(*JOE_AT(self, INDEX));
 }

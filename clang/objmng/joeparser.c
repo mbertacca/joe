@@ -89,6 +89,13 @@ unexpectedToken (JoeParser self, JoeArrayScan tokens, Token tk)
    return JOE_FAILURE;
 }
 
+int
+variableNotFound (JoeParser self, JoeArrayScan tokens, Token tk)
+{
+   exception (self,  "Variable not found ", tokens, tk);
+   return JOE_FAILURE;
+}
+
 
 joe_Object
 getString (char *str)
@@ -151,8 +158,7 @@ parClose (JoeParser self, JoeArrayScan tokens)
 
 
 joe_Object
-getValue (JoeParser self, Token tk) {
-
+getValue (JoeParser self, joe_Block block, Token tk) {
    switch (tk->type) {
    case _BANG_:
       return self->command;
@@ -172,7 +178,7 @@ getValue (JoeParser self, Token tk) {
        return joe_Null_value;
    case _BANGBANG_:
    case _WORD:
-      return joe_Variable_New(tk->word);
+      return joe_Block_getVar (block, tk->word);
    default:
       return 0;
    }
@@ -204,6 +210,7 @@ newBlock (JoeParser self, JoeArrayScan tokens, joe_Block parent, joe_Block *bloc
    compile (self, *block, tokens);
 }
 
+
 static void parseReceiver (JoeParser self, joe_Block block,
                                  JoeArray rpn, JoeArrayScan tokens);
 
@@ -218,7 +225,7 @@ parseArguments (JoeParser self, joe_Block block, JoeArray rpn, JoeArrayScan toke
    for ( ; ; ) {
       obj = 0;
       tk = pop (tokens);
-      if (tk != 0 && (obj = getValue(self, tk)) == 0) {
+      if (tk != 0 && (obj = getValue(self, block, tk)) == 0) {
          switch (tk->type) {
          case _DOT_:
             push(tokens);
@@ -246,8 +253,12 @@ parseArguments (JoeParser self, joe_Block block, JoeArray rpn, JoeArrayScan toke
             joe_Object_assign (&obj, 0);
             argc++;
             break;
+         case _WORD:
+            variableNotFound (self, tokens, tk);
+            break;
          default:
             unexpectedToken (self, tokens, tk);
+            break;
          }
       } else {
          if (obj) {
@@ -303,7 +314,7 @@ parseReceiver (JoeParser self, joe_Block block, JoeArray rpn, JoeArrayScan token
    joe_Object receiver = 0;
    joe_Block blockRcvr = 0;
 
-   if ((receiver = getValue(self, tk)) == 0) {
+   if ((receiver = getValue(self, block, tk)) == 0) {
      switch (tk->type) {
       case _PAR_OPEN_:
          parseReceiver (self, block, rpn, tokens);
@@ -318,8 +329,12 @@ parseReceiver (JoeParser self, joe_Block block, JoeArray rpn, JoeArrayScan token
          push (tokens);
          receiver = joe_Null_value;
          break;
+      case _WORD:
+         variableNotFound (self, tokens, tk);
+         break;
       default:
          unexpectedToken (self, tokens, tk);
+         break;
       }
    }
    if (blockRcvr) {
@@ -342,7 +357,7 @@ parseStart (JoeParser self, joe_Block block, JoeArray rpn, JoeArrayScan tokens)
    if (peek(tokens) == _ASSIGN) {
       pop(tokens);
       if (tk->type == _WORD) {
-         joe_Object_assign (&assignee, joe_Variable_New (tk->word));
+         joe_Object_assign (&assignee, joe_Block_getSetVar (block, tk->word));
          parseReceiver (self, block, rpn, tokens);
          joe_Block_addMessage (block,
                    joe_Message_New (assignee, JoeArray_length(rpn),JoeArray_getMem(rpn),

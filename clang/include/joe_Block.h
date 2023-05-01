@@ -33,13 +33,15 @@ JOEOBJ_API int joe_Block_exec (joe_Block self,
                     int argc, joe_Object *args, joe_Object *retval);
 JOEOBJ_API int joe_Block_new (joe_Block self,
                    int argc, joe_Object *args, joe_Object *retval);
-JOEOBJ_API int joe_Block_getVariable (joe_Block self, joe_Variable var,
-                                                 joe_Object* retval);
-
+JOEOBJ_API int joe_Block_getVarValue (joe_Block self, joe_Variable var,
+                                                      joe_Object* retval);
 JOEOBJ_API void joe_Block_setName (joe_Block self, char *name);
 JOEOBJ_API void joe_Block_removeMessages (joe_Block self);
 JOEOBJ_API joe_Object joe_Block_getBang (joe_Block self);
 JOEOBJ_API void joe_Block_setBang (joe_Block self, joe_Object bang);
+JOEOBJ_API joe_Variable joe_Block_setVar (joe_Block self, joe_String name);
+JOEOBJ_API joe_Variable joe_Block_getVar (joe_Block self, char *name);
+JOEOBJ_API joe_Variable joe_Block_getSetVar (joe_Block self, char *name);
 
 void joe_Block_addArgName (joe_Block self, char *name);
 

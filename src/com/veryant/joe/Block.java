@@ -28,35 +28,28 @@ public class Block extends ArrayList<Message>
    static final Object[] voidArgs = {};
    final Executor executor;
    private Block parent;
-   private HashMap<String,Object> variables;
-   private final HashMap<String,Object> constants;
+   private Block $super;
+   private HashMap<String,Variable> varByName;
+   private ArrayList<Object> varValues;
    private ArrayList<Block> children = new ArrayList<Block>();
+   private Object[] lastArgs;
    private String blockName;
-   private String[] argName;
-   private Object argArray[];
    private boolean execAsJoe;
 
    Block (Executor exec, Block par) {
       executor = exec;
       parent = par;
       if (parent != null)
-         constants = parent.constants;
-      else
-         constants = new HashMap<String,Object>();
-      if (parent != null)
          parent.children.add (this);
    }
-   void setArguments (String argn[]) {
-      argName = argn;
-   }
    public Object exec () throws JOEException {
-      return vExec (new HashMap<String,Object>(), voidArgs);
+      return vExec (null, voidArgs);
    }
    public Object multiply () throws JOEException {
       return exec ();
    }
    public Object exec (Object...argv) throws JOEException {
-      return vExec (new HashMap<String,Object>(), argv);
+      return vExec (null, argv);
    }
    public Object multiply (Object...argv) throws JOEException {
       return exec (argv);
@@ -65,98 +58,71 @@ public class Block extends ArrayList<Message>
       return init (voidArgs);
    }
    public Object init (Object...argv) throws JOEException {
-      if (variables == null)
-         variables = new HashMap<String,Object>();
-      return vExec (variables, argv);
-   }
-   @Deprecated
-   public Object sfExec (Object...argv) throws JOEException {
-      if (variables == null)
-         variables = new HashMap<String,Object>();
-      return vExec (variables, argv);
+      return vExec (varValues, argv);
    }
    
-   public Object vExec (HashMap<String,Object> vars, Object...argv)
+   public Object vExec (ArrayList<Object> vars, Object...argv)
                                                           throws JOEException {
-      HashMap<String,Object> saveVar = variables;
-      variables = vars;
-
-      if (argv == null)
-         argv = voidArgs;
-
-      argArray = argv;
-      if (argName != null) {
+      Object Return;
+      lastArgs = argv;
+      if (varValues != null) {
+         ArrayList<Object> saveData = vars != null ?
+                                  vars : (ArrayList<Object>) varValues.clone();
          int i;
-         final int nArgs = Math.min (argv.length, argName.length);
-         for (i = 0; i < nArgs; i++)
-            variables.put (argName[i], argv[i]);
-         for ( ; i < argName.length; i++)
-            variables.put (argName[i], WNull.value);
-      }
+         final int nVars = varValues.size();
+         final int nArgs = argv == null ? 0 : Math.min (argv.length, nVars);
 
-      Object Return = executor.run (this);
-      variables = saveVar;
+         for (i = 0; i < nArgs; i++) {
+            varValues.set (i, argv[i]);
+         }
+         for (     ; i < nVars; i++) {
+            varValues.set (i, WNull.value);
+         }
+         Return = executor.run (this);
+         varValues = saveData;
+      } else {
+         Return = executor.run (this);
+      }
       return Return;
-   }
-   private HashMap<String,Object> getDataContaining (String name) {
-      if (variables != null && variables.containsKey (name))
-         return variables;
-      else if (!execAsJoe && parent != null)
-         return parent.getDataContaining (name);
-      else 
-         return null;
-   }
-   public Object setConstant (String name, Object val) {
-      if (val == null)
-         val = WNull.value;
-      if (constants.get (name) == null) {
-         constants.put (name, val);
-         return val;
-      } else
-         return null;
    }
 
    public Object setVariable (WString name, Object val)throws JOEException {
-      if (variables == null)
-         throw new JOEException (
-             "Cannot set a variable while the block is not executing");
-      return setVariable (name.value, val);
+      Variable var = getSetVariable (name.value);
+      return setVariable (var, val);
    }
-   public Object setVariable (String name, Object val) {
-      if (val == null)
-         val = WNull.value;
-      if (constants.get (name) == null) {
-         HashMap<String,Object> var = getDataContaining (name);
-         if (var != null)
-            var.put (name, val);
-         else
-            variables.put (name, val);
-         return val;
-      } else
-         return null;
+   public Object setVariable (Variable var, Object val) {
+      Block block = this;
+      int depth = var.getDepth();
+
+      for ( ; depth != 0; depth--)
+         block = block.parent;
+
+      block.varValues.set(var.getIndex(), val);
+
+      return val;
    }
-   public Object getVariable (WString name) throws JOEException {
-      return getVariable (name.value);
-   }
-   private Object getVar (String name) {
-      Object Return = (variables == null) ? null : variables.get(name);
-      if (Return == null) {
-         Return = constants.get (name);
-         if (Return == null && parent != null)
-            Return = parent.getVar (name);
+
+   public Object getVariable (WString name) {
+      Variable var = lookForVariable (name.value);
+      if (var == null) {
+         return WNull.value;
+      } else {
+         return getVariable (var);
       }
-      return Return;
    }
-   public Object getVariable (String name) throws JOEException {
-      Object Return = getVar(name);
-      if (Return == null) {
-         throw new JOEException ("Variable not found: `" + name + "`");
-      }
-      return Return;
+
+   public Object getVariable (Variable var) {
+      Block block = this;
+      int depth = var.getDepth();
+
+      for ( ; depth != 0; depth--)
+         block = block.parent;
+      return block.varValues.get(var.getIndex());
    }
    private void getVariablesNames(ArrayList<String> list) {
-      for (String entry : variables.keySet())
-         list.add (entry);
+      if (varByName != null)
+         for (String name : varByName.keySet())
+            list.add (name);
       if (parent != null)
          parent. getVariablesNames(list);
    }
@@ -166,38 +132,43 @@ public class Block extends ArrayList<Message>
       String Return[] = new String[list.size()];
       return list.toArray (Return);
    }
-   public HashMap<String,Object> getVariables () {
-      return variables;
-   }
    public Object[] getArgv() {
-      return argArray;
+      Object[] Return = lastArgs;
+      if (Return == null) {
+         Return = new Object[0];
+      }
+      return Return;
    }
    protected boolean isExecAsJoe () {
      return execAsJoe;
    }
    Block getMethod (String name) throws JOEException {
-      Object Return = getVar (name);
-      if (Return instanceof Block) {
-          return (Block) Return;
+      Block Return;
+      Variable var = lookForVariable (name);
+      if (var != null) {
+         Object obj = getVariable (var);
+         if (obj instanceof Block) {
+            Return = (Block) obj;
+         } else {
+            Return = null;
+         }
       } else {
-          return null;
+         if ($super != null)
+            Return = $super.getMethod (name);
+         else
+            Return = null;
       }
-   }
-   public Object execBlock (String name, Object...argv) throws JOEException {
-      Object block = getVariable(name);
-      if (block instanceof Block)
-         return ((Block) block).exec (argv);
-      else
-         return null;
+      return Return;
    }
    public Object clone() {
       Block Return = (Block) super.clone();
       Return.blockName = name();
-      Return.variables = null;
+      if (varValues != null)
+         Return.varValues = (ArrayList<Object>)varValues.clone();
       Return.children = new ArrayList<Block>();
       final int size = children.size();
       for (int i = 0; i < size; i++)
-         Return.children.add(((Block)children.get(i).clone()).$extends(Return));
+         Return.children.add(((Block)children.get(i).clone()).setParent(Return));
       return Return;
    }
    public Block $new() throws JOEException {
@@ -236,8 +207,12 @@ public class Block extends ArrayList<Message>
    public int getCol() {
       return -1;
    }
-   public Block $extends(Block b) {
+   public Block setParent(Block b) {
       parent = b;
+      return this;
+   }
+   public Block $extends(Block b) {
+      $super = b;
       return this;
    }
    public Object getJoeClass () {
@@ -270,5 +245,53 @@ public class Block extends ArrayList<Message>
             Return = "{" + name() + "}";
       }
       return Return;
+   }
+   public Variable lookForVariable (String name, int depth[]) {
+      Variable Return = varByName != null ? varByName.get(name) : null;
+      if (Return == null && parent != null) {
+         depth[0]++;
+         Return = parent.lookForVariable (name, depth);
+      }
+      return Return;
+   }
+   public Variable lookForVariable (String name) {
+      Variable Return;
+      int depth[] =  { 0 };
+      Variable var = lookForVariable (name, depth);
+      if (var != null) {
+         if (depth[0] == 0)
+            Return = var;
+         else
+            Return = new Variable (name, depth[0] + var.getDepth(),
+                                         var.getIndex());
+      } else {
+         Return = null;
+      }
+      return Return;
+   }
+   public Variable getSetLocalVariable (String name) {
+      Variable Return;
+      if (varByName == null) {
+         varByName = new HashMap<String,Variable>();
+         varValues = new ArrayList<Object>();
+      }
+      Return = new Variable (name, 0, varValues.size());
+      varByName.put (name, Return);
+      varValues.add (WNull.value);
+      return Return;
+   }
+   public Variable getSetVariable (String name) {
+      Variable Return = lookForVariable (name);
+      if (Return == null)
+         Return = getSetLocalVariable (name);
+      return Return;
+   }
+   void setLocalVariables (ArrayList<String> names) {
+      varByName = new HashMap<String,Variable>();
+      varValues = new ArrayList<Object>();
+      for (String name : names) {
+         varByName.put (name, new Variable (name, 0, varValues.size()));
+         varValues.add (WNull.value);
+      }
    }
 }
