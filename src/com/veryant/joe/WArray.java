@@ -18,6 +18,7 @@
  */
 
 package com.veryant.joe;
+import java.util.Arrays;
 
 public class WArray extends Wrapper {
    private Object[] value;
@@ -43,22 +44,23 @@ public class WArray extends Wrapper {
    public Object get(WNumber idx) {
       return value[idx.intValue()];
    }
+   public Object set(int idx, Object obj) {
+      if (!value.getClass().equals(Object[].class) && obj instanceof Wrapper)
+         return value[idx] = ((Wrapper)obj).getWrapped();
+      else 
+         return value[idx] = obj;
+   }
    public Object set(WNumber idx, Object obj) {
-      return value[idx.intValue()] = obj;
+      return set (idx.intValue(), obj);
    }
    public Object add(Object obj) {
-      Object newValue[] = new Object[value.length + 1];
-      int i;
-      for (i = 0; i < value.length; i++)
-         newValue[i] = value[i];
+      final int i = value.length;
+      Object newValue[] = Arrays.copyOf (value, i + 1);
       value = newValue;
-      return value[i] = obj;
+      return set (i, obj);
    }
    public Object shift(final int shft) {
-      Object newValue[] = new Object[value.length - shft];
-      for (int i = shft; i < value.length; i++)
-         newValue[i - shft] = value[i];
-      value = newValue;
+      value = Arrays.copyOfRange (value, shft, value.length);
       return this;
    }
    public Object shift(WNumber shiftValue) {
@@ -68,3 +70,4 @@ public class WArray extends Wrapper {
       return shift (1);
    }
 }
+
