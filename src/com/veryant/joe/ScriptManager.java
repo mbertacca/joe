@@ -91,6 +91,9 @@ public class ScriptManager {
    public URL getURL (String spec) throws MalformedURLException {
       return new URL (entryPoint, spec);
    }
+   public LineReader getLineReader () {
+      return lineReader;
+   }
    public InputStream getInputStream (String name) throws IOException {
       InputStream Return;
       File f;

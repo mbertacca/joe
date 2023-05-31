@@ -79,17 +79,11 @@ joe_LoadScript_setCWD ()
    }
 }
 
-joe_Block
-joe_LoadScript_New (joe_Block self, char *scriptName)
+FILE *
+joe_LoadScript_getFile (char *scriptName)
 {
-   joe_Object Return = self;
    char *path;
-   FILE *scriptFile;
-   char *line = 0;
-   ssize_t lineLen = 0;
-   JoeArray tokens = JoeArray_new (sizeof (struct t_Token), 256);
-   Tokenizer tokenizer = Tokenizer_new (tokens);
-   JoeParser parser = JoeParser_new (scriptName);
+   FILE *Return;
 
    if (dirname == 0 || *dirname == 0) {
       path = scriptName;
@@ -103,31 +97,50 @@ joe_LoadScript_New (joe_Block self, char *scriptName)
       }
    }
 
-   scriptFile = fopen (path, "r");
+   Return = fopen (path, "r");
+
+   if (Return != NULL && dirname == 0) {
+      char *c;
+      int fs = -1;
+      dirname = strdup (scriptName);
+      for (c = dirname; *c; c++) {
+         if (isFileSeparator (*c))
+            fs = (c - dirname);
+      }
+      if (fs >= 0)
+         dirname[fs+1] = 0;
+      else
+         dirname[0] = 0;
+   }
+   if (path != scriptName)
+      free (path);
+
+   return Return;
+}
+
+joe_Block
+joe_LoadScript_New (joe_Block self, char *scriptName)
+{
+   joe_Object Return = self;
+   FILE *scriptFile;
+   char *line = 0;
+   ssize_t lineLen = 0;
+   JoeArray tokens = JoeArray_new (sizeof (struct t_Token), 256);
+   Tokenizer tokenizer = Tokenizer_new (tokens);
+   JoeParser parser = JoeParser_new (scriptName);
+
+   scriptFile = joe_LoadScript_getFile (scriptName);
 
    if (scriptFile == NULL) {
       joe_StringBuilder msg = joe_StringBuilder_New ();
       joe_StringBuilder_appendCharStar (msg, "cannot access ");
-      joe_StringBuilder_appendCharStar (msg, path);
+      joe_StringBuilder_appendCharStar (msg, scriptName);
       joe_StringBuilder_appendCharStar (msg, " (errno=");
       joe_StringBuilder_appendInt (msg, errno);
       joe_StringBuilder_appendChar (msg, ')');
       Return = joe_Exception_New_string (joe_StringBuilder_toString (msg));
       joe_Object_delIfUnassigned (&msg);
    } else {
-      if (dirname == 0) {
-         char *c;
-         int fs = -1;
-         dirname = strdup (scriptName);
-         for (c = dirname; *c; c++) {
-            if (isFileSeparator (*c))
-               fs = (c - dirname);
-         }
-         if (fs >= 0)
-            dirname[fs+1] = 0;
-         else
-            dirname[0] = 0;
-      }
       while (joe_Files_getline (&line, &lineLen, scriptFile) >= 0) {
          Tokenizer_tokenize (tokenizer, line);
       }
@@ -140,8 +153,6 @@ joe_LoadScript_New (joe_Block self, char *scriptName)
    JoeArray_delete (tokens);
    Tokenizer_delete (tokenizer);
 
-   if (path != scriptName)
-      free (path);
    if (line) {
       free (line);
       line = 0;

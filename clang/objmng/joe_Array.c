@@ -93,6 +93,21 @@ clean(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
    }
 }
 
+static int
+shift (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   int length = (int) joe_Array_length (self);
+   if (--length >= 0) {
+      int idx;
+      joe_Object_assign (retval, joe_Object_New(&joe_Array_Class, length));
+      for (idx = 0; idx < length; idx++) {
+         joe_Object_assign (JOE_AT(*retval, idx), *JOE_AT(self, idx + 1));
+      }
+   } else {
+      joe_Object_assign (retval, self);
+   }
+   return JOE_SUCCESS;
+}
 
 static int
 foreach (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -143,6 +158,7 @@ static joe_Method mthds[] = {
   {"set", set },
   {"foreach", foreach },
   {"clean", clean },
+  {"shift", shift },
   {(void *) 0, (void *) 0}
 };
 

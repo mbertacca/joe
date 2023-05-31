@@ -593,6 +593,27 @@ public class DefaultCommand extends CommandBase {
 
       return Return;
    }
+   /**
+    * Executes the specified JOE script as it were an inner block
+    * of the given argument.
+    */
+   public Object runAsBlock (Block blk,String name,Object...cmds)
+                                                    throws Exception {
+      Object Return;
+      String line;
+      ScriptManager sm =  ScriptManager.get(this);
+      LineReader lr = sm.getLineReader();
+      Execute exec = new Execute(blk, this, name);
+
+      lr.open (name, new InputStreamReader(sm.getInputStream(name)));
+      while ((line = lr.readLine()) != null) {
+         exec.add (line);
+      }
+      lr.close();
+      return Return = exec.exec(cmds);
+   }
+
+
    /** Stops the execution of the current script and executes the
     * script specified as argument.
     */

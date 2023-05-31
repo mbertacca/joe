@@ -42,10 +42,11 @@ typedef struct s_Execute {
 
 # define DATA 0
 # define BLOCK 1
-static char *variables[] = { "data", "block", 0 };
+# define NAME 2
+static char *variables[] = { "data", "block", "name", 0 };
 
 static int
-init (joe_Object self, joe_Block block)
+init (joe_Object self, joe_Block block, joe_String name)
 {
    joe_Memory mem = joe_Memory_New (sizeof (struct s_Execute));
    Execute exec = (void *) joe_Object_getMem(mem);
@@ -55,6 +56,7 @@ init (joe_Object self, joe_Block block)
    
    joe_Object_assign (JOE_AT(self, DATA), mem);
    joe_Object_assign (JOE_AT(self, BLOCK), joe_Block_New (block));
+   joe_Object_assign (JOE_AT(self,NAME), name);
     
    return JOE_SUCCESS;
 }
@@ -63,14 +65,17 @@ static int
 ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_Block block = 0;
-   if (argc == 1 && (block = argv[0]) &&
+   if (argc > 0 && (block = argv[0]) &&
           (joe_Object_instanceOf(argv[0], &joe_Block_Class))) {
-   } else if (argc != 0) {
+      if (argc > 1 &&  (joe_Object_instanceOf(argv[1], &joe_String_Class)))
+         return init (self, block, argv[1]);
+      else
+         return init (self, block, joe_String_New ("<execute>"));
+   } else {
       joe_Object_assign(retval,
                         joe_Exception_New ("execute ctor: invalid argument"));
       return JOE_FAILURE;
    }
-   return init (self, block);
 }
 
 
@@ -108,9 +113,10 @@ exec (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    joe_Memory mem = (void *) *JOE_AT(self, DATA);
    Execute exec = (void *) joe_Object_getMem(mem);
    joe_Block block =  *JOE_AT(self, BLOCK);
+   joe_String name = *JOE_AT(self, NAME);
 
    if (!exec->compiled) {
-      JoeParser parser = JoeParser_new ("<execute>");
+      JoeParser parser = JoeParser_new (joe_String_getCharStar(name));
       int rc = JoeParser_compile (parser, block, exec->tokens);
       if (rc != JOE_SUCCESS) {
          joe_Object_assign (retval, JoeParser_getException (parser));
@@ -120,7 +126,7 @@ exec (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       JoeParser_delete (parser);
       exec->compiled = 1;
    }
-   if (joe_Block_outer_exec (block, 0, 0, retval) != JOE_SUCCESS) {
+   if (joe_Block_outer_exec (block, argc, argv, retval) != JOE_SUCCESS) {
       return JOE_FAILURE;
    } else {
       return JOE_SUCCESS;
@@ -145,12 +151,15 @@ joe_Class joe_Execute_Class = {
 };
 
 joe_Object
-joe_Execute_New (joe_Block parent)
+joe_Execute_New (joe_Block parent, char *name)
 {
    joe_Object self;
 
    self = joe_Object_New (&joe_Execute_Class, 0);
-   init (self, parent);
+   if (name)
+      init (self, parent, joe_String_New (name));
+   else
+      init (self, parent, joe_String_New ("<Execute>"));
 
    return self;
 }
@@ -181,11 +190,12 @@ joe_Execute_clear (joe_Execute self)
 }
 
 int
-joe_Execute_exec (joe_Execute self, joe_Object *retval)
+joe_Execute_exec (joe_Execute self, int argc, joe_Object *args,
+                                              joe_Object *retval)
 {
    int Return;
 
-   Return = exec (self, 0, 0, retval);
+   Return = exec (self, argc, args, retval);
 
    return Return;
 }

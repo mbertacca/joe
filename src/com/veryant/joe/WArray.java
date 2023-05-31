@@ -53,15 +53,16 @@ public class WArray extends Wrapper {
    public Object set(WNumber idx, Object obj) {
       return set (idx.intValue(), obj);
    }
+   /* The method DO NOT modify the object since 1.14 */
    public Object add(Object obj) {
       final int i = value.length;
-      Object newValue[] = Arrays.copyOf (value, i + 1);
-      value = newValue;
-      return set (i, obj);
+      WArray Return = new WArray(Arrays.copyOf (value, i + 1));
+      Return.set (i, obj);
+      return Return;
    }
+   /* The method DO NOT modify the object since 1.14 */
    public Object shift(final int shft) {
-      value = Arrays.copyOfRange (value, shft, value.length);
-      return this;
+      return new WArray(Arrays.copyOfRange (value, shft, value.length));
    }
    public Object shift(WNumber shiftValue) {
       return shift (shiftValue.intValue());

@@ -213,10 +213,10 @@ joe_Message_debug (joe_Object self, int *debug,
          exit (0);
       } else {
          joe_Execute exec = 0;
-         joe_Object_assign (&exec, joe_Execute_New (block));
+         joe_Object_assign (&exec, joe_Execute_New (block, ":debug:"));
          joe_Execute_add (exec, line);
          *debug = 0;
-         joe_Execute_exec (exec, retval);
+         joe_Execute_exec (exec, 0, 0, retval);
          show (*retval);
          *debug = 1;
          joe_Object_assign (&exec, 0);

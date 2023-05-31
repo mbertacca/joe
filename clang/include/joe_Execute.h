@@ -23,9 +23,10 @@
 
 typedef joe_Object joe_Execute;
 extern joe_Class joe_Execute_Class;
-JOEOBJ_API joe_Object joe_Execute_New (joe_Block parent);
+JOEOBJ_API joe_Object joe_Execute_New (joe_Block parent, char* name);
 JOEOBJ_API int joe_Execute_add (joe_Execute self, char *line);
 JOEOBJ_API int joe_Execute_clear (joe_Execute self);
-JOEOBJ_API int joe_Execute_exec (joe_Execute self, joe_Object *retval);
+JOEOBJ_API int joe_Execute_exec (joe_Execute self, int argc, joe_Object *args,
+                                                           joe_Object *retval);
 
 # endif

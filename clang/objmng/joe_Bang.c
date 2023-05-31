@@ -17,6 +17,7 @@
  */
 
 # include <stdio.h>
+# include <errno.h>
 # include <time.h>
 # include <string.h>
 # include <stdlib.h>
@@ -26,6 +27,7 @@
 # include "joe_List.h"
 # include "joe_Block.h"
 # include "joe_Boolean.h"
+# include "joe_Execute.h"
 # include "joe_Integer.h"
 # include "joe_Null.h"
 # include "joe_Files.h"
@@ -38,6 +40,7 @@
 # include "joe_Glob.h"
 # include "joe_LoadScript.h"
 # include "joe_DoDebugException.h"
+# include "joestrct.h"
 
 static int Switch_case (joe_Object self,
                         int argc, joe_Object *argv, joe_Object *retval);
@@ -269,7 +272,7 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_StringBuilder msg = 0;
    joe_Object_assign (&msg, joe_StringBuilder_New ());
-   joe_StringBuilder_appendCharStar (msg, "JOE Revision 0.9l ");
+   joe_StringBuilder_appendCharStar (msg, "JOE Revision 0.9m ");
    joe_StringBuilder_appendCharStar (msg, __DATE__);
    joe_Object_assign(retval, joe_StringBuilder_toString (msg));
    joe_Object_assign (&msg, 0);
@@ -803,6 +806,59 @@ runJoe (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
    return JOE_FAILURE;
 }
 
+static int
+runAsBlock (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
+{
+   if (argc > 1 && joe_Object_instanceOf (args[0], &joe_Block_Class)
+                && joe_Object_instanceOf (args[1], &joe_String_Class)) {
+      char *scriptName = joe_String_getCharStar(args[1]);
+      FILE *scriptFile = joe_LoadScript_getFile (scriptName);
+      if (scriptFile) {
+         int Return;
+         char *line = 0;
+         ssize_t lineLen = 0;
+         joe_Execute exec = 0;
+         joe_Array argv = 0;
+         joe_Object_assign (&exec, joe_Execute_New (args[0], scriptName));
+         while (joe_Files_getline (&line, &lineLen, scriptFile) >= 0) {
+            joe_Execute_add (exec, line);
+         }
+         fclose (scriptFile);
+         if (argc > 2 && joe_Object_instanceOf (args[2], &joe_Array_Class)) {
+            int i;
+            int len = joe_Array_length(args[2]);
+            joe_Object_assign (&argv, joe_Array_New (len));
+            for (i = 0; i < len; i++)
+               joe_Object_assign (JOE_AT(argv, i), *JOE_AT(args[2], i));
+         } else {
+            joe_Object_assign (&argv, joe_Array_New (1));
+            joe_Object_assign (JOE_AT(argv, 0), args[1]);
+         }
+         Return = joe_Execute_exec (exec, 1, &argv, retval);
+
+         joe_Object_assign(&argv, 0);
+         joe_Object_assign(&exec, 0);
+         if (line)
+            free (line);
+         return Return;
+      } else {
+         joe_StringBuilder msg = joe_StringBuilder_New ();
+         joe_StringBuilder_appendCharStar (msg, "cannot access ");
+         joe_StringBuilder_appendCharStar (msg, scriptName);
+         joe_StringBuilder_appendCharStar (msg, " (errno=");
+         joe_StringBuilder_appendInt (msg, errno);
+         joe_StringBuilder_appendChar (msg, ')');
+         joe_Object_assign(retval,
+             joe_Exception_New_string (joe_StringBuilder_toString (msg)));
+         joe_Object_delIfUnassigned (&msg);
+         return JOE_FAILURE;
+      }
+   } else {
+      joe_Object_assign(retval,
+                        joe_Exception_New("runAsBlock: Invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
 
 static int
 newArray (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
@@ -874,6 +930,7 @@ static joe_Method mthds[] = {
   {"array", array},
   {"new", _new},
   {"runJoe", runJoe},
+  {"runAsBlock", runAsBlock},
   {"newArray", newArray},
   {"version", version},
   {"getOSType", getOSType},

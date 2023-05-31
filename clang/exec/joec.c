@@ -158,7 +158,7 @@ main (int argc, char *argv[])
       void (*putPrompt)(char*) = isatty(0) ? showPrompt : showNoPrompt;
 
       joe_LoadScript_setCWD();
-      joe_Object_assign (&exec, joe_Execute_New (0));
+      joe_Object_assign (&exec, joe_Execute_New (0, ":stdin:"));
       strcpy (line,"!println (!version),\"; type 'exit' to exit the session\".");
       do {
          i = strlen (line);
@@ -174,7 +174,7 @@ main (int argc, char *argv[])
          braces = countBraces (line, braces);
          if (braces <= 0 &&
              (!line[0] || lc == '.')) {
-            if (joe_Execute_exec (exec, &retval) != JOE_SUCCESS) {
+            if (joe_Execute_exec (exec, 0, 0, &retval) != JOE_SUCCESS) {
                showError (retval);
             } else {
                showValue (retval);
