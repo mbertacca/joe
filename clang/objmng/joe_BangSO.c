@@ -17,7 +17,9 @@
  */
 
 # include "joe_String.h"
+# include "joe_ByteArray.h"
 # include "joe_Integer.h"
+# include "joe_Pointer.h"
 # include "joe_Exception.h"
 
 # include <stdlib.h>
@@ -48,7 +50,7 @@
 # endif /* ! AIX */
 # define DLOPEN_RETURN_TYPE void *
 # define DLSYM dlsym
-# define DLSYM_TYPE(x) long (*x)()
+# define DLSYM_TYPE(x) void* (*x)()
 # define DLCLOSE dlclose
 # define STDCALL_FUNC(fPnt) ((long(*)())fPnt)
 # define CDECL_FUNC(fPnt) ((long(*)())fPnt)
@@ -66,7 +68,9 @@ static int
 call (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_Class* stringClass = joe_Class_getClass("joe_String");
+   joe_Class* byteArrayClass = joe_Class_getClass("joe_ByteArray");
    joe_Class* integerClass = joe_Class_getClass("joe_Integer");
+   joe_Class* pointerClass = joe_Class_getClass("joe_Pointer");
    struct LibData *lib = (struct LibData *) *joe_Object_getMem (self);
 
    if (argc > 0 && joe_Object_instanceOf(argv[0], stringClass)) {
@@ -80,43 +84,47 @@ call (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
          for (i = 1; i < argc; i++) {
             if (joe_Object_instanceOf(argv[i], stringClass)) {
                funcArg[i - 1] = joe_String_getCharStar (argv[i]);
+            } else if (joe_Object_instanceOf(argv[i], byteArrayClass)) {
+               funcArg[i - 1] = joe_ByteArray_getCharStar (argv[i]);
             } else if (joe_Object_instanceOf(argv[i], integerClass)) {
                funcArg[i - 1] = (void*) joe_Integer_value (argv[i]);
+            } else if (joe_Object_instanceOf(argv[i], pointerClass)) {
+               funcArg[i - 1] = (void*) joe_Pointer_value (argv[i]);
             } else  {
                funcArg[i - 1] = joe_Object_getMem (argv[i]);
             }
          }
          switch (argc) {
          case 1:
-            joe_Object_assign(retval, joe_Integer_New (pnt ()));
+            joe_Object_assign(retval, joe_Pointer_New ((void*)pnt ()));
             break;
          case 2:
-            joe_Object_assign(retval, joe_Integer_New (pnt (funcArg[0])));
+            joe_Object_assign(retval, joe_Pointer_New ((void*)pnt (funcArg[0])));
             break;
          case 3:
-            joe_Object_assign(retval,joe_Integer_New (pnt (funcArg[0],
+            joe_Object_assign(retval,joe_Pointer_New ((void*)pnt (funcArg[0],
                                                            funcArg[1])));
             break;
          case 4:
-            joe_Object_assign(retval,joe_Integer_New (pnt (funcArg[0],
+            joe_Object_assign(retval,joe_Pointer_New ((void*)pnt (funcArg[0],
                                                            funcArg[1],
                                                            funcArg[2])));
             break;
          case 5:
-            joe_Object_assign(retval,joe_Integer_New (pnt (funcArg[0],
+            joe_Object_assign(retval,joe_Pointer_New ((void*)pnt (funcArg[0],
                                                            funcArg[1],
                                                            funcArg[2],
                                                            funcArg[3])));
             break;
          case 6:
-            joe_Object_assign(retval,joe_Integer_New (pnt (funcArg[0],
+            joe_Object_assign(retval,joe_Pointer_New ((void*)pnt (funcArg[0],
                                                            funcArg[1],
                                                            funcArg[2],
                                                            funcArg[3],
                                                            funcArg[4])));
             break;
          case 7:
-            joe_Object_assign(retval,joe_Integer_New (pnt (funcArg[0],
+            joe_Object_assign(retval,joe_Pointer_New ((void*)pnt (funcArg[0],
                                                            funcArg[1],
                                                            funcArg[2],
                                                            funcArg[3],
@@ -124,7 +132,7 @@ call (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
                                                            funcArg[5])));
             break;
          case 8:
-            joe_Object_assign(retval,joe_Integer_New (pnt (funcArg[0],
+            joe_Object_assign(retval,joe_Pointer_New ((void*)pnt (funcArg[0],
                                                            funcArg[1],
                                                            funcArg[2],
                                                            funcArg[3],
@@ -133,7 +141,7 @@ call (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
                                                            funcArg[6])));
             break;
          case 9:
-            joe_Object_assign(retval,joe_Integer_New (pnt (funcArg[0],
+            joe_Object_assign(retval,joe_Pointer_New ((void*)pnt (funcArg[0],
                                                            funcArg[1],
                                                            funcArg[2],
                                                            funcArg[3],
@@ -170,7 +178,7 @@ static joe_Class joe_BangSO_Class = {
    0,
    mthds,
    0,
-   0,
+   &joe_Object_Class,
    0
 };
 

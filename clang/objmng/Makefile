@@ -35,6 +35,8 @@ OBJS=joe_Object.o \
      joe_Execute.o \
      joe_Files.o \
      joe_Glob.o \
+     joe_ByteArray.o \
+     joe_Pointer.o \
      ndecimal.o \
      joearray.o \
      joearrayscan.o \
