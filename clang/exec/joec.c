@@ -30,13 +30,6 @@
 # define MAXLINELEN 256
 # define isFileSeparator(c) (c=='/')
 
-static int
-usage (char *prgname)
-{
-   fprintf (stderr, "usage: %s <script-name>\n", prgname);
-   return ERROR_CMDLINE;
-}
-
 static void
 showError (joe_Exception excpt)
 {
@@ -120,7 +113,6 @@ main (int argc, char *argv[])
       rc=joe_Class_newInstance(loadScriptClass, 1, &scriptName, &retval);
       if (rc != JOE_SUCCESS) {
          showError (retval);
-         usage(argv[0]);
          joe_Object_assign(&retval, 0);
          return ERROR_GENERIC;
       } else {

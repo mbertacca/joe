@@ -22,6 +22,7 @@
 # include "joe_Memory.h"
 # include "joe_Exception.h"
 # include "joe_Integer.h"
+# include "joe_Pointer.h"
 # include "joestrct.h"
 
 # define MEMORY 0
@@ -29,7 +30,6 @@
 # define LENGTH 2
 
 static char *variables[] = { "memory", "offset", "length", 0 };
-
 
 static void
 init (joe_Object self, joe_Object mem, int offset, int length)
@@ -165,6 +165,82 @@ child (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 static int
+shortValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   int length = joe_Integer_value(*JOE_AT (self, LENGTH));
+   if (length >= sizeof(short)) {
+      int offset = joe_Integer_value(*JOE_AT (self, OFFSET));
+      joe_Object mem = *JOE_AT (self, MEMORY);
+      if (joe_Object_instanceOf (mem, &joe_ByteArray_Class))
+         mem =  *JOE_AT (mem, MEMORY);
+      joe_Object_assign (retval,
+         joe_Integer_New (*(short*)&(*(char **) joe_Object_getMem(mem))[offset]));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+           joe_Exception_New ("ByteArray shortValue: not enough memory space"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+intValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   int length = joe_Integer_value(*JOE_AT (self, LENGTH));
+   if (length >= sizeof(int)) {
+      int offset = joe_Integer_value(*JOE_AT (self, OFFSET));
+      joe_Object mem = *JOE_AT (self, MEMORY);
+      if (joe_Object_instanceOf (mem, &joe_ByteArray_Class))
+         mem =  *JOE_AT (mem, MEMORY);
+      joe_Object_assign (retval,
+         joe_Integer_New (*(int*)&(*(char **) joe_Object_getMem(mem))[offset]));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+           joe_Exception_New ("ByteArray intValue: not enough memory space"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+longValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   int length = joe_Integer_value(*JOE_AT (self, LENGTH));
+   if (length >= sizeof(long)) {
+      int offset = joe_Integer_value(*JOE_AT (self, OFFSET));
+      joe_Object mem = *JOE_AT (self, MEMORY);
+      if (joe_Object_instanceOf (mem, &joe_ByteArray_Class))
+         mem =  *JOE_AT (mem, MEMORY);
+      joe_Object_assign (retval,
+         joe_Integer_New (*(long*)&(*(char **) joe_Object_getMem(mem))[offset]));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+           joe_Exception_New ("ByteArray longValue: not enough memory space"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+pointerValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   int length = joe_Integer_value(*JOE_AT (self, LENGTH));
+   if (length >= sizeof(void *)) {
+      int offset = joe_Integer_value(*JOE_AT (self, OFFSET));
+      joe_Object mem = *JOE_AT (self, MEMORY);
+      if (joe_Object_instanceOf (mem, &joe_ByteArray_Class))
+         mem =  *JOE_AT (mem, MEMORY);
+      joe_Object_assign (retval,
+         joe_Pointer_New (*(void**)&(*(char **) joe_Object_getMem(mem))[offset]));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+           joe_Exception_New ("ByteArray pointerValue: not enough memory space"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
 toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
@@ -185,6 +261,10 @@ toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 static joe_Method mthds[] = {
+   {"shortValue", shortValue },
+   {"intValue", intValue },
+   {"longValue", longValue },
+   {"pointerValue", pointerValue },
    {"toString", toString },
    {"init", _init },
    {"set", set },

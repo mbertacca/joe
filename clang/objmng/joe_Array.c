@@ -96,17 +96,40 @@ clean(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 static int
 shift (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   int length = (int) joe_Array_length (self);
-   if (--length >= 0) {
-      int idx;
-      joe_Object_assign (retval, joe_Object_New(&joe_Array_Class, length));
-      for (idx = 0; idx < length; idx++) {
-         joe_Object_assign (JOE_AT(*retval, idx), *JOE_AT(self, idx + 1));
+   if (argc == 0) {
+      int length = (int) joe_Array_length (self);
+      if (--length >= 0) {
+         int idx;
+         joe_Object_assign (retval, joe_Object_New(&joe_Array_Class, length));
+         for (idx = 0; idx < length; idx++) {
+            joe_Object_assign (JOE_AT(*retval, idx), *JOE_AT(self, idx + 1));
+         }
+      } else {
+         joe_Object_assign (retval, self);
       }
+      return JOE_SUCCESS;
    } else {
-      joe_Object_assign (retval, self);
+      joe_Object_assign(retval, joe_Exception_New("Array shift: no argument expected"));
+      return JOE_FAILURE;
    }
-   return JOE_SUCCESS;
+}
+
+static int
+add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1) {
+      int length = (int) joe_Array_length (self);
+      int idx;
+      joe_Object_assign (retval, joe_Object_New(&joe_Array_Class, length+1));
+      for (idx = 0; idx < length; idx++) {
+          joe_Object_assign (JOE_AT(*retval, idx), *JOE_AT(self, idx));
+      }
+      joe_Object_assign (JOE_AT(*retval, idx), argv[0]);
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New("Array add: 1 argument expected"));
+      return JOE_FAILURE;
+   }
 }
 
 static int
@@ -159,6 +182,7 @@ static joe_Method mthds[] = {
   {"foreach", foreach },
   {"clean", clean },
   {"shift", shift },
+  {"add", add },
   {(void *) 0, (void *) 0}
 };
 

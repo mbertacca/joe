@@ -23,6 +23,13 @@
 # include "joe_Boolean.h"
 
 static int
+ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   *((void **) joe_Object_getMem(self)) = (void *) 0;
+   return JOE_SUCCESS;
+}
+
+static int
 toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    char buff[32];
@@ -87,7 +94,7 @@ static joe_Method mthds[] = {
 
 joe_Class joe_Pointer_Class = {
    "joe_Pointer",
-   0,
+   ctor,
    0,
    mthds,
    0,
