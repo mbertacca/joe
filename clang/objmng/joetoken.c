@@ -367,13 +367,12 @@ Tokenizer_tokenize (Tokenizer self, char *line)
       case 'M':
          if (self->status == _INTEGER || self->status == _FLOAT) {
             if (*c == 'e' || *c == 'E') {
-               c++;
-               if (*c >= '0' && *c <= '9') {
+               char *cp1 = c + 1;
+               if (*cp1 >= '0' && *cp1 <= '9') {
                   JoeStrBuild_appendChr(self->word, 'e');
                   self->status = _FLOAT;
                   break;
                }
-               --c;
             } else {
                newToken (self,_DECIMAL);
                self->status = _INIT;

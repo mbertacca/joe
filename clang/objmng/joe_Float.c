@@ -326,7 +326,7 @@ lt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 static int
 toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   char buff[32];
+   char buff[512];
    snprintf (buff, sizeof(buff), "%lf", *((double *) joe_Object_getMem(self)));
    joe_Object_assign(retval, joe_String_New (buff));
    return JOE_SUCCESS;
