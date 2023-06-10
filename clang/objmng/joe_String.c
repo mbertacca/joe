@@ -22,6 +22,7 @@
 # include "joe_Boolean.h"
 # include "joe_Float.h"
 # include "joe_Integer.h"
+# include "joe_BigDecimal.h"
 # include "joe_String.h"
 # include "joe_List.h"
 # include "joe_StringBuilder.h"
@@ -667,11 +668,25 @@ floatValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       }
       return JOE_SUCCESS;
    } else {
-      joe_Object_assign(retval, joe_Exception_New ("floatValue: invalid argument"));
+      joe_Object_assign(retval,
+                      joe_Exception_New ("floatValue: invalid argument"));
       return JOE_FAILURE;
    }
 }
 
+static int
+bigDecimalValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      char * const str = joe_String_getCharStar (self);
+      joe_Object_assign(retval, joe_BigDecimal_New_str (str));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                     joe_Exception_New ("bigDecimalValue: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
 
 static joe_Method mthds[] = {
   {"add", add},
@@ -695,6 +710,7 @@ static joe_Method mthds[] = {
   {"longValue", intValue},
   {"floatValue", floatValue},
   {"doubleValue", floatValue},
+  {"bigDecimalValue", bigDecimalValue},
   {"toString", toString},
   {(void *) 0, (void *) 0}
 };

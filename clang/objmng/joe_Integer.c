@@ -345,12 +345,60 @@ lt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 static int
+intValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      joe_Object_assign(retval, self);
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                   joe_Exception_New("intValue: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+floatValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      joe_Object_assign(retval,
+                    joe_Float_New (*((long *) joe_Object_getMem (self))));
+            return JOE_SUCCESS;
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                   joe_Exception_New("floatValue: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+bigDecimalValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      joe_Object_assign (retval, 
+                 joe_BigDecimal_New_lng (*((long *) joe_Object_getMem (self))));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                   joe_Exception_New("bigDecimalValue: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
 toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   char buff[32];
-   sprintf (buff, "%ld", *((long *) joe_Object_getMem(self)));
-   joe_Object_assign(retval, joe_String_New (buff));
-   return JOE_SUCCESS;
+   if (argc == 0) {
+      char buff[32];
+      sprintf (buff, "%ld", *((long *) joe_Object_getMem(self)));
+      joe_Object_assign(retval, joe_String_New (buff));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                   joe_Exception_New("toString: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
 }
 
 static joe_Method mthds[] = {
@@ -365,6 +413,11 @@ static joe_Method mthds[] = {
    {"ge", ge },
    {"lt", lt },
    {"le", le },
+   {"intValue", intValue },
+   {"longValue", intValue },
+   {"floatValue", floatValue },
+   {"doubleValue", floatValue },
+   {"bigDecimalValue", bigDecimalValue },
    {"toString", toString },
   {(void *) 0, (void *) 0}
 };

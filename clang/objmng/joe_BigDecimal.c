@@ -141,14 +141,67 @@ lt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 static int
+intValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      joe_Memory mem = *joe_Object_at (self, 0);
+      nDecimal num = (nDecimal) joe_Object_getMem (mem);
+      char* strNum = nDecimal_toString(num);
+      joe_Object_assign (retval, joe_Integer_New(atol(strNum)));
+      free(strNum);
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                        joe_Exception_New("intValue: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+floatValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      joe_Memory mem = *joe_Object_at (self, 0);
+      nDecimal num = (nDecimal) joe_Object_getMem (mem);
+      char* strNum = nDecimal_toString(num);
+      joe_Object_assign (retval, joe_Float_New(atof(strNum)));
+      free(strNum);
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                        joe_Exception_New("floatValue: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+bigDecimalValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      joe_Object_assign (retval, self);
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                    joe_Exception_New("bigDecimalValue: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
 toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   joe_Memory mem = *joe_Object_at (self, 0);
-   nDecimal num = (nDecimal) joe_Object_getMem (mem);
-   char* strNum = nDecimal_toString(num);
-   joe_Object_assign (retval, joe_String_New (nDecimal_toString (num)));
-   free(strNum);
-   return JOE_SUCCESS;
+   if (argc == 0) {
+      joe_Memory mem = *joe_Object_at (self, 0);
+      nDecimal num = (nDecimal) joe_Object_getMem (mem);
+      char* strNum = nDecimal_toString(num);
+      joe_Object_assign (retval, joe_String_New (nDecimal_toString (num)));
+      free(strNum);
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                        joe_Exception_New("toString: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
 }
 
 static joe_Method mthds[] = {
@@ -163,6 +216,11 @@ static joe_Method mthds[] = {
    {"ge", ge },
    {"lt", lt },
    {"le", le },
+   {"intValue", intValue },
+   {"longValue", intValue },
+   {"floatValue", floatValue },
+   {"doubleValue", floatValue },
+   {"bigDecimalValue", bigDecimalValue },
    {"toString", toString },
   {(void *) 0, (void *) 0}
 };
