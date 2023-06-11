@@ -28,5 +28,6 @@ unsigned int joe_ArrayList_length (joe_Object self);
 unsigned int joe_ArrayList_maxLength (joe_Object self);
 void joe_ArrayList_add (joe_Object self, joe_Object item);
 joe_Object *joe_ArrayList_at (joe_Object self, unsigned int idx);
+joe_Object joe_ArrayList_getArray (joe_Object self);
 
 # endif

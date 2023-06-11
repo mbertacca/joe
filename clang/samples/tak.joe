@@ -1,0 +1,12 @@
+tak := {:x,y,z,lvl.
+   lvl := lvl + 1.
+   !println lvl,"-->",x,",",y,",",z.
+   y >= x ifTrue { z },{
+      x1 := (tak exec (x - 1), y, z,lvl).
+      y1 := (tak exec (y - 1), z, x,lvl).
+      z1 := (tak exec (z - 1), x, y,lvl).
+      tak exec x1,y1,z1,lvl.
+   }.
+}.
+
+!for 1,1,{ tak exec 6, 3, 1, 0 }.

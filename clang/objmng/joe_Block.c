@@ -225,20 +225,39 @@ my_exec (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
    unsigned int i;
    int rc = JOE_SUCCESS;
-   joe_ArrayList argsNames = *JOE_AT(self, ARGS_NAMES);
-   unsigned int argsNamesLen = joe_ArrayList_length (argsNames);
-   unsigned int validArgsLen = argsNamesLen < argc ? argsNamesLen : argc;
+   joe_Array varcontent = joe_ArrayList_getArray (*JOE_AT(self, VARCONTENT));
+   int varcontentlen = joe_ArrayList_length(*JOE_AT(self, VARCONTENT));
+   joe_Array savevar =  0;
 
-   if (argsNamesLen) {
-      joe_ArrayList varcontent = *JOE_AT(self, VARCONTENT);
-      for (i = 0; i < validArgsLen; i++) {
-         joe_Object_assign (joe_ArrayList_at(varcontent, i+1), args[i]);
+   if (varcontentlen) {
+      joe_ArrayList argsNames = *JOE_AT(self, ARGS_NAMES);
+      unsigned int argsNamesLen = joe_ArrayList_length (argsNames);
+      unsigned int validArgsLen = argsNamesLen < argc ? argsNamesLen : argc;
+
+      joe_Object_assign (&savevar, joe_Array_New(varcontentlen));
+ 
+      for (i = 0; i < varcontentlen; i++) {
+         joe_Object_assign (JOE_AT(savevar,i), *JOE_AT(varcontent, i));
       }
-      for ( ; i < argsNamesLen; i++) {
-         joe_Object_assign (joe_ArrayList_at(varcontent, i+1), joe_Null_value);
+      if (argsNamesLen) {
+         for (i = 0; i < validArgsLen; i++) {
+            joe_Object_assign (JOE_AT (varcontent, i+1), args[i]);
+         }
+         for ( ; i < argsNamesLen; i++) {
+            joe_Object_assign (JOE_AT(varcontent, i+1), joe_Null_value);
+         }
       }
    }
+
    rc = my_exec_sub (self, 0, retval);
+
+   if (varcontentlen) {
+      for (i = 0; i < varcontentlen; i++) {
+         joe_Object_transfer (JOE_AT(varcontent, i), JOE_AT(savevar,i));
+      }
+      joe_Object_assign (&savevar, 0);
+   }
+
    return rc;
 }
 

@@ -118,6 +118,11 @@ joe_ArrayList_at (joe_Object self, unsigned int idx)
       return 0;
 }
 
+joe_Object
+joe_ArrayList_getArray (joe_Object self)
+{
+   return *JOE_AT(self,ARRAY);
+}
 void
 joe_ArrayList_add (joe_Object self, joe_Object item)
 {
