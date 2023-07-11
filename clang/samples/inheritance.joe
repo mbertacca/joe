@@ -76,7 +76,7 @@ timeStamp := {timeStamp:.
    setDay := {:d.
      !if (!isNull d not),{
          !if ((d < 0) or (d > 31)),{
-            !throw ("Invalid day: " + s).
+            !throw ("Invalid day: " + d).
          }.
          day := d.
       }.

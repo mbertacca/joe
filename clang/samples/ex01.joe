@@ -1,3 +1,7 @@
+aString := "VERYANT".
+idx:=.
+last:=.
+
 aSubr :=
 {
    !if ((idx = 0) or (idx = last) and (1=1)), {
@@ -11,9 +15,6 @@ aSubr :=
    }
 }.
 
-aString := "VERYANT".
 last := ((aString length) - 1).
-idx := 0.
-
 idx := -1.
 !while { idx := (idx + 1). idx <= last }, aSubr.

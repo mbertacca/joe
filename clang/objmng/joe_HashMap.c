@@ -19,7 +19,11 @@
 # include <stdio.h>
 # include "joe_HashMap.h"
 # include "joe_Array.h"
+# include "joe_Boolean.h"
+# include "joe_Exception.h"
+# include "joe_Integer.h"
 # include "joe_String.h"
+# include "joe_Null.h"
 # include "joestrct.h"
 
 # define KEY 0
@@ -48,11 +52,6 @@ item_New (joe_Object strKey, joe_Object value)
    return self;
 }
 
-static joe_Method mthds[] = {
-  /* {"length", length } */
-  {(void *) 0, (void *) 0}
-};
-
 # define ARRAY 0
 # define N_HASH 1
 # define LAST_SIB 2
@@ -61,16 +60,6 @@ static joe_Method mthds[] = {
 # define THRESHOLD 5
 static char *variables[] = { "array", "nHash", "lastSibling",
                              "len",   "totLen","threshold"};
-
-joe_Class joe_HashMap_Class = {
-   "joe_HashMap",
-   0,
-   0,
-   mthds,
-   variables,
-   &joe_Object_Class,
-   0
-};
 
 struct s_cself {
    joe_Object* theArray;
@@ -128,17 +117,23 @@ allocArray (joe_HashMap self, unsigned int size)
    return Return;
 }
 
-joe_Object
-joe_HashMap_New_size(unsigned int size)
+static void
+init (joe_Object self, unsigned int size)
 {
-   joe_Object self;
-   self = joe_Object_New(&joe_HashMap_Class, 0);
    joe_Object_assign(JOE_AT(self, N_HASH), joe_int_New0());
    joe_Object_assign(JOE_AT(self, LEN), joe_int_New0());
    joe_Object_assign(JOE_AT(self, THRESHOLD), joe_int_New0());
    joe_Object_assign(JOE_AT(self, LAST_SIB), joe_int_New0());
    joe_Object_assign(JOE_AT(self, TOT_LEN), joe_int_New0());
    allocArray(self, size << 1);
+}
+
+joe_Object
+joe_HashMap_New_size(unsigned int size)
+{
+   joe_Object self;
+   self = joe_Object_New(&joe_HashMap_Class, 0);
+   init (self, size);
 
    return self;
 }
@@ -198,14 +193,14 @@ checkKey (joe_Object item, joe_Object theArray, joe_String strKey)
    }
 }
 
-static joe_Object
+static void
 collision (joe_Object self, joe_Object strKey, joe_Object value,
-           joe_Object *item, struct s_cself *cself)
+           joe_Object *item, struct s_cself *cself, joe_Object *oldValue)
 {
-   joe_Object oldValue = 0;
 
    joe_String itmKey = *JOE_AT(*item, KEY);
    if (!joe_String_compare (itmKey, strKey)) {
+      joe_Object_assign(oldValue, *JOE_AT(*item, VALUE));
       joe_Object_assign(JOE_AT(*item, VALUE), value);
       joe_Object_delIfUnassigned (&strKey);
    } else {
@@ -218,37 +213,34 @@ collision (joe_Object self, joe_Object strKey, joe_Object value,
           joe_Object_assign (item, item_New (strKey, value));
       } else {
           item = JOE_AT(*(cself->theArray), sibling);
-          oldValue = collision (self, strKey, value, item, cself);
+          collision (self, strKey, value, item, cself, oldValue);
       }
    }
-   return oldValue;
 }
 
-static joe_Object
+static void
 myput (joe_Object self, struct s_cself *cself,
-       unsigned int hash, joe_String strKey, joe_Object value)
+       unsigned int hash, joe_String strKey, joe_Object value,
+       joe_Object *oldValue)
 {
-   joe_Object Return;
    joe_Object *item;
    unsigned int idx;
 
    idx = hash % *(cself->len);
    item = JOE_AT(*(cself->theArray), idx);
    if (*item) {
-      Return = collision (self, strKey, value, item, cself);
+      collision (self, strKey, value, item, cself, oldValue);
    } else {
       joe_Object_assign (item, item_New (strKey, value));
       (*(cself->nHash))++;
-      Return = 0;
    }
-
-   return Return;
 }
 
 static void
 rehash (joe_HashMap self, struct s_cself *cself)
 {
    int i;
+   joe_Object oldValue = 0;
    joe_Object *item;
    joe_Object *strKey, *value;
    joe_Array oArray = 0;
@@ -263,17 +255,18 @@ rehash (joe_HashMap self, struct s_cself *cself)
          strKey = JOE_AT(*item, KEY);
          value = JOE_AT(*item, VALUE);
          myput (self, cself, joe_HashMap_hash (*strKey),
-                *strKey, *value);
+                *strKey, *value, &oldValue);
+         joe_Object_assign (&oldValue, 0);
       }
    }
    joe_Object_assign (&oArray, 0);
 }
 
-joe_Object
+static void
 joe_HashMap_putHash (joe_HashMap self, unsigned int hash,
-                     joe_String strKey, joe_Object value)
+                     joe_String strKey, joe_Object value,
+                     joe_Object *oldValue)
 {
-   joe_Object Return;
    struct s_cself cself;
 
    joe_HashMap_fillStruct(self, &cself);
@@ -282,19 +275,18 @@ joe_HashMap_putHash (joe_HashMap self, unsigned int hash,
           *(cself.lastSibling) >= *(cself.totLen)) {
       rehash (self, &cself);
    }
-   Return = myput (self, &cself, hash, strKey, value);
-   return Return;
+   myput (self, &cself, hash, strKey, value, oldValue);
 }
-joe_Object
-joe_HashMap_put (joe_HashMap self, joe_Object key, joe_Object value)
+
+void
+joe_HashMap_put (joe_HashMap self, joe_Object key, joe_Object value,
+                 joe_Object *oldValue)
 {
    joe_String strKey = 0;
    joe_Object_invoke (key, "toString", 0, 0, &strKey);
-   joe_Object Return = joe_HashMap_putHash (self, joe_HashMap_hash(strKey),
-                                            strKey, value);
+   joe_HashMap_putHash (self, joe_HashMap_hash(strKey), strKey, value, oldValue);
    joe_Object_assign (&strKey, 0);
    joe_Object_delIfUnassigned (&key);
-   return Return;
 }
 
 int
@@ -413,18 +405,165 @@ joe_HashMap_containsKey (joe_HashMap self, joe_Object key)
 int
 joe_HashMap_containsValue (joe_HashMap self, joe_Object value)
 {
-   unsigned int lastSib = JOE_INT (*JOE_AT(self, LAST_SIB));
-   joe_Array theArray = *JOE_AT(self, ARRAY);
    joe_Object item = 0;
-   joe_String itmVal;
-   unsigned int i;
+   joe_String obj = 0;
+   int i;
+   joe_Object res = 0;
+   long totLen = JOE_INT (*JOE_AT(self, TOT_LEN));
+   joe_Array theArray = *JOE_AT(self, ARRAY);
 
-   for (i = 0; i < lastSib; i++) {
-      if ((item = *JOE_AT(theArray, i))) {
-         itmVal = *JOE_AT(item, VALUE);
-         if (itmVal == value)
-             return 1;
+   for (i = 0; i < totLen; i++) {
+      item = *JOE_AT(theArray, i);
+      if (item) {
+         obj = *JOE_AT(item, VALUE);
+         joe_Object_invoke (value, "equals", 1, &obj, &res);
+         if (joe_Boolean_isTrue (res)) {
+            joe_Object_assign (&res, 0);
+            return JOE_TRUE;
+         }
       }
    }
-   return 0;
+   return JOE_FALSE;
 }
+
+static int
+ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      init (self, 12);
+   } else if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_Integer_Class)) {
+      init (self, joe_Integer_value (argv[0]));
+   } else {
+      joe_Object_assign(retval,
+                   joe_Exception_New ("HashMap ctor: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+   return JOE_SUCCESS;
+}
+
+static int
+length (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      joe_Object_assign(retval, joe_Integer_New (joe_HashMap_length(self)));
+   } else {
+      joe_Object_assign(retval,
+                   joe_Exception_New ("HashMap length: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+   return JOE_SUCCESS;
+}
+
+static int
+put (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 2) {
+      joe_Object oldValue = 0;
+      joe_HashMap_put (self, argv[0], argv[1], &oldValue);
+      if (oldValue == NULL)
+          joe_Object_assign (retval, joe_Null_value);
+      else
+          joe_Object_transfer (retval, &oldValue);
+   } else {
+      joe_Object_assign(retval,
+                   joe_Exception_New ("HashMap put: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+   return JOE_SUCCESS;
+}
+
+static int
+get (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1) {
+      joe_Object retv = 0;
+      if (joe_HashMap_get (self, argv[0], &retv))
+         joe_Object_assign (retval, retv);
+      else
+         joe_Object_assign (retval, joe_Null_value);
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                   joe_Exception_New ("HashMap get: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+keys (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      joe_Object_assign (retval, getArray (self, KEY));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                   joe_Exception_New ("HashMap keys: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+values (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      joe_Object_assign (retval, getArray (self, VALUE));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                   joe_Exception_New ("HashMap keys: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+containsKey (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1) {
+      if (joe_HashMap_containsKey (self, argv[0]))
+         joe_Object_assign (retval, joe_Boolean_True);
+      else
+         joe_Object_assign (retval, joe_Boolean_False);
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+             joe_Exception_New ("HashMap containsKey: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+containsValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1) {
+      if (joe_HashMap_containsValue (self, argv[0]))
+         joe_Object_assign (retval, joe_Boolean_True);
+      else
+         joe_Object_assign (retval, joe_Boolean_False);
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+             joe_Exception_New ("HashMap containsValue: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+static joe_Method mthds[] = {
+  {"containsValue", containsValue },
+  {"containsKey",   containsKey },
+  {"keys",  keys },
+  {"values",values },
+  {"put",   put },
+  {"get",   get },
+  {"size",  length },
+  {(void *) 0, (void *) 0}
+};
+
+joe_Class joe_HashMap_Class = {
+   "joe_HashMap",
+   ctor,
+   0,
+   mthds,
+   variables,
+   &joe_Object_Class,
+   0
+};
+

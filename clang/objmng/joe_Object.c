@@ -29,6 +29,7 @@
 # include "joe_Float.h"
 # include "joe_BigDecimal.h"
 # include "joe_Exception.h"
+# include "joe_HashMap.h"
 # include "joe_JOEObject.h"
 # include "joe_LoadScript.h"
 # include "joe_Memory.h"
@@ -137,6 +138,7 @@ init ()
       joe_Class_registerClass (&joe_ByteArray_Class);
       joe_Class_registerClass (&joe_Pointer_Class);
       joe_Class_registerClass (&joe_Exception_Class);
+      joe_Class_registerClass (&joe_HashMap_Class);
    }
 }
 

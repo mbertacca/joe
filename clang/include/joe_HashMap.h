@@ -27,9 +27,8 @@ extern joe_Class joe_HashMap_Class;
 
 joe_Object joe_HashMap_New();
 joe_Object joe_HashMap_New_size(unsigned int len);
-joe_Object joe_HashMap_put (joe_HashMap self, joe_Object key, joe_Object value);
-joe_Object joe_HashMap_putHash (joe_HashMap self, unsigned int hash,
-                                joe_String strKey, joe_Object value);
+void joe_HashMap_put (joe_HashMap self, joe_Object key,
+                      joe_Object value,  joe_Object *oldValue);
 int joe_HashMap_get (joe_HashMap self, joe_Object key, joe_Object *retval);
 int joe_HashMap_getHash (joe_HashMap self, unsigned int hash,
                          joe_Object key, joe_Object *retval);

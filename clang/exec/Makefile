@@ -1,6 +1,6 @@
 CC=cc
 #CFLAGS=-g -Wall -rdynamic
-CFLAGS=-Og -Wall -pedantic
+CFLAGS=-Ofast -Wall -pedantic
 INCL=-I../objmng -I../include
 TARGET=../bin/joe
 LIBS=-Wl,-rpath=\$$ORIGIN/. -L../bin -ljoeobj -lbangso -ldl

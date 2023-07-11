@@ -301,7 +301,7 @@ joe_Block_new (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 
    joe_Object_assign(&jobj, joe_JOEObject_New(self, *JOE_AT(self, PARENT)));
 
-   rc = my_exec (jobj, argc, args, retval);
+   rc = init (jobj, argc, args, retval);
 
    if (rc == JOE_SUCCESS) {
       joe_Object_assign(retval, jobj);
@@ -366,6 +366,7 @@ getName(joe_JOEObject self, int argc, joe_Object* argv, joe_Object* retval)
 static void
 getAllVars (joe_JOEObject blk, joe_HashMap hashvars)
 {
+   joe_Object oldValue = 0;
    joe_HashMap vars = *JOE_AT(blk, VARIABLES);
    joe_Block parent = *JOE_AT(blk, PARENT);
 
@@ -379,7 +380,8 @@ getAllVars (joe_JOEObject blk, joe_HashMap hashvars)
       for (i = 0; i < len; i++) {
          name = *JOE_AT(varArray, i);
          if (strcmp(joe_String_getCharStar(name),"!!")) {
-            joe_HashMap_put(hashvars, name, 0);
+            joe_HashMap_put(hashvars, name, 0, &oldValue);
+            joe_Object_assign (&oldValue, 0);
          }
       }
       joe_Object_assign(&varArray, 0);
@@ -586,10 +588,12 @@ recurGetVar (joe_Block self, joe_String name, int *depth)
 static joe_Variable
 joe_Block_setVarDepthIndex (joe_Block self,joe_String name,int depth,int index)
 {
+   joe_Object oldValue = 0;
    joe_Variable Return;
    joe_HashMap hashvars = *JOE_AT(self,VARIABLES);
    Return = joe_Variable_New_String (name, depth, index);
-   joe_HashMap_put (hashvars, name, Return);
+   joe_HashMap_put (hashvars, name, Return, &oldValue);
+   joe_Object_assign (&oldValue, 0);
    return Return;
 }
 
