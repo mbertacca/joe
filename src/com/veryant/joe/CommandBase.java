@@ -197,7 +197,10 @@ public class CommandBase {
             WArray wargs = new WArray(args.length);
             for (int i = 0; i < args.length; i++) {
                final Object o = Wrapper.newInstance(args[i]);
-               wargs.set(i, o);
+               if (o != null)
+                  wargs.set(i, o);
+               else
+                  wargs.set(i, args[i]);
             }
             Object Return = blk.exec(method,wargs);
             if (Return instanceof Wrapper)
