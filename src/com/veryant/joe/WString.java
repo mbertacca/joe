@@ -92,6 +92,12 @@ public class WString extends Wrapper {
    public WInteger compareToIgnoreCase(String anotherString) {
       return new WInteger (value.compareToIgnoreCase (anotherString));
    }
+   public WInteger compareTo(WString anotherString) {
+      return new WInteger (value.compareTo (anotherString.value));
+   }
+   public WInteger compareToIgnoreCase(WString anotherString) {
+      return new WInteger (value.compareToIgnoreCase (anotherString.value));
+   }
    public WBoolean contains (WString s) {
       return new WBoolean (value.contains(s.value));
    }

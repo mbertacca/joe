@@ -24,6 +24,9 @@ import java.util.HashMap;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -178,6 +181,34 @@ public class CommandBase {
    public ClassReference getClassRef (String clazz) throws Exception {
       return new ClassReference (Class.forName (clazz));
    }
+   /**
+    * Returns the specified interface whose method must be implemented
+    * in the supplied block in a way similar to java.lang.reflect.Proxy.
+    */
+   public Object newInterface (String intf, final Block blk) throws Exception {
+      Class clazz = Class.forName (intf);
+
+      Object Return = Proxy.newProxyInstance(clazz.getClassLoader(),
+                                             new Class[] { clazz },
+                                             new InvocationHandler() {
+         @Override
+         public Object invoke(Object proxy, Method method, Object[] args)
+                                                          throws Throwable {
+            WArray wargs = new WArray(args.length);
+            for (int i = 0; i < args.length; i++) {
+               final Object o = Wrapper.newInstance(args[i]);
+               wargs.set(i, o);
+            }
+            Object Return = blk.exec(method,wargs);
+            if (Return instanceof Wrapper)
+               return ((Wrapper) Return).getWrapped();
+            else
+               return Return;
+         }
+      });
+      return Return;
+   }
+
    /**
     * Invoke System.exit (ec).
     */
