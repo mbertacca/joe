@@ -263,6 +263,15 @@ public class CommandBase {
       return false;
    }
    /**
+    * Returns the JOE name of the object.
+    */
+   public String typename (Object obj) {
+      if (obj instanceof Block && ((Block) obj).isExecAsJoe())
+         return ((Block) obj).name();
+      else
+         return obj.getClass().getName();
+   }
+   /**
     * Executes the specified JOE script and returns it as an object.
     */
    public Object $new (String fname) throws Exception {

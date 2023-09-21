@@ -272,7 +272,7 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_StringBuilder msg = 0;
    joe_Object_assign (&msg, joe_StringBuilder_New ());
-   joe_StringBuilder_appendCharStar (msg, "JOE Revision 0.9s ");
+   joe_StringBuilder_appendCharStar (msg, "JOE Revision 0.9t ");
    joe_StringBuilder_appendCharStar (msg, __DATE__);
    joe_Object_assign(retval, joe_StringBuilder_toString (msg));
    joe_Object_assign (&msg, 0);
@@ -779,6 +779,22 @@ _new (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 }
 
 static int
+typename (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
+{
+   if (argc == 1) {
+      if (joe_Object_instanceOf (args[0], &joe_JOEObject_Class))
+         joe_Object_assign(retval,joe_Block_getName (args[0]));
+      else
+         joe_Object_assign(retval,
+                        joe_String_New (joe_Object_getClassName (args[0])));
+      return JOE_SUCCESS;
+   }
+   joe_Object_assign(retval,
+                        joe_Exception_New("typename: Invalid argument"));
+   return JOE_FAILURE;
+}
+
+static int
 runJoe (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
    if (argc > 0 && joe_Object_instanceOf (args[0], &joe_String_Class)) {
@@ -929,6 +945,7 @@ static joe_Method mthds[] = {
   {"return", _return},
   {"array", array},
   {"new", _new},
+  {"typename", typename },
   {"runJoe", runJoe},
   {"runAsBlock", runAsBlock},
   {"newArray", newArray},

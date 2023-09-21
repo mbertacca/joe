@@ -352,14 +352,7 @@ joe_Block_clone (joe_Block self, joe_Block parent)
 static int
 getName(joe_JOEObject self, int argc, joe_Object* argv, joe_Object* retval)
 {
-   joe_String name = *JOE_AT(self,NAME);
-   if (!name) {
-      char buffer[32];
-      snprintf (buffer, sizeof(buffer),"block-%p", (void *) self);
-      joe_Block_setName (self, buffer);
-      name = *JOE_AT(self,NAME);
-   }
-   joe_Object_assign(retval, name);
+   joe_Object_assign(retval, joe_Block_getName (self));
    return JOE_SUCCESS;
 }
 
@@ -518,6 +511,19 @@ joe_Block_New (joe_Block parent)
    self = joe_Object_New (&joe_Block_Class, 0);
    joe_Block_Init (self, parent);
    return self;
+}
+
+joe_String
+joe_Block_getName(joe_Block self)
+{
+   joe_String Return = *JOE_AT(self,NAME);
+   if (!Return) {
+      char buffer[32];
+      snprintf (buffer, sizeof(buffer),"block-%p", (void *) self);
+      joe_Block_setName (self, buffer);
+      Return= *JOE_AT(self,NAME);
+   }
+   return Return;
 }
 
 void
