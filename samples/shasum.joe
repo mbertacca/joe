@@ -1,0 +1,47 @@
+:args.
+
+ByteBuffer := !getClassRef "java.nio.ByteBuffer".
+String := !getClassRef "java.lang.String".
+
+usage := {
+   !println "usage: joe ",(args get 0)," <file> [ SHA-1 | SHA-256 | MD5 ]".
+}.
+
+args length; > 1 ifFalse {
+   usage exec.
+   !systemExit 2.
+}.
+
+showHex := {:byteArray.
+   bb := ByteBuffer wrap byteArray.
+   Return := "".
+   
+   !try {
+      !while { <1> },{
+         Return := Return + (String format "%02x", (bb get; and 255)).
+      }.
+   }.
+   Return.
+}.
+
+file := !newInstance "java.io.File",(args get 1).
+
+file canRead; ifTrue {
+    MessageDigest := !getClassRef "java.security.MessageDigest".
+    *>dis := !newInstance "java.security.DigestInputStream".
+    algorithm := "SHA-1".
+    args length; > 2 ifTrue {
+       algorithm := args get 2.
+    }.
+    md := MessageDigest getInstance algorithm.
+    dis := !newInstance "java.security.DigestInputStream",
+              (!newInstance "java.io.FileInputStream", file), md.
+    dis on <1>;
+    buffer := !newArray "byte",8192.
+    !while { dis read buffer <> -1 },{}.
+    b := md digest.
+    dis close.
+    !println (showHex exec b).
+},{
+   !println "Cannot access ",file.
+}.

@@ -170,7 +170,26 @@ public class CommandBase {
     * Returns the Class instance of clazz.
     */
    public Class getClass (String clazz) throws Exception {
-      return Class.forName (clazz);
+      switch (clazz) {
+      case "boolean":
+         return boolean.class;
+      case "byte":
+         return byte.class;
+      case "char":
+         return char.class;
+      case "short":
+         return short.class;
+      case "int":
+         return int.class;
+      case "long":
+         return long.class;
+      case "float":
+         return float.class;
+      case "double":
+         return double.class;
+      default:
+         return Class.forName (clazz);
+      }
    }
    /**
     * Returns the ClassReference instance of clazz. The ClassReference
