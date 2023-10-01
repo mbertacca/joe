@@ -114,8 +114,8 @@ public abstract class Wrapper implements InternalObject {
                   }
                   obj = objArray;
                }
-               return new WArray ((Object[]) obj);
             }
+            return new WArray ((Object[]) obj);
          }
       } else {
          return WNull.value;
