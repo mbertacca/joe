@@ -1,0 +1,104 @@
+- := {
+   IF := {:b.
+      {
+         cond := b.
+         this :=!!.
+         THEN := {:blk.
+            cond ifTrue blk.
+            this.
+         }.
+         ELSE := {:blk.
+            cond ifFalse blk.
+            this.
+         }.
+      } new.
+   }.
+   EVALUATE := {:c.
+      {
+         todo :=<1>.
+         cmp := c.
+         this :=!!.
+         WHEN := {:case,blk.
+            todo and {case = cmp} ifTrue {blk exec. todo := <0> }.
+            this.
+         }.
+         WHEN_OTHER := {:blk.
+            todo ifTrue {blk exec. todo := <0> }.
+            this.
+         }.
+      } new.
+   }.
+   DISPLAY := {:c.
+      !println c.
+   }.
+   ACCEPT := {
+       !readLine; intValue.
+   }.
+   STOP_RUN := {
+      !systemExit.
+   }.
+   PERFORM_UNTIL := {:cond,exec.
+      {
+         !while {cond exec; not},{exec exec}.
+      } new.
+      exit := {<0>}.
+   }.
+} new.
+
+NULL := ().
+TRUE := <1>.
+A := .
+
+     -PERFORM_UNTIL { A = 99 },{ 
+        -DISPLAY "Write a number (99 = exit) ... ".
+        A := -ACCEPT.
+        -IF (A = 99) THEN {
+            -DISPLAY "Bye bye".
+            -STOP_RUN.
+       }.
+        -IF (A = NULL) THEN {
+            -DISPLAY "It is not a number".
+        } ELSE {
+            -IF (A > 0) THEN {
+                -DISPLAY ">0".
+            } ELSE {
+               -IF (A < 0) THEN {
+                   -DISPLAY "<0".
+               } ELSE { 
+                   -DISPLAY "=0".
+               }
+            }
+        }.
+
+        -EVALUATE A
+        WHEN NULL,{
+           -DISPLAY "It is not a number".
+        }
+        WHEN 0,{
+           -DISPLAY "=0".
+        }
+        WHEN_OTHER {
+           -IF (A > 0) THEN {
+               -DISPLAY ">0".
+           } ELSE {
+               -DISPLAY "<0".
+           }
+        }.
+
+        -EVALUATE TRUE
+        WHEN (A = NULL),{
+           -DISPLAY "It is not a number".
+        }
+        WHEN (A = 0),{
+           -DISPLAY "=0".
+        }
+        WHEN (A > 0),{
+           -DISPLAY ">0".
+        }
+        WHEN (A < 0),{
+           -DISPLAY "<0".
+        }
+        WHEN_OTHER {
+           -DISPLAY "It cannot be!".
+        }.
+    }.
