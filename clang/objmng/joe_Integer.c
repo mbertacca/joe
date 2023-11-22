@@ -345,6 +345,61 @@ lt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 static int
+and (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_Integer_Class)) {
+       joe_Object_assign(retval, 
+                joe_Integer_New(*((long *) joe_Object_getMem (self)) &
+                                *((long *) joe_Object_getMem (argv[0]))));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("and: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+or (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_Integer_Class)) {
+       joe_Object_assign(retval, 
+                joe_Integer_New(*((long *) joe_Object_getMem (self)) |
+                                *((long *) joe_Object_getMem (argv[0]))));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("or: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+xor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_Integer_Class)) {
+       joe_Object_assign(retval, 
+                joe_Integer_New(*((long *) joe_Object_getMem (self)) ^
+                                *((long *) joe_Object_getMem (argv[0]))));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("xor: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+not (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+       joe_Object_assign(retval, 
+                joe_Integer_New(~*((long *) joe_Object_getMem (self))));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("xor: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
 intValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
@@ -413,6 +468,10 @@ static joe_Method mthds[] = {
    {"ge", ge },
    {"lt", lt },
    {"le", le },
+   {"and", and },
+   {"or", or },
+   {"xor", xor },
+   {"not", not },
    {"intValue", intValue },
    {"longValue", intValue },
    {"floatValue", floatValue },
