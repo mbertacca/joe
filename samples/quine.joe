@@ -1,0 +1,1 @@
+q:=!chr 34.s:="q:=!chr 34.s:=.!println(s substring 0,14),q,s,q,(s substring 14).".!println(s substring 0,14),q,s,q,(s substring 14).
