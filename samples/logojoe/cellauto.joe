@@ -1,0 +1,120 @@
+/*
+ Elementary cellular automaton
+
+ interesting rules 
+ 110
+ 30, 45, 75, 86, 89, 101, 124 random 
+ 90, 18, 22, 26, 60, 82, 102, 126, 129, 146, 154, 165 sierpinsky
+ 73, 105, 150
+ 
+*/
+:args.
+winwidth := 640.
+winheight := 480.
+pensize := 2.
+zeroColor := !newInstance "java.awt.Color",0,0,64.
+oneColor := !newInstance "java.awt.Color",255,255,0.
+
+Rule := .
+args length; > 1 ifTrue {Rule := args get 1 intValue}.
+
+!if (() = Rule or { Rule < 0 or (Rule > 255) }),{
+   Rule := 110.
+}.
+
+logo := !newInstance "Logo",winwidth,winheight.
+logo setantialiasingoff;
+     hideturtle;
+     setTitle (args get 0 + " Rule=" + Rule).
+
+rows := !newInstance "java.util.ArrayList".
+x0 := winwidth / -2.
+y0 := winheight / 2.
+
+myNum := {mynum:n.
+   num := n.
+   binArray := {
+      Return := !array 0,0,0,0,0,0,0,0.
+      n:=num.
+      !for 7,0,-1,{:i.
+         n and 1 = 1 ifTrue { Return set i, 1 }.
+         n := n / 2.
+      }. 
+      Return.
+   }.
+}.
+
+ruleArray := myNum new Rule binArray.
+
+horArraySize := winwidth / pensize.
+verArraySize := winheight / pensize.
+
+{:i.
+   i := 0.
+   line := !newArray horArraySize.
+   !foreach line,{
+      line set i, 0.
+      i := i + 1.
+   }.
+   !for 1,(verArraySize - 1),{
+      rows add line.
+   }.
+   i := 0.
+   line := !newArray horArraySize.
+   !foreach line,{
+      line set i, 0.
+      i := i + 1.
+   }.
+   line set (line length; / 2),1.
+   rows add line.
+} exec.
+
+rule := {:old.
+   i := 0.
+   len := old length.
+   Return := !newArray len.
+   !foreach old,{:x.
+       lx := old get ((i - 1 + len) % len).
+       rx := old get ((i + 1) % len).
+       idx := 7 - ((lx * 4) + (x * 2) + rx).     
+       Return set i, (ruleArray get idx).
+       i := i + 1.
+   }.
+   Return.
+}.
+
+draw := {draw:.
+   
+   logo setupdateoff;
+        clearscreen;
+        setbackground zeroColor
+        penup;
+        setxy x0,y0
+        right 90
+        setpencolor oneColor
+        setpensize pensize
+        .
+   !for 0,(verArraySize - 1),{:i.
+      row := rows get i.
+      !foreach row,{:p.
+         p = 1 ifTrue { logo pendown },
+                      { logo penup   }.
+         logo forward pensize.
+      }.
+      logo penup;
+           setxy x0,(y0 - (i * pensize) - pensize).
+
+   }.
+   logo setupdateon.
+}.
+
+draw exec.
+
+!while {<1>}, {
+   last := verArraySize - 1.
+   old := rows get (last).
+   new := rule exec old.
+   rows remove 0.
+   rows add new.
+   draw exec.
+}.
