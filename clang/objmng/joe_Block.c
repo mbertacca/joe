@@ -141,7 +141,7 @@ my_exec_sub (joe_Object self, int startMsg, joe_Object *retval)
    joe_ArrayList messages = *JOE_AT(self,MESSAGES);
    unsigned int len = joe_ArrayList_length (messages);
 
-   joe_Object_assign(retval, 0);
+   joe_Object_assign(retval, joe_Null_value);
    lretval = 0;
    for (i = startMsg; i < len; i++) {
       obj = *joe_ArrayList_at(messages,i);

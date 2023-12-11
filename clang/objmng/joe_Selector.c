@@ -127,8 +127,11 @@ joe_Selector_invoke (joe_Object self, joe_Object receiver,
          joe_Object_assign (retval, joe_Exception_New (buffer));
          return JOE_FAILURE;
       }
-   } else {
+   } else if (selector->argRcvr) {
       return selector->method (selector->actualRcvr, argc, argv, retval);
+   } else {
+      joe_Object_assign (retval, joe_Exception_New ("Void receiver"));
+      return JOE_FAILURE;
    }
 /*
 
