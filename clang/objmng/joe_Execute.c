@@ -87,6 +87,7 @@ add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       Execute exec = (void *) joe_Object_getMem(mem);
       char *line = joe_String_getCharStar (argv[0]);
       Tokenizer_tokenize (exec->tokenizer, line);
+      joe_Object_assign(retval, self);
       return JOE_SUCCESS;
    } else {
       joe_Object_assign(retval,
@@ -104,6 +105,7 @@ clear (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    JoeArray_clear (exec->tokens);
    joe_Block_removeMessages(block);
    exec->compiled = 0;
+   joe_Object_assign(retval, self);
    return JOE_SUCCESS;
 }
 
@@ -174,6 +176,7 @@ joe_Execute_add (joe_Execute self, char *line)
    joe_Object_assign (&sline, joe_String_New (line));
    Return = add (self, 1, &sline, &retval);
    joe_Object_assign (&sline, 0);
+   joe_Object_assign (&retval, 0);
 
    return Return;
 }
@@ -185,6 +188,7 @@ joe_Execute_clear (joe_Execute self)
    int Return;
 
    Return = clear (self, 0, 0, &retval);
+   joe_Object_assign (&retval, 0);
 
    return Return;
 }
