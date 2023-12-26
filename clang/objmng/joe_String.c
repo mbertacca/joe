@@ -333,6 +333,33 @@ substring (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 static int
+trim(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
+{
+   if (argc == 0) {
+      unsigned int selfLen = joe_String_length(self);
+      char *strt =  joe_String_getCharStar(self);
+      char *end =  strt + selfLen - 1;
+      unsigned int trimLen = selfLen;
+      while (*strt <= ' ' && trimLen) {
+          trimLen--;
+          strt++;
+      }
+      while (*end <= ' ' && trimLen) {
+          trimLen--;
+          end--;
+      }
+      joe_Object_assign(retval, joe_String_New_len(strt, trimLen));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New(
+                               "joe_String trim: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+
+
+static int
 charAt(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 {
    if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_Integer_Class)) {
@@ -698,6 +725,7 @@ static joe_Method mthds[] = {
   {"lt", lt},
   {"length", length},
   {"substring", substring},
+  {"trim", trim},
   {"charAt", charAt},
   {"startsWith", startsWith},
   {"toLowerCase", toLowerCase},

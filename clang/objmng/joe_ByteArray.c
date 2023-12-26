@@ -116,6 +116,17 @@ set (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
                  minLen);
          joe_Object_assign(retval, self);
          return JOE_SUCCESS;
+      } else if (joe_Object_instanceOf (argv[0],&joe_Integer_Class)) {
+         if (length >= sizeof(long)) {
+            long *n = (long *) &(*(char **) joe_Object_getMem(mem))[offset];
+            *n = joe_Integer_value (argv[0]);
+            joe_Object_assign(retval, self);
+            return JOE_SUCCESS;
+         } else {
+            joe_Object_assign(retval,
+                     joe_Exception_New ("ByteArray set: not enough memory"));
+            return JOE_FAILURE;
+         }
       } else if (joe_Object_instanceOf (argv[0],&joe_ByteArray_Class)) {
          int offsrc = joe_Integer_value (*JOE_AT (argv[0], OFFSET));
          int minLen = joe_Integer_value (*JOE_AT (argv[0], LENGTH));
@@ -132,6 +143,118 @@ set (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       } else {
          joe_Object_assign(retval,
                      joe_Exception_New ("ByteArray set: invalid parameter"));
+         return JOE_FAILURE;
+      }
+   } else {
+      joe_Object_assign(retval,
+                     joe_Exception_New ("ByteArray set: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+setByte (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && joe_Object_instanceOf (argv[0],&joe_Integer_Class)) {
+      int offset = joe_Integer_value(*JOE_AT (self, OFFSET));
+      int length = joe_Integer_value(*JOE_AT (self, LENGTH));
+      joe_Object mem = *JOE_AT (self, MEMORY);
+
+      if (joe_Object_instanceOf (mem, &joe_ByteArray_Class))
+         mem =  *JOE_AT (mem, MEMORY);
+
+      if (length >= sizeof(char)) {
+         char *n = (char *) &(*(char **) joe_Object_getMem(mem))[offset];
+         *n = joe_Integer_value (argv[0]);
+         joe_Object_assign(retval, self);
+         return JOE_SUCCESS;
+      } else {
+         joe_Object_assign(retval,
+                     joe_Exception_New ("ByteArray set: not enough memory"));
+         return JOE_FAILURE;
+      }
+   } else {
+      joe_Object_assign(retval,
+                     joe_Exception_New ("ByteArray set: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+setShort (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && joe_Object_instanceOf (argv[0],&joe_Integer_Class)) {
+      int offset = joe_Integer_value(*JOE_AT (self, OFFSET));
+      int length = joe_Integer_value(*JOE_AT (self, LENGTH));
+      joe_Object mem = *JOE_AT (self, MEMORY);
+
+      if (joe_Object_instanceOf (mem, &joe_ByteArray_Class))
+         mem =  *JOE_AT (mem, MEMORY);
+
+      if (length >= sizeof(short)) {
+         short *n = (short *) &(*(char **) joe_Object_getMem(mem))[offset];
+         *n = joe_Integer_value (argv[0]);
+         joe_Object_assign(retval, self);
+         return JOE_SUCCESS;
+      } else {
+         joe_Object_assign(retval,
+                     joe_Exception_New ("ByteArray set: not enough memory"));
+         return JOE_FAILURE;
+      }
+   } else {
+      joe_Object_assign(retval,
+                     joe_Exception_New ("ByteArray set: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+setInt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && joe_Object_instanceOf (argv[0],&joe_Integer_Class)) {
+      int offset = joe_Integer_value(*JOE_AT (self, OFFSET));
+      int length = joe_Integer_value(*JOE_AT (self, LENGTH));
+      joe_Object mem = *JOE_AT (self, MEMORY);
+
+      if (joe_Object_instanceOf (mem, &joe_ByteArray_Class))
+         mem =  *JOE_AT (mem, MEMORY);
+
+      if (length >= sizeof(int)) {
+         int *n = (int *) &(*(char **) joe_Object_getMem(mem))[offset];
+         *n = joe_Integer_value (argv[0]);
+         joe_Object_assign(retval, self);
+         return JOE_SUCCESS;
+      } else {
+         joe_Object_assign(retval,
+                     joe_Exception_New ("ByteArray set: not enough memory"));
+         return JOE_FAILURE;
+      }
+   } else {
+      joe_Object_assign(retval,
+                     joe_Exception_New ("ByteArray set: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+setLong (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && joe_Object_instanceOf (argv[0],&joe_Integer_Class)) {
+      int offset = joe_Integer_value(*JOE_AT (self, OFFSET));
+      int length = joe_Integer_value(*JOE_AT (self, LENGTH));
+      joe_Object mem = *JOE_AT (self, MEMORY);
+
+      if (joe_Object_instanceOf (mem, &joe_ByteArray_Class))
+         mem =  *JOE_AT (mem, MEMORY);
+
+      if (length >= sizeof(long)) {
+         long *n = (long *) &(*(char **) joe_Object_getMem(mem))[offset];
+         *n = joe_Integer_value (argv[0]);
+         joe_Object_assign(retval, self);
+         return JOE_SUCCESS;
+      } else {
+         joe_Object_assign(retval,
+                     joe_Exception_New ("ByteArray set: not enough memory"));
          return JOE_FAILURE;
       }
    } else {
@@ -181,6 +304,19 @@ shortValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
            joe_Exception_New ("ByteArray shortValue: not enough memory space"));
       return JOE_FAILURE;
    }
+}
+
+static int
+byteValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+
+   int offset = joe_Integer_value(*JOE_AT (self, OFFSET));
+   joe_Object mem = *JOE_AT (self, MEMORY);
+   if (joe_Object_instanceOf (mem, &joe_ByteArray_Class))
+         mem =  *JOE_AT (mem, MEMORY);
+   joe_Object_assign (retval,
+         joe_Integer_New (*(char*)&(*(char **) joe_Object_getMem(mem))[offset]));
+   return JOE_SUCCESS;
 }
 
 static int
@@ -261,6 +397,7 @@ toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 static joe_Method mthds[] = {
+   {"byteValue", byteValue },
    {"shortValue", shortValue },
    {"intValue", intValue },
    {"longValue", longValue },
@@ -268,6 +405,10 @@ static joe_Method mthds[] = {
    {"toString", toString },
    {"init", _init },
    {"set", set },
+   {"setByte", setByte },
+   {"setShort", setShort },
+   {"setInt", setInt },
+   {"setLong", setLong },
    {"length", length },
    {"child", child },
    {(void *) 0, (void *) 0}

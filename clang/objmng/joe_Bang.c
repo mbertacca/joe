@@ -19,6 +19,7 @@
 # include <stdio.h>
 # include <errno.h>
 # include <time.h>
+# include <errno.h>
 # include <string.h>
 # include <stdlib.h>
 # include <unistd.h>
@@ -272,7 +273,7 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_StringBuilder msg = 0;
    joe_Object_assign (&msg, joe_StringBuilder_New ());
-   joe_StringBuilder_appendCharStar (msg, "JOE Revision 0.9x ");
+   joe_StringBuilder_appendCharStar (msg, "JOE Revision 0.9y ");
    joe_StringBuilder_appendCharStar (msg, __DATE__);
    joe_Object_assign(retval, joe_StringBuilder_toString (msg));
    joe_Object_assign (&msg, 0);
@@ -331,6 +332,19 @@ chr (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+
+static int
+getErrno (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      joe_Object_assign(retval, joe_Integer_New (errno));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("getErrno: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
 
 static int
 asc (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -882,10 +896,14 @@ static int
 newArray (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
    if (argc == 1 && joe_Object_instanceOf (args[0], &joe_Integer_Class)) {
-      joe_Object_assign(retval, joe_Array_New (joe_Integer_value (args[0])));
+      int i;
+      int dim = joe_Integer_value (args[0]);
+      joe_Object_assign(retval, joe_Array_New (dim));
+      for (i = 0; i < dim; i++)
+         joe_Object_assign (joe_Object_at (*retval, i), joe_Null_value);
       return JOE_SUCCESS;
    } else {
-      joe_Object_assign(retval, joe_Exception_New ("newArray: invaliid argument"));
+      joe_Object_assign(retval, joe_Exception_New ("newArray: invalid argument"));
       return JOE_FAILURE;
    }
 }
@@ -955,6 +973,7 @@ static joe_Method mthds[] = {
   {"getOSType", getOSType},
   {"asc", asc},
   {"chr", chr},
+  {"getErrno", getErrno},
   {"systemGetenv", systemGetenv},
   {"exec", exec},
   {"execFromDir", execFromDir},
