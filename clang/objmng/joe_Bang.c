@@ -74,6 +74,38 @@ static joe_Class switchClazz = {
    0
 };
 
+static char *
+execgetout (char *cmd)
+{
+  char buffer[160];
+  char *Return = calloc (1, 1);
+  int totSize = 0;
+  int size;
+  int rc = -1;
+
+  FILE *fout = popen (cmd, "r");
+  if (fout != NULL) {
+     while (fgets (buffer, sizeof(buffer), fout) != NULL) {
+        size = strlen (buffer);
+        Return = realloc (Return, totSize + size + 1);
+        memcpy (&Return[totSize], buffer, size);
+        totSize += size;
+     }
+     Return[totSize] = 0;
+     rc = pclose (fout);
+     if (rc != 0 && (rc & 0x00FF) == 0)
+        rc >>= 8;
+  }
+  if (rc && totSize == 0) {
+     snprintf (buffer, sizeof(buffer), "Error trying to execute %s (rc=%d)",
+               cmd, rc);
+     Return = realloc (Return, strlen(buffer) + 1);
+     strcpy (Return, buffer);
+  }
+  return Return;
+}
+
+
 joe_Object
 Switch_New (joe_Object cfrt)
 {
@@ -243,6 +275,30 @@ exec (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 static int
+execGetOut (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc > 0) {
+      int i;
+      char *output;
+      joe_StringBuilder msg = 0;
+      joe_Object_assign(&msg, joe_StringBuilder_New());
+
+      for (i = 0; i < argc; i++) {
+         joe_StringBuilder_append(msg, argv[i]);
+         joe_StringBuilder_appendChar(msg, ' ');
+      }
+      output = execgetout (joe_StringBuilder_getCharStar(msg));
+      joe_Object_assign(retval, joe_String_New (output));
+      free (output);
+      joe_Object_assign(&msg, 0);
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("exec: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
 execFromDir (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc > 1 && joe_Object_instanceOf (argv[0], &joe_String_Class)) {
@@ -275,25 +331,39 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    joe_Object_assign (&msg, joe_StringBuilder_New ());
    joe_StringBuilder_appendCharStar (msg, "JOE Revision 0.9y ");
    joe_StringBuilder_appendCharStar (msg, __DATE__);
+#ifdef WIN32
+   joe_StringBuilder_appendCharStar (msg, " Windows");
+#else
+   joe_StringBuilder_appendCharStar (msg, " Unix-like");
+#endif
    joe_Object_assign(retval, joe_StringBuilder_toString (msg));
    joe_Object_assign (&msg, 0);
    return JOE_SUCCESS;
 }
 
 static int
+nl (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+#ifdef WIN32
+   joe_Object_assign (retval,joe_String_New ("\r\n"));
+#else
+   joe_Object_assign (retval,joe_String_New ("\n"));
+#endif
+   return JOE_SUCCESS;
+}
+
+static int
 getOSType (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   joe_StringBuilder msg = 0;
-   joe_Object_assign (&msg, joe_StringBuilder_New ());
 #ifdef WIN32
-   joe_StringBuilder_appendCharStar (msg, "Windows");
+  joe_Object_assign (retval,joe_String_New ("Windows"));
 #elif __unix__
-   joe_StringBuilder_appendCharStar (msg, "Unix");
+   joe_Object_assign (retval,joe_String_New ("Unix-like"));
+#elif __MACH__
+   joe_Object_assign (retval,joe_String_New ("Mach"));
 #else
-   joe_StringBuilder_appendCharStar (msg, "Unknown");
+   joe_Object_assign (retval,joe_String_New ("Unknown"));
 # endif
-   joe_Object_assign(retval, joe_StringBuilder_toString (msg));
-   joe_Object_assign (&msg, 0);
    return JOE_SUCCESS;
 }
 
@@ -970,12 +1040,14 @@ static joe_Method mthds[] = {
   {"runAsBlock", runAsBlock},
   {"newArray", newArray},
   {"version", version},
+  {"nl", nl},
   {"getOSType", getOSType},
   {"asc", asc},
   {"chr", chr},
   {"getErrno", getErrno},
   {"systemGetenv", systemGetenv},
   {"exec", exec},
+  {"execGetOut", execGetOut},
   {"execFromDir", execFromDir},
   {"unixTime", unixTime},
   {"systemExit", systemExit},

@@ -561,7 +561,7 @@ public class DefaultCommand extends CommandBase {
          Return.append (line);
       for ( ; ; ) {
          if ((line = bro.readLine()) != null) {
-            Return.append (' ');
+            Return.append ('\n');
             Return.append (line);
          } else if ((line = bre.readLine()) != null)
             println (line);
