@@ -38,6 +38,7 @@
 # include "joe_Files.h"
 # include "joe_Glob.h"
 # include "joe_ByteArray.h"
+# include "joe_ArrayList.h"
 # include "joe_Pointer.h"
 # include "joe_Class.h"
 # include "joestrct.h"
@@ -139,6 +140,7 @@ init ()
       joe_Class_registerClass (&joe_Pointer_Class);
       joe_Class_registerClass (&joe_Exception_Class);
       joe_Class_registerClass (&joe_HashMap_Class);
+      joe_Class_registerClass (&joe_ArrayList_Class);
    }
 }
 

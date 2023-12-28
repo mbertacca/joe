@@ -20,6 +20,9 @@
 # include "joe_Array.h"
 # include "joe_Exception.h"
 # include "joe_Integer.h"
+# include "joe_Boolean.h"
+# include "joe_Block.h"
+# include "joe_BreakLoopException.h"
 # include "joestrct.h"
 
 # define ARRAY 0
@@ -31,7 +34,7 @@ static int
 ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
-      joe_Object_assign (retval,  joe_Array_New(8));
+      joe_Object_assign (retval,  joe_ArrayList_New(8));
       return JOE_SUCCESS;
     } else if (argc == 1 && joe_Object_instanceOf (argv[0],&joe_Integer_Class)) {
       unsigned int size = joe_Integer_value (argv[0]);
@@ -49,7 +52,7 @@ length (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
       joe_Object_assign(retval,
-                        *joe_Object_at (self, LENGTH));
+                        joe_Integer_New (joe_int_value (*JOE_AT (self, LENGTH))));
    } else {
       joe_Object_assign(retval,
                      joe_Exception_New ("ArrayList length: invalid argument"));
@@ -58,16 +61,155 @@ length (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_SUCCESS;
 }
 
+static int
+add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1) {
+      joe_ArrayList_add (self, argv[0]);
+      joe_Object_assign(retval, joe_Boolean_True);
+   } else {
+      joe_Object_assign(retval,
+                     joe_Exception_New ("ArrayList add: invalid argument"));
+      return JOE_FAILURE;
+   }
+   return JOE_SUCCESS;
+}
+
+static int
+get (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_Integer_Class)) {
+      long length = joe_Integer_value (*joe_Object_at (self, LENGTH));
+      int idx = joe_Integer_value (argv[0]);
+      if (idx < length) {
+         joe_Array array = *joe_Object_at (self, ARRAY);
+         joe_Object_assign(retval, *JOE_AT (array, idx));
+      } else {
+         joe_Object_assign(retval,
+                           joe_Exception_New ("ArrayList get: index out of bounds"));
+         return JOE_FAILURE;
+      }
+   } else {
+      joe_Object_assign(retval,
+                        joe_Exception_New ("ArrayList get: invalid argument"));
+      return JOE_FAILURE;
+   }
+   return JOE_SUCCESS;
+}
+
+static int
+foreach (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   int start;
+   joe_Block blk;
+   int rc;
+   joe_Array array = *joe_Object_at (self, ARRAY);
+   int len = joe_ArrayList_length (self);
+   int i;
+
+   if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_Block_Class)) {
+      start = 0;
+      blk = argv[0];
+   } else if (argc == 2 
+              && joe_Object_instanceOf (argv[0], &joe_Integer_Class)
+              && joe_Object_instanceOf (argv[1], &joe_Block_Class)) {
+      start = joe_Integer_value (argv[0]);
+      blk = argv[1];
+   } else {
+      joe_Object_assign(retval,
+                   joe_Exception_New ("ArrayList foreach: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+
+   for (i = 0; i < len; i++) {
+      if (i >= start) {
+         if ((rc=joe_Object_invoke(blk,"exec",
+                                      1, JOE_AT (array, i),
+                                             retval)) != JOE_SUCCESS) {
+            if (joe_Object_instanceOf (*retval,
+                                         &joe_BreakLoopException_Class)) {
+               joe_Object retobj = joe_BreakException_getReturnObj(*retval);
+               if (retobj)
+                  joe_Object_assign(retval, retobj);
+               return JOE_SUCCESS;
+            } else {
+               return JOE_FAILURE;
+            }
+         }
+      }
+   }
+   return JOE_SUCCESS;
+}
+
+static int
+set (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 2 && joe_Object_instanceOf (argv[0], &joe_Integer_Class)) {
+      int idx = joe_Integer_value (argv[0]);
+      joe_Array array = *joe_Object_at (self, ARRAY);
+
+      if (idx >= 0 && idx < (int) joe_ArrayList_length (self)) {
+         joe_Object_assign(retval, *JOE_AT(array, idx));
+         joe_Object_assign (JOE_AT(array, idx), argv[1]);
+         return JOE_SUCCESS;
+      } else {
+         joe_Object_assign(retval,
+                          joe_Exception_New ("ArrayList set: index out of bounds"));
+         return JOE_FAILURE;
+      }
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("ArrayList set: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+toArray (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      int i;
+      unsigned int len = joe_ArrayList_length (self);
+      joe_Array array = *joe_Object_at (self, ARRAY);
+
+      joe_Object_assign (retval, joe_Array_New(len));
+      for (i = 0; i < len; i++)
+         joe_Object_assign (JOE_AT(*retval, i), *JOE_AT(array, i));
+
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                        joe_Exception_New ("ArrayList toArray: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+isEmpty (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      unsigned int len = joe_ArrayList_length (self);
+      if (len) {
+         joe_Object_assign(retval, joe_Boolean_False);
+      } else {
+         joe_Object_assign(retval, joe_Boolean_True);
+      }
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("ArrayList: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+
 static joe_Method mthds[] = {
-// {"add", add },
-// {"push", add },
-// {"pop", pop },
-// {"peek", peek },
-// {"get", get },
-// {"empty", empty },
+   {"add", add },
+   {"get", get },
+   {"set", set },
+   {"isEmpty", isEmpty },
    {"length", length },
-// {"foreach", foreach },
-// {(void *) 0, (void *) 0}
+   {"size", length },
+   {"foreach", foreach },
+   {"toArray", toArray },
    {(void *) 0, (void *) 0}
 };
 

@@ -268,6 +268,24 @@ length (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 static int
+indexOf (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_String_Class)) {
+      char *hs = joe_String_getCharStar (self);
+      char *delta = strstr (hs, joe_String_getCharStar (argv[0]));
+      if (delta) {
+         joe_Object_assign(retval, joe_Integer_New (delta - hs));
+      } else {
+         joe_Object_assign(retval, joe_Integer_New (-1));
+      }
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("indexOf: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
 toLowerCase (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
@@ -724,6 +742,7 @@ static joe_Method mthds[] = {
   {"le", le},
   {"lt", lt},
   {"length", length},
+  {"indexOf", indexOf},
   {"substring", substring},
   {"trim", trim},
   {"charAt", charAt},

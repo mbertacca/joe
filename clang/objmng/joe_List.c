@@ -23,6 +23,7 @@
 # include "joe_Exception.h"
 # include "joe_BreakLoopException.h"
 # include "joe_Null.h"
+# include "joestrct.h"
 
 #define OBJ 0
 #define NEXT 1
@@ -204,7 +205,7 @@ length (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 static int
-empty (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+isEmpty (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
       if (joe_Integer_value(*joe_Object_at(self, LENGTH)) > 0)
@@ -274,16 +275,41 @@ iterator (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_SUCCESS;
 }
 
+static int
+toArray (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      int i;
+      joe_ListItem item;
+      long len = joe_Integer_value(*joe_Object_at (self, LENGTH));
+
+      joe_Object_assign (retval, joe_Array_New(len));
+
+      for (item = *joe_Object_at (self, FIRST), i = 0; item != 0;
+           item = *joe_Object_at (item, NEXT), i++) {
+         joe_Object_assign (JOE_AT(*retval, i), *JOE_AT(item, OBJ));
+      }
+
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                   joe_Exception_New ("List toArray: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
 static joe_Method mthds[] = {
   {"add", add },
   {"push", add },
   {"pop", pop },
   {"peek", peek },
   {"get", get },
-  {"empty", empty },
+  {"isEmpty", isEmpty },
   {"length", length },
+  {"size", length },
   {"foreach", foreach },
   {"iterator", iterator },
+  {"toArray", toArray },
   {(void *) 0, (void *) 0}
 };
 
