@@ -1,0 +1,21 @@
+CC=gcc
+#CFLAGS=-g -Wall -rdynamic
+CFLAGS=-Og -Wall -fPIC
+INCL=-I../include
+BIN=../bin
+LIB=../lib
+LIBS=-L$(BIN) -ljoeobj
+EGLIB=joemath.dll
+
+all:$(BIN)/$(EGLIB)
+
+$(BIN)/$(EGLIB):joe_Math.c
+	$(CC) $(INCL) -fPIC -g -shared -o $(BIN)/$(EGLIB) -Wl,--output-def,$(LIB)/$(TARGET).def,--out-implib,$(LIB)/$(TARGET).lib,--add-stdcall-alias $(OBJS) joe_Math.c $(LIBS)
+
+.c.o:
+	$(CC) $(INCL) -c $(CFLAGS) $(INCL) $<
+
+clean:
+	rm -f $(BIN)/$(EGLIB) $
+
+eglib:

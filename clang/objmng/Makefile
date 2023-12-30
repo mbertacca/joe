@@ -50,7 +50,7 @@ $(LIB)/$(TARGET).a:$(OBJS)
 	ar r $(LIB)/$(TARGET).a $(OBJS)
 
 $(BIN)/$(TARGET).so:$(OBJS)
-	$(CC) -g -shared -o $(BIN)/$(TARGET).so -Wl,-soname,$(TARGET).so $(OBJS)
+	$(CC) -g -shared -o $(BIN)/$(TARGET).so -Wl,-rpath,"\$$ORIGIN" -Wl,-soname,$(TARGET).so $(OBJS)
 
 
 .c.o:

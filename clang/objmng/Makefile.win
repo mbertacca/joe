@@ -50,7 +50,7 @@ $(LIB)/$(TARGET).lib:$(OBJS)
 	ar r $(LIB)/$(TARGET).a $(OBJS)
 
 $(BIN)/$(TARGET).dll:$(OBJS)
-	$(CC) -g -shared -o $(BIN)/$(TARGET).dll -Wl,--output-def,$(LIB)/$(TARGET).def,--out-implib,$(LIB)/$(TARGET).lib,--add-stdcall-alias $(OBJS)
+	$(CC) -g -shared -o $(BIN)/$(TARGET).dll -Wl,-rpath,"\$$ORIGIN" -Wl,--output-def,$(LIB)/$(TARGET).def,--out-implib,$(LIB)/$(TARGET).lib,--add-stdcall-alias $(OBJS)
 
 
 .c.o:
