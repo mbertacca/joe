@@ -171,6 +171,7 @@ static joe_Class joe_TimeStamp_Class = {
 static int
 timeStampCtor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
+   timeCtor (self, 0, 0, retval);
    joe_Object_assign (joe_Object_getVar (self, "year"),
                       joe_Integer_New (0));
    joe_Object_assign (joe_Object_getVar (self, "month"),
@@ -184,6 +185,7 @@ timeStampCtor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 JOEOBJ_API void
 joe_init ()
 {
+   joe_Time_Class.extends = joe_Class_getClass("joe_Object");
    joe_Class_registerClass (&joe_Time_Class);
    joe_Class_registerClass (&joe_TimeStamp_Class);
 }

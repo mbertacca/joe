@@ -1,5 +1,9 @@
 /* The library must be accessible, so set LD_LIBRARY_PATH accordingly */
-!loadSO "libtimeobjs.so".
+!if (!getOSType; startsWith "Win"),{
+   !loadSO "timeobjs.dll".
+},{
+   !loadSO "libtimeobjs.so".
+}.
 
 aTime := !newInstance "example_Time".
 aTime setHour 16 setMin 23 setSec 45.

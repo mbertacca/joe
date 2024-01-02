@@ -3,7 +3,7 @@ CC=cc
 CFLAGS=-Ofast -Wall -pedantic
 INCL=-I../objmng -I../include
 TARGET=../bin/joe
-LIBS=-Wl,-rpath=\$$ORIGIN/. -L../bin -ljoeobj -lbangso -ldl
+LIBS=-Wl,-rpath=\$$ORIGIN/. -L../bin -ljoeobj -ldl
 
 #all:joec testlib.so
 OBJS=joec.o
