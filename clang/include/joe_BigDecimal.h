@@ -29,7 +29,6 @@ joe_Object joe_BigDecimal_New (nDecimal bd);
 int joe_BigDecimal_bigDecimalValue (joe_Object self, joe_Object *retval);
 nDecimal get_nDecimal(joe_BigDecimal self);
 joe_Object joe_BigDecimal_New_str(char* num);
-joe_Object joe_BigDecimal_New_lng(long num);
 joe_Object joe_BigDecimal_New_dbl(double num);
 joe_Object joe_BigDecimal_New_dbl(double num);
 enum joe_BigDecimal_ops {

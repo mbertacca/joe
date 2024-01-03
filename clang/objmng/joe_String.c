@@ -671,7 +671,7 @@ intValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
       char * const str = joe_String_getCharStar (self);
-      long val = atol(str);
+      int64_t val = joe_Integer_fromAscii(str);
       if (val == 0) {
          int len = joe_String_length (self);
          if (len == 0) {

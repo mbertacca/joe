@@ -147,7 +147,7 @@ intValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       joe_Memory mem = *joe_Object_at (self, 0);
       nDecimal num = (nDecimal) joe_Object_getMem (mem);
       char* strNum = nDecimal_toString(num);
-      joe_Object_assign (retval, joe_Integer_New(atol(strNum)));
+      joe_Object_assign (retval, joe_Integer_New(joe_Integer_fromAscii(strNum)));
       free(strNum);
       return JOE_SUCCESS;
    } else {
@@ -247,12 +247,6 @@ joe_Object
 joe_BigDecimal_New_str(char* num)
 {
     return joe_BigDecimal_New(nDecimal_new_str(num));
-}
-
-joe_Object
-joe_BigDecimal_New_lng(long num)
-{
-    return joe_BigDecimal_New(nDecimal_new_lng(num));
 }
 
 joe_Object

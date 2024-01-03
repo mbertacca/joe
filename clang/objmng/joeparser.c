@@ -106,7 +106,7 @@ getString (char *str)
 joe_Object
 getInteger (char *intgr)
 {
-   return joe_Integer_New (atol(intgr));
+   return joe_Integer_New (joe_Integer_fromAscii(intgr));
 }
 
 joe_Object

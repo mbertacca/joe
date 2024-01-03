@@ -25,14 +25,59 @@
 
 # include <stdio.h>
 
+void
+joe_Integer_toAscii (int64_t n, char *out) {
+   char asc[32];
+   char *p = asc + sizeof (asc) - 1;
+
+   *(p--) = 0;
+   if (n == 0)
+     *(p) = '0';
+   else {
+      int negative = (n < 0);
+      if (negative)
+         n = ~n + 1;
+      for (*(p--) = 0; n != 0; p--) {
+         *p = '0' + (n % 10);
+         n /= 10;
+      }
+      if (negative)
+         *(p) = '-';
+      else
+         p++;
+   }
+   while (*p) 
+      *(out++) = *(p++);
+   *out = 0;
+}
+
+int64_t
+joe_Integer_fromAscii (char *asc) {
+   int64_t Return = 0;
+   int negative = *asc == '-';
+
+   if (negative)
+      asc++;
+
+   for (;*asc; asc++) {
+      Return *= 10; 
+      Return += *asc - '0';
+   }
+   if (negative)
+      Return = ~Return + 1;
+   return Return;
+}
+
 static int
 operation (joe_Integer self, int argc, joe_Object *argv,
            joe_Object *retval, enum joe_BigDecimal_ops op)
 {
    int Return;
    joe_BigDecimal bd = 0;
-   joe_Object_assign (&bd, 
-              joe_BigDecimal_New_lng (*((long *) joe_Object_getMem (self))));
+   char asc[32];
+   
+   joe_Integer_toAscii (*((int64_t *) joe_Object_getMem (self)), asc);
+   joe_Object_assign (&bd, joe_BigDecimal_New_str (asc));
    Return = joe_BigDecimal_oper (bd, argc, argv, retval, op);
    joe_Object_assign (&bd, 0);
    return Return;
@@ -44,12 +89,12 @@ add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    if (argc == 1) {
       if (joe_Object_instanceOf (argv[0], &joe_Integer_Class)) {
          joe_Object_assign (retval,
-                 joe_Integer_New (*((long *) joe_Object_getMem (self)) +
-                                  *((long *) joe_Object_getMem (argv[0]))));
+                 joe_Integer_New (*((int64_t *) joe_Object_getMem (self)) +
+                                  *((int64_t *) joe_Object_getMem (argv[0]))));
          return JOE_SUCCESS;
       } else if (joe_Object_instanceOf (argv[0], &joe_Float_Class)) {
          joe_Object_assign(retval,
-                 joe_Float_New (*((long *) joe_Object_getMem (self)) +
+                 joe_Float_New (*((int64_t *) joe_Object_getMem (self)) +
                                 *((double *) joe_Object_getMem (argv[0]))));
          return JOE_SUCCESS;
       } else if (joe_Object_instanceOf (argv[0], &joe_BigDecimal_Class)) {
@@ -66,12 +111,12 @@ subtract (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    if (argc == 1) {
       if (joe_Object_instanceOf (argv[0], &joe_Integer_Class)) {
          joe_Object_assign(retval,
-                   joe_Integer_New (*((long *) joe_Object_getMem (self)) -
-                                    *((long *) joe_Object_getMem (argv[0]))));
+                   joe_Integer_New (*((int64_t *) joe_Object_getMem (self)) -
+                                    *((int64_t *) joe_Object_getMem (argv[0]))));
          return JOE_SUCCESS;
       } else if (joe_Object_instanceOf (argv[0], &joe_Float_Class)) {
          joe_Object_assign(retval,
-                   joe_Float_New (*((long *) joe_Object_getMem (self)) -
+                   joe_Float_New (*((int64_t *) joe_Object_getMem (self)) -
                                 *((double *) joe_Object_getMem (argv[0]))));
          return JOE_SUCCESS;
       } else if (joe_Object_instanceOf (argv[0], &joe_BigDecimal_Class)) {
@@ -88,12 +133,12 @@ multiply (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    if (argc == 1) {
       if (joe_Object_instanceOf (argv[0], &joe_Integer_Class)) {
          joe_Object_assign(retval,
-                   joe_Integer_New (*((long *) joe_Object_getMem (self)) *
-                                    *((long *) joe_Object_getMem (argv[0]))));
+                   joe_Integer_New (*((int64_t *) joe_Object_getMem (self)) *
+                                    *((int64_t *) joe_Object_getMem (argv[0]))));
          return JOE_SUCCESS;
       } else if (joe_Object_instanceOf (argv[0], &joe_Float_Class)) {
          joe_Object_assign(retval,
-                 joe_Float_New (*((long *) joe_Object_getMem (self)) *
+                 joe_Float_New (*((int64_t *) joe_Object_getMem (self)) *
                                 *((double *) joe_Object_getMem (argv[0]))));
          return JOE_SUCCESS;
       } else if (joe_Object_instanceOf (argv[0], &joe_BigDecimal_Class)) {
@@ -109,14 +154,14 @@ divide (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1) {
       if (joe_Object_instanceOf (argv[0], &joe_Integer_Class)) {
-         long divisor = *((long*)joe_Object_getMem(argv[0]));
+         int64_t divisor = *((int64_t*)joe_Object_getMem(argv[0]));
          if (divisor == 0) {
             joe_Object_assign(retval,
                               joe_Exception_New("Integer divide: division by 0"));
             return JOE_FAILURE;
          } else {
             joe_Object_assign(retval,
-                   joe_Integer_New (*((long *) joe_Object_getMem (self)) / divisor));
+                   joe_Integer_New (*((int64_t *) joe_Object_getMem (self)) / divisor));
             return JOE_SUCCESS;
          }
       } else if (joe_Object_instanceOf (argv[0], &joe_Float_Class)) {
@@ -127,7 +172,7 @@ divide (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
             return JOE_FAILURE;
          } else {
             joe_Object_assign(retval,
-                   joe_Float_New (*((long *) joe_Object_getMem (self)) /
+                   joe_Float_New (*((int64_t *) joe_Object_getMem (self)) /
                                   divisor));
             return JOE_SUCCESS;
          }
@@ -144,14 +189,14 @@ _remainder (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1) {
       if (joe_Object_instanceOf (argv[0], &joe_Integer_Class)) {
-         long divisor = *((long*)joe_Object_getMem(argv[0]));
+         int64_t divisor = *((int64_t*)joe_Object_getMem(argv[0]));
          if (divisor == 0) {
             joe_Object_assign(retval,
                joe_Exception_New("Integer remainder: division by 0"));
             return JOE_FAILURE;
          } else {
             joe_Object_assign(retval,
-                   joe_Integer_New (*((long *) joe_Object_getMem (self)) %
+                   joe_Integer_New (*((int64_t *) joe_Object_getMem (self)) %
                                      divisor));
             return JOE_SUCCESS;
          }
@@ -172,13 +217,13 @@ equals (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1) {
       if (joe_Object_instanceOf(argv[0], &joe_Integer_Class)) {
-         if (*((long *) joe_Object_getMem (self)) ==
-             *((long *) joe_Object_getMem (argv[0])))
+         if (*((int64_t *) joe_Object_getMem (self)) ==
+             *((int64_t *) joe_Object_getMem (argv[0])))
             joe_Object_assign(retval, joe_Boolean_New_true());
          else
             joe_Object_assign(retval, joe_Boolean_New_false());
       } else if (joe_Object_instanceOf(argv[0], &joe_Float_Class)) {
-         if (*((long *) joe_Object_getMem (self)) ==
+         if (*((int64_t *) joe_Object_getMem (self)) ==
              *((double *) joe_Object_getMem (argv[0])))
             joe_Object_assign(retval, joe_Boolean_New_true());
          else
@@ -199,14 +244,14 @@ ne (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1) {
       if (joe_Object_instanceOf(argv[0], &joe_Integer_Class)) {
-         if (*((long *) joe_Object_getMem (self)) !=
-             *((long *) joe_Object_getMem (argv[0])))
+         if (*((int64_t *) joe_Object_getMem (self)) !=
+             *((int64_t *) joe_Object_getMem (argv[0])))
             joe_Object_assign(retval, joe_Boolean_New_true());
          else
             joe_Object_assign(retval, joe_Boolean_New_false());
          return JOE_SUCCESS;
       } else if (joe_Object_instanceOf(argv[0], &joe_Float_Class)) {
-         if (*((long *) joe_Object_getMem (self)) !=
+         if (*((int64_t *) joe_Object_getMem (self)) !=
              *((double *) joe_Object_getMem (argv[0])))
             joe_Object_assign(retval, joe_Boolean_New_true());
          else
@@ -229,14 +274,14 @@ ge (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1) {
       if (joe_Object_instanceOf(argv[0], &joe_Integer_Class)) {
-         if (*((long *) joe_Object_getMem (self)) >=
-             *((long *) joe_Object_getMem (argv[0])))
+         if (*((int64_t *) joe_Object_getMem (self)) >=
+             *((int64_t *) joe_Object_getMem (argv[0])))
             joe_Object_assign(retval, joe_Boolean_New_true());
          else
             joe_Object_assign(retval,joe_Boolean_New_false());
          return JOE_SUCCESS;
       } else if (joe_Object_instanceOf(argv[0], &joe_Float_Class)) {
-         if (*((long *) joe_Object_getMem (self)) >=
+         if (*((int64_t *) joe_Object_getMem (self)) >=
              *((double *) joe_Object_getMem (argv[0])))
             joe_Object_assign(retval, joe_Boolean_New_true());
          else
@@ -259,14 +304,14 @@ gt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1) {
       if (joe_Object_instanceOf(argv[0], &joe_Integer_Class)) {
-         if (*((long *) joe_Object_getMem (self)) >
-             *((long *) joe_Object_getMem (argv[0])))
+         if (*((int64_t *) joe_Object_getMem (self)) >
+             *((int64_t *) joe_Object_getMem (argv[0])))
             joe_Object_assign(retval, joe_Boolean_New_true());
          else
             joe_Object_assign(retval, joe_Boolean_New_false());
          return JOE_SUCCESS;
       } else if (joe_Object_instanceOf(argv[0], &joe_Float_Class)) {
-         if (*((long *) joe_Object_getMem (self)) >
+         if (*((int64_t *) joe_Object_getMem (self)) >
              *((double *) joe_Object_getMem (argv[0])))
             joe_Object_assign(retval, joe_Boolean_New_true());
          else
@@ -289,14 +334,14 @@ le (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1) {
       if (joe_Object_instanceOf(argv[0], &joe_Integer_Class)) {
-         if (*((long *) joe_Object_getMem (self)) <=
-             *((long *) joe_Object_getMem (argv[0])))
+         if (*((int64_t *) joe_Object_getMem (self)) <=
+             *((int64_t *) joe_Object_getMem (argv[0])))
             joe_Object_assign(retval, joe_Boolean_New_true());
          else
             joe_Object_assign(retval, joe_Boolean_New_false());
          return JOE_SUCCESS;
       } else if (joe_Object_instanceOf(argv[0], &joe_Float_Class)) {
-         if (*((long *) joe_Object_getMem (self)) <=
+         if (*((int64_t *) joe_Object_getMem (self)) <=
              *((double *) joe_Object_getMem (argv[0])))
             joe_Object_assign(retval, joe_Boolean_New_true());
          else
@@ -319,14 +364,14 @@ lt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1) {
       if (joe_Object_instanceOf(argv[0], &joe_Integer_Class)) {
-         if (*((long *) joe_Object_getMem (self)) <
-             *((long *) joe_Object_getMem (argv[0])))
+         if (*((int64_t *) joe_Object_getMem (self)) <
+             *((int64_t *) joe_Object_getMem (argv[0])))
             joe_Object_assign(retval, joe_Boolean_New_true());
          else
             joe_Object_assign(retval, joe_Boolean_New_false());
          return JOE_SUCCESS;
       } else if (joe_Object_instanceOf(argv[0], &joe_Float_Class)) {
-         if (*((long *) joe_Object_getMem (self)) <
+         if (*((int64_t *) joe_Object_getMem (self)) <
              *((double *) joe_Object_getMem (argv[0])))
             joe_Object_assign(retval, joe_Boolean_New_true());
          else
@@ -349,8 +394,8 @@ and (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_Integer_Class)) {
        joe_Object_assign(retval, 
-                joe_Integer_New(*((long *) joe_Object_getMem (self)) &
-                                *((long *) joe_Object_getMem (argv[0]))));
+                joe_Integer_New(*((int64_t *) joe_Object_getMem (self)) &
+                                *((int64_t *) joe_Object_getMem (argv[0]))));
       return JOE_SUCCESS;
    } else {
       joe_Object_assign(retval, joe_Exception_New ("and: invalid argument"));
@@ -363,8 +408,8 @@ or (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_Integer_Class)) {
        joe_Object_assign(retval, 
-                joe_Integer_New(*((long *) joe_Object_getMem (self)) |
-                                *((long *) joe_Object_getMem (argv[0]))));
+                joe_Integer_New(*((int64_t *) joe_Object_getMem (self)) |
+                                *((int64_t *) joe_Object_getMem (argv[0]))));
       return JOE_SUCCESS;
    } else {
       joe_Object_assign(retval, joe_Exception_New ("or: invalid argument"));
@@ -377,8 +422,8 @@ xor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_Integer_Class)) {
        joe_Object_assign(retval, 
-                joe_Integer_New(*((long *) joe_Object_getMem (self)) ^
-                                *((long *) joe_Object_getMem (argv[0]))));
+                joe_Integer_New(*((int64_t *) joe_Object_getMem (self)) ^
+                                *((int64_t *) joe_Object_getMem (argv[0]))));
       return JOE_SUCCESS;
    } else {
       joe_Object_assign(retval, joe_Exception_New ("xor: invalid argument"));
@@ -391,7 +436,7 @@ not (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
        joe_Object_assign(retval, 
-                joe_Integer_New(~*((long *) joe_Object_getMem (self))));
+                joe_Integer_New(~*((int64_t *) joe_Object_getMem (self))));
       return JOE_SUCCESS;
    } else {
       joe_Object_assign(retval, joe_Exception_New ("xor: invalid argument"));
@@ -417,7 +462,7 @@ floatValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
       joe_Object_assign(retval,
-                    joe_Float_New (*((long *) joe_Object_getMem (self))));
+                    joe_Float_New (*((int64_t *) joe_Object_getMem (self))));
             return JOE_SUCCESS;
       return JOE_SUCCESS;
    } else {
@@ -431,8 +476,10 @@ static int
 bigDecimalValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
-      joe_Object_assign (retval, 
-                 joe_BigDecimal_New_lng (*((long *) joe_Object_getMem (self))));
+      char asc[32];
+
+      joe_Integer_toAscii (*((int64_t *) joe_Object_getMem (self)), asc);
+      joe_Object_assign (retval, joe_BigDecimal_New_str (asc));
       return JOE_SUCCESS;
    } else {
       joe_Object_assign(retval,
@@ -446,7 +493,7 @@ toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
       char buff[32];
-      sprintf (buff, "%ld", *((long *) joe_Object_getMem(self)));
+      joe_Integer_toAscii (*((int64_t *) joe_Object_getMem(self)), buff);
       joe_Object_assign(retval, joe_String_New (buff));
       return JOE_SUCCESS;
    } else {
@@ -492,37 +539,37 @@ joe_Class joe_Integer_Class = {
 };
 
 joe_Object
-joe_Integer_New (long value)
+joe_Integer_New (int64_t value)
 {
    joe_Object self;
    self = joe_Object_New (&joe_Integer_Class, 0);
-   *((long *) joe_Object_getMem(self)) = value;
+   *((int64_t *) joe_Object_getMem(self)) = value;
    return self;
 }
 
-long
+int64_t
 joe_Integer_value (joe_Object self)
 {
-   return  *((long *) joe_Object_getMem(self));
+   return  *((int64_t *) joe_Object_getMem(self));
 }
 
 joe_Integer
-joe_Integer_addMe(joe_Object self, long incr)
+joe_Integer_addMe(joe_Object self, int64_t incr)
 {
-   (*((long*)joe_Object_getMem(self))) += incr;
+   (*((int64_t*)joe_Object_getMem(self))) += incr;
    return self;
 }
 
 joe_Integer
 joe_Integer_addMe1(joe_Object self)
 {
-   (*((long*)joe_Object_getMem(self)))++;
+   (*((int64_t*)joe_Object_getMem(self)))++;
    return self;
 }
 
 joe_Integer
 joe_Integer_subMe1 (joe_Object self)
 {
-   (*((long *) joe_Object_getMem(self)))--;
+   (*((int64_t *) joe_Object_getMem(self)))--;
    return self;
 }
