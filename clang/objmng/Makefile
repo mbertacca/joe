@@ -37,6 +37,7 @@ OBJS=joe_Object.o \
      joe_Glob.o \
      joe_ByteArray.o \
      joe_Pointer.o \
+     joe_Date.o \
      ndecimal.o \
      joearray.o \
      joearrayscan.o \

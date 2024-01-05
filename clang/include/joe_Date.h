@@ -16,18 +16,11 @@
  * limitations under the License.
  */
 
-# ifndef joe_Integer_h
-# define joe_Integer_h  "$Id$";
+# ifndef joe_Date_h
+# define joe_Date_h  "$Id$";
 # include "joe_Object.h"
-# include <stdint.h>
 
-typedef joe_Object joe_Integer;
-extern joe_Class joe_Integer_Class;
-JOEOBJ_API joe_Object joe_Integer_New (int64_t value);
-JOEOBJ_API int64_t joe_Integer_value(joe_Integer self);
-JOEOBJ_API joe_Integer joe_Integer_addMe(joe_Object self, int64_t incr);
-JOEOBJ_API joe_Integer joe_Integer_addMe1(joe_Object self);
-JOEOBJ_API joe_Integer joe_Integer_subMe1 (joe_Object self);
-JOEOBJ_API void joe_Integer_toAscii (int64_t n, char *out);
-JOEOBJ_API int64_t joe_Integer_fromAscii (char *asc);
+typedef joe_Object joe_Date;
+extern joe_Class joe_Date_Class;
+
 # endif
