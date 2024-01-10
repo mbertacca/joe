@@ -18,6 +18,7 @@
 
 # include "joe_ArrayList.h"
 # include "joe_Array.h"
+# include "joe_ArrayIterator.h"
 # include "joe_Exception.h"
 # include "joe_Integer.h"
 # include "joe_Boolean.h"
@@ -96,6 +97,59 @@ get (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
    return JOE_SUCCESS;
 }
+
+static int
+pop (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      joe_Object *selfVars = joe_Object_array (self);
+      joe_int objLen = selfVars[LENGTH];
+      joe_Array array = selfVars[ARRAY];
+      unsigned int *len = (unsigned int *) JOE_INT_STAR (objLen);
+
+      if (*len > 0) {
+         (*len)--;
+         joe_Object_assign(retval, *JOE_AT (array, *len));
+         joe_Object_assign(JOE_AT (array, *len), 0);
+         return JOE_SUCCESS;
+      } else {
+         joe_Object_assign(retval,
+                        joe_Exception_New ("ArrayList pop: empty array"));
+         return JOE_FAILURE;
+      }
+   } else {
+      joe_Object_assign(retval,
+                     joe_Exception_New ("ArrayList pop: invalid argument"));
+      return JOE_FAILURE;
+   }
+   return JOE_SUCCESS;
+}
+static int
+peek (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      joe_Object *selfVars = joe_Object_array (self);
+      joe_int objLen = selfVars[LENGTH];
+      joe_Array array = selfVars[ARRAY];
+      unsigned int len = *(unsigned int *) JOE_INT_STAR (objLen);
+
+      if (len > 0) {
+         len--;
+         joe_Object_assign(retval, *JOE_AT (array, len));
+         return JOE_SUCCESS;
+      } else {
+         joe_Object_assign(retval,
+                        joe_Exception_New ("ArrayList peek: empty array"));
+         return JOE_FAILURE;
+      }
+   } else {
+      joe_Object_assign(retval,
+                     joe_Exception_New ("ArrayList peek: invalid argument"));
+      return JOE_FAILURE;
+   }
+   return JOE_SUCCESS;
+}
+
 
 static int
 foreach (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -200,9 +254,28 @@ isEmpty (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+static int
+iterator (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      joe_Array array = 0;
+      toArray (self, 0, 0, &array);
+      joe_ArrayIterator_New (array, retval);
+      joe_Object_assign (&array, 0);
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+              joe_Exception_New ("ArrayList iterator: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
 
 static joe_Method mthds[] = {
    {"add", add },
+   {"push", add },
+   {"pop", pop },
+   {"peek", peek },
    {"get", get },
    {"set", set },
    {"isEmpty", isEmpty },
@@ -210,6 +283,7 @@ static joe_Method mthds[] = {
    {"size", length },
    {"foreach", foreach },
    {"toArray", toArray },
+   {"iterator", iterator },
    {(void *) 0, (void *) 0}
 };
 
@@ -265,6 +339,13 @@ joe_ArrayList_getArray (joe_Object self)
 {
    return *JOE_AT(self,ARRAY);
 }
+
+int
+joe_ArrayList_toArray (joe_Object self, joe_Array *retval)
+{
+   return toArray (self, 0, 0, retval);
+}
+
 void
 joe_ArrayList_add (joe_Object self, joe_Object item)
 {

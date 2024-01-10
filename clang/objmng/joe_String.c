@@ -24,7 +24,7 @@
 # include "joe_Integer.h"
 # include "joe_BigDecimal.h"
 # include "joe_String.h"
-# include "joe_List.h"
+# include "joe_ArrayList.h"
 # include "joe_StringBuilder.h"
 # include "joe_Null.h"
 # include "joe_Exception.h"
@@ -546,15 +546,16 @@ split (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_String_Class)) {
       char * const str = joe_String_getCharStar (self);
       char * re = joe_String_getCharStar (argv[0]);
+      joe_ArrayList al = 0;
       int ic = 0;
       if (re[0] == '(' && re[1] == '?' && re[2] == 'i' && re[3] == ')') {
          re+=4;
          ic = 1;
       }
-      
-      joe_Object_assign(retval, joe_List_New(4));
+
+      joe_Object_assign(&al, joe_ArrayList_New(4));
       if (*re == '*' || *re == '+'|| *re == '?')
-          joe_List_push(*retval, self);
+          joe_ArrayList_add(al, self);
       else {
          char *s0 = str;
          char *st = str;
@@ -564,8 +565,7 @@ split (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
            if (r_matches (&sx, re, ic) && sx != st) {
               len = st - s0;
               if (len > 0 || *sx) /* do not add the final 0 length sep */
-                 joe_List_push(*retval, 
-                               joe_String_New_len (s0, len));
+                 joe_ArrayList_add(al, joe_String_New_len (s0, len));
               s0 = st = sx;
             } else {
               sx = ++st;
@@ -573,10 +573,11 @@ split (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
          }
          if (s0 != st) {
             len = st - s0;
-            joe_List_push(*retval, 
-                          joe_String_New_len (s0, len));
+            joe_ArrayList_add(al, joe_String_New_len (s0, len));
          }
       }
+      joe_ArrayList_toArray (al, retval);
+      joe_Object_assign (&al, 0);
       return JOE_SUCCESS;
    } else {
       joe_Object_assign(retval, joe_Exception_New (

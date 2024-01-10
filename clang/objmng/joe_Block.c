@@ -21,7 +21,6 @@
 #include <stdlib.h>
 # include "joe_Block.h"
 # include "joe_JOEObject.h"
-# include "joe_ArrayList.h"
 # include "joe_HashMap.h"
 # include "joe_Variable.h"
 # include "joe_BreakBlockException.h"
@@ -53,7 +52,7 @@ static int
 findLabel (joe_Block *blk, joe_String name) {
    joe_Object obj;
    joe_Block parent = 0;
-   joe_ArrayList messages;
+   joe_Array messages;
    unsigned int len;
    int i;
 
@@ -64,9 +63,9 @@ findLabel (joe_Block *blk, joe_String name) {
    }
 
    messages = *JOE_AT(*blk, MESSAGES);
-   len = joe_ArrayList_length (messages);
+   len = joe_Array_length (messages);
    for (i = 0; i < len; i++) {
-      obj = *joe_ArrayList_at(messages,i);
+      obj = *JOE_AT (messages,i);
       if (joe_Message_isLabel (obj, name)) {
 /*
          printf ("[%d][%s] ? [%d]\n", i, joe_String_getCharStar(obj),
@@ -138,13 +137,13 @@ my_exec_sub (joe_Object self, int startMsg, joe_Object *retval)
    joe_Object obj;
    joe_Object lretval;
    int rc = JOE_SUCCESS;
-   joe_ArrayList messages = *JOE_AT(self,MESSAGES);
-   unsigned int len = joe_ArrayList_length (messages);
+   joe_Array messages = *JOE_AT(self,MESSAGES);
+   unsigned int len = joe_Array_length (messages);
 
    joe_Object_assign(retval, joe_Null_value);
    lretval = 0;
    for (i = startMsg; i < len; i++) {
-      obj = *joe_ArrayList_at(messages,i);
+      obj = *JOE_AT(messages,i);
       if (joe_Object_instanceOf (obj, &joe_Message_Class)) {
          lretval = 0;
          if (debug)
@@ -206,14 +205,14 @@ init (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
    unsigned int i;
    int rc = JOE_SUCCESS;
-   joe_ArrayList argsNames = *JOE_AT(self, ARGS_NAMES);
-   unsigned int argsNamesLen = joe_ArrayList_length (argsNames);
+   joe_Array argsNames = *JOE_AT(self, ARGS_NAMES);
+   unsigned int argsNamesLen = joe_Array_length (argsNames);
    unsigned int validArgsLen = argsNamesLen < argc ? argsNamesLen : argc;
 
    if (argsNamesLen) {
-      joe_ArrayList varcontent = *JOE_AT(self, VARCONTENT);
+      joe_Array varcontent = *JOE_AT(self, VARCONTENT);
       for (i = 0; i < validArgsLen; i++) {
-         joe_Object_assign (joe_ArrayList_at(varcontent, i+1), args[i]);
+         joe_Object_assign (JOE_AT(varcontent, i+1), args[i]);
       }
    }
    rc = my_exec_sub (self, 0, retval);
@@ -225,13 +224,13 @@ my_exec (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
    unsigned int i;
    int rc = JOE_SUCCESS;
-   joe_Array varcontent = joe_ArrayList_getArray (*JOE_AT(self, VARCONTENT));
-   int varcontentlen = joe_ArrayList_length(*JOE_AT(self, VARCONTENT));
+   joe_Array varcontent = *JOE_AT(self, VARCONTENT);
+   int varcontentlen = joe_Array_length(varcontent);
    joe_Array savevar =  0;
 
    if (varcontentlen) {
-      joe_ArrayList argsNames = *JOE_AT(self, ARGS_NAMES);
-      unsigned int argsNamesLen = joe_ArrayList_length (argsNames);
+      joe_Array argsNames = *JOE_AT(self, ARGS_NAMES);
+      unsigned int argsNamesLen = joe_Array_length (argsNames);
       unsigned int validArgsLen = argsNamesLen < argc ? argsNamesLen : argc;
 
       joe_Object_assign (&savevar, joe_Array_New(varcontentlen));
@@ -266,17 +265,17 @@ joe_Block_outer_exec (joe_Object self, int argc, joe_Object *args, joe_Object *r
 {
    unsigned int i;
    int rc = JOE_SUCCESS;
-   joe_ArrayList argsNames = *JOE_AT(self, ARGS_NAMES);
-   unsigned int argsNamesLen = joe_ArrayList_length (argsNames);
+   joe_Array argsNames = *JOE_AT(self, ARGS_NAMES);
+   unsigned int argsNamesLen = joe_Array_length (argsNames);
    unsigned int validArgsLen = argsNamesLen < argc ? argsNamesLen : argc;
 
    if (argsNamesLen) {
-      joe_ArrayList varcontent = *JOE_AT(self, VARCONTENT);
+      joe_Array varcontent = *JOE_AT(self, VARCONTENT);
       for (i = 0; i < validArgsLen; i++) {
-         joe_Object_assign (joe_ArrayList_at(varcontent, i+1), args[i]);
+         joe_Object_assign (JOE_AT(varcontent, i+1), args[i]);
       }
       for ( ; i < argsNamesLen; i++) {
-         joe_Object_assign (joe_ArrayList_at(varcontent, i+1), joe_Null_value);
+         joe_Object_assign (JOE_AT(varcontent, i+1), joe_Null_value);
       }
    }
 
@@ -323,28 +322,26 @@ joe_Block
 joe_Block_clone (joe_Block self, joe_Block parent)
 {
    joe_Block Return;
-   joe_ArrayList messNew, messOld;
+   joe_Array messNew, messOld;
    unsigned int len;
    int i;
-   joe_ArrayList newcontent;
-   int contentlen = joe_ArrayList_length(*JOE_AT(self, VARCONTENT));
+   joe_Array newcontent;
+   int contentlen = joe_Array_length(*JOE_AT(self, VARCONTENT));
    if (parent == 0)
       parent = self;
 
    Return = joe_Object_clone (self);
    joe_Object_assign (JOE_AT(Return, PARENT),parent);
-   newcontent = joe_ArrayList_New(contentlen);
+   newcontent = joe_Array_New(contentlen);
    joe_Object_assign(JOE_AT(Return, VARCONTENT), newcontent);
-   for (i = 0; i < contentlen; i++)
-      joe_ArrayList_add (newcontent, joe_Null_value);
 
    messOld = *JOE_AT(self, MESSAGES);
-   len = joe_ArrayList_length (messOld);   
+   len = joe_Array_length (messOld);   
    joe_Object_assign (JOE_AT(Return, MESSAGES),
-                       messNew = joe_ArrayList_New(len));
+                       messNew = joe_Array_New(len));
    for (i = 0; i < len; i++) {
-      joe_ArrayList_add (messNew,
-                joe_Message_clone (*joe_ArrayList_at(messOld,i), Return));
+      joe_Object_assign (JOE_AT(messNew, i),
+                joe_Message_clone (*JOE_AT(messOld,i), Return));
    }
    return Return;
 }
@@ -485,7 +482,7 @@ joe_Block_Init (joe_Block self, joe_Block parent)
    joe_HashMap hashvars = joe_HashMap_New(8);
    joe_String bangBang = 0;
 
-   joe_Object_assign(&thisVars[MESSAGES], joe_ArrayList_New(8));
+   joe_Object_assign(&thisVars[MESSAGES], joe_Array_New(0));
 
    joe_Object_assign(&thisVars[PARENT], parent);
    if (parent) {
@@ -494,10 +491,10 @@ joe_Block_Init (joe_Block self, joe_Block parent)
       joe_Object_assign(&thisVars[BANG], joe_Bang_New());
    }
    joe_Object_assign(&thisVars[NAME], 0);
-   joe_Object_assign(&thisVars[ARGS_NAMES], joe_ArrayList_New(8));
+   joe_Object_assign(&thisVars[ARGS_NAMES], joe_Array_New(0));
 
    joe_Object_assign(&thisVars[VARIABLES], hashvars);
-   joe_Object_assign(&thisVars[VARCONTENT], joe_ArrayList_New(8));
+   joe_Object_assign(&thisVars[VARCONTENT], joe_Array_New(0));
 
    joe_Object_assign(&bangBang, joe_String_New ("!!"));
    joe_Block_setVar (self,  bangBang);
@@ -529,7 +526,9 @@ joe_Block_getName(joe_Block self)
 void
 joe_Block_addMessage (joe_Block self, joe_Message msg)
 {
-   joe_ArrayList_add (*JOE_AT(self,MESSAGES), msg);
+   joe_Array newArray = 0;
+   joe_Array_add (*JOE_AT(self,MESSAGES), msg, &newArray);
+   joe_Object_transfer (JOE_AT(self,MESSAGES), &newArray);
 }
 
 static joe_Object
@@ -539,7 +538,7 @@ joe_Block_varValue(joe_Object self, joe_Variable var)
    if (index == 0) {
       return self;
    } else {
-      joe_ArrayList varcontent;
+      joe_Array varcontent;
       int depth = joe_Variable_getDepth(var);
       joe_Block block = self;
 
@@ -548,7 +547,7 @@ joe_Block_varValue(joe_Object self, joe_Variable var)
       }
       varcontent = *JOE_AT(block, VARCONTENT);
 
-      return *joe_ArrayList_at(varcontent, index);
+      return *JOE_AT(varcontent, index);
    }
 } 
 
@@ -562,7 +561,7 @@ joe_Block_getVarValue (joe_Object self, joe_Variable var, joe_Object* retval)
 void
 joe_Block_setVarValue (joe_Block self, joe_Variable var, joe_Object value)
 {
-   joe_ArrayList varcontent;
+   joe_Array varcontent;
    int index = joe_Variable_getIndex(var);
    int depth = joe_Variable_getDepth(var);
    joe_Block block = self;
@@ -572,7 +571,7 @@ joe_Block_setVarValue (joe_Block self, joe_Variable var, joe_Object value)
    }
    varcontent = *JOE_AT(block, VARCONTENT);
 
-   joe_Object_assign (joe_ArrayList_at(varcontent, index),value);
+   joe_Object_assign (JOE_AT(varcontent, index),value);
 }
 
 static joe_Variable
@@ -633,11 +632,12 @@ joe_Variable
 joe_Block_setVar (joe_Block self,  joe_String name)
 {
    joe_Variable Return;
-   joe_ArrayList varcontent = *JOE_AT(self,VARCONTENT);
-   unsigned int index = joe_ArrayList_length(varcontent);
+   joe_Array newArray = 0;
+   unsigned int index = joe_Array_length(*JOE_AT(self,VARCONTENT));
 
    Return = joe_Block_setVarDepthIndex (self, name, 0, index);
-   joe_ArrayList_add (varcontent, joe_Null_value);
+   joe_Array_add (*JOE_AT(self,VARCONTENT), joe_Null_value, &newArray);
+   joe_Object_transfer (JOE_AT(self,VARCONTENT), &newArray);
 
    return Return;
 }
@@ -675,15 +675,16 @@ void
 joe_Block_addArgName (joe_Block self, char *c)
 {
    joe_String name = joe_String_New (c);
-   joe_ArrayList argsNames = *JOE_AT(self,ARGS_NAMES);
-   joe_ArrayList_add (argsNames,  name);
+   joe_Array newArray = 0;
+   joe_Array_add (*JOE_AT(self,ARGS_NAMES), name, &newArray);
+   joe_Object_transfer (JOE_AT(self,ARGS_NAMES), &newArray);
    joe_Block_setVar (self, name);
 }
 
 void
 joe_Block_removeMessages (joe_Block self)
 {
-   joe_Object_assign (JOE_AT(self, MESSAGES), joe_ArrayList_New(1));
+   joe_Object_assign (JOE_AT(self, MESSAGES), joe_Array_New(0));
 }
 
 /* JOEObject */

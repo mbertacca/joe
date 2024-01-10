@@ -24,7 +24,7 @@
 # include "joe_Integer.h"
 # include "joe_String.h"
 # include "joe_StringBuilder.h"
-# include "joe_List.h"
+# include "joe_ArrayList.h"
 # include "joe_Files.h"
 # include "joe_Boolean.h"
 # include "joe_Exception.h"
@@ -55,9 +55,9 @@ readAllLines (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       char *filename = joe_String_getCharStar (argv[0]);
       FILE *fd = fopen (filename, "r");
       if (fd != NULL) {
-         joe_Object_assign (retval, joe_List_New());
+         joe_Object_assign (retval, joe_ArrayList_New(64));
          while ((llen = joe_Files_getline (&line, &lineLen, fd)) >= 0) {
-            joe_List_push(*retval, joe_String_New_len(line, llen));
+            joe_ArrayList_add(*retval, joe_String_New_len(line, llen));
          }
          fclose (fd);
          if (line) {
@@ -80,9 +80,9 @@ static int
 files_write (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 2 && joe_Object_instanceOf (argv[0], &joe_String_Class)
-                 && joe_Object_instanceOf (argv[1], &joe_List_Class)) {
+                 && joe_Object_instanceOf (argv[1], &joe_ArrayList_Class)) {
       char *filename = joe_String_getCharStar (argv[0]);
-      joe_List list = argv[1];
+      joe_ArrayList list = argv[1];
       FILE *fd = fopen (filename, "w");
       if (fd != NULL) {
          int rc;
@@ -90,9 +90,10 @@ files_write (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
          char *chst = 0;
          joe_String str = 0;
          joe_Object value;
-         joe_ListItem item = joe_List_getFirstItem(list);
-         while (item) {
-            value = joe_ListItem_value (item);
+         int idx = 0;
+         int maxidx = joe_ArrayList_length(list);
+         for (idx = 0; idx < maxidx; idx++) {
+            value = *joe_ArrayList_at (list, idx);
             joe_Object_invoke (value, "toString", 0, 0, &str);
             chst = joe_String_getCharStar(str);
             llen = joe_String_length (str);
@@ -105,7 +106,6 @@ files_write (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
                   return JOE_FAILURE;
                }
             }
-            item = joe_ListItem_next (item);
          }
          fclose (fd);
          joe_Object_assign (retval, argv[0]);
@@ -129,13 +129,13 @@ listDirectory (joe_Object self,
       DIR *dir = opendir (filename);
       if (dir != NULL) {
          struct dirent *entry;
-         joe_Object_assign (retval, joe_List_New());
+         joe_Object_assign (retval, joe_ArrayList_New(64));
          while ((entry = readdir (dir))	) {
             if (entry->d_name[0] == '.' &&
                  (entry->d_name[1] == 0 ||
                    (entry->d_name[1] == '.' && entry->d_name[2] == 0)))
                continue;
-            joe_List_push(*retval, joe_String_New(entry->d_name));
+            joe_ArrayList_add(*retval, joe_String_New(entry->d_name));
          }
          closedir (dir);
          return JOE_SUCCESS;

@@ -20,7 +20,8 @@
 # include <stdlib.h>
 # include <string.h>
 
-# include "joe_Array.h" 
+# include "joe_Array.h"
+# include "joe_ArrayIterator.h"
 # include "joe_List.h"
 # include "joe_Boolean.h"
 # include "joe_String.h"
@@ -80,10 +81,11 @@ struct s_ObjectList {
    struct s_ObjectList * prev;
 };
 
-
-static joe_Object roots[128];
+# define MAX_CACHE 65536
+static joe_Object st_roots[128];
+static joe_Object *roots = st_roots;
 static int rootsCnt = 0;
-static int maxRoots = sizeof(roots) / sizeof(joe_Object);
+static int maxRoots = sizeof(st_roots) / sizeof(joe_Object);
 
 # ifdef JOE_MEM_DEBUG
 void
@@ -127,6 +129,7 @@ init ()
       registeredClasses->clazz = &joe_Object_Class;
       registeredClasses->next = 0;
       joe_Class_registerClass (&joe_Array_Class);
+      joe_Class_registerClass (&joe_ArrayIterator_Class);
       joe_Class_registerClass (&joe_List_Class);
       joe_Class_registerClass (&joe_String_Class);
       joe_Class_registerClass (&joe_StringBuilder_Class);
@@ -570,8 +573,16 @@ joe_Object_unassign (joe_Object self)
          if (!self->buffered) {
             self->buffered = 1;
             roots[rootsCnt++] = self;
-            if (rootsCnt == maxRoots)
+            if (rootsCnt == maxRoots) {
                joe_Object_gc ();
+               if (maxRoots < MAX_CACHE) {
+                  maxRoots <<= 1;
+                  if (roots == st_roots)
+                     roots = calloc (maxRoots, sizeof(joe_Object));
+                  else
+                     roots = realloc (roots, maxRoots * sizeof(joe_Object));
+               }
+            }
          }
       }
    }

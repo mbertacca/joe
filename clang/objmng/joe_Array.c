@@ -17,6 +17,7 @@
  */
 
 # include "joe_Array.h"
+# include "joe_ArrayIterator.h"
 # include "joe_Integer.h"
 # include "joe_Exception.h"
 # include "joe_Block.h"
@@ -175,6 +176,19 @@ foreach (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_SUCCESS;
 }
 
+static int
+iterator (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      joe_ArrayIterator_New (self, retval);
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+              joe_Exception_New ("Array iterator: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
 static joe_Method mthds[] = {
   {"length", length },
   {"get", get },
@@ -183,6 +197,7 @@ static joe_Method mthds[] = {
   {"clean", clean },
   {"shift", shift },
   {"add", add },
+  {"iterator", iterator },
   {(void *) 0, (void *) 0}
 };
 
@@ -218,4 +233,10 @@ joe_Array_clean(joe_Object self)
    for (i = 0; i < len; i++)
       joe_Object_assign(JOE_AT(self, i), 0);
    return self;
+}
+
+int
+joe_Array_add(joe_Object self, joe_Object obj, joe_Object *retval)
+{
+   return add (self, 1, &obj, retval);
 }
