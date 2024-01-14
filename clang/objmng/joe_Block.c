@@ -302,10 +302,10 @@ joe_Block_new (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 
    rc = init (jobj, argc, args, retval);
 
-   if (rc == JOE_SUCCESS) {
-      joe_Object_assign(retval, jobj);
-   }
-   joe_Object_assign(&jobj, 0);
+   if (rc == JOE_SUCCESS)
+      joe_Object_transfer(retval, &jobj);
+   else
+      joe_Object_assign(&jobj, 0);
 
    return rc;
 }
