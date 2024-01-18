@@ -27,11 +27,13 @@
 
 typedef struct s_Selector {
    int (*method)(JOE_METHOD_ARGS);
-   joe_Block argRcvr;
-   joe_Block actualRcvr;
+   joe_Object argRcvr;
+   joe_Object actualRcvr;
    joe_Class *argClazz;
    int argc;
 } Selector;
+
+static joe_Method *blkExecMthd;
 
 #define SELECTOR 0
 
@@ -72,6 +74,7 @@ joe_Selector_New (char *name, int argc)
    strcpy (mname, name);
    selector->argc = argc;
    joe_Object_assign (JOE_AT(self, SELECTOR), mem);
+   blkExecMthd = joe_Object_getMethod (&joe_Block_Class, "exec");
 
    return self;
 }
@@ -91,9 +94,20 @@ joe_Selector_invoke (joe_Object self, joe_Object receiver,
                      int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_Memory mem = *JOE_AT(self, 0);
-   Selector *selector = (Selector*) joe_Object_getMem (mem) ;
+   Selector *selector = (Selector*) joe_Object_getMem (mem);
 
-   if (selector->argRcvr != receiver) {
+   if (selector->argRcvr == receiver) {
+      if (selector->argRcvr) {
+         return selector->method (selector->actualRcvr, argc, argv, retval);
+      } else {
+         joe_Object_assign (retval, joe_Exception_New ("Void receiver"));
+         return JOE_FAILURE;
+      }
+   } else if (selector->argClazz == receiver->clazz) {
+      selector->argRcvr = receiver;
+      selector->actualRcvr = receiver;
+      return selector->method (selector->actualRcvr, argc, argv, retval);
+   } else {
       joe_Class *clazz = joe_Object_getClass (receiver);
       char *selName;
       joe_Method *mthd;
@@ -109,12 +123,14 @@ joe_Selector_invoke (joe_Object self, joe_Object receiver,
       if (clazz == &joe_JOEObject_Class) {
          joe_Block actualRcvr = joe_JOEObject_getReceiver (receiver, selName);
          if (actualRcvr != 0) {
-            mthd = joe_Object_getMethod (&joe_Block_Class, "exec");
+            mthd = blkExecMthd;
             selector->method = mthd->mthd;
             selector->actualRcvr = actualRcvr;
+            selector->argClazz = 0;
             return selector->method (selector->actualRcvr, argc, argv, retval);
          }
       }
+      selector->argClazz = receiver->clazz;
       mthd = joe_Object_getMethod (clazz, selName);
       if (mthd) {
          selector->method = mthd->mthd;
@@ -127,11 +143,6 @@ joe_Selector_invoke (joe_Object self, joe_Object receiver,
          joe_Object_assign (retval, joe_Exception_New (buffer));
          return JOE_FAILURE;
       }
-   } else if (selector->argRcvr) {
-      return selector->method (selector->actualRcvr, argc, argv, retval);
-   } else {
-      joe_Object_assign (retval, joe_Exception_New ("Void receiver"));
-      return JOE_FAILURE;
    }
 /*
 

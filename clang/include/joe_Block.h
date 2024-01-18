@@ -44,6 +44,7 @@ JOEOBJ_API void joe_Block_setBang (joe_Block self, joe_Object bang);
 JOEOBJ_API joe_Variable joe_Block_setVar (joe_Block self, joe_String name);
 JOEOBJ_API joe_Variable joe_Block_getVar (joe_Block self, char *name);
 JOEOBJ_API joe_Variable joe_Block_getSetVar (joe_Block self, char *name);
+JOEOBJ_API joe_Object joe_Block_varValue(joe_Object self, joe_Variable var);
 
 void joe_Block_addArgName (joe_Block self, char *name);
 

@@ -531,7 +531,7 @@ joe_Block_addMessage (joe_Block self, joe_Message msg)
    joe_Object_transfer (JOE_AT(self,MESSAGES), &newArray);
 }
 
-static joe_Object
+joe_Object
 joe_Block_varValue(joe_Object self, joe_Variable var)
 {
    int index = joe_Variable_getIndex(var);

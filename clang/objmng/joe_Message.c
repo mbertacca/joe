@@ -113,7 +113,8 @@ joe_Message_exec (joe_Object self, joe_Block block, joe_Object *retval)
              joe_Object_assign (&execStack[execIdx], 0);
          joe_Object_transfer (&execStack[execIdx++], &lretval);
       } else if (JOE_ISCLASS (rpnItem, &joe_Variable_Class)) {
-         rc = joe_Block_getVarValue(block, rpnItem, &execStack[execIdx++]);
+         joe_Object_assign (&execStack[execIdx++],
+                            joe_Block_varValue(block, rpnItem));
       } else {
          joe_Object_assign (&execStack[execIdx++], rpnItem);
       }

@@ -73,7 +73,7 @@ call (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    joe_Class* pointerClass = joe_Class_getClass("joe_Pointer");
    struct LibData *lib = (struct LibData *) *joe_Object_getMem (self);
 
-   if (argc > 0 && argc < 10 && joe_Object_instanceOf(argv[0], stringClass)) {
+   if (argc > 0 && joe_Object_instanceOf(argv[0], stringClass)) {
       char *funcName = joe_String_getCharStar (argv[0]);
       void *funcArg[8];
       DLSYM_TYPE(pnt) = DLSYM(lib->pnt,funcName);
@@ -150,6 +150,10 @@ call (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
                                                            funcArg[6],
                                                            funcArg[7])));
             break;
+         default:
+            joe_Object_assign(retval,
+                              joe_Exception_New ("call :too many arguments"));
+            return JOE_FAILURE;
          }
          return JOE_SUCCESS;
       } else {
@@ -158,12 +162,7 @@ call (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
          return JOE_FAILURE;
       }
    } else {
-      if (argc > 9)
-         joe_Object_assign(retval,
-                      joe_Exception_New ("call :too many arguments (8 max)"));
-      else
-         joe_Object_assign(retval,
-                      joe_Exception_New ("call :invalid argument(s)"));
+     joe_Object_assign(retval, joe_Exception_New ("call :invalid argument"));
       return JOE_FAILURE;
    }
 }
