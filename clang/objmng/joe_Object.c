@@ -87,6 +87,10 @@ static joe_Object *roots = st_roots;
 static int rootsCnt = 0;
 static int maxRoots = sizeof(st_roots) / sizeof(joe_Object);
 
+# define NUM_CACHE 32
+static joe_Object numCache[NUM_CACHE];
+static int numCacheCnt = 0;
+
 # ifdef JOE_MEM_DEBUG
 void
 traceMemory (joe_Object obj)
@@ -181,9 +185,13 @@ joe_Object_New (joe_Class *clazz, unsigned int size)
 {
    joe_Object Return = 0;
    if (clazz->varNames == 0) { /* primitive */
-      Return = calloc (1, sizeof (struct s_joe_Object) + size);
-      Return->data.mem = (char *) Return + sizeof (struct s_joe_Object);
-      Return->acyclic = 1;
+      if (clazz->nativeNum && numCacheCnt > 0) {
+         Return = numCache[--numCacheCnt];
+      } else {
+         Return = calloc (1, sizeof (struct s_joe_Object) + size);
+         Return->data.mem = (char *) Return + sizeof (struct s_joe_Object);
+         Return->acyclic = 1;
+      }
       size = 0;
    } else {
       if (size == 0) {
@@ -308,7 +316,11 @@ joe_Object_Delete (joe_Object self)
       printf ("Memory not found! %p\n", (void*) self);
    }
 # endif
-   free (self);
+   if (self->clazz->nativeNum && numCacheCnt < NUM_CACHE) {
+      numCache[numCacheCnt++] = self;
+   } else {
+      free (self);
+   }
 }
 
 void

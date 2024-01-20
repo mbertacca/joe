@@ -18,11 +18,12 @@
 
 # ifndef joestrct_h
 # define joestrct_h  "$Id$"
+# include <stdint.h>
 
 union ptr {
    joe_Object * obj;
    void * mem;
-   long  lng;
+   int64_t  lng;
    int   intg;
    double dbl;
    char* str;
@@ -46,5 +47,9 @@ struct s_joe_Object {
 #define JOE_ARRAY(self) ((self)->data.obj)
 #define JOE_INT(self) ((self)->data.intg)
 #define JOE_INT_STAR(self) (&(self)->data.intg)
+#define JOE_INTEGER(self) ((self)->data.lng)
+#define JOE_FLOAT(self) ((self)->data.dbl)
+#define JOE_CHAR_STAR(self) ((self)->data.str)
+
 
 # endif

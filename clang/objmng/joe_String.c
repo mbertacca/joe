@@ -28,6 +28,7 @@
 # include "joe_StringBuilder.h"
 # include "joe_Null.h"
 # include "joe_Exception.h"
+# include "joestrct.h"
 
 /* Basic regex matcher
    supported character: * ? + [ ^ ] .
@@ -225,26 +226,26 @@ static int
 add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1) {
-      char **str = 0;
+      char *str;
       char *str1;
       char *str2;
       joe_String tmp = 0;
-      if (!joe_Object_instanceOf(argv[0], &joe_String_Class)) {
+      if (!JOE_ISCLASS(argv[0], &joe_String_Class)) {
          if (argv[0])
              joe_Object_invoke (argv[0], "toString", 0, 0, &tmp);
           else
              joe_Object_assign (&tmp, joe_String_New ("(null)"));
-          str2 = *((char **) joe_Object_getMem(tmp));
+          str2 = JOE_CHAR_STAR(tmp);
       } else {
-          str2 = *((char **) joe_Object_getMem(argv[0]));
+          str2 = JOE_CHAR_STAR(argv[0]);
       }
 
-      str1 = *((char **) joe_Object_getMem(self));
+      str1 = JOE_CHAR_STAR(self);
       joe_Object_assign (retval,
              joe_Object_New (&joe_String_Class, strlen(str1)+strlen(str2)+1));
-      str = (char **) joe_Object_getMem(*retval);
-      strcat (*str, str1);
-      strcat (*str, str2);
+      str = JOE_CHAR_STAR(*retval);
+      strcat (str, str1);
+      strcat (str, str2);
       if (tmp)
           joe_Object_assign (&tmp, 0);
     
@@ -270,7 +271,7 @@ length (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 static int
 indexOf (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_String_Class)) {
+   if (argc == 1 && JOE_ISCLASS(argv[0], &joe_String_Class)) {
       char *hs = joe_String_getCharStar (self);
       char *delta = strstr (hs, joe_String_getCharStar (argv[0]));
       if (delta) {
@@ -322,7 +323,7 @@ toUpperCase (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 static int
 substring (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   if (argc>0 && argc<3 && joe_Object_instanceOf(argv[0], &joe_Integer_Class)) {
+   if (argc>0 && argc<3 && JOE_ISCLASS(argv[0], &joe_Integer_Class)) {
       unsigned int selfLen = joe_String_length (self);
       unsigned int beginIndex = joe_Integer_value (argv[0]);
       if (argc == 1) {
@@ -333,7 +334,7 @@ substring (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
             joe_Object_assign(retval, joe_String_New(""));
          }
          return JOE_SUCCESS;
-      } else if (argc==2 && joe_Object_instanceOf(argv[1],&joe_Integer_Class)) {
+      } else if (argc==2 && JOE_ISCLASS(argv[1],&joe_Integer_Class)) {
          int newLen = joe_Integer_value (argv[1]) - beginIndex;
          if (beginIndex < selfLen && newLen > 0) {
             joe_Object_assign(retval, joe_String_New_len(
@@ -380,7 +381,7 @@ trim(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 static int
 charAt(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 {
-   if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_Integer_Class)) {
+   if (argc == 1 && JOE_ISCLASS(argv[0], &joe_Integer_Class)) {
       unsigned int selfLen = joe_String_length(self);
       unsigned int index = joe_Integer_value(argv[0]);
       if (index < selfLen) {
@@ -400,7 +401,7 @@ charAt(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 static int
 startsWith(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 {
-   if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_String_Class)) {
+   if (argc == 1 && JOE_ISCLASS(argv[0], &joe_String_Class)) {
       unsigned int selfLen = joe_String_length(self);
       unsigned int arglen = joe_String_length(argv[0]);
       if (arglen <= selfLen) {
@@ -431,7 +432,7 @@ toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 static int
 equals (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_String_Class)
+   if (argc == 1 && JOE_ISCLASS(argv[0], &joe_String_Class)
                  && joe_String_compare (self, argv[0]) == 0)
       joe_Object_assign(retval, joe_Boolean_New_true());
    else
@@ -442,7 +443,7 @@ equals (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 static int
 ne (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_String_Class)) {
+   if (argc == 1 && JOE_ISCLASS(argv[0], &joe_String_Class)) {
       if (joe_String_compare (self, argv[0]) != 0)
          joe_Object_assign(retval, joe_Boolean_New_true());
       else
@@ -457,7 +458,7 @@ ne (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 static int
 ge (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_String_Class)) {
+   if (argc == 1 && JOE_ISCLASS(argv[0], &joe_String_Class)) {
       if (joe_String_compare (self, argv[0]) >= 0)
          joe_Object_assign(retval, joe_Boolean_New_true());
       else
@@ -472,7 +473,7 @@ ge (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 static int
 gt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_String_Class)) {
+   if (argc == 1 && JOE_ISCLASS(argv[0], &joe_String_Class)) {
       if (joe_String_compare (self, argv[0]) > 0)
          joe_Object_assign(retval, joe_Boolean_New_true());
       else
@@ -487,7 +488,7 @@ gt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 static int
 le (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_String_Class)) {
+   if (argc == 1 && JOE_ISCLASS(argv[0], &joe_String_Class)) {
       if (joe_String_compare (self, argv[0]) <= 0)
          joe_Object_assign(retval, joe_Boolean_New_true());
       else
@@ -502,7 +503,7 @@ le (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 static int
 lt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_String_Class)) {
+   if (argc == 1 && JOE_ISCLASS(argv[0], &joe_String_Class)) {
       if (joe_String_compare (self, argv[0]) < 0)
          joe_Object_assign(retval, joe_Boolean_New_true());
       else
@@ -517,7 +518,7 @@ lt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 static int
 matches (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_String_Class)) {
+   if (argc == 1 && JOE_ISCLASS(argv[0], &joe_String_Class)) {
       char * str = joe_String_getCharStar (self);
       char * re = joe_String_getCharStar (argv[0]);
       int ic = 0;
@@ -543,7 +544,7 @@ matches (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 static int
 split (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_String_Class)) {
+   if (argc == 1 && JOE_ISCLASS(argv[0], &joe_String_Class)) {
       char * const str = joe_String_getCharStar (self);
       char * re = joe_String_getCharStar (argv[0]);
       joe_ArrayList al = 0;
@@ -636,8 +637,8 @@ replace (joe_String self, char *re, char *rplcmnt, int firstOnly)
 static int
 replaceAll (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   if (argc == 2 && joe_Object_instanceOf(argv[0], &joe_String_Class)
-                 && joe_Object_instanceOf(argv[1], &joe_String_Class)) {
+   if (argc == 2 && JOE_ISCLASS(argv[0], &joe_String_Class)
+                 && JOE_ISCLASS(argv[1], &joe_String_Class)) {
       char * re = joe_String_getCharStar (argv[0]);
       char * rplcmnt = joe_String_getCharStar (argv[1]);
       
@@ -653,8 +654,8 @@ replaceAll (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 static int
 replaceFirst (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   if (argc == 2 && joe_Object_instanceOf(argv[0], &joe_String_Class)
-                 && joe_Object_instanceOf(argv[1], &joe_String_Class)) {
+   if (argc == 2 && JOE_ISCLASS(argv[0], &joe_String_Class)
+                 && JOE_ISCLASS(argv[1], &joe_String_Class)) {
       char * re = joe_String_getCharStar (argv[0]);
       char * rplcmnt = joe_String_getCharStar (argv[1]);
       
@@ -778,7 +779,7 @@ joe_String_New_len (char *c, unsigned int len) {
    joe_Object self;
 
    self = joe_Object_New (&joe_String_Class, len + 1);
-   memcpy (*((char **) joe_Object_getMem(self)), c, len);
+   memcpy (JOE_CHAR_STAR(self), c, len);
    return self;
 }
 
@@ -788,7 +789,7 @@ joe_String_New (const char *c) {
    joe_Object self;
 
    self = joe_Object_New (&joe_String_Class, len + 1);
-   strcpy (*((char **) joe_Object_getMem(self)), c);
+   strcpy (JOE_CHAR_STAR(self), c);
    return self;
 }
 
@@ -798,8 +799,8 @@ joe_String_New2 (const char *c1, const char *c2) {
    joe_Object self;
 
    self = joe_Object_New (&joe_String_Class, len + 1);
-   strcpy (*((char **) joe_Object_getMem(self)), c1);
-   strcat (*((char **) joe_Object_getMem(self)), c2);
+   strcpy (JOE_CHAR_STAR(self), c1);
+   strcat (JOE_CHAR_STAR(self), c2);
    return self;
 }
 
@@ -809,9 +810,9 @@ joe_String_New3 (const char *c1, const char *c2, const char *c3) {
    joe_Object self;
 
    self = joe_Object_New (&joe_String_Class, len + 1);
-   strcpy (*((char **) joe_Object_getMem(self)), c1);
-   strcat (*((char **) joe_Object_getMem(self)), c2);
-   strcat (*((char **) joe_Object_getMem(self)), c3);
+   strcpy (JOE_CHAR_STAR(self), c1);
+   strcat (JOE_CHAR_STAR(self), c2);
+   strcat (JOE_CHAR_STAR(self), c3);
    return self;
 }
 
@@ -821,17 +822,17 @@ joe_String_New4(const char *c1,const char *c2,const char *c3,const char *c4) {
    joe_Object self;
 
    self = joe_Object_New (&joe_String_Class, len + 1);
-   strcpy (*((char **) joe_Object_getMem(self)), c1);
-   strcat (*((char **) joe_Object_getMem(self)), c2);
-   strcat (*((char **) joe_Object_getMem(self)), c3);
-   strcat (*((char **) joe_Object_getMem(self)), c4);
+   strcpy (JOE_CHAR_STAR(self), c1);
+   strcat (JOE_CHAR_STAR(self), c2);
+   strcat (JOE_CHAR_STAR(self), c3);
+   strcat (JOE_CHAR_STAR(self), c4);
    return self;
 }
  
 char *
 joe_String_getCharStar (joe_String self)
 {
-   return *((char **) joe_Object_getMem(self));
+   return JOE_CHAR_STAR(self);
 }
 
 int
@@ -839,8 +840,7 @@ joe_String_compare (joe_String self, joe_String aStr)
 {
    if (self)
       if (aStr)
-         return strcmp (*((char **) joe_Object_getMem(self)),
-                        *((char **) joe_Object_getMem(aStr)));
+         return strcmp (JOE_CHAR_STAR(self), JOE_CHAR_STAR(aStr));
      else
         return 1;
    else
@@ -853,5 +853,5 @@ joe_String_compare (joe_String self, joe_String aStr)
 unsigned int
 joe_String_length (joe_String self)
 {
-   return strlen (*((char **) joe_Object_getMem(self)));
+   return strlen (JOE_CHAR_STAR(self));
 }

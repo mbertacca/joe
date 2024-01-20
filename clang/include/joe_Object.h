@@ -55,7 +55,7 @@ typedef struct s_joe_Class {
    joe_Method *mthds;
    char **varNames;
    struct s_joe_Class *extends;
-   void *reserved; /* must be 0 */
+   int nativeNum; /* must be 0 except for joe_Integer && joe_Float */
 } joe_Class;
 
 extern joe_Class joe_Object_Class;

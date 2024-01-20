@@ -83,7 +83,7 @@ int
 joe_Selector_getArgc (joe_Selector self)
 {
    joe_Memory mem = *JOE_AT(self, 0);
-   Selector *selector = (Selector*) joe_Object_getMem (mem) ;
+   Selector *selector = (Selector*) JOE_MEM (mem) ;
 
    return selector->argc;
 }
@@ -94,7 +94,7 @@ joe_Selector_invoke (joe_Object self, joe_Object receiver,
                      int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_Memory mem = *JOE_AT(self, 0);
-   Selector *selector = (Selector*) joe_Object_getMem (mem);
+   Selector *selector = (Selector*) JOE_MEM (mem);
 
    if (selector->argRcvr == receiver) {
       if (selector->argRcvr) {
@@ -174,7 +174,7 @@ char *
 joe_Selector_name (joe_Object self)
 {
    joe_Memory mem = *JOE_AT(self, 0);
-   Selector *selector = (Selector*) joe_Object_getMem (mem) ;
+   Selector *selector = (Selector*) JOE_MEM (mem) ;
    return ((char *) selector) + sizeof(Selector);
 }
 
@@ -184,7 +184,7 @@ char *
 joe_Selector_toString (joe_Object self)
 {
    joe_Memory mem = *JOE_AT(self, 0);
-   Selector *selector = (Selector*) joe_Object_getMem (mem) ;
+   Selector *selector = (Selector*) JOE_MEM (mem);
 
    snprintf (buffer, sizeof(buffer), "%s#%d",
             ((char *) selector) + sizeof(Selector),
