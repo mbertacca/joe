@@ -177,7 +177,10 @@ Tokenizer_tokenize (Tokenizer self, char *line)
       case '<':
          if (breakChar(self, *c)) {
             ++c;
-            if (*c == '=') {
+            if (*c == '-') {
+               JoeStrBuild_appendStr (self->word, "<-");
+               newToken(self, _CONSTANT);
+            } else if (*c == '=') {
                JoeStrBuild_appendStr (self->word, "le");
                newToken(self, _WORD);
             } else if (*c == '>') {

@@ -164,10 +164,25 @@ public class Parser {
       Message Return;
       Token tk = tokens.pop();
       Token peek = tokens.peek();
-      if (peek.type== TokenType._ASSIGN) {
-         tokens.pop();;
+      if (peek.type == TokenType._ASSIGN || peek.type == TokenType._CONSTANT) {
+         tokens.pop();
          if (tk.type==TokenType._WORD) {
             final Variable var = block.getSetVariable (tk.word);
+            if (peek.type == TokenType._CONSTANT) {
+               if (var.canBeConst()) {
+                  var.setConstant (true);
+               } else {
+                  throw new JOEException (
+                     "Variable already declared: `" + tk.word + "`", tk);
+               }
+            } else {
+               if (var.isConstant()) {
+                  throw new JOEException (
+                     "Cannot change a constant: `" + tk.word + "`", tk);
+               } else {
+                  var.setConstant (false);
+               }
+            }
             final Object val = message (tokens, tokens.pop());
             Return = assgnDyMsg (var, val, tk.row, tk.col);
          } else {
@@ -387,7 +402,8 @@ public class Parser {
          case _WORD:
             var = block.lookForVariable (tk.word);
             if (var == null)
-               throw new JOEException ("Variable not found: " + tk.word, tk);
+               throw new JOEException (
+                         "Variable not found: `" + tk.word+ "`", tk);
             return new Message()  {
                public Object exec (Block blk) throws JOEException {
                   return blk.getVariable(var);

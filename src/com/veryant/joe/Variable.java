@@ -23,11 +23,13 @@ public class Variable {
    private final String name;
    private int depth = 0;
    private int index = -1;
+   private Boolean isConst; 
 
    public Variable (String name, int depth, int index) {
       this.depth = depth;
       this.index = index;
       this.name = name;
+      this.isConst = null;
    }
    Variable setLocal (int index) {
       this.depth = 0;
@@ -42,6 +44,15 @@ public class Variable {
    }
    int getIndex () {
       return index;
+   }
+   void setConstant (boolean b) {
+      isConst = new Boolean(b);
+   }
+   boolean isConstant () {
+      return isConst != null && isConst.booleanValue();
+   }
+   boolean canBeConst () {
+      return isConst == null;
    }
    @Override
    public int hashCode() {

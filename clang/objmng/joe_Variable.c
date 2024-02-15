@@ -25,10 +25,10 @@
 # include "joestrct.h"
 
 # define NAME  0
-# define HASH  1
+# define CONST  1
 # define DEPTH 2
 # define INDEX 3
-static char *item_vars[] = { "name", "hash","depth", "index",  0 };
+static char *item_vars[] = { "name", "const","depth", "index",  0 };
 
 static joe_Method mthds[] = {
   {(void *) 0, (void *) 0}
@@ -47,10 +47,9 @@ joe_Class joe_Variable_Class = {
 joe_Object
 joe_Variable_New_String (joe_String name, int depth, int index) {
    joe_Object self = joe_Object_New (&joe_Variable_Class, 0);
-   unsigned int hash = joe_HashMap_hash (name);
 
    joe_Object_assign (JOE_AT(self, NAME), name);
-   joe_Object_assign (JOE_AT(self, HASH), joe_int_New (hash));
+   joe_Object_assign (JOE_AT(self, CONST), joe_Null_value);
    joe_Object_assign (JOE_AT(self, DEPTH), joe_int_New(depth));
    joe_Object_assign (JOE_AT(self, INDEX), joe_int_New(index));
 
@@ -74,10 +73,23 @@ joe_Variable_nameCharStar (joe_Variable self)
    return joe_String_getCharStar(*JOE_AT(self, NAME));
 }
 
-unsigned int
-joe_Variable_hash (joe_Variable self)
+void
+joe_Variable_setConstant (joe_Variable self, int bool)
 {
-   return  JOE_INT(*JOE_AT(self, HASH));
+   joe_Object_assign (JOE_AT(self, CONST), joe_int_New(bool));
+}
+
+unsigned int
+joe_Variable_isConstant (joe_Variable self)
+{
+   joe_Object const_val = *JOE_AT(self, CONST);
+   return const_val != joe_Null_value && JOE_INT(*JOE_AT(self, CONST));
+}
+
+unsigned int
+joe_Variable_canBeConst (joe_Variable self)
+{
+   return *JOE_AT(self, CONST) == joe_Null_value;
 }
 
 int

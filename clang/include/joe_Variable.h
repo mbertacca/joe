@@ -28,6 +28,8 @@ joe_String joe_Variable_name (joe_Variable self);
 char * joe_Variable_nameCharStar (joe_Variable self);
 int joe_Variable_getDepth (joe_Variable self);
 int joe_Variable_getIndex (joe_Variable self);
-unsigned int joe_Variable_hash (joe_Variable self);
+void joe_Variable_setConstant (joe_Variable self, int bool);
+unsigned int joe_Variable_isConstant (joe_Variable self);
+unsigned int joe_Variable_canBeConst (joe_Variable self);
 
 # endif

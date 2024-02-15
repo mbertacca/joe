@@ -119,7 +119,9 @@ public class Tokenizer {
          case '<':
             if (breakChar(line[idx])) {
                ++idx;
-               if (idx < line.length && line[idx] == '=') {
+               if (idx < line.length && line[idx] == '-') {
+                  tokens.add (newToken("le", TokenType._CONSTANT, cCol));
+               } else if (idx < line.length && line[idx] == '=') {
                   tokens.add (newToken("le", TokenType._WORD, cCol));
                } else if (idx < line.length && line[idx] == '>') {
                   tokens.add (newToken("ne", TokenType._WORD, cCol));

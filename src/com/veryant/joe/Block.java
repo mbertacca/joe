@@ -259,11 +259,13 @@ public class Block extends ArrayList<Message>
       int depth[] =  { 0 };
       Variable var = lookForVariable (name, depth);
       if (var != null) {
-         if (depth[0] == 0)
+         if (depth[0] == 0) {
             Return = var;
-         else
+         } else {
             Return = new Variable (name, depth[0] + var.getDepth(),
                                          var.getIndex());
+            Return.setConstant (var.isConstant());
+         }
       } else {
          Return = null;
       }

@@ -22,6 +22,7 @@ enum TokenType {
    _FLOAT,
    _DECIMAL,
    _ASSIGN,
+   _CONSTANT,
    _ML_COMMENT,
    _COMMENT,
    _TRUE,

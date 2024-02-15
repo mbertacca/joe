@@ -20,3 +20,4 @@ sysout println ("<<" + res + ">>").
 
 system := !newInstance "com.veryant.joe.ClassReference",system_cls.
 sysout println (system getProperty "user.home").
+sysout println (!version).

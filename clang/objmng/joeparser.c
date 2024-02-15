@@ -64,10 +64,13 @@ exception (JoeParser self, char *msg, JoeArrayScan tokens, Token tk)
    if (self->exception == 0) {
       JoeStrBuild fullMsg = JoeStrBuild_new ();
       JoeStrBuild_appendStr (fullMsg, msg);
-      if (tk)
+      if (tk) {
+         JoeStrBuild_appendStr (fullMsg, "`");
          JoeStrBuild_appendStr (fullMsg, tk->word);
-      else
+         JoeStrBuild_appendStr (fullMsg, "`");
+      } else {
          JoeStrBuild_appendStr (fullMsg, "<end-of-file>");
+      }
       JoeStrBuild_appendStr (fullMsg, ", file=");
       JoeStrBuild_appendStr (fullMsg, self->fileName);
       if (tk) {
@@ -96,6 +99,19 @@ variableNotFound (JoeParser self, JoeArrayScan tokens, Token tk)
    return JOE_FAILURE;
 }
 
+int
+cannotChangeConstant (JoeParser self, JoeArrayScan tokens, Token tk)
+{
+   exception (self,  "Cannot change a constant ", tokens, tk);
+   return JOE_FAILURE;
+}
+
+int
+cannotBeConstant (JoeParser self, JoeArrayScan tokens, Token tk)
+{
+   exception (self,  "Variable already declared ", tokens, tk);
+   return JOE_FAILURE;
+}
 
 joe_Object
 getString (char *str)
@@ -353,11 +369,29 @@ parseStart (JoeParser self, joe_Block block, JoeArray rpn, JoeArrayScan tokens)
    Token tk = pop (tokens);
    // joe_Message msg;
    joe_Variable assignee = 0;
+   int peekTk = peek(tokens);
 
-   if (peek(tokens) == _ASSIGN) {
+   if (peekTk == _ASSIGN || peekTk == _CONSTANT) {
       pop(tokens);
       if (tk->type == _WORD) {
          joe_Object_assign (&assignee, joe_Block_getSetVar (block, tk->word));
+         if (peekTk == _CONSTANT) {
+            if (joe_Variable_canBeConst(assignee)) {
+               joe_Variable_setConstant(assignee, 1);
+            } else {
+               cannotBeConstant (self, tokens, tk);
+               joe_Object_assign (&assignee, 0);
+               return;
+            }
+         } else {
+            if (joe_Variable_isConstant(assignee)) {
+               cannotChangeConstant (self, tokens, tk);
+               joe_Object_assign (&assignee, 0);
+               return;
+            } else {
+               joe_Variable_setConstant(assignee, 0);
+            }
+         }
          parseReceiver (self, block, rpn, tokens);
          joe_Block_addMessage (block,
                    joe_Message_New (assignee, JoeArray_length(rpn),JoeArray_getMem(rpn),
