@@ -70,5 +70,8 @@ public class WArray extends Wrapper {
    public Object shift() {
       return shift (1);
    }
+   public Object clone() {
+      return value.clone();
+   }
 }
 

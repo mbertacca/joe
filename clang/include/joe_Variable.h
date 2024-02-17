@@ -24,11 +24,15 @@ typedef joe_Object joe_Variable;
 extern joe_Class joe_Variable_Class;
 /* joe_Object joe_Variable_New (char *c); */
 joe_Object joe_Variable_New_String (joe_String name, int depth, int index);
+joe_Object joe_Variable_New_VarDepth (joe_Variable var, int depth);
 joe_String joe_Variable_name (joe_Variable self);
 char * joe_Variable_nameCharStar (joe_Variable self);
 int joe_Variable_getDepth (joe_Variable self);
 int joe_Variable_getIndex (joe_Variable self);
-void joe_Variable_setConstant (joe_Variable self, int bool);
+void joe_Variable_makeVarAssigned (joe_Variable self);
+void joe_Variable_makeConstUnassigned (joe_Variable self);
+void joe_Variable_makeConstAssigned (joe_Variable self);
+void joe_Variable_setSameStatus (joe_Variable self, joe_Variable var);
 unsigned int joe_Variable_isConstant (joe_Variable self);
 unsigned int joe_Variable_canBeConst (joe_Variable self);
 

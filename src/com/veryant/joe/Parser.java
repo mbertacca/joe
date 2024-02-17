@@ -170,7 +170,10 @@ public class Parser {
             final Variable var = block.getSetVariable (tk.word);
             if (peek.type == TokenType._CONSTANT) {
                if (var.canBeConst()) {
-                  var.setConstant (true);
+                  if (tokens.peek().type == TokenType._DOT_)
+                     var.makeConstUnassigned ();
+                  else
+                     var.makeConstAssigned ();
                } else {
                   throw new JOEException (
                      "Variable already declared: `" + tk.word + "`", tk);
@@ -180,7 +183,7 @@ public class Parser {
                   throw new JOEException (
                      "Cannot change a constant: `" + tk.word + "`", tk);
                } else {
-                  var.setConstant (false);
+                  var.makeVarAssigned ();
                }
             }
             final Object val = message (tokens, tokens.pop());

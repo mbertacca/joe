@@ -20,16 +20,26 @@
 package com.veryant.joe;
 
 public class Variable {
+   private static final int ST_NEW = 0;
+   private static final int ST_VAR_ASSGND = 1;
+   private static final int ST_CONST_UNASGN = 2;
+   private static final int ST_CONST_ASSGND = 3;
    private final String name;
    private int depth = 0;
    private int index = -1;
-   private Boolean isConst; 
+   private int status; 
 
    public Variable (String name, int depth, int index) {
       this.depth = depth;
       this.index = index;
       this.name = name;
-      this.isConst = null;
+      this.status = ST_NEW;
+   }
+   public Variable (Variable v, int depth) {
+      this.depth = depth;
+      this.index = v.index;
+      this.name = v.name;
+      this.status = v.status;
    }
    Variable setLocal (int index) {
       this.depth = 0;
@@ -45,14 +55,21 @@ public class Variable {
    int getIndex () {
       return index;
    }
-   void setConstant (boolean b) {
-      isConst = new Boolean(b);
+   void makeVarAssigned () {
+      status = ST_VAR_ASSGND;
+   }
+   void makeConstUnassigned () {
+      status = ST_CONST_UNASGN;
+   }
+   void makeConstAssigned () {
+      status = ST_CONST_ASSGND;
    }
    boolean isConstant () {
-      return isConst != null && isConst.booleanValue();
+      return status >= ST_CONST_UNASGN;
    }
    boolean canBeConst () {
-      return isConst == null;
+      return status == ST_NEW ||
+            (status == ST_CONST_UNASGN && depth == 0);
    }
    @Override
    public int hashCode() {

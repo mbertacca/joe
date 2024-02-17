@@ -262,9 +262,7 @@ public class Block extends ArrayList<Message>
          if (depth[0] == 0) {
             Return = var;
          } else {
-            Return = new Variable (name, depth[0] + var.getDepth(),
-                                         var.getIndex());
-            Return.setConstant (var.isConstant());
+            Return = new Variable (var, depth[0] + var.getDepth());
          }
       } else {
          Return = null;

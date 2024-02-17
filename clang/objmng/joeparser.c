@@ -377,7 +377,10 @@ parseStart (JoeParser self, joe_Block block, JoeArray rpn, JoeArrayScan tokens)
          joe_Object_assign (&assignee, joe_Block_getSetVar (block, tk->word));
          if (peekTk == _CONSTANT) {
             if (joe_Variable_canBeConst(assignee)) {
-               joe_Variable_setConstant(assignee, 1);
+               if (peek(tokens) == _DOT_)
+                  joe_Variable_makeConstUnassigned(assignee);
+               else
+                  joe_Variable_makeConstAssigned(assignee);
             } else {
                cannotBeConstant (self, tokens, tk);
                joe_Object_assign (&assignee, 0);
@@ -389,7 +392,7 @@ parseStart (JoeParser self, joe_Block block, JoeArray rpn, JoeArrayScan tokens)
                joe_Object_assign (&assignee, 0);
                return;
             } else {
-               joe_Variable_setConstant(assignee, 0);
+               joe_Variable_makeVarAssigned(assignee);
             }
          }
          parseReceiver (self, block, rpn, tokens);

@@ -659,7 +659,7 @@ joe_Block_getSetVar (joe_Block self, char *c)
          Return = var;
       } else {
          Return = joe_Block_setVarDepthIndex (self, name, depth, index);
-         joe_Variable_setConstant (Return,joe_Variable_isConstant(var));
+         joe_Variable_setSameStatus (Return, var);
       }
    }
    joe_Object_assign(&name, 0);

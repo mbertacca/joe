@@ -24,11 +24,11 @@
 # include "joe_HashMap.h"
 # include "joestrct.h"
 
-# define NAME  0
-# define CONST  1
-# define DEPTH 2
-# define INDEX 3
-static char *item_vars[] = { "name", "const","depth", "index",  0 };
+# define NAME    0
+# define STATUS  1
+# define DEPTH   2
+# define INDEX   3
+static char *item_vars[] = { "name", "status","depth", "index",  0 };
 
 static joe_Method mthds[] = {
   {(void *) 0, (void *) 0}
@@ -44,12 +44,17 @@ joe_Class joe_Variable_Class = {
    0
 };
 
+# define ST_NEW              0
+# define ST_VAR_ASSIGNED     1
+# define ST_CONST_UNASSIGNED 2
+# define ST_CONST_ASSIGNED   3
+
 joe_Object
 joe_Variable_New_String (joe_String name, int depth, int index) {
    joe_Object self = joe_Object_New (&joe_Variable_Class, 0);
 
    joe_Object_assign (JOE_AT(self, NAME), name);
-   joe_Object_assign (JOE_AT(self, CONST), joe_Null_value);
+   joe_Object_assign (JOE_AT(self, STATUS), joe_int_New(ST_NEW));
    joe_Object_assign (JOE_AT(self, DEPTH), joe_int_New(depth));
    joe_Object_assign (JOE_AT(self, INDEX), joe_int_New(index));
 
@@ -74,22 +79,42 @@ joe_Variable_nameCharStar (joe_Variable self)
 }
 
 void
-joe_Variable_setConstant (joe_Variable self, int bool)
+joe_Variable_makeVarAssigned (joe_Variable self)
 {
-   joe_Object_assign (JOE_AT(self, CONST), joe_int_New(bool));
+   joe_Object_assign (JOE_AT(self, STATUS), joe_int_New(ST_VAR_ASSIGNED));
+}
+
+void
+joe_Variable_makeConstUnassigned (joe_Variable self)
+{
+   joe_Object_assign (JOE_AT(self, STATUS), joe_int_New(ST_CONST_UNASSIGNED));
+}
+
+void
+joe_Variable_makeConstAssigned (joe_Variable self)
+{
+   joe_Object_assign (JOE_AT(self, STATUS), joe_int_New(ST_CONST_ASSIGNED));
 }
 
 unsigned int
 joe_Variable_isConstant (joe_Variable self)
 {
-   joe_Object const_val = *JOE_AT(self, CONST);
-   return const_val != joe_Null_value && JOE_INT(*JOE_AT(self, CONST));
+   int status = JOE_INT(*JOE_AT(self, STATUS));
+   return status >= ST_CONST_UNASSIGNED;
+}
+
+void
+joe_Variable_setSameStatus (joe_Variable self, joe_Variable var)
+{
+   joe_Object_assign (JOE_AT(self, STATUS), *JOE_AT(var, STATUS));
 }
 
 unsigned int
 joe_Variable_canBeConst (joe_Variable self)
 {
-   return *JOE_AT(self, CONST) == joe_Null_value;
+   int status = JOE_INT(*JOE_AT(self, STATUS));
+   return status == ST_NEW || 
+         (status == ST_CONST_UNASSIGNED && JOE_INT(*JOE_AT(self, DEPTH)) == 0);
 }
 
 int
