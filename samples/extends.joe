@@ -1,36 +1,36 @@
-Time := {:h,m,s.
+Time <- {:h,m,s.
 
    hours := h.
    minutes := m.
    seconds := s.
 
-   toString := {
+   toString <- {
       "" + hours + ":" + minutes + ":" + seconds.
    }.
-   setTime := {:h, m, s.
+   setTime <- {:h, m, s.
       hours:= h.
       minutes:= m.
       seconds:= s.
    }.
 }.
 
-Timestamp := {:y,mo,d,h,m,s.
+Timestamp <- {:y,mo,d,h,m,s.
 
    year := y.
    month := mo.
    day := d.
 
-   super := Time new h,m,s.
+   super <- Time new h,m,s.
    !! extends super.
 
-   setDate := {:y,mo,d,h,m,s.
+   setDate <- {:y,mo,d,h,m,s.
       super setTime h,m,s.
       year := y.
       month := mo.
       day := d.
    }.
 
-   toString := {
+   toString <- {
      "" + year + "/" + month + "/" + day + " " + super.
    }.
 }.

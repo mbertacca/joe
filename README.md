@@ -20,7 +20,7 @@ with encapsulation, inheritance, nested functions and closures.
 
 The syntax can be summarized in the following 2 lines:
 
-*message:* [var `:=` ] obj [ method1 { `;` | obj-arg1-1 [`,`obj-arg1-2] ... } [ method2 { `;` | obj-arg2-1 [`,`obj-arg2-2] ...}] ... ]`.`  
+*message:* [var {`:=`|`<-`} ] obj [ method1 { `;` | obj-arg1-1 [`,`obj-arg1-2] ... } [ method2 { `;` | obj-arg2-1 [`,`obj-arg2-2] ...}] ... ]`.`  
 *block:* `{` [[name]`:`[arg1 [`,`arg2] ...]`.`] [*message*] ... `}`
 
 *block* is an object itself therefore it can be put wherever an object can. Parenthesis can be used to alter the default left-to-right evaluation  order.
