@@ -2,14 +2,14 @@
 
 re := ".*".
 
-mre := {:str.
+mre <- {:str.
    rx := re;
    !println str," matches ",rx," ? ",(str matches rx iif "True","False").
    rx := "(?i)" + re;
    !println str," matches ",rx," ? ",(str matches rx iif "True","False").
 }.
 
-sre := {:str.
+sre <- {:str.
    rx := re;
    split := str split rx.
    !foreach split,{:s.
@@ -24,7 +24,7 @@ sre := {:str.
    !println.
 }.
 
-tre := {:str.
+tre <- {:str.
    mre exec str.
    sre exec str.
 }.

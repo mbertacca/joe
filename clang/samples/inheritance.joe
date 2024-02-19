@@ -1,15 +1,15 @@
-time := {time:.
-   this := !!.
+time <- {time:.
+   this <- !!.
 
    hours := 0.
    minutes := 0.
    seconds := 0.
 
-   toString := {
+   toString <- {
       "" + hours + ":" + minutes + ":" + seconds.
    }.
 
-   setHours := {:h.
+   setHours <- {:h.
      !if (!isNull h not),{
          !if ((h < 0) or (h > 23)),{
             !throw ("Invalid hour: " + h).
@@ -18,7 +18,7 @@ time := {time:.
       }.
       this.
    }.
-   setMinutes := {:m.
+   setMinutes <- {:m.
      !if (!isNull m not),{
          !if ((m < 0) or (m > 59)),{
             !throw ("Invalid minutes: " + m).
@@ -27,7 +27,7 @@ time := {time:.
       }.
       this.
    }.
-   setSeconds := {:s.
+   setSeconds <- {:s.
      !if (!isNull s not),{
          !if ((s < 0) or (s > 59)),{
             !throw ("Invalid seconds: " + s).
@@ -42,28 +42,28 @@ aTime setHours 16 setMinutes 23 setSeconds 45.
 
 !println aTime.
 
-timeStamp := {timeStamp:.
-   super := time new.
+timeStamp <- {timeStamp:.
+   super <- time new.
    !! extends super.
-   this := !!.
+   this <- !!.
    year := 0.
    month := 0.
    day := 0.
 
-   toString := {
+   toString <- {
       "" + year + "/" + month + "/" + day
          + " " + (super toString)
       .
    }.
 
-   setYear := {:y.
+   setYear <- {:y.
       !if (!isNull y not),{
          year := y.
       }.
       this.
    }.
 
-   setMonth := {:m.
+   setMonth <- {:m.
       !if (!isNull m not),{
          !if ((m < 0) or (m > 12)),{
             !throw ("Invalid month: " + m).
@@ -73,7 +73,7 @@ timeStamp := {timeStamp:.
       this.
    }.
 
-   setDay := {:d.
+   setDay <- {:d.
      !if (!isNull d not),{
          !if ((d < 0) or (d > 31)),{
             !throw ("Invalid day: " + d).

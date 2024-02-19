@@ -1,7 +1,7 @@
-fact :=
-{:n.
+fact <- {:n.
+   self <- !!.
    !if (n > 1), {
-      n * (fact exec (n - 1)).
+      n * (self exec (n - 1)).
    } , {
       n := 1.
    }.

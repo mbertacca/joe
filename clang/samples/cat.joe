@@ -1,26 +1,20 @@
 cat:args.
 
-LEN := 80.
+LEN <- 80.
 
-!if ((args length) <> 2), {
+!if ((args length) < 2), {
    !println "usage: ",(args get 0), " <file-name>".
    !break "cat".
 }.
 
-line := !newInstance "joe_ByteArray",(LEN + 1).
+line <- !newInstance "joe_ByteArray",(LEN + 1).
 
-so := .
-!if (!getOSType; startsWith "Win"),{
-   so := !loadSO "msvcrt.dll".
-},{
-   so := !loadSO "".
-}.
+so <- !getOSType; startsWith "Win" ifTrue {!loadSO "msvcrt.dll"},{!loadSO ""}.
 
-idx := 0.
-!while {idx := idx + 1. idx < (args length)}, {
-   file := so call "fopen",(args get idx),"r".
+!foreach args,1,{:arg.
+   file := so call "fopen",arg,"r".
    !if (file isNull),{
-       !println "Error: file ",(args get idx)," not found".
+       !println "Error: file ",arg," not found".
    },{
       rc := .
       !while {rc := so call "fgets",line,(line length; - 1), file.
