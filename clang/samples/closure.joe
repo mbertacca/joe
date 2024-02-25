@@ -1,6 +1,6 @@
-getClos := {:n.
+getClos <- {:n.
    i := n.
-   exec := {
+   exec <- {
       i := i + 1.
    }.
 }.

@@ -1,12 +1,12 @@
-parent := {parent:.
+parent <- {parent:.
    a := 7.
-   inc := {
+   inc <- {
       a := a + 1.
    }.
    getA := { a. }.
 }.
 
-child := {child:.
+child <- {child:.
    super := parent new.
    !! extends super.
    !! inc.

@@ -1,4 +1,4 @@
-tak := {:x,y,z,lvl.
+tak <- {:x,y,z,lvl.
    lvl := lvl + 1.
    !println lvl,"-->",x,",",y,",",z.
    y >= x ifTrue { z },{

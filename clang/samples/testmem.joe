@@ -11,13 +11,8 @@ aa := {
  
 aa p.
 
-System := {
-   currentTimeMillis :=.
-   !try {
-      currentTimeMillis := { !unixTime; * 1000m}.
-   },{:ex.
-      currentTimeMillis := !getClassRef "java.lang.System" currentTimeMillis.
-   }.
+System <- {
+   currentTimeMillis <- {!newInstance "joe_Date" getTime}.
 } new.
 
 !println (System currentTimeMillis).
