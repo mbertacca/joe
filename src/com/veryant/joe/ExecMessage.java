@@ -47,7 +47,7 @@ public class ExecMessage implements Message {
                                         IllegalAccessException,
                                         InvocationTargetException {
          if (_block != null) {
-            return _block.exec (_args);
+            return _block.exec (null, _args);
          } else {
             _method.setAccessible (true);
             return _method.invoke (obj, _args);

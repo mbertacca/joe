@@ -21,6 +21,7 @@ package com.veryant.joe;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class Block extends ArrayList<Message>
@@ -30,7 +31,7 @@ public class Block extends ArrayList<Message>
    private Block parent;
    private Block $super;
    private HashMap<String,Variable> varByName;
-   private ArrayList<Object> varValues;
+   private Object[] varValues;
    private ArrayList<Block> children = new ArrayList<Block>();
    private Object[] lastArgs;
    private String blockName;
@@ -42,41 +43,40 @@ public class Block extends ArrayList<Message>
       if (parent != null)
          parent.children.add (this);
    }
-   public Object exec () throws JOEException {
-      return vExec (null, voidArgs);
+   public final Object exec () throws JOEException {
+      return exec (null, voidArgs);
    }
-   public Object multiply () throws JOEException {
+   public final Object multiply () throws JOEException {
       return exec ();
    }
-   public Object exec (Object...argv) throws JOEException {
-      return vExec (null, argv);
+   public final Object exec (Object...argv) throws JOEException {
+      return exec (null, argv);
    }
-   public Object multiply (Object...argv) throws JOEException {
+   public final Object multiply (Object...argv) throws JOEException {
       return exec (argv);
    }
-   public Object init () throws JOEException {
+   public final Object init () throws JOEException {
       return init (voidArgs);
    }
-   public Object init (Object...argv) throws JOEException {
-      return vExec (varValues, argv);
+   public final Object init (Object...argv) throws JOEException {
+      return exec (varValues, argv);
    }
    
-   public Object vExec (ArrayList<Object> vars, Object...argv)
+   public final Object exec (Object vars[], Object...argv)
                                                           throws JOEException {
       Object Return;
       lastArgs = argv;
       if (varValues != null) {
-         ArrayList<Object> saveData = vars != null ?
-                                  vars : (ArrayList<Object>) varValues.clone();
+         Object saveData[] = vars != null ? vars : varValues.clone();
          int i;
-         final int nVars = varValues.size();
+         final int nVars = varValues.length;
          final int nArgs = argv == null ? 0 : Math.min (argv.length, nVars);
 
          for (i = 0; i < nArgs; i++) {
-            varValues.set (i, argv[i]);
+            varValues[i] = argv[i];
          }
          for (     ; i < nVars; i++) {
-            varValues.set (i, WNull.value);
+            varValues[i] = WNull.value;
          }
          Return = executor.run (this);
          varValues = saveData;
@@ -97,7 +97,7 @@ public class Block extends ArrayList<Message>
       for ( ; depth != 0; depth--)
          block = block.parent;
 
-      block.varValues.set(var.getIndex(), val);
+      block.varValues[var.getIndex()] = val;
 
       return val;
    }
@@ -117,7 +117,7 @@ public class Block extends ArrayList<Message>
 
       for ( ; depth != 0; depth--)
          block = block.parent;
-      return block.varValues.get(var.getIndex());
+      return block.varValues[var.getIndex()];
    }
    private void getVariablesNames(ArrayList<String> list) {
       if (varByName != null)
@@ -164,7 +164,7 @@ public class Block extends ArrayList<Message>
       Block Return = (Block) super.clone();
       Return.blockName = name();
       if (varValues != null)
-         Return.varValues = (ArrayList<Object>)varValues.clone();
+         Return.varValues = varValues.clone();
       Return.children = new ArrayList<Block>();
       final int size = children.size();
       for (int i = 0; i < size; i++)
@@ -271,13 +271,18 @@ public class Block extends ArrayList<Message>
    }
    public Variable getSetLocalVariable (String name) {
       Variable Return;
+      final int len;
       if (varByName == null) {
+         len = 0;
          varByName = new HashMap<String,Variable>();
-         varValues = new ArrayList<Object>();
+         varValues = new Object[]  { WNull.value };
+      } else {
+         len = varValues.length;
+         varValues = Arrays.copyOf (varValues, len + 1);
+         varValues[len] = WNull.value;
       }
-      Return = new Variable (name, 0, varValues.size());
+      Return = new Variable (name, 0, len);
       varByName.put (name, Return);
-      varValues.add (WNull.value);
       return Return;
    }
    public Variable getSetVariable (String name) {
@@ -287,11 +292,14 @@ public class Block extends ArrayList<Message>
       return Return;
    }
    void setLocalVariables (ArrayList<String> names) {
+      String name;
+      final int len = names.size();
       varByName = new HashMap<String,Variable>();
-      varValues = new ArrayList<Object>();
-      for (String name : names) {
-         varByName.put (name, new Variable (name, 0, varValues.size()));
-         varValues.add (WNull.value);
+      varValues = new Object[len];
+      for (int i = 0; i < len; i++) {
+         name = names.get(i);
+         varByName.put (name, new Variable (name, 0, i));
+         varValues[i] = WNull.value;
       }
    }
 }
