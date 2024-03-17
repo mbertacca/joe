@@ -140,7 +140,7 @@ Switch_case (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
             joe_Object_assign (&or,*joe_Object_at (self,SW_PREV_COND));
             if (joe_Boolean_isFalse (or)) {
                if (joe_Object_instanceOf (argv[0], &joe_Block_Class)) {
-                  rc = joe_Object_invoke (argv[0], "exec", 0, 0, &or);
+                  rc = joe_Block_exec (argv[0], 0, 0, &or);
                   if (rc != JOE_SUCCESS) {
                      joe_Object_assign(retval, or);
                      joe_Object_assign(&or, 0);
@@ -163,7 +163,7 @@ Switch_case (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
                if (joe_Object_instanceOf (argv[1], &joe_Block_Class)) {
                   if (joe_Boolean_isTrue (or)) {
                      joe_Object Return = 0;
-                     rc = joe_Object_invoke (argv[1], "exec", 0, 0, &Return);
+                     rc = joe_Block_exec (argv[1], 0, 0, &Return);
                      joe_Object_assign (joe_Object_at (self,SW_ALREADY_DONE),
                                         joe_Boolean_New_true());
                      if (rc == JOE_SUCCESS) {
@@ -208,7 +208,7 @@ Switch_default (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
          return JOE_SUCCESS;
       } else {
         joe_Object Return = 0;
-        rc = joe_Object_invoke (argv[0], "exec", 0, 0, &Return);
+        rc = joe_Block_exec (argv[0], 0, 0, &Return);
         joe_Object_assign (joe_Object_at (self,SW_ALREADY_DONE),
                            joe_Boolean_New_true());
         if (rc == JOE_SUCCESS) {
@@ -328,7 +328,7 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_StringBuilder msg = 0;
    joe_Object_assign (&msg, joe_StringBuilder_New ());
-   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.20 ");
+   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.21 ");
    joe_StringBuilder_appendCharStar (msg, __DATE__);
 #ifdef WIN32
    joe_StringBuilder_appendCharStar (msg, " Windows");
@@ -491,7 +491,7 @@ _while (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
           joe_Object_instanceOf (argv[1], &joe_Block_Class)) {
          while (goOn) {
             bol = 0;
-            if ((rc=joe_Object_invoke (argv[0],"exec",0,0,&bol))!=JOE_SUCCESS) {
+            if ((rc=joe_Block_exec (argv[0],0,0,&bol))!=JOE_SUCCESS) {
                joe_Object_assign(retval, bol);
                joe_Object_assign(&bol, 0);
                return JOE_FAILURE;
@@ -506,7 +506,7 @@ _while (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
                return JOE_FAILURE;
             }
             if (joe_Boolean_isTrue (bol)) {
-               if ((rc=joe_Object_invoke(argv[1],"exec",0,0,&lretval))
+               if ((rc=joe_Block_exec(argv[1],0,0,&lretval))
                                                             !=JOE_SUCCESS){
                   if (joe_Object_instanceOf (lretval,
                                             &joe_BreakLoopException_Class)) {
@@ -659,7 +659,7 @@ _if (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       joe_Object bol = 0;
       int isTrue;
       if (joe_Object_instanceOf (argv[0], &joe_Block_Class)) {
-         if ((rc=joe_Object_invoke (argv[0],"exec",0,0,&bol))!=JOE_SUCCESS) {
+         if ((rc = joe_Block_exec (argv[0],0,0,&bol))!=JOE_SUCCESS) {
             joe_Object_assign(retval, bol);
             joe_Object_assign(&bol, 0);
             return JOE_FAILURE;
@@ -677,7 +677,7 @@ _if (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 
       if (isTrue) {
          if (joe_Object_instanceOf (argv[1], &joe_Block_Class)) {
-            if ((rc=joe_Object_invoke(argv[1],"exec",0,0,retval))!=JOE_SUCCESS){
+            if ((rc = joe_Block_exec(argv[1],0,0,retval))!=JOE_SUCCESS){
                return JOE_FAILURE;
             }
           } else {
@@ -686,7 +686,7 @@ _if (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
           }
       } else if (argc == 3) {
          if (joe_Object_instanceOf (argv[2], &joe_Block_Class)) {
-            if ((rc=joe_Object_invoke(argv[2],"exec",0,0,retval))!=JOE_SUCCESS){
+            if ((rc = joe_Block_exec(argv[2],0,0,retval))!=JOE_SUCCESS){
                return JOE_FAILURE;
             }
           } else {
@@ -710,12 +710,12 @@ TRY(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
       int rc;
       if (argc == 1 || 
           (argc == 2 && joe_Object_instanceOf(argv[0], &joe_Block_Class))) {
-         if ((rc = joe_Object_invoke(argv[0], "exec", 0, 0, retval)) != JOE_SUCCESS) {
+         if ((rc = joe_Block_exec(argv[0], 0, 0, retval)) != JOE_SUCCESS) {
             if (argc == 2) {
                joe_Object largs[1] = { 0 };
                joe_Object_assign(&largs[0], *retval);
                joe_Object_assign(retval, 0);
-               rc = joe_Object_invoke(argv[1], "exec", 1, largs, retval);
+               rc = joe_Block_exec(argv[1], 1, largs, retval);
                joe_Object_assign(&largs[0], 0);
             } else {
                joe_Object_assign (retval, 0);

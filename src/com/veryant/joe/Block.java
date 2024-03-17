@@ -85,6 +85,25 @@ public class Block extends ArrayList<Message>
       }
       return Return;
    }
+   private final Object whileTF (Block b, WBoolean tf) throws JOEException {
+      Object Return = null;
+      Object bol;
+      for ( ; ; ) {
+         bol = exec ();
+         if (bol.equals (tf)) {
+            Return = b.exec ();
+         } else {
+            break;
+         }
+      }
+      return Return;
+   }
+   public final Object whileTrue (Block b) throws JOEException {
+      return whileTF (b, WBoolean.TRUE);
+   }
+   public final Object whileFalse (Block b) throws JOEException {
+      return whileTF (b, WBoolean.FALSE);
+   }
 
    public Object setVariable (WString name, Object val)throws JOEException {
       Variable var = getSetVariable (name.value);

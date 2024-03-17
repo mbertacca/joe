@@ -30,6 +30,7 @@
 # include "joe_Memory.h"
 # include "joe_Null.h"
 # include "joe_Bang.h"
+# include "joe_Boolean.h"
 # include "joestrct.h"
 # include "joearray.h"
 
@@ -318,6 +319,47 @@ joe_Block_exec (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
    return rc;
 }
 
+static int
+whileTrueFalse (joe_Object self, int argc, joe_Object *argv, joe_Object *retval,
+                joe_Boolean tf)
+{
+   int rc;
+   joe_Object_assign(retval, joe_Null_value);
+   if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_Block_Class)) {
+      joe_Object bol = 0;
+      for ( ; ; ) {
+         if ((rc = my_exec (self, 0, 0, &bol)) != JOE_SUCCESS) {
+            joe_Object_transfer (retval, &bol);
+            return JOE_FAILURE;
+         }
+         if (bol == tf) {
+            if ((rc = my_exec (argv[0],0,0,retval)) != JOE_SUCCESS) {
+               joe_Object_assign(&bol, 0);
+               return JOE_FAILURE;
+            }
+         } else {
+            joe_Object_assign(&bol, 0);
+            return JOE_SUCCESS;
+         }
+      }
+   } else {
+      joe_Object_assign(retval, joe_Exception_New("while: invalid arguments"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+whileTrue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   return whileTrueFalse (self, argc, argv, retval, joe_Boolean_True);
+}
+
+static int
+whileFalse (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   return whileTrueFalse (self, argc, argv, retval, joe_Boolean_False);
+}
+
 joe_Block
 joe_Block_clone (joe_Block self, joe_Block parent)
 {
@@ -444,6 +486,8 @@ static joe_Method mthds[] = {
   {"multiply", joe_Block_exec },
   {"new", joe_Block_new },
   {"add", joe_Block_new },
+  {"whileTrue",whileTrue},
+  {"whileFalse",whileFalse},
   {"name", getName },
   {"getName", getName },
   {"setVariable", setVariable },

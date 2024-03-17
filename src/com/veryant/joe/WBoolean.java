@@ -20,6 +20,8 @@
 package com.veryant.joe;
 
 public class WBoolean extends Wrapper {
+   final static WBoolean TRUE = new WBoolean (true);
+   final static WBoolean FALSE = new WBoolean (false);
    private final boolean pValue;
    private final Boolean oValue;
 
@@ -39,6 +41,9 @@ public class WBoolean extends Wrapper {
    }
    public boolean booleanValue() {
       return pValue;
+   }
+   public boolean equals (Object b) {
+      return b instanceof WBoolean && ((WBoolean) b).pValue == pValue;
    }
    public boolean equals (WBoolean b) {
       return pValue == b.pValue;
