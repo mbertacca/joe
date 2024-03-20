@@ -280,6 +280,17 @@ indexOf (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
          joe_Object_assign(retval, joe_Integer_New (-1));
       }
       return JOE_SUCCESS;
+   } else if (argc == 2 && JOE_ISCLASS(argv[0], &joe_String_Class) &&
+                           JOE_ISCLASS(argv[1], &joe_Integer_Class)) {
+      unsigned int beginIndex = joe_Integer_value (argv[1]);
+      char *hs = joe_String_getCharStar (self);
+      char *delta = strstr (hs  + beginIndex, joe_String_getCharStar (argv[0]));
+      if (delta) {
+         joe_Object_assign(retval, joe_Integer_New (delta - hs));
+      } else {
+         joe_Object_assign(retval, joe_Integer_New (-1));
+      }
+      return JOE_SUCCESS;
    } else {
       joe_Object_assign(retval, joe_Exception_New ("indexOf: invalid argument"));
       return JOE_FAILURE;
