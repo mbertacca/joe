@@ -452,6 +452,27 @@ equals (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 static int
+equalsIgnoreCase (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && JOE_ISCLASS(argv[0], &joe_String_Class)) {
+      char *c1 = joe_String_getCharStar (self);
+      char *c2 = joe_String_getCharStar (argv[0]);
+      for ( ; *c1 && c2; c1++, c2++) {
+         if (toupper(*c1) != toupper (*c2)) {
+            break;
+         }
+      }
+      if (*c1 == *c2) 
+         joe_Object_assign(retval, joe_Boolean_New_true());
+      else
+         joe_Object_assign(retval, joe_Boolean_New_false());
+   } else
+      joe_Object_assign(retval, joe_Boolean_New_false());
+   return JOE_SUCCESS;
+}
+
+
+static int
 ne (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1 && JOE_ISCLASS(argv[0], &joe_String_Class)) {
@@ -762,6 +783,7 @@ static joe_Method mthds[] = {
   {"startsWith", startsWith},
   {"toLowerCase", toLowerCase},
   {"toUpperCase", toUpperCase},
+  {"equalsIgnoreCase", equalsIgnoreCase},
   {"matches", matches},
   {"split", split},
   {"replaceAll", replaceAll},
