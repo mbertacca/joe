@@ -91,7 +91,13 @@ public class Block extends ArrayList<Message>
       for ( ; ; ) {
          bol = exec ();
          if (bol.equals (tf)) {
-            Return = b.exec ();
+            try {
+               Return = b.exec ();
+            } catch (BreakLoopException _ex) {
+               if (_ex.hasReturnObject())
+                  Return = _ex.getReturnObject();
+               break;
+            }
          } else {
             break;
          }

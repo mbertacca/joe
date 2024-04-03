@@ -23,6 +23,7 @@
 # include "joe_JOEObject.h"
 # include "joe_HashMap.h"
 # include "joe_Variable.h"
+# include "joe_BreakLoopException.h"
 # include "joe_BreakBlockException.h"
 # include "joe_GotoException.h"
 # include "joe_DoDebugException.h"
@@ -335,7 +336,14 @@ whileTrueFalse (joe_Object self, int argc, joe_Object *argv, joe_Object *retval,
          if (bol == tf) {
             if ((rc = my_exec (argv[0],0,0,retval)) != JOE_SUCCESS) {
                joe_Object_assign(&bol, 0);
-               return JOE_FAILURE;
+               if (joe_Object_instanceOf (*retval,
+                                            &joe_BreakLoopException_Class)) {
+                  joe_Object_assign(retval,
+                                   joe_BreakException_getReturnObj(*retval));
+                  return JOE_SUCCESS;
+               } else {
+                  return JOE_FAILURE;
+               }
             }
          } else {
             joe_Object_assign(&bol, 0);
