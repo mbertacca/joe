@@ -169,10 +169,11 @@ public class Block extends ArrayList<Message>
    }
    Block getMethod (String name) throws JOEException {
       Block Return;
-      Variable var = lookForVariable (name);
+
+      Variable var = varByName != null ? varByName.get(name) : null;
       if (var != null) {
-         Object obj = getVariable (var);
-         if (obj instanceof Block) {
+         Object obj = varValues[var.getIndex()];
+         if (obj instanceof Block && !((Block)obj).execAsJoe) {
             Return = (Block) obj;
          } else {
             Return = null;

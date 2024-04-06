@@ -808,7 +808,7 @@ joe_JOEObject_getReceiver (joe_JOEObject self, const char *selector)
 
    if (var != 0) {
       joe_Object receiver = joe_Block_varValue (self,var);
-      if (joe_Object_instanceOf (receiver, &joe_Block_Class))
+      if (JOE_ISCLASS (receiver, &joe_Block_Class))
          return receiver;
    }
 
