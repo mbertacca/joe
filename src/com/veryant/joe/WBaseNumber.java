@@ -45,32 +45,32 @@ public abstract class WBaseNumber extends Wrapper implements WNumber {
    }
 
    public WBoolean equals (WNumber n) {
-      return new WBoolean (bigDecimalValue().compareTo(
-                                     n.bigDecimalValue()) == 0);
+      return bigDecimalValue().compareTo(n.bigDecimalValue()) == 0 ?
+             WBoolean.TRUE : WBoolean.FALSE;
    }
 
    public WBoolean ne (WNumber n) {
-      return new WBoolean (bigDecimalValue().compareTo(
-                                     n.bigDecimalValue()) != 0);
+      return bigDecimalValue().compareTo(n.bigDecimalValue()) != 0 ?
+             WBoolean.TRUE : WBoolean.FALSE;
    }
 
    public WBoolean lt (WNumber n) {
-      return new WBoolean (bigDecimalValue().compareTo(
-                                     n.bigDecimalValue()) < 0);
+      return bigDecimalValue().compareTo(n.bigDecimalValue()) < 0 ?
+             WBoolean.TRUE : WBoolean.FALSE;
    }
 
    public WBoolean le (WNumber n) {
-      return new WBoolean (bigDecimalValue().compareTo(
-                                     n.bigDecimalValue()) <= 0);
+      return bigDecimalValue().compareTo(n.bigDecimalValue()) <= 0 ?
+             WBoolean.TRUE : WBoolean.FALSE;
    }
 
    public WBoolean gt (WNumber n) {
-      return new WBoolean (bigDecimalValue().compareTo(
-                                     n.bigDecimalValue()) > 0);
+      return bigDecimalValue().compareTo(n.bigDecimalValue()) > 0 ?
+             WBoolean.TRUE : WBoolean.FALSE;
    }
 
    public WBoolean ge (WNumber n) {
-      return new WBoolean (bigDecimalValue().compareTo(
-                                     n.bigDecimalValue()) >= 0);
+      return bigDecimalValue().compareTo(n.bigDecimalValue()) >= 0 ?
+             WBoolean.TRUE : WBoolean.FALSE;
    }
 }

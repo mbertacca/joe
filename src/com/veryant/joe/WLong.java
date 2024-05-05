@@ -110,63 +110,63 @@ public class WLong extends WBaseNumber {
    }
 
    public WBoolean equals (WLong n) {
-      return new WBoolean (value == n.value);
+      return value == n.value ? WBoolean.TRUE : WBoolean.FALSE;
    }
    public WBoolean equals (WInteger n) {
-      return new WBoolean (value == n.value);
+      return value == n.value ? WBoolean.TRUE : WBoolean.FALSE;
    }
    public WBoolean equals (WDouble n) {
-      return new WBoolean (value == n.value);
+      return value == n.value ? WBoolean.TRUE : WBoolean.FALSE;
    }
 
    public WBoolean lt (WLong n) {
-      return new WBoolean (value < n.value);
+      return value < n.value ? WBoolean.TRUE : WBoolean.FALSE;
    }
    public WBoolean lt (WInteger n) {
-      return new WBoolean (value < n.value);
+      return value < n.value ? WBoolean.TRUE : WBoolean.FALSE;
    }
    public WBoolean lt (WDouble n) {
-      return new WBoolean (value < n.value);
+      return value < n.value ? WBoolean.TRUE : WBoolean.FALSE;
    }
 
    public WBoolean gt (WLong n) {
-      return new WBoolean (value > n.value);
+      return value > n.value ? WBoolean.TRUE : WBoolean.FALSE;
    }
    public WBoolean gt (WInteger n) {
-      return new WBoolean (value > n.value);
+      return value > n.value ? WBoolean.TRUE : WBoolean.FALSE;
    }
    public WBoolean gt (WDouble n) {
-      return new WBoolean (value > n.longValue());
+      return value > n.longValue() ? WBoolean.TRUE : WBoolean.FALSE;
    }
 
    public WBoolean ge (WLong n) {
-      return new WBoolean (value >= n.value);
+      return value >= n.value ? WBoolean.TRUE : WBoolean.FALSE;
    }
    public WBoolean ge (WInteger n) {
-      return new WBoolean (value >= n.value);
+      return value >= n.value ? WBoolean.TRUE : WBoolean.FALSE;
    }
    public WBoolean ge (WDouble n) {
-      return new WBoolean (value >= n.value);
+      return value >= n.value ? WBoolean.TRUE : WBoolean.FALSE;
    }
 
    public WBoolean le (WLong n) {
-      return new WBoolean (value <= n.value);
+      return value <= n.value ? WBoolean.TRUE : WBoolean.FALSE;
    }
    public WBoolean le (WInteger n) {
-      return new WBoolean (value <= n.value);
+      return value <= n.value ? WBoolean.TRUE : WBoolean.FALSE;
    }
    public WBoolean le (WDouble n) {
-      return new WBoolean (value <= n.value);
+      return value <= n.value ? WBoolean.TRUE : WBoolean.FALSE;
    }
 
    public WBoolean ne (WLong n) {
-      return new WBoolean (value != n.value);
+      return value != n.value ? WBoolean.TRUE : WBoolean.FALSE;
    }
    public WBoolean ne (WInteger n) {
-      return new WBoolean (value != n.value);
+      return value != n.value ? WBoolean.TRUE : WBoolean.FALSE;
    }
    public WBoolean ne (WDouble n) {
-      return new WBoolean (value != n.value);
+      return value != n.value ? WBoolean.TRUE : WBoolean.FALSE;
    }
 
    public WLong and (WLong n) {

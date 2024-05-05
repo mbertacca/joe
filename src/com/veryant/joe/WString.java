@@ -35,22 +35,22 @@ public class WString extends Wrapper {
       return value;
    }
    public WBoolean equals (WString s) {
-      return new WBoolean (value.equals(s.value));
+      return value.equals(s.value) ? WBoolean.TRUE : WBoolean.FALSE;
    }
    public WBoolean lt (WString s) {
-      return new WBoolean (value.compareTo(s.value) < 0);
+      return value.compareTo(s.value) < 0 ? WBoolean.TRUE : WBoolean.FALSE;
    }
    public WBoolean gt (WString s) {
-      return new WBoolean (value.compareTo(s.value) > 0);
+      return value.compareTo(s.value) > 0 ? WBoolean.TRUE : WBoolean.FALSE;
    }
    public WBoolean ge (WString s) {
-      return new WBoolean (value.compareTo(s.value) >= 0);
+      return value.compareTo(s.value) >= 0 ? WBoolean.TRUE : WBoolean.FALSE;
    }
    public WBoolean le (WString s) {
-      return new WBoolean (value.compareTo(s.value) <= 0);
+      return value.compareTo(s.value) <= 0 ? WBoolean.TRUE : WBoolean.FALSE;
    }
    public WBoolean ne (WString s) {
-      return new WBoolean (value.compareTo(s.value) != 0);
+      return value.compareTo(s.value) != 0 ? WBoolean.TRUE : WBoolean.FALSE;
    }
    public WString concat (WString str) {
       return new WString (value.concat(str.value));
@@ -62,10 +62,11 @@ public class WString extends Wrapper {
       return new WString (value.concat(obj.toString()));
    }
    public WBoolean startsWith (WString s) {
-      return new WBoolean (value.startsWith(s.value));
+      return value.startsWith(s.value) ? WBoolean.TRUE : WBoolean.FALSE;
    }
    public WBoolean startsWith (WString s, WNumber toffset) {
-      return new WBoolean (value.startsWith(s.value, toffset.intValue()));
+      return value.startsWith(s.value, toffset.intValue()) ?
+             WBoolean.TRUE : WBoolean.FALSE;
    }
    public WString substring (WNumber beginIndex) {
       return new WString (value.substring(beginIndex.intValue()));
@@ -99,13 +100,13 @@ public class WString extends Wrapper {
       return new WInteger (value.compareToIgnoreCase (anotherString.value));
    }
    public WBoolean contains (WString s) {
-      return new WBoolean (value.contains(s.value));
+      return value.contains(s.value) ? WBoolean.TRUE : WBoolean.FALSE;
    }
    public WBoolean endsWith (WString s) {
-      return new WBoolean (value.endsWith(s.value));
+      return value.endsWith(s.value) ? WBoolean.TRUE : WBoolean.FALSE;
    }
    public WBoolean equalsIgnoreCase (WString s) {
-      return new WBoolean (value.equalsIgnoreCase(s.value));
+      return value.equalsIgnoreCase(s.value) ? WBoolean.TRUE : WBoolean.FALSE;
    }
    public WInteger indexOf(WString str) {
       return new WInteger (value.indexOf (str.value));
@@ -114,7 +115,7 @@ public class WString extends Wrapper {
       return new WInteger (value.indexOf(str.value, fromIndex.intValue()));
    }
    public WBoolean isEmpty () {
-      return new WBoolean (value.isEmpty());
+      return value.isEmpty() ? WBoolean.TRUE : WBoolean.FALSE;
    }
    public WInteger lastIndexOf(WString str) {
       return new WInteger (value.lastIndexOf (str.value));
@@ -123,7 +124,7 @@ public class WString extends Wrapper {
       return new WInteger (value.lastIndexOf(str.value, fromIndex.intValue()));
    }
    public WBoolean matches (WString regex) {
-      return new WBoolean (value.matches(regex.value));
+      return value.matches(regex.value) ? WBoolean.TRUE : WBoolean.FALSE;
    }
    public WString replace(WString target, WString replacement) {
       return new WString (value.replace (target.value, replacement.value));

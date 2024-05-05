@@ -61,7 +61,8 @@ public abstract class Wrapper implements InternalObject {
          if ((t = mapping.get (clazz)) != null) {
             switch (t) {
             case BOOLEAN:
-               return new WBoolean ((Boolean) obj);
+               return ((Boolean) obj).booleanValue() ?
+                                       WBoolean.TRUE : WBoolean.FALSE;
             case BYTE:
                return new WLong (((Byte) obj).longValue());
             case CHAR:

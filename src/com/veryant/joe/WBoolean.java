@@ -20,18 +20,14 @@
 package com.veryant.joe;
 
 public class WBoolean extends Wrapper {
-   final static WBoolean TRUE = new WBoolean (true);
-   final static WBoolean FALSE = new WBoolean (false);
+   public final static WBoolean TRUE = new WBoolean (Boolean.TRUE);
+   public final static WBoolean FALSE = new WBoolean (Boolean.FALSE);
    private final boolean pValue;
    private final Boolean oValue;
 
-   public WBoolean (Boolean v) {
+   private WBoolean (Boolean v) {
       oValue = v;
       pValue = v.booleanValue();
-   }
-   public WBoolean (boolean v) {
-      oValue = new Boolean (v);
-      pValue = v;
    }
    public Type type() {
       return Type.BOOLEAN;
@@ -45,17 +41,11 @@ public class WBoolean extends Wrapper {
    public boolean equals (Object b) {
       return b instanceof WBoolean && ((WBoolean) b).pValue == pValue;
    }
-   public boolean equals (WBoolean b) {
-      return pValue == b.pValue;
-   }
    public boolean ne (WBoolean b) {
       return pValue != b.pValue;
    }
-   public WBoolean and (Boolean b) {
-      return new WBoolean (pValue && b.booleanValue());
-   }
    public WBoolean and (WBoolean b) {
-      return new WBoolean (pValue && b.pValue);
+      return pValue && b.pValue ? TRUE : FALSE;
    }
    public WBoolean and (Block m) throws JOEException {
       if (pValue) {
@@ -66,10 +56,7 @@ public class WBoolean extends Wrapper {
       return this;
    }
    public WBoolean or (WBoolean b) {
-      return new WBoolean (pValue || b.pValue);
-   }
-   public WBoolean or (Boolean b) {
-      return new WBoolean (pValue || b.booleanValue());
+      return pValue || b.pValue ? TRUE : FALSE;
    }
    public WBoolean or (Block m) throws JOEException {
       if (!pValue) {
@@ -80,21 +67,18 @@ public class WBoolean extends Wrapper {
       return this;
    }
    public WBoolean xor (WBoolean b) {
-      return new WBoolean (pValue ^ b.pValue);
-   }
-   public WBoolean xor (Boolean b) {
-      return new WBoolean (pValue ^ b.booleanValue());
+      return pValue ^ b.pValue ? TRUE : FALSE;
    }
    public WBoolean xor (Block m) throws JOEException {
       Object b = m.exec();
       if (b instanceof WBoolean) {
-         return new WBoolean (pValue ^ ((WBoolean) b).booleanValue());
+         return pValue ^ ((WBoolean) b).pValue ? TRUE : FALSE;
       } else {
-         return new WBoolean (pValue ^ false);
+         return pValue ^ false ? TRUE : FALSE;
       }
    }
    public WBoolean not () {
-      return new WBoolean (!pValue);
+      return pValue ? FALSE : TRUE ;
    }
 
    public Object iif (Object oTrue, Object oFalse) throws JOEException {
