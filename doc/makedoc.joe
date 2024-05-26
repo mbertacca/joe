@@ -1,0 +1,17 @@
+:args.
+
+system <- !getClassRef "java.lang.System" 
+           getProperty "os.name"
+           startsWith "Windows"
+           iif {:cmd. !println cmd. rc:=!exec "cmd","/c",cmd. },
+               {:cmd. !println cmd. rc:=!exec "sh", "-c",cmd. }.
+
+BASEDIR <- !newInstance "java.io.File",(args get 0) getParentFile; getAbsoluteFile.
+SRCDIR  <- BASEDIR getParent; + "/src/com/veryant/joe".
+DESTDIR <- !newInstance "java.io.File",(BASEDIR getPath),"javadoc".
+DESTDIR mkdir.
+
+system exec ("javadoc -d " + (DESTDIR getPath) + " " +
+                             SRCDIR + "/Block.java " + 
+                             SRCDIR + "/W*.java " + 
+                             SRCDIR + "/*Command*.java").
