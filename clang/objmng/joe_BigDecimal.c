@@ -270,7 +270,7 @@ joe_BigDecimal_bigDecimalValue (joe_Object self, joe_Object *retval)
    } else {
       nDecimal bd;
       if (joe_Object_instanceOf(self, &joe_Integer_Class)) {
-         bd = nDecimal_new_lng(*((long*)joe_Object_getMem(self)));
+         bd = nDecimal_new_lng(*((int64_t*)joe_Object_getMem(self)));
       } else if (joe_Object_instanceOf(self, &joe_Float_Class)) {
          bd = nDecimal_new_dbl(*((double*)joe_Object_getMem(self)));
       } else if (joe_Object_instanceOf(self, &joe_String_Class)) {

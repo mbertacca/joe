@@ -21,6 +21,7 @@
 # include "joe_String.h"
 # include "joe_Integer.h"
 # include "joe_Boolean.h"
+# include "joe_Exception.h"
 
 static int
 ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -82,6 +83,21 @@ isNull (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_SUCCESS;
 }
 
+static int
+displace (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_Integer_Class)) {
+      joe_Object_assign(retval,
+         joe_Pointer_New ((void *) (*((char **) joe_Object_getMem(self)) +
+                          joe_Integer_value(argv[0]))));
+   } else {
+      joe_Object_assign(retval,
+                   joe_Exception_New ("ArrayList get: index out of bounds"));
+      return JOE_FAILURE;
+   }
+   return JOE_SUCCESS;
+}
+
 static joe_Method mthds[] = {
    {"isNull", isNull },
    {"shortValue", shortValue },
@@ -89,6 +105,7 @@ static joe_Method mthds[] = {
    {"longValue", longValue },
    {"stringValue", stringValue },
    {"toString", toString },
+   {"displace", displace },
    {(void *) 0, (void *) 0}
 };
 

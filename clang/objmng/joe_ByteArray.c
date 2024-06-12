@@ -45,7 +45,7 @@ static int
 ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1 && joe_Object_instanceOf (argv[0],&joe_Integer_Class)) {
-      init (self, (void*) 0, 0, JOE_INT (argv[0]));
+      init (self, (void*) 0, 0, (int) JOE_INTEGER (argv[0]));
       return JOE_SUCCESS;
    } else {
       joe_Object_assign(retval,
@@ -117,8 +117,8 @@ set (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
          joe_Object_assign(retval, self);
          return JOE_SUCCESS;
       } else if (joe_Object_instanceOf (argv[0],&joe_Integer_Class)) {
-         if (length >= sizeof(long)) {
-            long *n = (long *) &(*(char **) joe_Object_getMem(mem))[offset];
+         if (length >= sizeof(int64_t)) {
+            int64_t *n = (int64_t *) &(*(char **) joe_Object_getMem(mem))[offset];
             *n = joe_Integer_value (argv[0]);
             joe_Object_assign(retval, self);
             return JOE_SUCCESS;
@@ -247,8 +247,8 @@ setLong (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       if (joe_Object_instanceOf (mem, &joe_ByteArray_Class))
          mem =  *JOE_AT (mem, MEMORY);
 
-      if (length >= sizeof(long)) {
-         long *n = (long *) &(*(char **) joe_Object_getMem(mem))[offset];
+      if (length >= sizeof(int64_t)) {
+         int64_t *n = (int64_t *) &(*(char **) joe_Object_getMem(mem))[offset];
          *n = joe_Integer_value (argv[0]);
          joe_Object_assign(retval, self);
          return JOE_SUCCESS;
@@ -342,13 +342,13 @@ static int
 longValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    int length = joe_Integer_value(*JOE_AT (self, LENGTH));
-   if (length >= sizeof(long)) {
+   if (length >= sizeof(int64_t)) {
       int offset = joe_Integer_value(*JOE_AT (self, OFFSET));
       joe_Object mem = *JOE_AT (self, MEMORY);
       if (joe_Object_instanceOf (mem, &joe_ByteArray_Class))
          mem =  *JOE_AT (mem, MEMORY);
       joe_Object_assign (retval,
-         joe_Integer_New (*(long*)&(*(char **) joe_Object_getMem(mem))[offset]));
+         joe_Integer_New (*(int64_t*)&(*(char **) joe_Object_getMem(mem))[offset]));
       return JOE_SUCCESS;
    } else {
       joe_Object_assign(retval,

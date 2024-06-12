@@ -44,6 +44,13 @@ public abstract class WBaseNumber extends Wrapper implements WNumber {
       return bigDecimalValue().remainder(n.bigDecimalValue());
    }
 
+   public boolean equals (Object n) {
+      if (n instanceof WNumber)
+         return bigDecimalValue().compareTo(((WNumber)n).bigDecimalValue()) == 0;
+      else
+         return false;
+   }
+
    public WBoolean equals (WNumber n) {
       return bigDecimalValue().compareTo(n.bigDecimalValue()) == 0 ?
              WBoolean.TRUE : WBoolean.FALSE;
