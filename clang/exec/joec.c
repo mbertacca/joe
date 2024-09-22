@@ -50,10 +50,10 @@ showValue (joe_Object value)
       joe_String str = 0;
       joe_Object_invoke (value, "toString", 0, 0, &str);
 
-      fprintf (stderr, "---> %s\n", joe_String_getCharStar(str));
+      fprintf (stdout, "---> %s\n", joe_String_getCharStar(str));
       joe_Object_assign (&str, 0);
    }
-   fflush (stderr);
+   fflush (stdout);
 }
 
 void

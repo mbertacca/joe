@@ -26,7 +26,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.PrintStream;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -62,45 +62,65 @@ public class DefaultCommand extends CommandBase {
       else
          return stdin.readLine();
    }
+   private void intPrint (PrintStream pw, boolean nl, Object... b) {
+      if (b == null)
+         if (nl)
+            pw.println ("()");
+         else
+            pw.print ("()");
+      else {
+         StringBuilder s = new StringBuilder();
+         for (int i = 0; i < b.length; i++)
+            if (b[i] == null)
+               s.append ("()");
+            else
+               s.append (b[i].toString());
+         if (nl)
+            pw.println (s.toString());
+         else
+            pw.print (s.toString());
+      }
+   }
    /**
     * Prints a newline.
     */
    public Object println () {
-      System.out.println ("");
+      intPrint (System.out, true);
+      return this;
+   }
+   /**
+    * Prints a newline on stderr.
+    */
+   public Object eprintln () {
+      intPrint (System.err, true);
       return this;
    }
    /**
     * Prints the specified objects.
     */
    public Object print (Object... b) {
-      if (b != null) {
-         String s = "";
-         for (int i = 0; i < b.length; i++) {
-            if (b[i] == null)
-               s += "()";
-            else
-               s += b[i].toString();
-         }
-         System.out.print (s);
-      } else
-         System.out.print ("()");
+      intPrint (System.out, false, b);
+      return this;
+   }
+   /**
+    * Prints the specified objects on stderr.
+    */
+   public Object eprint (Object... b) {
+      intPrint (System.err, false, b);
       return this;
    }
    /**
     * Prints the specified objects followed by a newline.
     */
    public Object println (Object... b) {
-      if (b != null) {
-         String s = "";
-         for (int i = 0; i < b.length; i++) {
-            if (b[i] == null)
-               s += "()";
-            else
-               s += b[i].toString();
-         }
-         System.out.println (s);
-      } else
-         System.out.println ("()");
+      intPrint (System.out, true, b);
+      return this;
+   }
+   /**
+    * Prints the specified objects followed by a newline on stderr.
+    */
+   public Object eprintln (Object... b) {
+      intPrint (System.err, true, b);
       return this;
    }
    /**
@@ -498,7 +518,7 @@ public class DefaultCommand extends CommandBase {
                out.flush();
             }
          } catch (IOException ignore) {
-            System.out.println (ignore + "(" + in + ";" + out + ")");
+            System.err.println (ignore + "(" + in + ";" + out + ")");
          }
       }
    }

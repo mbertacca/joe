@@ -34,13 +34,13 @@ public class JavaObjectsExecutor {
    static protected Executor executor = new StandardExecutor();
    static protected LineReader lineReader = new BasicLineReader();
    static protected String version = "JOE " + Revision.id 
-              + " ready, type 'exit' to exit the session";
+              + ", type 'exit' to exit the session";
 
    public static void showException (DefaultCommand cmd, Throwable ex) {
-      cmd.println(ex.getMessage());
+      cmd.eprintln(ex.getMessage());
       Throwable cause = ex;
       while ((cause = cause.getCause()) != null) {
-         cmd.println ("Caused by: " + cause.toString());
+         cmd.eprintln ("Caused by: " + cause.toString());
       }
    }
    public static void main (String argv[]) {

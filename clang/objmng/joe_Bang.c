@@ -328,7 +328,7 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_StringBuilder msg = 0;
    joe_Object_assign (&msg, joe_StringBuilder_New ());
-   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.26 ");
+   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.27 ");
    joe_StringBuilder_appendCharStar (msg, __DATE__);
 #ifdef WIN32
    joe_StringBuilder_appendCharStar (msg, " Windows");
@@ -461,6 +461,30 @@ println (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    if ((rc = print (self, argc, argv, retval)) == JOE_SUCCESS) {
       fputs ("\n", stdout);
       fflush (stdout);
+   }
+   return rc;
+}
+
+static int
+eprint (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
+{
+   joe_String msg = 0;
+   args2String(argc, args, &msg);
+   fputs (joe_String_getCharStar (msg), stderr);
+   fflush (stderr);
+
+   joe_Object_assign(&msg, 0);
+   joe_Object_assign(retval, self);
+   return JOE_SUCCESS;
+}
+
+static int
+eprintln (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   int rc;
+   if ((rc = eprint (self, argc, argv, retval)) == JOE_SUCCESS) {
+      fputs ("\n", stderr);
+      fflush (stderr);
    }
    return rc;
 }
@@ -1023,6 +1047,8 @@ static joe_Method mthds[] = {
   {"isNull", isNull},
   {"println", println},
   {"print", print},
+  {"eprintln", eprintln},
+  {"eprint", eprint},
   {"readLine", readLine},
   {"newInstance", newInstance},
   {"throw", _throw},
