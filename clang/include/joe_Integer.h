@@ -25,9 +25,7 @@ typedef joe_Object joe_Integer;
 extern joe_Class joe_Integer_Class;
 JOEOBJ_API joe_Object joe_Integer_New (int64_t value);
 JOEOBJ_API int64_t joe_Integer_value(joe_Integer self);
-JOEOBJ_API joe_Integer joe_Integer_addMe(joe_Object self, int64_t incr);
-JOEOBJ_API joe_Integer joe_Integer_addMe1(joe_Object self);
-JOEOBJ_API joe_Integer joe_Integer_subMe1 (joe_Object self);
+JOEOBJ_API joe_Integer joe_Integer_add(joe_Object self, int64_t incr);
 JOEOBJ_API void joe_Integer_toAscii (int64_t n, char *out);
 JOEOBJ_API int64_t joe_Integer_fromAscii (char *asc);
 # endif

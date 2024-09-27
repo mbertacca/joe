@@ -69,7 +69,8 @@ next (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 
       if (curidx < arsize) {
          joe_Object_assign (retval, *JOE_AT (array, curidx));
-         joe_Integer_addMe (*JOE_AT(self, CURIDX), 1);
+         joe_Object_assign (JOE_AT(self, CURIDX),
+                            joe_Integer_add (*JOE_AT(self, CURIDX), 1));
          return JOE_SUCCESS;
       } else {
          joe_Object_assign(retval, joe_Exception_New ("Array: index out of bound"));

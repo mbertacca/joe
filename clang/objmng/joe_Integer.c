@@ -530,22 +530,7 @@ joe_Integer_value (joe_Object self)
 }
 
 joe_Integer
-joe_Integer_addMe(joe_Object self, int64_t incr)
+joe_Integer_add(joe_Object self, int64_t incr)
 {
-   JOE_INTEGER (self) += incr;
-   return self;
-}
-
-joe_Integer
-joe_Integer_addMe1(joe_Object self)
-{
-  JOE_INTEGER (self)++;
-   return self;
-}
-
-joe_Integer
-joe_Integer_subMe1 (joe_Object self)
-{
-  JOE_INTEGER (self)--;
-   return self;
+   return joe_Integer_New(JOE_INTEGER(self) + incr);
 }
