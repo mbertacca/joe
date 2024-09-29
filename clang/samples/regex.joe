@@ -428,3 +428,6 @@ tre exec "ADCDCDE".
 
 re:="a+ab".
 tre exec "aaab".
+
+re:="a?a?a?a?".
+tre exec "aaaa".

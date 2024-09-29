@@ -120,7 +120,7 @@ r_matches (char **s, char*  m, int ic)
             return (bgn != *s);
          }
          fx = *s;
-         if (r_matches (s, m, ic))
+         if (r_matches (s, m, ic) && **s == 0)
             return (bgn != *s);
           else
              *s = fx;
@@ -139,7 +139,7 @@ r_matches (char **s, char*  m, int ic)
          }
          for (bx = 0; **s != 0; (*s)++) {
             fx = *s;
-            if (r_matches (s, m, ic)) {
+            if (r_matches (s, m, ic) && **s == 0) {
                if (!bx)
                   bx = *s;
                else if (*s - bx > 0)
