@@ -1,0 +1,44 @@
+/* general object for memoization */
+
+memoize <- {:aBlock.
+   f <- aBlock.
+   cache := !newInstance "java.util.HashMap".
+   fun <- {:arg.
+      Return := cache get arg.
+      () = Return ifTrue {
+           Return := f exec arg.
+           cache put arg,Return.
+      }.
+      Return.
+   }.
+}.
+
+/* example, purposely inefficient */
+
+fib<- {:n.
+   n <= 1 ifTrue { n },
+                 { fib exec (n - 1) + (fib exec (n - 2)) }
+}.
+
+mem_fib <- memoize new fib.
+
+TIMES <- 22.
+startMillis := !newInstance "java.util.Date" getTime.
+!for 1,TIMES,{.
+   !for 1,TIMES,{:i.
+      !print (fib exec i)," ".
+   }.
+   !println.
+}.
+endMillis := !newInstance "java.util.Date" getTime.
+!println "-->direct ",(endMillis - startMillis).
+
+startMillis := !newInstance "java.util.Date" getTime.
+!for 1,TIMES,{.
+   !for 1,TIMES,{:i.
+      !print (mem_fib fun i)," ".
+   }.
+   !println.
+}.
+endMillis := !newInstance "java.util.Date" getTime.
+!println "-->memoized ",(endMillis - startMillis).
