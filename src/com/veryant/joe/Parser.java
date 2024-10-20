@@ -392,6 +392,8 @@ public class Parser {
             return Literals.getString(tk.word);
          case _INTEGER:
             return Literals.getInteger(tk.word);
+         case _LONG:
+            return Literals.getLong(tk.word);
          case _FLOAT:
             return Literals.getDouble(tk.word);
          case _DECIMAL:

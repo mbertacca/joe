@@ -18,7 +18,6 @@
 
 # include <time.h>
 # include "joe_Date.h"
-# include "joe_Integer.h"
 # include "joe_String.h"
 # include "joe_Boolean.h"
 # include "joe_Exception.h"
@@ -60,7 +59,7 @@ const static int dayInMonth[13][2] = {
 inline static int
 isLeapYear (int y)
 {
-   if ((y) <= 1752)
+   if ((y) <= 1582)
       return y % 4 == 0 ? 1 : 0;
    else
       return (y % 4 == 0 && y % 100 != 0) || y % 400 == 0 ? 1 : 0;
@@ -80,10 +79,10 @@ toMilliseconds(struct s_Timestamp * ts)
          Return += 366;
       else
          Return += 365;
-   if (ts->year > 1752 ||
-       (ts->year == 1752 && ts->month > 9) ||
-       (ts->year == 1752 && ts->month == 9 && ts->day >= 14))
-      Return -= 11;
+   if (ts->year > 1582 ||
+       (ts->year == 1582 && ts->month > 10) ||
+       (ts->year == 1582 && ts->month == 10 && ts->day >= 15))
+      Return -= 10;
    Return += 5;  /* 01/01/0001 era sabato (?); cosi' j % 7 da domenica = 0 */
    ts->julian = Return;
 
@@ -104,8 +103,8 @@ fromMilliseconds (struct s_Timestamp * ts, int64_t millis)
 
    ts->day = ts->month = ts->year = 0;
    ts->julian = julian;
-   if (julian > 639803L) /* giuliano del 2/9/1752 */
-      julian += 11; /* Compensazione gregoriana */
+   if (julian > 577742L) /* julian  02/10/1582 */
+      julian += 10; /* gregorian correction */
    julian -= 5;  /* 01/01/0001 era sabato (?); cosi' j % 7 da domenica = 0 */
    if ( julian > 0) {
       for (i = 1; ; i++)
@@ -140,6 +139,12 @@ fromMilliseconds (struct s_Timestamp * ts, int64_t millis)
    ts->second = time / 1000;
    time %= 1000;
    ts->millis = time;
+}
+
+int64_t
+joe_Date_getEpochMillis()
+{
+   return 62136288000000L;
 }
 
 static char tsbuff[48];
@@ -379,6 +384,18 @@ getTime (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 static int
+getEpochMillis (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      joe_Object_assign(retval, joe_Integer_New (joe_Date_getEpochMillis()));
+      return JOE_SUCCESS;
+   }
+   joe_Object_assign(retval,
+            joe_Exception_New("joe_Date getEpochMillis: invalid argument(s)"));
+   return JOE_FAILURE;
+}
+
+static int
 getYear (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
@@ -498,6 +515,8 @@ setTime (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_Integer_Class)) {
       int64_t millis = *((int64_t *) joe_Object_getMem (argv[0]));
+      if (millis == 0)
+         millis = zeroMillis;
       if (millis >= zeroMillis) {
          *((int64_t *) joe_Object_getMem(self)) = millis;
          joe_Object_assign(retval, self);
@@ -589,6 +608,7 @@ static joe_Method mthds[] = {
    {"setSeconds", setSeconds },
    {"setTime", setTime },
    {"setYear", setYear },
+   {"getEpochMillis", getEpochMillis },
    {"toString", toString },
   {(void *) 0, (void *) 0}
 };

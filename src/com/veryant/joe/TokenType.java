@@ -37,6 +37,7 @@ enum TokenType {
    _STRING,
    _UNCLOSED_STRING,
    _INTEGER,
+   _LONG,
    _FLOAT,
    _DECIMAL,
    _ASSIGN,

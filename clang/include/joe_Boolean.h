@@ -22,9 +22,9 @@
 
 typedef joe_Object joe_Boolean;
 extern joe_Class joe_Boolean_Class;
-joe_Object joe_Boolean_New_true ();
-joe_Object joe_Boolean_New_false ();
-int joe_Boolean_isTrue (joe_Object self);
-int joe_Boolean_isFalse (joe_Object self);
+JOEOBJ_API joe_Object joe_Boolean_New_true ();
+JOEOBJ_API joe_Object joe_Boolean_New_false ();
+JOEOBJ_API int joe_Boolean_isTrue (joe_Object self);
+JOEOBJ_API int joe_Boolean_isFalse (joe_Object self);
 
 # endif

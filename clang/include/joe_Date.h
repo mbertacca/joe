@@ -18,9 +18,11 @@
 
 # ifndef joe_Date_h
 # define joe_Date_h  "$Id$";
-# include "joe_Object.h"
+# include "joe_Integer.h"
 
 typedef joe_Object joe_Date;
 extern joe_Class joe_Date_Class;
+
+JOEOBJ_API int64_t joe_Date_getEpochMillis();
 
 # endif

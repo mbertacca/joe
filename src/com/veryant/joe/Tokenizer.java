@@ -43,6 +43,7 @@ public class Tokenizer {
       case _INIT:
          break;
       case _INTEGER:
+      case _LONG:
       case _FLOAT:
       case _DECIMAL:
       case _WORD:
@@ -290,6 +291,8 @@ public class Tokenizer {
             break;
          case 'e':
          case 'E':
+         case 'l':
+         case 'L':
          case 'm':
          case 'M':
             if (status == TokenType._INTEGER || status == TokenType._FLOAT) {
@@ -299,6 +302,10 @@ public class Tokenizer {
                      status = TokenType._FLOAT;
                      break;
                   }
+               } else if (line[idx] == 'l' || line[idx] == 'L') {
+                  status = TokenType._LONG;
+                  breakChar('\000');
+                  break;
                } else {
                   status = TokenType._DECIMAL;
                   breakChar('\000');

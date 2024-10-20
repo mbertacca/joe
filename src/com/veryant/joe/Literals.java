@@ -25,6 +25,9 @@ public class Literals {
    public static Object getInteger (String val) {
       return Wrapper.newInstance (Integer.parseInt(val));
    }
+   public static Object getLong (String val) {
+      return Wrapper.newInstance (Long.parseLong(val));
+   }
    public static Object getDouble (String val) {
       return Wrapper.newInstance (Double.parseDouble(val));
    }
