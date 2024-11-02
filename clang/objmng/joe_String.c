@@ -808,7 +808,7 @@ joe_Class joe_String_Class = {
 };
 
 joe_Object
-joe_String_New_len (char *c, unsigned int len) {
+joe_String_New_len (const char *c, unsigned int len) {
    joe_Object self;
 
    self = joe_Object_New (&joe_String_Class, len + 1);
@@ -817,13 +817,12 @@ joe_String_New_len (char *c, unsigned int len) {
 }
 
 joe_Object
-joe_String_New (const char *c) {
-   int len = strlen (c);
-   joe_Object self;
-
-   self = joe_Object_New (&joe_String_Class, len + 1);
-   strcpy (JOE_CHAR_STAR(self), c);
-   return self;
+joe_String_New (const char *c)
+{
+   if (c)
+      return joe_String_New_len (c, strlen (c));
+   else
+      return joe_String_New_len ("", 0);
 }
 
 joe_Object
