@@ -164,8 +164,10 @@ r_matches (char **s, char*  m, int ic)
             if (*(++m) != '*' && *(m) != '?') {
                (*s)++;
             }
-         } else {
+         } else if (*(++m) != '*' && *(m) != '?'){
             return 0;
+         } else {
+            ++m;
          }
          break;
       case '[':
@@ -214,10 +216,7 @@ r_matches (char **s, char*  m, int ic)
          break;
       }
    }
-   if (*m == 0)
-      return (bgn != *s);
-   else
-      return 0;
+   return (*m == 0);
 }
 
 /* */
@@ -589,7 +588,13 @@ split (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       joe_Object_assign(&al, joe_ArrayList_New(4));
       if (*re == '*' || *re == '+'|| *re == '?')
           joe_ArrayList_add(al, self);
-      else {
+      else if (!*re) {
+         char *sx = str;
+         while (*sx) {
+            joe_ArrayList_add(al, joe_String_New_len (sx, 1));
+            sx++;
+         }
+      } else {
          char *s0 = str;
          char *st = str;
          char *sx = str;
