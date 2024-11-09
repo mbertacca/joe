@@ -431,3 +431,9 @@ tre exec "aaab".
 
 re:="a?a?a?a?".
 tre exec "aaaa".
+
+re:="".
+tre exec "a (a) c".
+
+re:=".*.?".
+tre exec "".
