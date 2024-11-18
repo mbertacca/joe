@@ -4,4 +4,4 @@
 files := !newInstance "joe_Files".
 f := files readAllLines (argv get 0).
 it := f iterator.
-!while { it hasNext },{!print (it next)}.
+!while { it hasNext },{!println (it next)}.

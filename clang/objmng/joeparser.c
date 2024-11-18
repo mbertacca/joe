@@ -428,7 +428,7 @@ setBlockArguments (JoeParser self, joe_Block block, JoeArrayScan tokens)
       if ((tk = pop(tokens)) != 0 && tk->type != _COMMA_)
          break;
    }
-   if (tk->type != _DOT_)
+   if (tk && tk->type != _DOT_)
       unexpectedToken (self, tokens, tk);
 }
 

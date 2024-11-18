@@ -21,6 +21,7 @@
 # include <dirent.h>
 # include <sys/stat.h>
 # include <errno.h>
+# include <unistd.h>
 # include "joe_Integer.h"
 # include "joe_String.h"
 # include "joe_StringBuilder.h"
@@ -77,13 +78,49 @@ readAllLines (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 static int
+exists (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_String_Class)) {
+      if (access(joe_String_getCharStar (argv[0]),F_OK))
+         joe_Object_assign (retval, joe_Boolean_New_false());
+      else
+         joe_Object_assign (retval, joe_Boolean_New_true());
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("exists: invalid argument"));
+      return JOE_FAILURE;
+   }
+   return JOE_SUCCESS;
+}
+
+static int
+deleteIfExists (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_String_Class)) {
+      if (unlink(joe_String_getCharStar (argv[0])))
+         joe_Object_assign (retval, joe_Boolean_New_false());
+      else
+         joe_Object_assign (retval, joe_Boolean_New_true());
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("deleteIfExists: invalid argument"));
+      return JOE_FAILURE;
+   }
+   return JOE_SUCCESS;
+}
+
+static int
 files_write (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
+   char *op = "w";
+
+   if (argc == 3 && joe_Object_instanceOf (argv[2], &joe_String_Class)) {
+      op = joe_String_getCharStar (argv[2]);
+      argc--;
+   }
    if (argc == 2 && joe_Object_instanceOf (argv[0], &joe_String_Class)
                  && joe_Object_instanceOf (argv[1], &joe_ArrayList_Class)) {
       char *filename = joe_String_getCharStar (argv[0]);
       joe_ArrayList list = argv[1];
-      FILE *fd = fopen (filename, "w");
+      FILE *fd = fopen (filename, op);
       if (fd != NULL) {
          int rc;
          int llen;
@@ -105,7 +142,14 @@ files_write (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
                   fclose (fd);
                   return JOE_FAILURE;
                }
+            } else {
+               joe_Object_assign(&str, 0);
             }
+#ifdef WIN32
+            fwrite ("\r\n", 2, 1, fd);
+#else
+            fwrite ("\n", 1, 1, fd);
+#endif
          }
          fclose (fd);
          joe_Object_assign (retval, argv[0]);
@@ -180,6 +224,8 @@ static joe_Method filesMthds[] = {
    {"listDirectory", listDirectory },
    {"newDirectoryStream", listDirectory },
    {"isDirectory", isDirectory },
+   {"exists", exists },
+   {"deleteIfExists", deleteIfExists },
    {(void *) 0, (void *) 0}
 };
 
@@ -222,10 +268,17 @@ joe_Files_getline (char **lineptr, ssize_t *n, FILE *fp)
       c = fgetc (fp);
       if (c != EOF) {
          cnt++;
-         *(pnt++) = c;
+         *(pnt) = c;
          if (c == '\n') {
             *pnt = 0;
+            cnt--;
+            if (*(--pnt) == '\r') {
+               *pnt = 0;
+               cnt--;
+            }
             break;
+         } else {
+            pnt++;
          }
       } else {
          *pnt = 0;
