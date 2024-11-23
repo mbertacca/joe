@@ -310,9 +310,14 @@ execFromDir (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       }
       if (chdir (joe_String_getCharStar(argv[0])) == 0) {
          rc = exec (self, (argc - 1), &argv[1], retval);
-         chdir (currpath);
+         if (chdir (currpath) != 0) {
+            joe_Object_assign(retval, joe_Exception_New (
+                       "execFromDir: cannot change directory back"));
+            rc = JOE_FAILURE;
+         }
       } else {
-         joe_Object_assign(retval, joe_Exception_New ("execFromDir: cannot change directory"));
+         joe_Object_assign(retval, joe_Exception_New (
+                       "execFromDir: cannot change directory"));
          rc = JOE_FAILURE;
       }
       free (currpath);
@@ -328,7 +333,7 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_StringBuilder msg = 0;
    joe_Object_assign (&msg, joe_StringBuilder_New ());
-   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.34 ");
+   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.35 ");
    joe_StringBuilder_appendCharStar (msg, __DATE__);
 #ifdef WIN32
    joe_StringBuilder_appendCharStar (msg, " Windows");
@@ -671,7 +676,10 @@ static int
 foreach (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc > 1) {
-      return joe_Object_invoke(argv[0],"foreach", argc-1, &argv[1], retval);
+      if (argv[0])
+         return joe_Object_invoke(argv[0],"foreach", argc-1, &argv[1], retval);
+      else
+         return JOE_SUCCESS;
    } else {
       joe_Object_assign(retval, joe_Exception_New (
                                     "foreach: invalid argument number"));
@@ -906,30 +914,51 @@ typename (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
    return JOE_FAILURE;
 }
 
+
+static int
+joe (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
+{
+   joe_String scriptName;
+   joe_Array argArray = 0;
+   int argLen;
+   int rc;
+
+   if (argc > 0 && joe_Object_instanceOf (args[0], &joe_String_Class)) {
+      int i;
+      scriptName = args[0];
+      joe_Object_assign(&argArray, joe_Array_New (argc));
+      for (i = 0; i < argc; i++) {
+         joe_Object_assign (joe_Object_at (argArray, i), args[i]);
+      }
+   } else if (argc == 1 && joe_Object_instanceOf (args[0], &joe_Array_Class) &&
+       (argLen = joe_Array_length(args[0])) > 0 && 
+       joe_Object_instanceOf (*JOE_AT (args[0], 0), &joe_String_Class)) {
+      scriptName = *JOE_AT (args[0], 0);
+      argArray = args[0];
+   } else {
+      joe_Object_assign(retval, joe_Exception_New("joe: Invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+
+   rc =loadScript (scriptName, retval);
+   if (rc == JOE_SUCCESS) {
+      joe_LoadScript block = 0;
+      joe_Object_transfer(&block, retval);
+      rc = joe_Block_outer_exec (block, 1, &argArray, retval);
+      joe_Object_assign(&block, 0);
+      if (argArray != args[0])
+         joe_Object_assign(&argArray, 0);
+   }
+   return rc;
+}
+
 static int
 runJoe (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
    if (argc > 0 && joe_Object_instanceOf (args[0], &joe_String_Class)) {
-      int rc;
-      rc =loadScript (args[0], retval);
-      if (rc == JOE_SUCCESS) {
-         int i;
-         joe_LoadScript block = 0;
-         joe_Array argArray = 0;
-         joe_Object_transfer(&block, retval);
-
-         joe_Object_assign(&argArray, joe_Array_New (argc));
-         for (i = 0; i < argc; i++) {
-            joe_Object_assign (joe_Object_at (argArray, i), args[i]);
-         }
-
-         rc = joe_Block_outer_exec (block, 1, &argArray, retval);
-         joe_Object_assign(&block, 0);
-         joe_Object_assign(&argArray, 0);
-         return rc;
-      }
+      return joe (self, argc, args, retval);
    } else {
-      joe_Object_assign(retval, joe_Exception_New("new: Invalid argument(s)"));
+      joe_Object_assign(retval, joe_Exception_New("runJoe: Invalid argument(s)"));
    }
    return JOE_FAILURE;
 }
@@ -1064,6 +1093,7 @@ static joe_Method mthds[] = {
   {"array", array},
   {"new", _new},
   {"typename", typename },
+  {"joe", joe},
   {"runJoe", runJoe},
   {"runAsBlock", runAsBlock},
   {"newArray", newArray},

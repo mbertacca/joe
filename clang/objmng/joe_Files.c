@@ -188,7 +188,7 @@ listDirectory (joe_Object self,
          return JOE_FAILURE;
       }
    } else {
-      joe_Object_assign(retval, joe_Exception_New ("readAllLines: invalid argument"));
+      joe_Object_assign(retval, joe_Exception_New ("listDirectory: invalid argument"));
       return JOE_FAILURE;
    }
 }
@@ -212,11 +212,26 @@ isDirectory (joe_Object self,
          return JOE_FAILURE;
       }
    } else {
-      joe_Object_assign(retval, joe_Exception_New ("readAllLines: invalid argument"));
+      joe_Object_assign(retval, joe_Exception_New ("isDirectory: invalid argument"));
       return JOE_FAILURE;
    }
 }
 
+static int
+isAbsolute (joe_Object self,
+                    int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_String_Class)) {
+      if (joe_Files_isAbsolute(joe_String_getCharStar (argv[0])))
+         joe_Object_assign (retval, joe_Boolean_New_true());
+      else
+         joe_Object_assign (retval, joe_Boolean_New_false());
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("isAbsolute: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
 
 static joe_Method filesMthds[] = {
    {"readAllLines", readAllLines },
@@ -226,6 +241,7 @@ static joe_Method filesMthds[] = {
    {"isDirectory", isDirectory },
    {"exists", exists },
    {"deleteIfExists", deleteIfExists },
+   {"isAbsolute", isAbsolute },
    {(void *) 0, (void *) 0}
 };
 
@@ -290,4 +306,16 @@ joe_Files_getline (char **lineptr, ssize_t *n, FILE *fp)
    return cnt; 
 }
 
-
+int
+joe_Files_isAbsolute (char *p)
+{
+   if (*p == '/')
+      return 1;
+# ifdef WIN32
+   if (*p == '\\')
+      return 1;
+   if (strlen(p) > 2 && p[1] == ':' && p[2] == '\\')
+      return 1;
+# endif
+   return 0;
+}

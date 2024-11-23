@@ -24,5 +24,6 @@
 typedef joe_Object joe_Files;
 extern joe_Class joe_Files_Class;
 JOEOBJ_API extern ssize_t joe_Files_getline (char **lineptr, ssize_t *n, FILE *fp);
+JOEOBJ_API extern int joe_Files_isAbsolute (char *p);
 
 # endif

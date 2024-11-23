@@ -88,7 +88,7 @@ joe_LoadScript_getFile (char *scriptName)
    if (dirname == 0 || *dirname == 0) {
       path = scriptName;
    } else {
-      if (isFileSeparator(scriptName[0])) {
+      if (joe_Files_isAbsolute(scriptName)) {
          path = strdup(scriptName);
       } else {
          path = calloc (1, strlen (dirname) + strlen (scriptName) + 1);
