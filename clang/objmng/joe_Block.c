@@ -216,6 +216,9 @@ init (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
       for (i = 0; i < validArgsLen; i++) {
          joe_Object_assign (JOE_AT(varcontent, i+1), args[i]);
       }
+      for ( ; i < argsNamesLen; i++) {
+         joe_Object_assign (JOE_AT(varcontent, i+1), joe_Null_value);
+      }
    }
    rc = my_exec_sub (self, 0, retval);
    return rc;

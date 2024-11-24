@@ -29,7 +29,11 @@
 # include <stdlib.h>
 # include <string.h>
 
-# define isFileSeparator(c) (c=='/' || c=='\\')
+# ifdef WIN32
+# define isFileSeparator(c) (c=='/'||c=='\\')
+# else
+# define isFileSeparator(c) (c=='/')
+# endif
 
 static char *variables[] = { 0 };
 static char *dirname = 0;
