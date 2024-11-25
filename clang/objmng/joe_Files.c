@@ -288,7 +288,7 @@ joe_Files_getline (char **lineptr, ssize_t *n, FILE *fp)
          if (c == '\n') {
             *pnt = 0;
             cnt--;
-            if (*(--pnt) == '\r') {
+            if (pnt > *lineptr && *(--pnt) == '\r') {
                *pnt = 0;
                cnt--;
             }

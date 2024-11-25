@@ -125,6 +125,7 @@ joe_LoadScript_getFile (char *scriptName)
 joe_Block
 joe_LoadScript_New (joe_Block self, char *scriptName)
 {
+   int i;
    joe_Object Return = self;
    FILE *scriptFile;
    char *line = 0;
@@ -154,6 +155,8 @@ joe_LoadScript_New (joe_Block self, char *scriptName)
          Return = JoeParser_getException (parser);
    }
    JoeParser_delete (parser);
+   for (i = JoeArray_length(tokens) - 1; i >= 0; i--)
+      free (((struct t_Token*) JoeArray_get(tokens, i))->word);
    JoeArray_delete (tokens);
    Tokenizer_delete (tokenizer);
 
