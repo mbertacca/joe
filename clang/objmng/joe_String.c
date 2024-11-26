@@ -296,6 +296,58 @@ indexOf (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+static char *
+strrstr (char *haystack, const char *needle)
+{
+   char *Return;
+   if (*needle) {
+      int lenNeedle = strlen (needle);
+      int lenHaystack = strlen (haystack);
+      char *ptr = haystack + lenHaystack - lenNeedle;
+      Return = NULL;
+      while (ptr >= haystack) {
+         if (strstr (ptr, needle)) {
+            Return = ptr;
+            break;
+         }
+         ptr--;
+      } 
+   } else {
+      Return = haystack;
+   }
+   return Return;
+}
+
+static int
+lastIndexOf (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && JOE_ISCLASS(argv[0], &joe_String_Class)) {
+      char *hs = joe_String_getCharStar (self);
+      char *delta = strrstr (hs, joe_String_getCharStar (argv[0]));
+      if (delta) {
+         joe_Object_assign(retval, joe_Integer_New (delta - hs));
+      } else {
+         joe_Object_assign(retval, joe_Integer_New (-1));
+      }
+      return JOE_SUCCESS;
+   } else if (argc == 2 && JOE_ISCLASS(argv[0], &joe_String_Class) &&
+                           JOE_ISCLASS(argv[1], &joe_Integer_Class)) {
+      unsigned int beginIndex = joe_Integer_value (argv[1]);
+      char *hs = joe_String_getCharStar (self);
+      char *delta = strrstr (hs  + beginIndex, joe_String_getCharStar (argv[0]));
+      if (delta) {
+         joe_Object_assign(retval, joe_Integer_New (delta - hs));
+      } else {
+         joe_Object_assign(retval, joe_Integer_New (-1));
+      }
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("indexOf: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+
 static int
 toLowerCase (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -782,6 +834,7 @@ static joe_Method mthds[] = {
   {"lt", lt},
   {"length", length},
   {"indexOf", indexOf},
+  {"lastIndexOf", lastIndexOf},
   {"substring", substring},
   {"trim", trim},
   {"charAt", charAt},
