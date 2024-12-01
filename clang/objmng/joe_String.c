@@ -139,7 +139,7 @@ r_matches (char **s, char*  m, int ic)
          }
          for (bx = 0; **s != 0; (*s)++) {
             fx = *s;
-            if (r_matches (s, m, ic) && **s == 0) {
+            if (r_matches (s, m, ic)) {
                if (!bx)
                   bx = *s;
                else if (*s - bx > 0)
