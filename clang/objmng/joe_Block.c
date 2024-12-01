@@ -713,8 +713,11 @@ joe_Block_getSetVar (joe_Block self, char *c)
       if (depth == 0) {
          Return = var;
       } else {
+         joe_Variable lv = 0;
+         joe_Object_assign (&lv, var);
          Return = joe_Block_setVarDepthIndex (self, name, depth, index);
          joe_Variable_setSameStatus (Return, var);
+         joe_Object_assign (&lv, 0);
       }
    }
    joe_Object_assign(&name, 0);

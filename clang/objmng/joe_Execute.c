@@ -25,14 +25,7 @@
 # include "joe_Block.h"
 # include "joestrct.h"
 
-/*
-# include <string.h>
 # include <stdlib.h>
-# include <ctype.h>
-# include "joe_StringBuilder.h"
-# include "joe_Boolean.h"
-# include "joe_Integer.h"
-*/
 
 typedef struct s_Execute {
    JoeArray tokens;
@@ -51,8 +44,8 @@ init (joe_Object self, joe_Block block, joe_String name)
    joe_Memory mem = joe_Memory_New (sizeof (struct s_Execute));
    Execute exec = (void *) joe_Object_getMem(mem);
 
-   exec->tokens = JoeArray_new (sizeof (struct t_Token), 8);
-   exec->tokenizer = Tokenizer_new (exec->tokens);
+   exec->tokens = 0;
+   exec->tokenizer = 0;
    
    joe_Object_assign (JOE_AT(self, DATA), mem);
    joe_Object_assign (JOE_AT(self, BLOCK), joe_Block_New (block));
@@ -86,6 +79,10 @@ add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       joe_Memory mem = (void *) *JOE_AT(self, DATA);
       Execute exec = (void *) joe_Object_getMem(mem);
       char *line = joe_String_getCharStar (argv[0]);
+      if (!exec->tokenizer) {
+         exec->tokens = JoeArray_new (sizeof (struct t_Token), 8);
+         exec->tokenizer = Tokenizer_new (exec->tokens);
+      }
       Tokenizer_tokenize (exec->tokenizer, line);
       joe_Object_assign(retval, self);
       return JOE_SUCCESS;
@@ -102,7 +99,15 @@ clear (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    joe_Memory mem = (void *) *JOE_AT(self, DATA);
    Execute exec = (void *) joe_Object_getMem(mem);
    joe_Block block =  *JOE_AT(self, BLOCK);
-   JoeArray_clear (exec->tokens);
+   if (exec->tokenizer) {
+      int i;
+      for (i = JoeArray_length(exec->tokens) - 1; i >= 0; i--)
+         free (((struct t_Token*) JoeArray_get(exec->tokens, i))->word);
+      JoeArray_delete (exec->tokens);
+      Tokenizer_delete (exec->tokenizer);
+      exec->tokens = 0;
+      exec->tokenizer = 0;
+   }
    joe_Block_removeMessages(block);
    exec->compiled = 0;
    joe_Object_assign(retval, self);

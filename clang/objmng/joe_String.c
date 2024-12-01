@@ -677,15 +677,30 @@ split (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 static joe_String
-replace (joe_String self, char *re, char *rplcmnt, int firstOnly)
+replace (joe_String self, char *are, char *rplcmnt, int firstOnly)
 {
    joe_String Return = self;
    int ic = 0;
    char * const str = joe_String_getCharStar (self);
    joe_StringBuilder sb = 0;
+   char *re0 = strdup (are);
+   char *re = re0;
+   int anchStrt = 0;
+   int anchEnd = 0;
+   int reLen;
    if (re[0] == '(' && re[1] == '?' && re[2] == 'i' && re[3] == ')') {
       re+=4;
       ic = 1;
+   }
+   if (*re == '^') {
+      re++;
+      anchStrt = 1;
+   }
+   reLen = strlen (re);
+   if (re[reLen-1] == '$' && reLen > 1 && re[reLen-2] != '\\') {
+      anchEnd = 1;
+      re[reLen-1] = 0;
+      reLen--;
    }
    if (*re != '*' && *re != '+' && *re != '?') {
       char *s0 = str;
@@ -700,7 +715,10 @@ replace (joe_String self, char *re, char *rplcmnt, int firstOnly)
             }
             if (len0 > 0)
                joe_StringBuilder_appendCharStar_len(sb, s0, len0);
-            joe_StringBuilder_appendCharStar(sb, rplcmnt);
+            if ((!anchStrt || s0 == str) && (!anchEnd  || *sx == 0))
+               joe_StringBuilder_appendCharStar(sb, rplcmnt);
+            else
+               joe_StringBuilder_appendCharStar_len(sb, st, (sx - st));
             s0 = st = sx;
             if (firstOnly) {
                while (*st)
@@ -720,6 +738,7 @@ replace (joe_String self, char *re, char *rplcmnt, int firstOnly)
          joe_Object_assign (&sb, 0);
       }
    }
+   free (re0);
    return Return;
 }
 

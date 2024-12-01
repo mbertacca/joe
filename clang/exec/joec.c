@@ -187,6 +187,7 @@ main (int argc, char *argv[])
          putPrompt (prompt);
       } while (fgets (line, MAXLINELEN, stdin) != NULL);
       joe_Object_assign(&retval, 0);
+      joe_Execute_clear(exec);
       joe_Object_assign(&exec, 0);
    }
    joe_Object_gc ();
