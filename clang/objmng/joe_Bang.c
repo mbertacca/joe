@@ -333,7 +333,7 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_StringBuilder msg = 0;
    joe_Object_assign (&msg, joe_StringBuilder_New ());
-   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.40 ");
+   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.41 ");
    joe_StringBuilder_appendCharStar (msg, __DATE__);
 #ifdef WIN32
    joe_StringBuilder_appendCharStar (msg, " Windows");
@@ -587,6 +587,7 @@ _for(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
    joe_Block blk;
    joe_Integer arg = 0;
    joe_Object lretval = 0;
+   int istep = 1;
 
    if (argc == 3 && joe_Object_instanceOf(argv[0], &joe_Integer_Class) &&
                     joe_Object_instanceOf(argv[1], &joe_Integer_Class) &&
@@ -611,11 +612,12 @@ _for(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
       i = (start - end) / -step + 1;
    } else if (step > 0) {
       i = (end - start) / step + 1;
-   } else
-      i = 1;
-   if (i < 1)
-      i = 1;
-   for ( ; i > 0; i--) {
+   } else {
+      i = end - start + 1;
+      istep = 0;
+   }
+   joe_Object_assign(&lretval, joe_Null_value);
+   for ( ; i > 0; i -= istep) {
       /* rc = joe_Object_invoke(blk, "exec", 1, &arg, &lretval); */
       rc = joe_Block_exec(blk, 1, &arg, &lretval);
       if (rc != JOE_SUCCESS) {
