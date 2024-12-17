@@ -41,6 +41,9 @@ public class WArray extends Wrapper {
    public WInteger length() {
       return new WInteger (value.length);
    }
+   public WInteger size() {
+      return new WInteger (value.length);
+   }
    public Object get(WNumber idx) {
       return value[idx.intValue()];
    }
@@ -69,6 +72,16 @@ public class WArray extends Wrapper {
    }
    public Object shift() {
       return shift (1);
+   }
+   public Object unshift (Object obj) {
+      Object Return[] = new Object[value.length + 1];
+      Return[0] = obj;
+      System.arraycopy(value, 0, Return, 1, value.length);
+      return new WArray(Return);
+   }
+   public Object slice (WNumber from, WNumber to) {
+      return new WArray(Arrays.copyOfRange (value,
+                                          from.intValue(), to.intValue()));
    }
    public Object clone() {
       return value.clone();

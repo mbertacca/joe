@@ -22,6 +22,7 @@
 # include "joe_Exception.h"
 # include "joe_Block.h"
 # include "joe_BreakLoopException.h"
+# include "joe_Null.h"
 # include "joestrct.h"
 
 static int
@@ -116,6 +117,56 @@ shift (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 static int
+unshift (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1) {
+      int idx0, idx1;
+      int length = (int) joe_Array_length (self);
+      joe_Object_assign (retval, joe_Object_New(&joe_Array_Class, length + 1));
+      joe_Object_assign (JOE_AT(*retval, 0), argv[0]);
+ 
+      for (idx0 = 0, idx1 = 1; idx0 < length; idx0++,idx1++) {
+         joe_Object_assign (JOE_AT(*retval, idx1), *JOE_AT(self, idx0));
+      }
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+               joe_Exception_New("Array unshift: invalid arguments number"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+slice (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 2 && joe_Object_instanceOf (argv[0], &joe_Integer_Class)
+                 && joe_Object_instanceOf (argv[1], &joe_Integer_Class)) {
+      int from = joe_Integer_value (argv[0]);
+      int to = joe_Integer_value (argv[1]);
+      if (from >= 0 && to >= from) {
+         int idx0, idx1;
+         int newlen = to - from;
+         int length = (int) joe_Array_length (self);
+         joe_Object_assign (retval, joe_Object_New(&joe_Array_Class, newlen));
+         for (idx0=0, idx1=from; idx0 < newlen && idx1 < length; idx0++,idx1++)
+            joe_Object_assign (JOE_AT(*retval,idx0), *JOE_AT(self,idx1));
+         for ( ; idx0 < newlen; idx0++)
+            joe_Object_assign (JOE_AT(*retval,idx0), joe_Null_value);
+         return JOE_SUCCESS;
+      } else {
+         joe_Object_assign(retval,
+               joe_Exception_New("Array slice: invalid arguments values"));
+         return JOE_FAILURE;
+      }
+   } else {
+      joe_Object_assign(retval,
+               joe_Exception_New("Array slice: invalid arguments"));
+      return JOE_FAILURE;
+   }
+}
+
+
+static int
 add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1) {
@@ -191,11 +242,14 @@ iterator (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 
 static joe_Method mthds[] = {
   {"length", length },
+  {"size", length },
   {"get", get },
   {"set", set },
   {"foreach", foreach },
   {"clean", clean },
   {"shift", shift },
+  {"unshift", unshift },
+  {"slice", slice },
   {"add", add },
   {"iterator", iterator },
   {(void *) 0, (void *) 0}
