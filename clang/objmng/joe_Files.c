@@ -26,9 +26,11 @@
 # include "joe_String.h"
 # include "joe_StringBuilder.h"
 # include "joe_ArrayList.h"
+# include "joe_Date.h"
 # include "joe_Files.h"
 # include "joe_Boolean.h"
 # include "joe_Exception.h"
+# include "joe_Null.h"
 
 static void
 getErrno (char *filename, joe_Object *retval)
@@ -218,6 +220,84 @@ isDirectory (joe_Object self,
 }
 
 static int
+getAttribute (joe_Object self,
+                    int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc >= 2 && joe_Object_instanceOf (argv[0], &joe_String_Class)
+                 && joe_Object_instanceOf (argv[1], &joe_String_Class)) {
+      char *filename = joe_String_getCharStar (argv[0]);
+      char *attr = joe_String_getCharStar (argv[1]);
+      struct stat sb;
+      int rc = stat(filename, &sb);
+      if (rc != 0) {
+         joe_Object_assign(retval,
+            joe_Exception_New_string (
+                  joe_String_New2("getAttribute: cannot access file ",filename)));
+         return JOE_FAILURE;
+      }
+      if (!strcmp("size",attr)) {
+         joe_Object_assign(retval, joe_Integer_New (sb.st_size));
+      } else if (!strcmp("isRegularFile",attr)) {
+         if ((sb.st_mode & S_IFMT) == S_IFREG) {
+            joe_Object_assign (retval, joe_Boolean_New_true());
+         } else {
+            joe_Object_assign (retval, joe_Boolean_New_false());
+         }
+      } else if (!strcmp("isDirectory",attr)) {
+         if ((sb.st_mode & S_IFMT) == S_IFDIR) {
+            joe_Object_assign (retval, joe_Boolean_New_true());
+         } else {
+            joe_Object_assign (retval, joe_Boolean_New_false());
+         }
+      } else if (!strcmp("isOther",attr)) {
+         if ((sb.st_mode & S_IFMT) != S_IFDIR &&
+             (sb.st_mode & S_IFMT) != S_IFREG) {
+            joe_Object_assign (retval, joe_Boolean_New_true());
+         } else {
+            joe_Object_assign (retval, joe_Boolean_New_false());
+         }
+      } else if (!strcmp("fileKey",attr)) {
+         if (sb.st_ino == 0) {
+            joe_Object_assign (retval, joe_Null_value);
+         } else {
+            char str[64];
+            snprintf (str,sizeof(str),"(dev=%ld,ino=%ld)",
+                        (long) sb.st_dev, (long) sb.st_ino);
+            joe_Object_assign (retval, joe_String_New(str));
+         }
+      } else if (!strcmp("lastModifiedTime",attr)) {
+         joe_Integer millis = 0;
+         joe_Object_assign(&millis,
+            joe_Integer_New ((sb.st_mtime * 1000) + joe_Date_getEpochMillis()));
+         joe_Class_newInstance (&joe_Date_Class, 1, &millis, retval);
+         joe_Object_assign(&millis, 0);
+      } else if (!strcmp("lastAccessTime",attr)) {
+         joe_Integer millis = 0;
+         joe_Object_assign(&millis,
+            joe_Integer_New ((sb.st_atime * 1000) + joe_Date_getEpochMillis()));
+         joe_Class_newInstance (&joe_Date_Class, 1, &millis, retval);
+         joe_Object_assign(&millis, 0);
+      } else if (!strcmp("creationTime",attr)) {
+         joe_Integer millis = 0;
+         joe_Object_assign(&millis,
+            joe_Integer_New ((sb.st_mtime * 1000) + joe_Date_getEpochMillis()));
+         joe_Class_newInstance (&joe_Date_Class, 1, &millis, retval);
+         joe_Object_assign(&millis, 0);
+      } else {
+         joe_Object_assign(retval,
+            joe_Exception_New_string (
+                  joe_String_New2("getAttribute: invalid argument ",attr)));
+         return JOE_FAILURE;
+      }
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+         joe_Exception_New ("getAttribute: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
 isAbsolute (joe_Object self,
                     int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -239,6 +319,7 @@ static joe_Method filesMthds[] = {
    {"listDirectory", listDirectory },
    {"newDirectoryStream", listDirectory },
    {"isDirectory", isDirectory },
+   {"getAttribute", getAttribute },
    {"exists", exists },
    {"deleteIfExists", deleteIfExists },
    {"isAbsolute", isAbsolute },

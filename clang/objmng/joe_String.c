@@ -483,6 +483,28 @@ startsWith(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
    }
 }
 
+static int
+endsWith(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
+{
+   if (argc == 1 && JOE_ISCLASS(argv[0], &joe_String_Class)) {
+      unsigned int selfLen = joe_String_length(self);
+      unsigned int arglen = joe_String_length(argv[0]);
+      if (arglen <= selfLen) {
+          if (strncmp (&joe_String_getCharStar(self)[selfLen - arglen],
+                       joe_String_getCharStar(argv[0]), arglen) == 0)
+             joe_Object_assign(retval, joe_Boolean_New_true());
+          else
+             joe_Object_assign(retval, joe_Boolean_New_false());
+      } else {
+         joe_Object_assign(retval, joe_Boolean_New_false());
+      }
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New(
+                                "joe_String endsWith: invalid argument"));
+         return JOE_FAILURE;
+   }
+}
 
 static int
 toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -677,7 +699,7 @@ split (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 static joe_String
-replace (joe_String self, char *are, char *rplcmnt, int firstOnly)
+re_replace (joe_String self, char *are, char *rplcmnt, int firstOnly)
 {
    joe_String Return = self;
    int ic = 0;
@@ -743,6 +765,52 @@ replace (joe_String self, char *are, char *rplcmnt, int firstOnly)
 }
 
 static int
+replace (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 2 && JOE_ISCLASS(argv[0], &joe_String_Class)
+                 && JOE_ISCLASS(argv[1], &joe_String_Class)) {
+      char * selfc = joe_String_getCharStar (self);
+      char * target = joe_String_getCharStar (argv[0]);
+      char * rplcmnt = joe_String_getCharStar (argv[1]);
+      int tLen = strlen (target);
+      char *pnt = strstr (selfc, target);
+      if (pnt && !(*rplcmnt == 0 && tLen == 0)) {
+         char * pnt0 = pnt;
+         joe_StringBuilder sb = 0;
+         joe_Object_assign (&sb, joe_StringBuilder_New ());
+         if (tLen == 0) {
+            joe_StringBuilder_appendCharStar (sb, rplcmnt);
+            for ( ; *pnt0; pnt0++) { 
+               joe_StringBuilder_appendCharStar_len (sb, pnt0,1);
+               joe_StringBuilder_appendCharStar (sb, rplcmnt);
+            }
+         } else {
+            joe_StringBuilder_appendCharStar_len (sb, selfc,(pnt - selfc));
+            joe_StringBuilder_appendCharStar (sb, rplcmnt);
+            pnt0 += tLen;
+            for (pnt = strstr (pnt0, target); pnt; pnt = strstr (pnt0, target)) {
+               joe_StringBuilder_appendCharStar_len (sb, pnt0,(pnt - pnt0));
+               joe_StringBuilder_appendCharStar (sb, rplcmnt);
+               pnt0 = pnt;
+               pnt0 += tLen;
+            }
+            if (pnt0)
+               joe_StringBuilder_appendCharStar (sb, pnt0);
+         }
+         joe_Object_assign(retval, joe_StringBuilder_toString(sb));
+         joe_Object_assign(&sb, 0);
+      } else {
+         joe_Object_assign(retval, self);
+      }
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New (
+                               "joe_String replaceAll: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
 replaceAll (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 2 && JOE_ISCLASS(argv[0], &joe_String_Class)
@@ -750,7 +818,7 @@ replaceAll (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       char * re = joe_String_getCharStar (argv[0]);
       char * rplcmnt = joe_String_getCharStar (argv[1]);
       
-      joe_Object_assign(retval, replace (self, re, rplcmnt,0));
+      joe_Object_assign(retval, re_replace (self, re, rplcmnt,0));
       return JOE_SUCCESS;
    } else {
       joe_Object_assign(retval, joe_Exception_New (
@@ -767,7 +835,7 @@ replaceFirst (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       char * re = joe_String_getCharStar (argv[0]);
       char * rplcmnt = joe_String_getCharStar (argv[1]);
       
-      joe_Object_assign(retval, replace (self, re, rplcmnt, 1));
+      joe_Object_assign(retval, re_replace (self, re, rplcmnt, 1));
       return JOE_SUCCESS;
    } else {
       joe_Object_assign(retval, joe_Exception_New (
@@ -858,11 +926,13 @@ static joe_Method mthds[] = {
   {"trim", trim},
   {"charAt", charAt},
   {"startsWith", startsWith},
+  {"endsWith", endsWith},
   {"toLowerCase", toLowerCase},
   {"toUpperCase", toUpperCase},
   {"equalsIgnoreCase", equalsIgnoreCase},
   {"matches", matches},
   {"split", split},
+  {"replace", replace},
   {"replaceAll", replaceAll},
   {"replaceFirst", replaceFirst},
   {"intValue", intValue},
