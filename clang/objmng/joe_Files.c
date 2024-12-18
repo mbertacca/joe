@@ -268,19 +268,22 @@ getAttribute (joe_Object self,
       } else if (!strcmp("lastModifiedTime",attr)) {
          joe_Integer millis = 0;
          joe_Object_assign(&millis,
-            joe_Integer_New ((sb.st_mtime * 1000) + joe_Date_getEpochMillis()));
+            joe_Integer_New (((int64_t)sb.st_mtime * 1000) +
+                              joe_Date_getEpochMillis()));
          joe_Class_newInstance (&joe_Date_Class, 1, &millis, retval);
          joe_Object_assign(&millis, 0);
       } else if (!strcmp("lastAccessTime",attr)) {
          joe_Integer millis = 0;
          joe_Object_assign(&millis,
-            joe_Integer_New ((sb.st_atime * 1000) + joe_Date_getEpochMillis()));
+            joe_Integer_New (((int64_t)sb.st_atime * 1000) +
+                              joe_Date_getEpochMillis()));
          joe_Class_newInstance (&joe_Date_Class, 1, &millis, retval);
          joe_Object_assign(&millis, 0);
       } else if (!strcmp("creationTime",attr)) {
          joe_Integer millis = 0;
          joe_Object_assign(&millis,
-            joe_Integer_New ((sb.st_mtime * 1000) + joe_Date_getEpochMillis()));
+            joe_Integer_New (((int64_t)sb.st_mtime * 1000) +
+                              joe_Date_getEpochMillis()));
          joe_Class_newInstance (&joe_Date_Class, 1, &millis, retval);
          joe_Object_assign(&millis, 0);
       } else {
