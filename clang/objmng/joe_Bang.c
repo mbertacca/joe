@@ -1164,7 +1164,7 @@ random_ (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
          srand (time(0));
          initRand = 1;
       }
-      Return = (double) rand() / RAND_MAX;
+      Return = (double) rand() / ((double)(RAND_MAX) + 1);
       joe_Object_assign(retval, joe_Float_New (Return));
    } else {
       joe_Object_assign(retval,
