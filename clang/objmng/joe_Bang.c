@@ -25,10 +25,12 @@
 # include <unistd.h>
 # include "joe_Bang.h"
 # include "joe_Array.h"
+# include "joe_ArrayList.h"
 # include "joe_Block.h"
 # include "joe_Boolean.h"
 # include "joe_Execute.h"
 # include "joe_Integer.h"
+# include "joe_Float.h"
 # include "joe_Null.h"
 # include "joe_Files.h"
 # include "joe_String.h"
@@ -233,6 +235,37 @@ Switch_end (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_SUCCESS;
 }
 
+static int
+shellsort (joe_Array v, joe_Block blk, int n, joe_Object *retval)
+{
+   int gap, i, j;
+   joe_Object vArg[2];
+
+   for (gap = n/2; gap > 0; gap /= 2)
+      for (i = gap; i < n; i++)
+         for (j=i-gap; j>=0 /* && v[j]>v[j+gap] */; j-=gap) {
+            vArg[0] = *JOE_AT(v, j);
+            vArg[1] = *JOE_AT(v, j+gap);
+            if ((joe_Block_exec (blk,2,vArg,retval))!=JOE_SUCCESS) {
+                return JOE_FAILURE;
+            } else if (joe_Object_instanceOf (*retval, &joe_Integer_Class)) {
+               if (joe_Integer_value (*retval) <= 0) {
+                  break;
+               } else {
+                  *JOE_AT(v, j) = vArg[1];
+                  *JOE_AT(v, j+gap) = vArg[0];
+               }
+            } else {
+               joe_Object_assign(retval, joe_Exception_New (
+                 "arraySort: invalid block return value, must be an integer"));
+               return JOE_FAILURE;
+            }
+         }
+   joe_Object_assign (retval, joe_Null_value);
+   return JOE_SUCCESS;
+}
+
+
 static void
 args2String(int argc, joe_Object* argv, joe_Object* retval)
 {
@@ -333,7 +366,7 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_StringBuilder msg = 0;
    joe_Object_assign (&msg, joe_StringBuilder_New ());
-   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.43 ");
+   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.44 ");
    joe_StringBuilder_appendCharStar (msg, __DATE__);
 #ifdef WIN32
    joe_StringBuilder_appendCharStar (msg, " Windows");
@@ -1045,6 +1078,101 @@ array (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
    return JOE_SUCCESS;
 }
 
+static int
+arraySort (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
+{
+   if (argc == 2 && joe_Object_instanceOf (args[0], &joe_Array_Class)
+                 && joe_Object_instanceOf (args[1], &joe_Block_Class)) {
+      return shellsort (args[0],args[1],joe_Array_length(args[0]),retval);
+   } else if (argc == 2 && joe_Object_instanceOf (args[0], &joe_ArrayList_Class)
+                       && joe_Object_instanceOf (args[1], &joe_Block_Class)) {
+      joe_Array v = joe_ArrayList_getArray(args[0]);
+      int n = joe_ArrayList_length (args[0]);
+      return shellsort (v, args[1], n, retval);
+   } else {
+      joe_Object_assign(retval,
+                        joe_Exception_New ("arraySort: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+   return JOE_SUCCESS;
+}
+
+static int
+bsearch_ (joe_Array v, int n, joe_Object cfrt,
+          joe_Block blk, joe_Integer *retval)
+{
+   int i = n / 2;
+   int min = 0;
+   int max = n - 1;
+   joe_Object arg[2];
+
+   arg[1] = cfrt;
+   for ( ; ; ) {
+      if (max < min)
+         break;
+      i = ((max - min) / 2) + min;
+      arg[0] = *JOE_AT (v,i);
+      if ((joe_Block_exec (blk,2,arg,retval)) != JOE_SUCCESS) {
+         return JOE_FAILURE;
+      } else if (joe_Object_instanceOf (*retval, &joe_Integer_Class)) {
+         int cmp = joe_Integer_value (*retval);
+         if ( cmp < 0) {
+            min = i + 1;
+         } else if (cmp > 0) {
+            max = i - 1;
+         } else {
+            joe_Object_assign (retval, joe_Integer_New (i));
+            return JOE_SUCCESS;
+         }
+      } else {
+        joe_Object_assign(retval, joe_Exception_New (
+            "binarySearch: invalid block return value, must be an integer"));
+      }
+   }
+   joe_Object_assign (retval, joe_Integer_New (-1));
+   return JOE_SUCCESS;
+}
+
+static int
+binarySearch (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
+{
+   if (argc == 3 && joe_Object_instanceOf (args[0], &joe_Array_Class)
+                 && joe_Object_instanceOf (args[2], &joe_Block_Class)) {
+      return bsearch_(args[0], joe_Array_length(args[0]), args[1],
+                       args[2], retval);
+   } else if (argc == 3 && joe_Object_instanceOf (args[0], &joe_ArrayList_Class)
+                        && joe_Object_instanceOf (args[2], &joe_Block_Class)) {
+      joe_Array v = joe_ArrayList_getArray(args[0]);
+      int n = joe_ArrayList_length (args[0]);
+      return bsearch_(v, n, args[1], args[2], retval);
+   } else {
+      joe_Object_assign(retval,
+                        joe_Exception_New ("binarySearch: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+   return JOE_SUCCESS;
+}
+
+int initRand;
+ 
+static int
+random_ (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
+{
+   if (argc == 0) {
+      double Return;
+      if (initRand == 0) {
+         srand (time(0));
+         initRand = 1;
+      }
+      Return = (double) rand() / RAND_MAX;
+      joe_Object_assign(retval, joe_Float_New (Return));
+   } else {
+      joe_Object_assign(retval,
+                        joe_Exception_New ("random: no arguments allowed"));
+      return JOE_FAILURE;
+   }
+   return JOE_SUCCESS;
+}
 
 static int
 getGlob (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
@@ -1093,6 +1221,8 @@ static joe_Method mthds[] = {
   {"gosub", gosub},
   {"return", _return},
   {"array", array},
+  {"arraySort", arraySort},
+  {"binarySearch", binarySearch},
   {"new", _new},
   {"typename", typename },
   {"joe", joe},
@@ -1114,6 +1244,7 @@ static joe_Method mthds[] = {
   {"getGlob", getGlob},
   {"loadSO", loadSO},
   {"toString", toString},
+  {"random", random_},
   {"debug", debug},
   {(void *) 0, (void *) 0}
 };

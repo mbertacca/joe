@@ -621,6 +621,20 @@ lt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 static int
+compareTo (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && JOE_ISCLASS(argv[0], &joe_String_Class)) {
+      joe_Object_assign(retval,
+                joe_Integer_New(joe_String_compare (self, argv[0])));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, 
+           joe_Exception_New ("joe_String compareTo: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
 matches (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1 && JOE_ISCLASS(argv[0], &joe_String_Class)) {
@@ -919,6 +933,7 @@ static joe_Method mthds[] = {
   {"gt", gt},
   {"le", le},
   {"lt", lt},
+  {"compareTo",compareTo},
   {"length", length},
   {"indexOf", indexOf},
   {"lastIndexOf", lastIndexOf},

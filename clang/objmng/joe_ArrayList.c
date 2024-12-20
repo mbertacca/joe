@@ -82,7 +82,7 @@ get (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_Integer_Class)) {
       int64_t length = joe_Integer_value (*joe_Object_at (self, LENGTH));
       int idx = joe_Integer_value (argv[0]);
-      if (idx < length) {
+      if (idx >= 0 && idx < length) {
          joe_Array array = *joe_Object_at (self, ARRAY);
          joe_Object_assign(retval, *JOE_AT (array, idx));
       } else {
@@ -328,7 +328,7 @@ joe_Object *
 joe_ArrayList_at (joe_Object self, unsigned int idx)
 {
    unsigned int len = joe_ArrayList_length (self);
-   if (idx < len) 
+   if (idx >= 0 && idx < len) 
       return JOE_AT(*JOE_AT(self,ARRAY), idx);
    else
       return 0;

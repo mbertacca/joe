@@ -29,7 +29,9 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.Writer;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.lang.reflect.Constructor;
@@ -646,6 +648,41 @@ public class DefaultCommand extends CommandBase {
    public String systemGetenv (String name) {
       return System.getenv (name);
    }
+   private class Cmp implements Comparator {
+      final Block blk;
+      Cmp (Block blk) {
+         this.blk = blk;
+      }
+      public int compare (Object o1, Object o2) {
+         try {
+            Object obj = blk.exec (Wrapper.newInstance(o1),
+                                   Wrapper.newInstance(o2));
+            return ((WInteger) obj).intValue();
+         } catch (JOEException ex) {
+            throw new RuntimeException (ex);
+         }
+      }
+   }
+   /**
+    * Sort an array according to the block.
+    */
+   public Object arraySort (Object array[], Block blk) {
+      Arrays.sort (array, new Cmp(blk));
+      return null;
+   }
+   /**
+    * Binary search on an array according to the block.
+    */
+   public Object binarySearch (Object array[], Object key, Block blk) {
+      return Arrays.binarySearch (array, key, new Cmp(blk));
+   }
+
+   /**
+    * Returns a random number in the range 0.0 - 1.0.
+    */
+   public Object random () {
+      return Math.random();
+   }
 
    /**
     * Returns a Glob object that performs match operations on paths
@@ -654,7 +691,7 @@ public class DefaultCommand extends CommandBase {
    public Glob getGlob (String glob, boolean caseInsensitive) {
       return new Glob (glob, caseInsensitive);
    }
-   /**
+   /**edit 
     * Shows the specified objects in a graphical window.
     */
    public void showMessageDialog(Object... message) {
