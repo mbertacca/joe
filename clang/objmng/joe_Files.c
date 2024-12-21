@@ -147,11 +147,7 @@ files_write (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
             } else {
                joe_Object_assign(&str, 0);
             }
-#ifdef WIN32
-            fwrite ("\r\n", 2, 1, fd);
-#else
             fwrite ("\n", 1, 1, fd);
-#endif
          }
          fclose (fd);
          joe_Object_assign (retval, argv[0]);

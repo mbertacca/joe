@@ -235,13 +235,59 @@ Switch_end (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_SUCCESS;
 }
 
+static int *qsort_rc;
+static joe_Block qsort_blk;
+static joe_Object *qsort_retval;
+
+static int
+qCmp(const void *p1, const void *p2)
+{
+   joe_Object vArg[2];
+   if (*qsort_rc != JOE_SUCCESS)
+      return 0;
+
+   vArg[0] = *((joe_Object *) p1);
+   vArg[1] = *((joe_Object *) p2);
+
+   if ((joe_Block_exec (qsort_blk,2,vArg,qsort_retval))!=JOE_SUCCESS) {
+       *qsort_rc = JOE_FAILURE;
+   } else if (joe_Object_instanceOf (*qsort_retval, &joe_Integer_Class)) {
+       return joe_Integer_value (*qsort_retval);
+   } else {
+       joe_Object_assign(qsort_retval, joe_Exception_New (
+                 "arraySort: invalid block return value, must be an integer"));
+       *qsort_rc = JOE_FAILURE;
+   }
+   return 0;
+}
+
+static int
+mysort  (joe_Array v, joe_Block blk, int n, joe_Object *retval)
+{
+   int Return = JOE_SUCCESS;
+   qsort_rc = &Return;
+   qsort_blk = blk;
+   qsort_retval = retval;
+
+   qsort(JOE_AT(v, 0), n, sizeof(char *), qCmp);
+
+   return Return;
+}
+
+#ifdef COMMENT
+
 static int
 shellsort (joe_Array v, joe_Block blk, int n, joe_Object *retval)
 {
    int gap, i, j;
    joe_Object vArg[2];
 
-   for (gap = n/2; gap > 0; gap /= 2)
+   gap = 1; 
+   while (gap < n) {
+     gap = gap * 3 + 1;
+   }
+
+   for (gap = gap/3 ; gap > 0; gap /= 3)
       for (i = gap; i < n; i++)
          for (j=i-gap; j>=0 /* && v[j]>v[j+gap] */; j-=gap) {
             vArg[0] = *JOE_AT(v, j);
@@ -263,8 +309,9 @@ shellsort (joe_Array v, joe_Block blk, int n, joe_Object *retval)
          }
    joe_Object_assign (retval, joe_Null_value);
    return JOE_SUCCESS;
-}
+}	
 
+#endif
 
 static void
 args2String(int argc, joe_Object* argv, joe_Object* retval)
@@ -366,7 +413,7 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_StringBuilder msg = 0;
    joe_Object_assign (&msg, joe_StringBuilder_New ());
-   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.44 ");
+   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.45 ");
    joe_StringBuilder_appendCharStar (msg, __DATE__);
 #ifdef WIN32
    joe_StringBuilder_appendCharStar (msg, " Windows");
@@ -1083,12 +1130,12 @@ arraySort (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
    if (argc == 2 && joe_Object_instanceOf (args[0], &joe_Array_Class)
                  && joe_Object_instanceOf (args[1], &joe_Block_Class)) {
-      return shellsort (args[0],args[1],joe_Array_length(args[0]),retval);
+      return mysort (args[0],args[1],joe_Array_length(args[0]),retval);
    } else if (argc == 2 && joe_Object_instanceOf (args[0], &joe_ArrayList_Class)
                        && joe_Object_instanceOf (args[1], &joe_Block_Class)) {
       joe_Array v = joe_ArrayList_getArray(args[0]);
       int n = joe_ArrayList_length (args[0]);
-      return shellsort (v, args[1], n, retval);
+      return mysort (v, args[1], n, retval);
    } else {
       joe_Object_assign(retval,
                         joe_Exception_New ("arraySort: invalid argument(s)"));
