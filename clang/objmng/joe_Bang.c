@@ -44,6 +44,90 @@
 # include "joe_DoDebugException.h"
 # include "joestrct.h"
 
+# ifdef WIN32
+# include <windows.h>
+
+static int
+run (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   DWORD rc;
+   int i;
+   STARTUPINFO si;
+   PROCESS_INFORMATION pi;
+   joe_StringBuilder msg = 0;
+   joe_Object_assign(&msg, joe_StringBuilder_New());
+
+   ZeroMemory( &si, sizeof(si) );
+   si.cb = sizeof(si);
+   ZeroMemory( &pi, sizeof(pi) );
+
+   for (i = 0; i < argc; i++) {
+      joe_StringBuilder_append(msg, argv[i]);
+      joe_StringBuilder_appendChar(msg, ' ');
+   }
+ 
+   if (!CreateProcess( NULL,   /* No module name (use command line) */
+        joe_StringBuilder_getCharStar(msg), /* Command line */
+        NULL,           /* Process handle not inheritable */
+        NULL,           /* Thread handle not inheritable */
+        FALSE,          /* Set handle inheritance to FALSE */
+        0,              /* No creation flags */
+        NULL,           /* Use parent's environment block */
+        NULL,           /* Use parent's starting directory  */
+        &si,            /* Pointer to STARTUPINFO structure */
+        &pi )           /* Pointer to PROCESS_INFORMATION structure */
+   ) {
+      joe_Object_assign(&msg, 0);
+      joe_Object_assign(retval,
+                        joe_Exception_New ("exec: cannot create process"));
+      return JOE_FAILURE;
+   }
+   joe_Object_assign(&msg, 0);
+
+   /* Wait until child process exits. */
+   WaitForSingleObject( pi.hProcess, INFINITE );
+   GetExitCodeProcess ( pi.hProcess, &rc);
+
+   /* Close process and thread handles.  */
+   CloseHandle( pi.hProcess );
+   CloseHandle( pi.hThread );
+   joe_Object_assign(retval, joe_Integer_New (rc));
+   return JOE_SUCCESS;
+}
+#else
+#include <sys/wait.h>
+static int
+run (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   int i;
+   int rc;
+   int pid;
+   char **args = calloc (argc + 1, sizeof(char*));
+   for (i = 0; i < argc; i++)
+      args[i] = joe_String_getCharStar(argv[i]);
+   args[i] = NULL;
+
+   switch (pid = fork()) {
+   case -1: /* fork() failed */
+      joe_Object_assign(retval, joe_Exception_New ("exec: fork failed"));
+      free (args);
+      return JOE_FAILURE;
+   case 0: /* Child: exec command */
+      execvp(args[0], args);
+      exit(127); /* We could not exec the shell */
+   default: /* Parent: wait for our child to terminate */
+      waitpid(pid, &rc, 0);
+      if (rc != 0 && (rc & 0x00FF) == 0)
+         rc >>= 8;
+      joe_Object_assign (retval, joe_Integer_New (rc));
+      break;
+   }
+
+   free (args);
+   return JOE_SUCCESS;
+}
+#endif
+
 static int Switch_case (joe_Object self,
                         int argc, joe_Object *argv, joe_Object *retval);
 static int Switch_end (joe_Object self,
@@ -327,8 +411,24 @@ args2String(int argc, joe_Object* argv, joe_Object* retval)
    joe_Object_assign(&msg, 0);
 }
 
+
 static int
 exec (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   int i;
+   for (i = 0; i < argc; i++)
+      if (! joe_Object_instanceOf(argv[i], &joe_String_Class))
+         break;
+   if (argc > 0 && i == argc) {
+      return run (self, argc, argv, retval);
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("exec: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+system_ (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc > 0) {
       int i, rc;
@@ -413,7 +513,7 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_StringBuilder msg = 0;
    joe_Object_assign (&msg, joe_StringBuilder_New ());
-   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.45 ");
+   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.46 ");
    joe_StringBuilder_appendCharStar (msg, __DATE__);
 #ifdef WIN32
    joe_StringBuilder_appendCharStar (msg, " Windows");
@@ -1284,6 +1384,7 @@ static joe_Method mthds[] = {
   {"getErrno", getErrno},
   {"systemGetenv", systemGetenv},
   {"exec", exec},
+  {"system", system_},
   {"execGetOut", execGetOut},
   {"execFromDir", execFromDir},
   {"unixTime", unixTime},
