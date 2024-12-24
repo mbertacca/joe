@@ -279,7 +279,23 @@ public class Tokenizer {
                break;
             case _INIT:
                status = TokenType._INTEGER;
-               word = new StringBuilder (Character.toString(line[idx]));
+               word = new StringBuilder ();
+               if (line[idx] == '0' && idx + 2 < line.length &&
+                   line[idx+1] == 'x' && Character.digit(line[idx+2],16)>=0) {
+                  idx ++;
+                  word.append(line[idx]);
+                  for (++idx;
+                       idx<line.length && Character.digit(line[idx],16)>=0;
+                       idx++)
+                     word.append(line[idx]);
+                  if (idx < line.length && (line[idx] == 'L' || line[idx] == 'l'))
+                     status = TokenType._LONG;
+                  else 
+                     idx--;
+                  breakChar('\000');
+               } else {
+                  word.append(line[idx]);
+               }
                break;
             case _INTEGER:
             case _FLOAT:

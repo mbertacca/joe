@@ -25,6 +25,7 @@
 # include "joestrct.h"
 
 # include <stdio.h>
+# include <string.h>
 
 void
 joe_Integer_toAscii (int64_t n, char *out) {
@@ -32,9 +33,12 @@ joe_Integer_toAscii (int64_t n, char *out) {
    char *p = asc + sizeof (asc) - 1;
 
    *(p--) = 0;
-   if (n == 0)
-     *(p) = '0';
-   else {
+   if (n == 0) {
+     *out++ = '0';
+     *out = 0;
+   } else if (n == 0x8000000000000000) {
+     strcpy (out,"-9223372036854775808");
+   } else {
       int negative = (n < 0);
       if (negative)
          n = ~n + 1;
@@ -46,10 +50,34 @@ joe_Integer_toAscii (int64_t n, char *out) {
          *(p) = '-';
       else
          p++;
+      while (*p) 
+         *(out++) = *(p++);
+      *out = 0;
    }
-   while (*p) 
-      *(out++) = *(p++);
-   *out = 0;
+}
+
+static char xdigits[] = "0123456789abcdef";
+
+void
+joe_Integer_toHexAscii (int64_t sn, char *out) {
+   char asc[32];
+   char *p = asc + sizeof (asc) - 1;
+   uint64_t n = sn;
+
+   *(p--) = 0;
+   if (n == 0) {
+     *out++ = '0';
+     *out = 0;
+   } else {
+      for (*(p--) = 0; n != 0; p--) {
+         *p = xdigits[n & 0x0F];
+         n >>= 4;
+      }
+      p++;
+      while (*p) 
+         *(out++) = *(p++);
+      *out = 0;
+   }
 }
 
 int64_t
@@ -60,9 +88,36 @@ joe_Integer_fromAscii (char *asc) {
    if (negative)
       asc++;
 
-   for (;*asc; asc++) {
-      Return *= 10; 
-      Return += *asc - '0';
+   if (*asc == 'x') {
+      for (++asc; *asc; asc++) {
+         Return <<= 4;
+         switch (*asc) {
+         case 'A':
+         case 'B':
+         case 'C':
+         case 'D':
+         case 'E':
+         case 'F':
+            Return |= (*asc - 'A' + 10);
+            break;
+         case 'a':
+         case 'b':
+         case 'c':
+         case 'd':
+         case 'e':
+         case 'f':
+            Return |= (*asc - 'a' + 10);
+            break;
+         default:
+            Return |= (*asc - '0');
+            break;
+         }
+      }
+   } else {
+      for (;*asc; asc++) {
+         Return *= 10; 
+         Return += *asc - '0';
+      }
    }
    if (negative)
       Return = ~Return + 1;
@@ -465,6 +520,21 @@ bigDecimalValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval
 }
 
 static int
+toHexString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      char buff[32];
+      joe_Integer_toHexAscii (JOE_INTEGER (self), buff);
+      joe_Object_assign(retval, joe_String_New (buff));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                   joe_Exception_New("toHexString: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
 toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
@@ -500,6 +570,7 @@ static joe_Method mthds[] = {
    {"floatValue", floatValue },
    {"doubleValue", floatValue },
    {"bigDecimalValue", bigDecimalValue },
+   {"toHexString", toHexString },
    {"toString", toString },
   {(void *) 0, (void *) 0}
 };

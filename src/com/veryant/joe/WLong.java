@@ -190,4 +190,7 @@ public class WLong extends WBaseNumber {
    public String toString() {
       return Long.toString (value);
    }
+   public String toHexString () {
+      return Long.toHexString (value);
+   }
 }

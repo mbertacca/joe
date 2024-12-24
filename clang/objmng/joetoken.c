@@ -19,6 +19,7 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <string.h>
+# include <ctype.h>
 # include "joetoken.h"
 # include "joestrbuild.h"
 
@@ -351,7 +352,17 @@ Tokenizer_tokenize (Tokenizer self, char *line)
             break;
          case _INIT:
             self->status = _INTEGER;
-            JoeStrBuild_appendChr (self->word, *c);
+            if (*c == '0' && *(c+1) == 'x' && isxdigit(*(c+2))) {
+               c++;
+               JoeStrBuild_appendChr (self->word, *c);
+               for (c++; isxdigit(*c); c++)
+                  JoeStrBuild_appendChr (self->word, toupper(*c));
+               if (*c != 'l' && *c != 'L')
+                  c--;
+               breakChar(self, '\0');
+            } else {
+               JoeStrBuild_appendChr (self->word, *c);
+            }
             break;
          case _INTEGER:
          case _FLOAT:
@@ -368,6 +379,8 @@ Tokenizer_tokenize (Tokenizer self, char *line)
       case 'E':
       case 'm':
       case 'M':
+      case 'l':
+      case 'L':
          if (self->status == _INTEGER || self->status == _FLOAT) {
             if (*c == 'e' || *c == 'E') {
                char *cp1 = c + 1;
@@ -376,6 +389,10 @@ Tokenizer_tokenize (Tokenizer self, char *line)
                   self->status = _FLOAT;
                   break;
                }
+            } else if (*c == 'l' || *c == 'L') {
+               newToken (self,_INTEGER);
+               self->status = _INIT;
+               break;
             } else {
                newToken (self,_DECIMAL);
                self->status = _INIT;

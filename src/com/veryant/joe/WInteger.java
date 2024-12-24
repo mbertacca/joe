@@ -47,5 +47,8 @@ public class WInteger extends WLong {
    public WInteger remainder (WInteger n) {
       return new WInteger (value % n.intValue());
    }
+   public String toHexString () {
+      return Integer.toHexString ((int) value);
+   }
 }
 

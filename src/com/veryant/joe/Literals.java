@@ -23,10 +23,16 @@ import java.math.BigDecimal;
 
 public class Literals {
    public static Object getInteger (String val) {
-      return Wrapper.newInstance (Integer.parseInt(val));
+      if (val.startsWith("x"))
+         return Wrapper.newInstance (Integer.parseInt(val.substring(1),16));
+      else
+         return Wrapper.newInstance (Integer.parseInt(val));
    }
    public static Object getLong (String val) {
-      return Wrapper.newInstance (Long.parseLong(val));
+      if (val.startsWith("x"))
+         return Wrapper.newInstance (Long.parseLong(val.substring(1),16));
+      else
+         return Wrapper.newInstance (Long.parseLong(val));
    }
    public static Object getDouble (String val) {
       return Wrapper.newInstance (Double.parseDouble(val));
