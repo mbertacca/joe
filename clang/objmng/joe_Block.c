@@ -531,7 +531,7 @@ joe_Block_setBang (joe_Block self, joe_Object bang)
 }
 
 void
-joe_Block_Init (joe_Block self, joe_Block parent)
+joe_Block_Init (joe_Block self, joe_Block parent, joe_Bang bang)
 {
    joe_Object* thisVars = joe_Object_array(self);
    joe_HashMap hashvars = joe_HashMap_New(8);
@@ -540,7 +540,9 @@ joe_Block_Init (joe_Block self, joe_Block parent)
    joe_Object_assign(&thisVars[MESSAGES], joe_Array_New(0));
 
    joe_Object_assign(&thisVars[PARENT], parent);
-   if (parent) {
+   if (bang) {
+      joe_Object_assign(&thisVars[BANG], bang);
+   } else if (parent) {
       joe_Object_assign(&thisVars[BANG], joe_Block_getBang(parent));
    } else {
       joe_Object_assign(&thisVars[BANG], joe_Bang_New());
@@ -561,7 +563,7 @@ joe_Block_New (joe_Block parent)
 {
    joe_Object self;
    self = joe_Object_New (&joe_Block_Class, 0);
-   joe_Block_Init (self, parent);
+   joe_Block_Init (self, parent, 0);
    return self;
 }
 
@@ -764,15 +766,7 @@ static int extends (joe_JOEObject self,
    }
 }
 
-static int
-getClass (joe_JOEObject self, int argc, joe_Object *argv, joe_Object *retval)
-{
-   joe_Object_assign(retval, *JOE_AT(self,PARENT));
-   return JOE_SUCCESS;
-}
-
 static joe_Method JOEObject_mthds[] = {
-  {"getClass", getClass },
   {"extends", extends },
   {(void *) 0, (void *) 0}
 };

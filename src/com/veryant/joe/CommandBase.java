@@ -49,6 +49,7 @@ public class CommandBase {
       primitiveClasses.put (Double.class, double.class);
    }
    static final String eol = System.getProperty("line.separator", "\n");
+   protected String path[] = {};
    private Constructor<?> getConstructorForArgs(Class<?> clazz, Class[] args) {
       Constructor<?>[] constructors = clazz.getConstructors();
       Constructor<?> Return = null;
@@ -289,6 +290,22 @@ public class CommandBase {
          return ((Block) obj).name();
       else
          return obj.getClass().getName();
+   }
+   /**
+    * Adds one path from which to load new object.
+    */
+   public Object addPath (String fname) throws Exception {
+      String newpath[] = new String[path.length + 1];
+      System.arraycopy(path,0,newpath,0,path.length);
+      newpath[path.length] = fname;
+      path = newpath;
+      return this;
+   }
+   /**
+    * Returns the path set.
+    */
+   public String[] getPath () {
+      return (String[]) path.clone();
    }
    /**
     * Executes the specified JOE script and returns it as an object.

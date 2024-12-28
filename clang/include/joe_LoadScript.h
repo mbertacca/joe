@@ -21,10 +21,12 @@
 # include <stdio.h>
 # include "joe_Block.h"
 # include "joe_Array.h"
+# include "joe_Bang.h"
 
 typedef joe_Object joe_LoadScript;
 extern joe_Class joe_LoadScript_Class;
 JOEOBJ_API void joe_LoadScript_setCWD ();
-JOEOBJ_API joe_Block joe_LoadScript_New (joe_Block self, char *scriptName);
-FILE * joe_LoadScript_getFile (char *scriptName);
+JOEOBJ_API joe_Block joe_LoadScript_New (joe_Block self,
+                       char *scriptName, joe_Array path, joe_Bang bang);
+FILE * joe_LoadScript_getFile (char *scriptName, joe_Array path, joe_Bang bang);
 # endif

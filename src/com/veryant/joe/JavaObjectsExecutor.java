@@ -69,7 +69,7 @@ public class JavaObjectsExecutor {
             final File f = new File (argv[0]).getCanonicalFile();
             sm = new ScriptManager(f.getParentFile(), exec, defCmd, lr);
             Object[] jarg = new Object [] {new WArray (argv)};
-            Block blk = sm.load (f.getName(), jarg);
+            Block blk = sm.load (f.getName(), jarg, new String[0]);
             Object rc  = blk.init (jarg);
             if (rc instanceof WNumber) {
                Return = ((WNumber) rc).intValue();

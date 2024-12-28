@@ -94,7 +94,7 @@ public class JOEJar {
       ScriptManager sm;
       try {
          sm = new ScriptManager(jar, exec, defCmd, lread);
-         Block blk = sm.load (script, jarg);
+         Block blk = sm.load (script, jarg, new String[0]);
          blk.init (jarg);
       } catch (BreakEndException ex) {
          System.exit (ex.rc);

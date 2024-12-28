@@ -627,7 +627,7 @@ public class DefaultCommand extends CommandBase {
       LineReader lr = sm.getLineReader();
       Execute exec = new Execute(blk, this, name);
 
-      lr.open (name, new InputStreamReader(sm.getInputStream(name)));
+      lr.open (name, new InputStreamReader(sm.getInputStream(name,path)));
       while ((line = lr.readLine()) != null) {
          exec.add (line);
       }

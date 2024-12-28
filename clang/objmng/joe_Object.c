@@ -739,7 +739,7 @@ invoke (joe_Object self, joe_Class *clazz, const char *name,
    if (mthd) {
       Return = mthd->mthd (self, argc, argv, retval);
    } else {
-      sprintf (buffer, "Method not found: %s in class %s",
+      snprintf (buffer, sizeof(buffer), "Method not found: %s in class %s",
                  name, clazz->name);
       joe_Object_assign (retval, joe_Exception_New (buffer));
       Return = JOE_FAILURE;

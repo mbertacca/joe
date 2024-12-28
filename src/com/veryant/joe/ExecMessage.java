@@ -173,7 +173,8 @@ public class ExecMessage implements Message {
       Block b = ob.getMethod (selector.word);
       if (b == null) {
          if ("toString".equals (selector.word) ||
-             "extends".equals (selector.word))
+             "extends".equals (selector.word) ||
+             "new".equals (selector.word))
             return check (ob, blk);
          else if ("getClass".equals (selector.word)) {
             selector=new Token ("getJoeClass",

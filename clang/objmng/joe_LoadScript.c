@@ -24,14 +24,18 @@
 # include "joetoken.h"
 # include "joearray.h"
 # include "joeparser.h"
+# include "joestrct.h"
 # include <errno.h>
 # include <stdio.h>
 # include <stdlib.h>
 # include <string.h>
+# include <limits.h>
 
 # ifdef WIN32
+# define PATH_SEPARATOR '\\'
 # define isFileSeparator(c) (c=='/'||c=='\\')
 # else
+# define PATH_SEPARATOR '/'
 # define isFileSeparator(c) (c=='/')
 # endif
 
@@ -41,10 +45,25 @@ static char *dirname = 0;
 static int
 ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
+   joe_Array path = 0;
+   joe_Block bang = 0;
    switch (argc) {
    case 1:
       if (!joe_Object_instanceOf (argv[0], &joe_String_Class)) {
-         joe_Object_assign(retval, joe_Exception_New ("LoadScript: invalid 1st argument"));
+         joe_Object_assign(retval, 
+                     joe_Exception_New ("LoadScript: invalid 1st argument"));
+         return JOE_FAILURE;
+      }
+      break;
+   case 3:
+      if (joe_Object_instanceOf (argv[0], &joe_String_Class) &&
+          joe_Object_instanceOf (argv[1], &joe_Array_Class)  &&
+          joe_Object_instanceOf (argv[2], &joe_Bang_Class) ) {
+         path = argv[1];
+         bang = argv[2];
+      } else {
+         joe_Object_assign(retval,
+                     joe_Exception_New ("LoadScript: invalid arguments"));
          return JOE_FAILURE;
       }
       break;
@@ -53,7 +72,8 @@ ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 
-   joe_Object_assign(retval, joe_LoadScript_New (self, joe_String_getCharStar(argv[0])));
+   joe_Object_assign(retval, joe_LoadScript_New (self, 
+                      joe_String_getCharStar(argv[0]), path, bang));
 
    if (joe_Object_instanceOf (*retval, &joe_Exception_Class))
       return JOE_FAILURE;
@@ -84,46 +104,50 @@ joe_LoadScript_setCWD ()
 }
 
 FILE *
-joe_LoadScript_getFile (char *scriptName)
+joe_LoadScript_getFile (char *scriptName, joe_Array path, joe_Bang bang)
 {
-   char *path;
    FILE *Return;
 
-   if (dirname == 0 || *dirname == 0) {
-      path = scriptName;
+   if (dirname == 0) {
+      Return = fopen (scriptName, "r");
+      if (Return != NULL) {
+         char *c;
+         int fs = -1;
+         dirname = strdup (scriptName);
+         for (c = dirname; *c; c++) {
+            if (isFileSeparator (*c))
+               fs = (c - dirname);
+         }
+         if (fs >= 0)
+            dirname[fs+1] = 0;
+         else
+            dirname[0] = 0;
+      }
    } else {
-      if (joe_Files_isAbsolute(scriptName)) {
-         path = strdup(scriptName);
-      } else {
-         path = calloc (1, strlen (dirname) + strlen (scriptName) + 1);
-         strcat (path, dirname);
-         strcat (path, scriptName);
+      char fullpath[PATH_MAX];
+      int npath = path != NULL ? joe_Array_length(path) : 0;
+      int i;
+      char *dir;
+      strcpy (fullpath, dirname);
+      strcat (fullpath, scriptName);
+      Return = fopen (fullpath, "r");
+      for ( i = 0; Return == NULL && i < npath; i++) {
+         dir = joe_String_getCharStar(*JOE_AT (path, i));
+         if (joe_Files_isAbsolute(dir)) {
+            snprintf (fullpath,sizeof(fullpath), "%s%c%s",
+                                             dir,PATH_SEPARATOR,scriptName);
+         } else {
+            snprintf (fullpath,sizeof(fullpath),"%s%s%c%s",
+                                     dirname,dir,PATH_SEPARATOR,scriptName);
+         }
+         Return = fopen (fullpath, "r");
       }
    }
-
-   Return = fopen (path, "r");
-
-   if (Return != NULL && dirname == 0) {
-      char *c;
-      int fs = -1;
-      dirname = strdup (scriptName);
-      for (c = dirname; *c; c++) {
-         if (isFileSeparator (*c))
-            fs = (c - dirname);
-      }
-      if (fs >= 0)
-         dirname[fs+1] = 0;
-      else
-         dirname[0] = 0;
-   }
-   if (path != scriptName)
-      free (path);
-
    return Return;
 }
 
 joe_Block
-joe_LoadScript_New (joe_Block self, char *scriptName)
+joe_LoadScript_New (joe_Block self, char *scriptName, joe_Array path, joe_Bang bang)
 {
    int i;
    joe_Object Return = self;
@@ -134,7 +158,7 @@ joe_LoadScript_New (joe_Block self, char *scriptName)
    Tokenizer tokenizer = Tokenizer_new (tokens);
    JoeParser parser = JoeParser_new (scriptName);
 
-   scriptFile = joe_LoadScript_getFile (scriptName);
+   scriptFile = joe_LoadScript_getFile (scriptName, path, bang);
 
    if (scriptFile == NULL) {
       joe_StringBuilder msg = joe_StringBuilder_New ();
@@ -150,7 +174,7 @@ joe_LoadScript_New (joe_Block self, char *scriptName)
          Tokenizer_tokenize (tokenizer, line);
       }
       fclose (scriptFile);
-      joe_Block_Init (self, 0);
+      joe_Block_Init (self, 0, bang);
       if (JoeParser_compile (parser, self, tokens) != JOE_SUCCESS)
          Return = JoeParser_getException (parser);
    }

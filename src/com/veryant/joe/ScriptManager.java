@@ -42,12 +42,12 @@ public class ScriptManager {
    public static ScriptManager get (Object cmd) {
       return scriptManagerMap.get (cmd);
    }
-   public static Block load (Object cmd, String name, Object[] argv)
+   public static Block load (CommandBase cmd, String name, Object[] argv)
                                              throws IOException,JOEException {
       ScriptManager sm = ScriptManager.get (cmd);
       if (sm == null)
          throw new RuntimeException ("ScriptManager not found!");
-      return sm.load (name, argv);
+      return sm.load (name, argv, cmd.getPath());
    }
    static URL getURL (File f) {
       try {
@@ -94,7 +94,7 @@ public class ScriptManager {
    public LineReader getLineReader () {
       return lineReader;
    }
-   public InputStream getInputStream (String name) throws IOException {
+   public InputStream getInputStream (String name, String[] path) throws IOException {
       InputStream Return;
       File f;
 
@@ -104,8 +104,16 @@ public class ScriptManager {
          throw new FileNotFoundException (entryPoint.getFile());
       }
       if (f.isDirectory()) {
-         f = new File (f, name);
-         Return = new FileInputStream (f);
+         File dir;
+         File fp = new File (f, name);
+         for (int i = 0; i < path.length && !fp.exists(); i++) {
+            dir = new File (path[i]);
+            if (dir.isAbsolute())
+               fp = new File (dir, name);
+            else
+               fp = new File (new File(f,dir.getPath()), name);
+         }
+         Return = new FileInputStream (fp);
       } else {
          Return = getStreamFromJar (name);
          if (Return == null) 
@@ -113,7 +121,7 @@ public class ScriptManager {
       }
       return Return;
    }
-   public Block load (String name, Object[] argv)
+   public Block load (String name, Object[] argv, String path[])
                                throws IOException,JOEException {
       Block Return = blocks.get (name);
       if (Return != null) {
@@ -125,7 +133,7 @@ public class ScriptManager {
                   argv[i] = wobj;
          }
       } else {
-         lineReader.open (name, new InputStreamReader(getInputStream(name)));
+         lineReader.open (name, new InputStreamReader(getInputStream(name,path)));
          Return = OuterBlock.get (name, lineReader, argv, command, executor);
          blocks.put (name, Return);
       }

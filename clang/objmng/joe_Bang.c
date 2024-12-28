@@ -397,6 +397,9 @@ shellsort (joe_Array v, joe_Block blk, int n, joe_Object *retval)
 
 #endif
 
+# define PATH 0
+static char *variables[] = { "path", 0 };
+
 static void
 args2String(int argc, joe_Object* argv, joe_Object* retval)
 {
@@ -410,7 +413,6 @@ args2String(int argc, joe_Object* argv, joe_Object* retval)
    joe_Object_assign(retval, joe_StringBuilder_toString(msg));
    joe_Object_assign(&msg, 0);
 }
-
 
 static int
 exec (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -513,7 +515,7 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_StringBuilder msg = 0;
    joe_Object_assign (&msg, joe_StringBuilder_New ());
-   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.47 ");
+   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.48 ");
    joe_StringBuilder_appendCharStar (msg, __DATE__);
 #ifdef WIN32
    joe_StringBuilder_appendCharStar (msg, " Windows");
@@ -1055,10 +1057,14 @@ _return (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 }
 
 static int
-loadScript (joe_String scriptName, joe_Object *retval)
+loadScript (joe_Bang self, joe_String scriptName, joe_Object *retval)
 {
+   joe_Object args[3];
    joe_Class* loadScriptClass = joe_Class_getClass("joe_LoadScript");
-   return joe_Class_newInstance(loadScriptClass, 1, &scriptName, retval);
+   args[0] = scriptName;
+   args[1] = *JOE_AT(self,PATH);
+   args[2] = self;
+   return joe_Class_newInstance(loadScriptClass, 3, args, retval);
 }
 
 static int
@@ -1066,7 +1072,7 @@ _new (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
    if (argc > 0 && joe_Object_instanceOf (args[0], &joe_String_Class)) {
       int rc;
-      rc =loadScript (args[0], retval);
+      rc =loadScript (self, args[0], retval);
       if (rc == JOE_SUCCESS) {
          joe_LoadScript block = 0;
          joe_Object_transfer(&block, retval);
@@ -1122,7 +1128,7 @@ joe (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
       return JOE_FAILURE;
    }
 
-   rc =loadScript (scriptName, retval);
+   rc =loadScript (self, scriptName, retval);
    if (rc == JOE_SUCCESS) {
       joe_LoadScript block = 0;
       joe_Object_transfer(&block, retval);
@@ -1151,7 +1157,8 @@ runAsBlock (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
    if (argc > 1 && joe_Object_instanceOf (args[0], &joe_Block_Class)
                 && joe_Object_instanceOf (args[1], &joe_String_Class)) {
       char *scriptName = joe_String_getCharStar(args[1]);
-      FILE *scriptFile = joe_LoadScript_getFile (scriptName);
+      FILE *scriptFile = joe_LoadScript_getFile (scriptName,
+                                                 *JOE_AT(self,PATH), self);
       if (scriptFile) {
          int Return;
          char *line = 0;
@@ -1327,6 +1334,38 @@ getGlob (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
    return joe_Class_newInstance (&joe_Glob_Class, argc, args, retval);
 }
 
+static int
+addPath (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
+{
+   if (argc == 1 && joe_Object_instanceOf (args[0], &joe_String_Class)) {
+      joe_Array old = 0;
+      joe_Array neu = 0;
+      joe_Object_assign (&old, *JOE_AT(self,PATH));
+      joe_Array_add(old, args[0], &neu);
+      joe_Object_transfer (JOE_AT(self,PATH), &neu);
+      joe_Object_assign (&old, 0);
+      joe_Object_assign (retval, self);
+   } else {
+      joe_Object_assign (retval,
+                         joe_Exception_New("addPath: invalid argument"));
+      return JOE_FAILURE;
+   }
+   return JOE_SUCCESS;
+}
+
+static int
+getPath (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
+{
+   if (argc == 0) {
+      joe_Object_assign (retval, joe_Object_clone (*JOE_AT(self,PATH)));
+   } else {
+      joe_Object_assign (retval,
+                         joe_Exception_New("getPath: invalid argument"));
+      return JOE_FAILURE;
+   }
+   return JOE_SUCCESS;
+}
+
 extern int joe_BangSO_New(joe_String soName, joe_Object* obj);
 
 static int
@@ -1348,6 +1387,8 @@ toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_SUCCESS;
 }
 static joe_Method mthds[] = {
+  {"addPath", addPath },
+  {"getPath", getPath },
   {"if", _if},
   {"try", TRY},
   {"while", _while},
@@ -1402,7 +1443,7 @@ joe_Class joe_Bang_Class = {
    0,
    0,
    mthds,
-   0,
+   variables,
    &joe_Object_Class,
    0
 };
@@ -1410,5 +1451,6 @@ joe_Class joe_Bang_Class = {
 joe_Object
 joe_Bang_New () {
    joe_Object self = joe_Object_New (&joe_Bang_Class, 0);
+   joe_Object_assign (JOE_AT(self,PATH), joe_Array_New (0));
    return self;
 }
