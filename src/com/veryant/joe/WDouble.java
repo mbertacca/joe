@@ -61,6 +61,9 @@ public class WDouble extends WBaseNumber implements WNumber {
    public BigDecimal bigDecimalValue() {
       return new BigDecimal (value);
    }
+   public int signum() {
+      return (int) Math.signum (value);
+   }
 
    public WDouble add (WDouble n) {
       return new WDouble (value + n.value);

@@ -799,6 +799,16 @@ nDecimal_toString (nDecimal self)
    return Return;
 }
 
+int
+nDecimal_signum (nDecimal self)
+{
+   if (nDecimal_isZero (self))
+      return 0;
+   else if (self->negative)
+      return -1;
+   else
+      return 1;
+}
 /*
 int
 main (int argc, char *argv[])

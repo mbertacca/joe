@@ -58,6 +58,9 @@ public class WLong extends WBaseNumber {
    public java.math.BigDecimal bigDecimalValue() {
       return new java.math.BigDecimal (value);
    }
+   public int signum() {
+      return Long.signum (value);
+   }
 
    public WLong add (WLong n) {
       return new WLong (value + n.value);

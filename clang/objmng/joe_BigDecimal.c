@@ -188,6 +188,22 @@ bigDecimalValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval
 }
 
 static int
+signum (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      joe_Memory mem = *joe_Object_at (self, 0);
+      nDecimal num = (nDecimal) joe_Object_getMem (mem);
+      joe_Object_assign (retval, joe_Integer_New (nDecimal_signum (num)));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                        joe_Exception_New("signum: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
+
+static int
 toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
@@ -221,6 +237,7 @@ static joe_Method mthds[] = {
    {"floatValue", floatValue },
    {"doubleValue", floatValue },
    {"bigDecimalValue", bigDecimalValue },
+   {"signum", signum },
    {"toString", toString },
   {(void *) 0, (void *) 0}
 };

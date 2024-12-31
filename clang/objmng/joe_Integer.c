@@ -216,15 +216,9 @@ divide (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
          }
       } else if (JOE_ISCLASS (argv[0], &joe_Float_Class)) {
          double divisor = JOE_FLOAT (argv[0]);
-         if (divisor == 0) {
-            joe_Object_assign(retval,
-               joe_Exception_New("Integer divide: division by 0"));
-            return JOE_FAILURE;
-         } else {
-            joe_Object_assign(retval,
+         joe_Object_assign(retval,
                    joe_Float_New (JOE_INTEGER (self) / divisor));
-            return JOE_SUCCESS;
-         }
+         return JOE_SUCCESS;
       } else if (JOE_ISCLASS (argv[0], &joe_BigDecimal_Class)) {
          return operation (self, argc, argv, retval, DIVIDE);
       }
@@ -535,6 +529,21 @@ toHexString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 static int
+signum (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      int64_t x = JOE_INTEGER (self);
+      joe_Object_assign(retval, joe_Integer_New (
+                           x > 0 ? 1 : (x < 0 ? -1 : 0)));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                   joe_Exception_New("signum: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
 toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
@@ -571,6 +580,7 @@ static joe_Method mthds[] = {
    {"doubleValue", floatValue },
    {"bigDecimalValue", bigDecimalValue },
    {"toHexString", toHexString },
+   {"signum", signum },
    {"toString", toString },
   {(void *) 0, (void *) 0}
 };

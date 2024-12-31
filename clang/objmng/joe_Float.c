@@ -104,14 +104,8 @@ divide (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    if (argc == 1) {
       if (JOE_ISCLASS (argv[0], &joe_Float_Class)) {
          double divisor = JOE_FLOAT(argv[0]);
-         if (divisor == 0) {
-            joe_Object_assign(retval,
-               joe_Exception_New("Float divide: division by 0"));
-            return JOE_FAILURE;
-         } else {
-           joe_Object_assign(retval, joe_Float_New (JOE_FLOAT (self) / divisor));
-            return JOE_SUCCESS;
-         }
+         joe_Object_assign(retval, joe_Float_New (JOE_FLOAT (self) / divisor));
+         return JOE_SUCCESS;
       } else if (JOE_ISCLASS (argv[0], &joe_Integer_Class)) {
          int64_t divisor =  JOE_INTEGER(argv[0]);
          if (divisor == 0) {
@@ -341,11 +335,25 @@ bigDecimalValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval
 }
 
 static int
+signum (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      double x = JOE_FLOAT (self);
+      joe_Object_assign(retval, joe_Integer_New (
+                           x > 0 ? 1 : (x < 0 ? -1 : 0)));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                   joe_Exception_New("signum: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+static int
 toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
       char buff[512];
-      snprintf (buff, sizeof(buff), "%lf", JOE_FLOAT(self));
+      snprintf (buff, sizeof(buff), "%.16g", JOE_FLOAT(self));
       joe_Object_assign(retval, joe_String_New (buff));
       return JOE_SUCCESS;
    } else {
@@ -372,6 +380,7 @@ static joe_Method mthds[] = {
    {"floatValue", floatValue },
    {"doubleValue", floatValue },
    {"bigDecimalValue", bigDecimalValue },
+   {"signum", signum },
    {"toString", toString },
   {(void *) 0, (void *) 0}
 };

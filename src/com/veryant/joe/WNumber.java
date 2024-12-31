@@ -30,4 +30,5 @@ public interface WNumber {
    abstract float floatValue();
    abstract double doubleValue();
    abstract BigDecimal bigDecimalValue();
+   abstract int signum();
 }
