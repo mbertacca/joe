@@ -191,9 +191,7 @@ static int
 signum (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
-      joe_Memory mem = *joe_Object_at (self, 0);
-      nDecimal num = (nDecimal) joe_Object_getMem (mem);
-      joe_Object_assign (retval, joe_Integer_New (nDecimal_signum (num)));
+      joe_Object_assign (retval, joe_Integer_New (joe_BigDecimal_signum(self)));
       return JOE_SUCCESS;
    } else {
       joe_Object_assign(retval,
@@ -277,6 +275,13 @@ get_nDecimal (joe_BigDecimal self)
 {
    joe_Memory mem = *joe_Object_at (self, 0);
    return (nDecimal) joe_Object_getMem (mem); 
+}
+
+int
+joe_BigDecimal_signum (joe_Object self)
+{
+   nDecimal num = (nDecimal) joe_Object_getMem (*joe_Object_at (self, 0));
+   return nDecimal_signum (num);
 }
 
 int

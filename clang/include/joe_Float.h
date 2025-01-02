@@ -24,4 +24,5 @@ typedef joe_Object joe_Float;
 extern joe_Class joe_Float_Class;
 JOEOBJ_API joe_Object joe_Float_New (double value);
 JOEOBJ_API double joe_Float_value(joe_Float self);
+JOEOBJ_API int joe_Float_signum(joe_Float self);
 # endif

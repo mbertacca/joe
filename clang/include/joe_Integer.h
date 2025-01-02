@@ -25,6 +25,7 @@ typedef joe_Object joe_Integer;
 extern joe_Class joe_Integer_Class;
 JOEOBJ_API joe_Object joe_Integer_New (int64_t value);
 JOEOBJ_API int64_t joe_Integer_value(joe_Integer self);
+JOEOBJ_API int joe_Integer_signum(joe_Integer self);
 JOEOBJ_API joe_Integer joe_Integer_add(joe_Object self, int64_t incr);
 JOEOBJ_API void joe_Integer_toAscii (int64_t n, char *out);
 JOEOBJ_API int64_t joe_Integer_fromAscii (char *asc);

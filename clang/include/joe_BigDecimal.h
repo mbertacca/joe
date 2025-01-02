@@ -23,10 +23,10 @@
 
 typedef joe_Object joe_BigDecimal;
 extern joe_Class joe_BigDecimal_Class;
-JOEOBJ_API long joe_BigDecimal_value(joe_BigDecimal self);
 
 joe_Object joe_BigDecimal_New (nDecimal bd);
 int joe_BigDecimal_bigDecimalValue (joe_Object self, joe_Object *retval);
+int joe_BigDecimal_signum(joe_BigDecimal self);
 nDecimal get_nDecimal(joe_BigDecimal self);
 joe_Object joe_BigDecimal_New_str(char* num);
 joe_Object joe_BigDecimal_New_dbl(double num);

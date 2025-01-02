@@ -338,9 +338,7 @@ static int
 signum (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
-      double x = JOE_FLOAT (self);
-      joe_Object_assign(retval, joe_Integer_New (
-                           x > 0 ? 1 : (x < 0 ? -1 : 0)));
+      joe_Object_assign(retval, joe_Integer_New(joe_Float_signum (self)));
       return JOE_SUCCESS;
    } else {
       joe_Object_assign(retval,
@@ -405,7 +403,14 @@ joe_Float_New (double value)
 }
 
 double
-joe_Float_value (joe_Object self)
+joe_Float_value (joe_Float self)
 {
    return JOE_FLOAT(self);
+}
+
+int
+joe_Float_signum (joe_Float self)
+{
+   double x = JOE_FLOAT (self);
+   return (x > 0 ? 1 : (x < 0 ? -1 : 0));
 }

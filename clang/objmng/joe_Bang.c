@@ -31,6 +31,7 @@
 # include "joe_Execute.h"
 # include "joe_Integer.h"
 # include "joe_Float.h"
+# include "joe_BigDecimal.h"
 # include "joe_Null.h"
 # include "joe_Files.h"
 # include "joe_String.h"
@@ -336,10 +337,14 @@ qCmp(const void *p1, const void *p2)
    if ((joe_Block_exec (qsort_blk,2,vArg,qsort_retval))!=JOE_SUCCESS) {
        *qsort_rc = JOE_FAILURE;
    } else if (joe_Object_instanceOf (*qsort_retval, &joe_Integer_Class)) {
-       return joe_Integer_value (*qsort_retval);
+       return joe_Integer_signum (*qsort_retval);
+   } else if (joe_Object_instanceOf (*qsort_retval, &joe_Float_Class)) {
+       return joe_Float_signum (*qsort_retval);
+   } else if (joe_Object_instanceOf (*qsort_retval, &joe_BigDecimal_Class)) {
+       return joe_BigDecimal_signum (*qsort_retval);
    } else {
        joe_Object_assign(qsort_retval, joe_Exception_New (
-                 "arraySort: invalid block return value, must be an integer"));
+                 "arraySort: invalid block return value, must be a number"));
        *qsort_rc = JOE_FAILURE;
    }
    return 0;
@@ -515,7 +520,7 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_StringBuilder msg = 0;
    joe_Object_assign (&msg, joe_StringBuilder_New ());
-   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.49 ");
+   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.50 ");
    joe_StringBuilder_appendCharStar (msg, __DATE__);
 #ifdef WIN32
    joe_StringBuilder_appendCharStar (msg, " Windows");
@@ -1266,10 +1271,21 @@ bsearch_ (joe_Array v, int n, joe_Object cfrt,
          break;
       i = ((max - min) / 2) + min;
       arg[0] = *JOE_AT (v,i);
-      if ((joe_Block_exec (blk,2,arg,retval)) != JOE_SUCCESS) {
+      if ((joe_Block_exec (blk,2,arg,retval)) != JOE_SUCCESS)
          return JOE_FAILURE;
-      } else if (joe_Object_instanceOf (*retval, &joe_Integer_Class)) {
-         int cmp = joe_Integer_value (*retval);
+      else {
+         int cmp;
+         if (joe_Object_instanceOf (*retval, &joe_Integer_Class))
+            cmp = joe_Integer_signum (*retval);
+         else if (joe_Object_instanceOf (*retval, &joe_Float_Class))
+            cmp = joe_Float_signum (*retval);
+         else if (joe_Object_instanceOf (*retval, &joe_BigDecimal_Class))
+            cmp = joe_BigDecimal_signum (*retval);
+         else {
+            joe_Object_assign(retval, joe_Exception_New (
+               "binarySearch: invalid block return value, must be a number"));
+            return JOE_FAILURE;
+         }
          if ( cmp < 0) {
             min = i + 1;
          } else if (cmp > 0) {
@@ -1278,9 +1294,6 @@ bsearch_ (joe_Array v, int n, joe_Object cfrt,
             joe_Object_assign (retval, joe_Integer_New (i));
             return JOE_SUCCESS;
          }
-      } else {
-        joe_Object_assign(retval, joe_Exception_New (
-            "binarySearch: invalid block return value, must be an integer"));
       }
    }
    joe_Object_assign (retval, joe_Integer_New (-1));

@@ -532,9 +532,7 @@ static int
 signum (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
-      int64_t x = JOE_INTEGER (self);
-      joe_Object_assign(retval, joe_Integer_New (
-                           x > 0 ? 1 : (x < 0 ? -1 : 0)));
+      joe_Object_assign (retval, joe_Integer_New (joe_Integer_signum(self)));
       return JOE_SUCCESS;
    } else {
       joe_Object_assign(retval,
@@ -608,6 +606,13 @@ int64_t
 joe_Integer_value (joe_Object self)
 {
    return JOE_INTEGER (self);
+}
+
+int
+joe_Integer_signum (joe_Integer self)
+{
+   int64_t x = JOE_INTEGER (self);
+   return (x > 0 ? 1 : (x < 0 ? -1 : 0));
 }
 
 joe_Integer
