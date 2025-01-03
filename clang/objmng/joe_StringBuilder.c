@@ -52,8 +52,17 @@ init (joe_Object self)
 static int
 ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   init (self);
-   return JOE_SUCCESS;
+   if (argc == 0 ||
+       (argc == 1 && joe_Object_instanceOf(argv[0], &joe_String_Class))) {
+      init (self);
+      if (argc == 1)
+         joe_StringBuilder_append (self, argv[0]);
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                 joe_Exception_New ("StringBuilder ctor: invalid argument"));
+      return JOE_FAILURE;
+   }
 }
 
 static int
@@ -66,6 +75,36 @@ add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    } else {
       joe_Object_assign(retval,
                         joe_Exception_New ("StringBuilder add: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+insert (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 2 && joe_Object_instanceOf (argv[0],&joe_Integer_Class)
+                 && joe_StringBuilder_insert (self,
+                         joe_Integer_value(argv[0]), argv[1]) == JOE_SUCCESS) {
+      joe_Object_assign(retval, self);
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+               joe_Exception_New ("StringBuilder insert: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+static int
+delete (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 2 && joe_Object_instanceOf (argv[0], &joe_Integer_Class)
+                 && joe_Object_instanceOf (argv[1], &joe_Integer_Class)
+                 && joe_StringBuilder_delete (self, joe_Integer_value(argv[0]),
+                              joe_Integer_value(argv[1])) == JOE_SUCCESS) {
+      joe_Object_assign(retval, self);
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                 joe_Exception_New ("StringBuilder delete: invalid argument"));
       return JOE_FAILURE;
    }
 }
@@ -86,6 +125,9 @@ toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 
 static joe_Method mthds[] = {
   {"add", add},
+  {"append", add},
+  {"insert", insert},
+  {"delete", delete},
   {"length", length},
   {"toString", toString},
   {(void *) 0, (void *) 0}
@@ -121,29 +163,62 @@ joe_StringBuilder_length (joe_StringBuilder self)
    return sb->length;
 }
 
+int
+joe_StringBuilder_delete (joe_StringBuilder self, int64_t start, int64_t end)
+{
+   joe_Memory mem = *JOE_AT(self, 0);
+   StrBuild *sb = (void *) joe_Object_getMem (mem);
+   char *str = ((char*) sb) + sizeof (StrBuild);
+   if (start >= 0 && end <= sb->length && end >= start) {
+      int cnt = end - start;
+      char *src = &str[start + cnt];
+      char *dst = &str[start];
+      while (src != &str[sb->length])
+         *dst++ = *src++;
+      sb->length -= cnt;
+      str[sb->length] = 0;
+      return JOE_SUCCESS;
+   } else {
+      return JOE_FAILURE;
+   }
+}
+
+static void
+joe_StringBuilder_enlargeMem (joe_StringBuilder self, unsigned int newLen)
+{
+   joe_Memory mem = *JOE_AT(self, 0);
+   StrBuild *sb = (void *) joe_Object_getMem (mem) ;
+   char *str = ((char*) sb) + sizeof (StrBuild);
+   char *newstr;
+   StrBuild *newsb;
+   int newMaxLen = newLen + DEFMAXLENGTH - (newLen % DEFMAXLENGTH);
+   joe_Memory newmem = joe_Memory_New (newMaxLen + sizeof (StrBuild));
+   newsb = (void *) joe_Object_getMem (newmem);
+   newstr = ((char*) newsb) + sizeof (StrBuild);
+   memcpy(newstr, str, sb->length);
+   newsb->length = sb->length;
+   newsb->maxLength = newMaxLen;
+   sb = newsb;
+   str = newstr;
+   joe_Object_assign (JOE_AT(self, 0), newmem);
+}
+
 void
 joe_StringBuilder_appendCharStar_len (joe_StringBuilder self, char *s, int len)
 {
    joe_Memory mem = *JOE_AT(self, 0);
    StrBuild *sb = (void *) joe_Object_getMem (mem) ;
-   char *str = ((char*) sb) + sizeof (StrBuild);
+   char *str;
    unsigned int newLen = sb->length + len;
    if (sb->maxLength <= newLen) {
-      char *newstr;
-      StrBuild *newsb;
-      int newMaxLen = newLen + DEFMAXLENGTH - (newLen % DEFMAXLENGTH);
-      joe_Memory newmem = joe_Memory_New (newMaxLen + sizeof (StrBuild));
-      newsb = (void *) joe_Object_getMem (newmem);
-      newstr = ((char*) newsb) + sizeof (StrBuild);
-      memcpy(newstr, str, sb->length);
-      newsb->length = sb->length;
-      newsb->maxLength = newMaxLen;
-      sb = newsb;
-      str = newstr;
-      joe_Object_assign (JOE_AT(self, 0), newmem);
+      joe_StringBuilder_enlargeMem (self, newLen);
+      mem = *JOE_AT(self, 0);
+      sb = (void *) joe_Object_getMem (mem);
    }
+   str = ((char*) sb) + sizeof (StrBuild);
    memcpy(&str[sb->length], s, len);
    sb->length += len;
+   str[sb->length] = 0;
 }
 
 void
@@ -196,6 +271,57 @@ joe_StringBuilder_append (joe_StringBuilder self, joe_Object obj)
          joe_StringBuilder_appendCharStar(self, "(null)");
       }
    }
+}
+
+void
+joe_StringBuilder_insertCharStar (joe_StringBuilder self,
+                                      int64_t offset, char *s)
+{
+   joe_Memory mem = *JOE_AT(self, 0);
+   StrBuild *sb = (void *) joe_Object_getMem (mem) ;
+   char *str;
+   int len = strlen (s);
+   unsigned int newLen = sb->length + len;
+   if (sb->maxLength <= newLen) {
+      joe_StringBuilder_enlargeMem (self, newLen);
+      mem = *JOE_AT(self, 0);
+      sb = (void *) joe_Object_getMem (mem);
+   }
+   str = ((char*) sb) + sizeof (StrBuild);
+   if (offset < sb->length) {
+      char *src = &str[newLen - 1 - len];
+      char *dst = &str[newLen - 1];
+      while (src != &str[offset])
+         *dst-- = *src--;
+      *dst = *src;
+   }
+   memcpy (&str[offset], s, len);
+   sb->length += len;
+   str[sb->length] = 0;
+}
+
+int
+joe_StringBuilder_insert (joe_StringBuilder self, int64_t offset, joe_Object obj)
+{
+   StrBuild *sb = (void *) joe_Object_getMem (*JOE_AT(self, 0));
+   if (offset < 0 || offset > sb->length)
+      return JOE_FAILURE;
+
+   if (joe_Object_instanceOf(obj, &joe_String_Class)) {
+      joe_StringBuilder_insertCharStar(self, offset,
+                                            joe_String_getCharStar(obj));
+   } else {
+      if (obj) {
+         joe_String str = 0;
+         joe_Object_invoke (obj, "toString", 0, 0, &str);
+         joe_StringBuilder_insertCharStar(self, offset,
+                                          joe_String_getCharStar(str));
+         joe_Object_assign(&str, 0);
+      } else {
+         joe_StringBuilder_insertCharStar(self, offset, "(null)");
+      }
+   }
+   return JOE_SUCCESS;
 }
 
 joe_Object

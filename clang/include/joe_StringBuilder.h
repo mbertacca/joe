@@ -18,6 +18,7 @@
 
 # ifndef joe_StringBuilder_h
 # define joe_StringBuilder_h  "$Id$";
+# include <stdint.h>
 # include "joe_Object.h"
 
 typedef joe_Object joe_StringBuilder;
@@ -25,9 +26,12 @@ extern joe_Class joe_StringBuilder_Class;
 joe_Object joe_StringBuilder_New ();
 void joe_StringBuilder_appendChar (joe_StringBuilder self, char c);
 void joe_StringBuilder_appendCharStar (joe_StringBuilder self, char *s);
+void joe_StringBuilder_insertCharStar(joe_StringBuilder self, int64_t o,char *s);
 void joe_StringBuilder_appendCharStar_len (joe_StringBuilder self, char *s, int len);
 void joe_StringBuilder_appendInt (joe_StringBuilder self, int n);
 void joe_StringBuilder_append (joe_StringBuilder self, joe_Object obj);
+int joe_StringBuilder_insert (joe_StringBuilder self,int64_t ofs,joe_Object obj);
+int joe_StringBuilder_delete (joe_StringBuilder self, int64_t s, int64_t e);
 unsigned int joe_StringBuilder_length (joe_StringBuilder self);
 joe_Object joe_StringBuilder_toString (joe_StringBuilder self);
 char * joe_StringBuilder_getCharStar (joe_Object self);
