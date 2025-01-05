@@ -26,7 +26,7 @@ compileJoe := {
                    format (!newInstance "java.util.Date")) + "\$".
       build replaceFirstInFile (srcDir + "/Revision.java"),
                                "\$Revision.*\$",revision.
-      rc := build system ("javac -g -cp src "+srcDir+"/*.java").
+      rc := build system ("javac -cp src "+srcDir+"/*.java").
       !if (rc <> 0), {
          !throw "Compilation failed!".
       }.
@@ -55,7 +55,7 @@ makeJoeJar := {
 compileIn := {:dir.
    build depends makeJoeJar.
    !if (build anythingNew dir,".java",dir,".class"), {
-      rc := build system ("javac -g -cp ""jar/joe.jar"+pathSep+dir+""" "+dir+"/*.java").
+      rc := build system ("javac -cp ""jar/joe.jar"+pathSep+dir+""" "+dir+"/*.java").
       !if (rc <> 0), {
          !throw ("Compilation in "+ dir + " failed!").
       }.

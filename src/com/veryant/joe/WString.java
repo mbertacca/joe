@@ -69,7 +69,11 @@ public class WString extends Wrapper {
              WBoolean.TRUE : WBoolean.FALSE;
    }
    public WString substring (WNumber beginIndex) {
-      return new WString (value.substring(beginIndex.intValue()));
+      int idx = beginIndex.intValue();
+      if (idx < 0)
+         return new WString (value.substring(value.length() + idx));
+      else
+         return new WString (value.substring(idx));
    }
    public WString substring (WNumber beginIndex, WNumber endIndex) {
       return new WString (value.substring(beginIndex.intValue(),

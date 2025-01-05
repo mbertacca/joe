@@ -387,8 +387,10 @@ substring (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc>0 && argc<3 && JOE_ISCLASS(argv[0], &joe_Integer_Class)) {
       unsigned int selfLen = joe_String_length (self);
-      unsigned int beginIndex = joe_Integer_value (argv[0]);
+      int beginIndex = joe_Integer_value (argv[0]);
       if (argc == 1) {
+         if (beginIndex < 0)
+            beginIndex += selfLen;
          if (beginIndex < selfLen) {
             joe_Object_assign(retval, joe_String_New(
                               &joe_String_getCharStar (self)[beginIndex]));
