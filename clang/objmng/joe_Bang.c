@@ -520,7 +520,7 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_StringBuilder msg = 0;
    joe_Object_assign (&msg, joe_StringBuilder_New ());
-   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.52 ");
+   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.53 ");
    joe_StringBuilder_appendCharStar (msg, __DATE__);
 #ifdef WIN32
    joe_StringBuilder_appendCharStar (msg, " Windows");
@@ -702,69 +702,25 @@ readLine (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 static int
 _while (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   int rc;
-   joe_Object lretval = 0;
-   int goOn = 1;
-   if (argc == 2) {
-      joe_Object bol;
-      if (joe_Object_instanceOf (argv[0], &joe_Block_Class) &&
-          joe_Object_instanceOf (argv[1], &joe_Block_Class)) {
-         while (goOn) {
-            bol = 0;
-            if ((rc=joe_Block_exec (argv[0],0,0,&bol))!=JOE_SUCCESS) {
-               joe_Object_assign(retval, bol);
-               joe_Object_assign(&bol, 0);
-               return JOE_FAILURE;
-            }
-            if (!joe_Object_instanceOf (bol, &joe_Boolean_Class)) {
-               joe_String msg = joe_String_New2 ("while: not a condition -> ",
-                                                  joe_Object_getClassName(bol));
-               joe_Object_assign (retval, joe_Exception_New_string (msg));
-               joe_Object_delIfUnassigned (&msg);
-               joe_Object_assign(&bol, 0);
-               /* joe_Object_decrReference (retval); */
-               return JOE_FAILURE;
-            }
-            if (joe_Boolean_isTrue (bol)) {
-               if ((rc=joe_Block_exec(argv[1],0,0,&lretval))
-                                                            !=JOE_SUCCESS){
-                  if (joe_Object_instanceOf (lretval,
-                                            &joe_BreakLoopException_Class)) {
-                     joe_Object_assign(retval,
-                                   joe_BreakException_getReturnObj(lretval));
-                     goOn = 0;
-                     joe_Object_assign (&lretval, 0);
-                     return JOE_SUCCESS;
-                  } else {
-                     joe_Object_assign (retval, lretval);
-                     joe_Object_assign(&lretval, 0);
-                     return JOE_FAILURE;
-                  }
-               } else {
-                  joe_Object_assign(retval, lretval);
-                  joe_Object_assign(&lretval, 0);
-               }
-               joe_Object_assign (&bol, 0);
-            } else {
-               /* joe_Object_decrReference (retval); */
-               return JOE_SUCCESS;
-            }
-         }
-      } else {
-         joe_String msg = joe_String_New4 ("while: invalid arguments -> ",
-                                           joe_Object_getClassName(argv[0]),
-                                           " ",
-                                           joe_Object_getClassName(argv[1])
-                                           );
-         joe_Object_assign(retval, joe_Exception_New_string(msg));
-         joe_Object_delIfUnassigned(&msg);;
-         return JOE_FAILURE;
-      }
-      return JOE_SUCCESS;
+   if (argc == 2 && joe_Object_instanceOf (argv[0], &joe_Block_Class) &&
+                    joe_Object_instanceOf (argv[1], &joe_Block_Class)) {
+      return joe_Block_while (argv[0],argv[1],joe_Boolean_True,JOE_TRUE,retval);
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("while: invalid arguments"));
+      return JOE_FAILURE;
    }
+}
 
-   joe_Object_assign(retval, joe_Exception_New ("while: invalid argument number"));
-   return JOE_FAILURE;
+static int
+doWhile (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 2 && joe_Object_instanceOf (argv[0], &joe_Block_Class) &&
+                    joe_Object_instanceOf (argv[1], &joe_Block_Class)) {
+      return joe_Block_while (argv[1],argv[0],joe_Boolean_True,JOE_FALSE,retval);
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("doWhile: invalid arguments"));
+      return JOE_FAILURE;
+   }
 }
 
 static int
@@ -1405,6 +1361,7 @@ static joe_Method mthds[] = {
   {"if", _if},
   {"try", TRY},
   {"while", _while},
+  {"doWhile", doWhile},
   {"foreach", foreach},
   {"for", _for},
   {"switch", _switch},

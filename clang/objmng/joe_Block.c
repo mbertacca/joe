@@ -323,52 +323,86 @@ joe_Block_exec (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
    return rc;
 }
 
-static int
-whileTrueFalse (joe_Object self, int argc, joe_Object *argv, joe_Object *retval,
-                joe_Boolean tf)
+int
+joe_Block_while (joe_Block cond, joe_Block code,
+                 joe_Boolean tf, int checkBefore, joe_Object *retval)
 {
-   int rc;
    joe_Object_assign(retval, joe_Null_value);
-   if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_Block_Class)) {
-      joe_Object bol = 0;
-      for ( ; ; ) {
-         if ((rc = my_exec (self, 0, 0, &bol)) != JOE_SUCCESS) {
-            joe_Object_transfer (retval, &bol);
-            return JOE_FAILURE;
-         }
-         if (bol == tf) {
-            if ((rc = my_exec (argv[0],0,0,retval)) != JOE_SUCCESS) {
-               joe_Object_assign(&bol, 0);
-               if (joe_Object_instanceOf (*retval,
-                                            &joe_BreakLoopException_Class)) {
-                  joe_Object_assign(retval,
-                                   joe_BreakException_getReturnObj(*retval));
-                  return JOE_SUCCESS;
-               } else {
-                  return JOE_FAILURE;
-               }
-            }
-         } else {
-            joe_Object_assign(&bol, 0);
-            return JOE_SUCCESS;
-         }
+   joe_Object bol = 0;
+   if (checkBefore) {
+      if (my_exec (cond, 0, 0, &bol) != JOE_SUCCESS) {
+         joe_Object_assign (&bol,0);
+         return JOE_FAILURE;
       }
    } else {
-      joe_Object_assign(retval, joe_Exception_New("while: invalid arguments"));
-      return JOE_FAILURE;
+      joe_Object_assign (&bol,tf);
+   }
+   for ( ; ; ) {
+      if (bol == tf) {
+         if (my_exec (code,0,0,retval) != JOE_SUCCESS) {
+            joe_Object_assign(&bol, 0);
+            if (joe_Object_instanceOf (*retval,
+                                            &joe_BreakLoopException_Class)) {
+               joe_Object_assign(retval,
+                                   joe_BreakException_getReturnObj(*retval));
+               return JOE_SUCCESS;
+            } else {
+               return JOE_FAILURE;
+            }
+         }
+      } else {
+         joe_Object_assign(&bol, 0);
+         return JOE_SUCCESS;
+      }
+      if (my_exec (cond, 0, 0, &bol) != JOE_SUCCESS) {
+         joe_Object_assign (&bol,0);
+         return JOE_FAILURE;
+      }
    }
 }
 
 static int
 whileTrue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   return whileTrueFalse (self, argc, argv, retval, joe_Boolean_True);
+   if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_Block_Class)) {
+      return joe_Block_while (self,argv[0],joe_Boolean_True,JOE_TRUE,retval);
+   } else {
+      joe_Object_assign(retval,joe_Exception_New("whileTrue: invalid arguments"));
+      return JOE_FAILURE;
+   }
 }
 
 static int
 whileFalse (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
-   return whileTrueFalse (self, argc, argv, retval, joe_Boolean_False);
+   if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_Block_Class)) {
+      return joe_Block_while (self,argv[0],joe_Boolean_False,JOE_TRUE,retval);
+   } else {
+      joe_Object_assign(retval,joe_Exception_New("whileFalse: invalid arguments"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+doWhileTrue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_Block_Class)) {
+      return joe_Block_while (argv[0],self,joe_Boolean_True,JOE_FALSE,retval);
+   } else {
+      joe_Object_assign(retval,joe_Exception_New("doWhileTrue: invalid arguments"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
+doWhileFalse (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_Block_Class)) {
+      return joe_Block_while (argv[0],self,joe_Boolean_False,JOE_FALSE,retval);
+   } else {
+      joe_Object_assign(retval,joe_Exception_New("doWhileFalse: invalid arguments"));
+      return JOE_FAILURE;
+   }
 }
 
 joe_Block
@@ -499,6 +533,8 @@ static joe_Method mthds[] = {
   {"add", joe_Block_new },
   {"whileTrue",whileTrue},
   {"whileFalse",whileFalse},
+  {"doWhileTrue",doWhileTrue},
+  {"doWhileFalse",doWhileFalse},
   {"name", getName },
   {"getName", getName },
   {"setVariable", setVariable },

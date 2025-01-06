@@ -20,6 +20,7 @@
 # define joe_Block_h  "$Id$";
 # include "joe_Message.h"
 # include "joe_Variable.h"
+# include "joe_Boolean.h"
 # include "joe_Bang.h"
 
 typedef joe_Object joe_Block;
@@ -46,7 +47,8 @@ JOEOBJ_API joe_Variable joe_Block_setVar (joe_Block self, joe_String name);
 JOEOBJ_API joe_Variable joe_Block_getVar (joe_Block self, char *name);
 JOEOBJ_API joe_Variable joe_Block_getSetVar (joe_Block self, char *name);
 JOEOBJ_API joe_Object joe_Block_varValue(joe_Object self, joe_Variable var);
-
+JOEOBJ_API int joe_Block_while (joe_Block cond, joe_Block code,
+                       joe_Boolean tf, int checkBefore, joe_Object *retval);
 void joe_Block_addArgName (joe_Block self, char *name);
 
 # endif

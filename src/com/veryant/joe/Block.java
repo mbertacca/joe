@@ -85,14 +85,25 @@ public class Block extends ArrayList<Message>
       }
       return Return;
    }
-   private final Object whileTF (Block b, WBoolean tf) throws JOEException {
+   private final Object whileTF (Block b, WBoolean tf, boolean checkBefore)
+                                                        throws JOEException {
       Object Return = null;
       Object bol;
+      Block cond;
+      Block code;
+      if (checkBefore) {
+         cond = this;
+         code = b;
+         bol = cond.exec ();
+      } else {
+         cond = b;
+         code = this;
+         bol = tf;
+      }
       for ( ; ; ) {
-         bol = exec ();
          if (bol.equals (tf)) {
             try {
-               Return = b.exec ();
+               Return = code.exec ();
             } catch (BreakLoopException _ex) {
                if (_ex.hasReturnObject())
                   Return = _ex.getReturnObject();
@@ -101,14 +112,21 @@ public class Block extends ArrayList<Message>
          } else {
             break;
          }
+         bol = cond.exec ();
       }
       return Return;
    }
    public final Object whileTrue (Block b) throws JOEException {
-      return whileTF (b, WBoolean.TRUE);
+      return whileTF (b, WBoolean.TRUE, true);
    }
    public final Object whileFalse (Block b) throws JOEException {
-      return whileTF (b, WBoolean.FALSE);
+      return whileTF (b, WBoolean.FALSE, true);
+   }
+   public final Object doWhileTrue (Block b) throws JOEException {
+      return whileTF (b, WBoolean.TRUE, false);
+   }
+   public final Object doWhileFalse (Block b) throws JOEException {
+      return whileTF (b, WBoolean.FALSE, false);
    }
 
    public Object setVariable (WString name, Object val)throws JOEException {

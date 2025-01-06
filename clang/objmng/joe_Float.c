@@ -351,7 +351,7 @@ toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
       char buff[512];
-      snprintf (buff, sizeof(buff), "%.16g", JOE_FLOAT(self));
+      snprintf (buff, sizeof(buff), "%.15g", JOE_FLOAT(self));
       joe_Object_assign(retval, joe_String_New (buff));
       return JOE_SUCCESS;
    } else {

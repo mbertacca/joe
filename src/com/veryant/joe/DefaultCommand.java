@@ -192,6 +192,27 @@ public class DefaultCommand extends CommandBase {
       return Return;
    }
    /**
+    * This method implements a loop. This loop will execute the code block once,
+    * before checking if the cond block returns the boolean value true,
+    * then it will repeat the loop as long as the condition is true or
+    * until the breakLoop () invocation is encountered..
+    */
+   public Object doWhile (Block code, Block cond) throws JOEException {
+      Object Return = WNull.value;
+      Object bool;
+      do {
+         try {
+            Return = code.exec();
+         } catch (BreakLoopException _ex) {
+            if (_ex.hasReturnObject())
+               Return = _ex.getReturnObject();
+            break;
+         }
+      } while ((bool = cond.exec()) != null && bool instanceof WBoolean &&
+             ((WBoolean) bool).booleanValue());
+      return Return;
+   }
+   /**
     * This method implements a 'for' cycle. The code block is executed for
     * passing the index as argument.
     */
