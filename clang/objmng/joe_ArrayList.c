@@ -80,7 +80,7 @@ static int
 get (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_Integer_Class)) {
-      int64_t length = joe_Integer_value (*joe_Object_at (self, LENGTH));
+      unsigned int length = joe_int_value (*JOE_AT (self, LENGTH));
       int idx = joe_Integer_value (argv[0]);
       if (idx >= 0 && idx < length) {
          joe_Array array = *joe_Object_at (self, ARRAY);
