@@ -520,7 +520,7 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_StringBuilder msg = 0;
    joe_Object_assign (&msg, joe_StringBuilder_New ());
-   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.54 ");
+   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.55 ");
    joe_StringBuilder_appendCharStar (msg, __DATE__);
 #ifdef WIN32
    joe_StringBuilder_appendCharStar (msg, " Windows");
@@ -1198,12 +1198,23 @@ arraySort (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
    if (argc == 2 && joe_Object_instanceOf (args[0], &joe_Array_Class)
                  && joe_Object_instanceOf (args[1], &joe_Block_Class)) {
-      return mysort (args[0],args[1],joe_Array_length(args[0]),retval);
+      if (mysort (args[0],args[1],joe_Array_length(args[0]),retval)
+                                                   != JOE_SUCCESS) {
+         return JOE_FAILURE;
+      } else {
+         joe_Object_assign (retval, args[0]);
+         return JOE_SUCCESS;
+      }
    } else if (argc == 2 && joe_Object_instanceOf (args[0], &joe_ArrayList_Class)
                        && joe_Object_instanceOf (args[1], &joe_Block_Class)) {
       joe_Array v = joe_ArrayList_getArray(args[0]);
       int n = joe_ArrayList_length (args[0]);
-      return mysort (v, args[1], n, retval);
+      if (mysort (v, args[1], n, retval) != JOE_SUCCESS) {
+         return JOE_FAILURE;
+      } else {
+         joe_Object_assign (retval, args[0]);
+         return JOE_SUCCESS;
+      }
    } else {
       joe_Object_assign(retval,
                         joe_Exception_New ("arraySort: invalid argument(s)"));

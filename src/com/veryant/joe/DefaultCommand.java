@@ -689,7 +689,7 @@ public class DefaultCommand extends CommandBase {
     */
    public Object arraySort (Object array[], Block blk) {
       Arrays.sort (array, new Cmp(blk));
-      return null;
+      return array;
    }
    /**
     * Binary search on an array according to the block.
