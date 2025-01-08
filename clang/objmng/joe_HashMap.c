@@ -550,6 +550,7 @@ static joe_Method mthds[] = {
   {"containsValue", containsValue },
   {"containsKey",   containsKey },
   {"keys",  keys },
+  {"keySet",keys },
   {"values",values },
   {"put",   put },
   {"get",   get },
