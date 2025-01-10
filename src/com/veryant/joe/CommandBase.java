@@ -29,6 +29,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.io.File;
 
 /**
  * This class contains some methods that are useful for any flavor of
@@ -305,7 +306,13 @@ public class CommandBase {
     * Returns the path set.
     */
    public String[] getPath () {
-      return (String[]) path.clone();
+      String Return[] = new String[path.length + 1];
+      Return[0] = new File (ScriptManager.get(this).getEntryPoint().getPath())
+                           .getPath();
+      if (path.length > 0)
+         System.arraycopy(path,0,Return,1,path.length);
+      return Return;
+      // return (String[]) path.clone();
    }
    /**
     * Executes the specified JOE script and returns it as an object.

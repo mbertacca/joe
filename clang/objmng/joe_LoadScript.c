@@ -103,6 +103,12 @@ joe_LoadScript_setCWD ()
    }
 }
 
+char *
+joe_LoadScript_getCWD ()
+{
+   return dirname;
+}
+
 FILE *
 joe_LoadScript_getFile (char *scriptName, joe_Array path, joe_Bang bang)
 {

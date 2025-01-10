@@ -520,7 +520,7 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_StringBuilder msg = 0;
    joe_Object_assign (&msg, joe_StringBuilder_New ());
-   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.56 ");
+   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.57 ");
    joe_StringBuilder_appendCharStar (msg, __DATE__);
 #ifdef WIN32
    joe_StringBuilder_appendCharStar (msg, " Windows");
@@ -1337,7 +1337,20 @@ static int
 getPath (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
    if (argc == 0) {
-      joe_Object_assign (retval, joe_Object_clone (*JOE_AT(self,PATH)));
+      unsigned int idx0, idx1;
+      char *dir = joe_LoadScript_getCWD();
+      int dirLen = 0;
+      joe_Object *path = JOE_AT(self,PATH);
+      unsigned int length = joe_Array_length (*path);
+      joe_Object_assign (retval, joe_Object_New(&joe_Array_Class, length + 1));
+      if (dir && (dirLen = strlen(dir)) > 0)
+          joe_Object_assign (JOE_AT(*retval,0),joe_String_New_len(dir,--dirLen));
+      else
+          joe_Object_assign (JOE_AT(*retval,0),joe_String_New(""));
+      for (idx0 = 0, idx1 = 1; idx0 < length; idx0++,idx1++) {
+         joe_Object_assign (JOE_AT(*retval, idx1), *JOE_AT(*path, idx0));
+      }
+      return JOE_SUCCESS;
    } else {
       joe_Object_assign (retval,
                          joe_Exception_New("getPath: invalid argument"));
