@@ -23,6 +23,7 @@
 # include "joe_Memory.h"
 # include "joe_String.h"
 # include "joe_Block.h"
+# include "joe_Null.h"
 # include "joestrct.h"
 
 # include <stdlib.h>
@@ -39,7 +40,7 @@ typedef struct s_Execute {
 static char *variables[] = { "data", "block", "name", 0 };
 
 static int
-init (joe_Object self, joe_Block block, joe_String name)
+init (joe_Object self, joe_Block block, joe_String name, joe_Bang bang)
 {
    joe_Memory mem = joe_Memory_New (sizeof (struct s_Execute));
    Execute exec = (void *) joe_Object_getMem(mem);
@@ -48,7 +49,7 @@ init (joe_Object self, joe_Block block, joe_String name)
    exec->tokenizer = 0;
    
    joe_Object_assign (JOE_AT(self, DATA), mem);
-   joe_Object_assign (JOE_AT(self, BLOCK), joe_Block_New (block));
+   joe_Object_assign (JOE_AT(self, BLOCK), joe_Block_New (block, bang));
    joe_Object_assign (JOE_AT(self,NAME), name);
     
    return JOE_SUCCESS;
@@ -58,17 +59,44 @@ static int
 ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_Block block = 0;
-   if (argc > 0 && (block = argv[0]) &&
-          (joe_Object_instanceOf(argv[0], &joe_Block_Class))) {
-      if (argc > 1 &&  (joe_Object_instanceOf(argv[1], &joe_String_Class)))
-         return init (self, block, argv[1]);
-      else
-         return init (self, block, joe_String_New ("<execute>"));
-   } else {
+   joe_String name = 0;
+   joe_Bang bang = 0;
+   int syntaxError = JOE_FALSE;
+
+   if (argc > 0) {
+      if (joe_Object_instanceOf(argv[0], &joe_Block_Class)) {
+         block = argv[0];
+      } else if (!joe_Object_instanceOf(argv[0], &joe_Null_Class)) {
+         syntaxError = JOE_TRUE;
+      }
+      if (argc > 1) {
+         if (joe_Object_instanceOf(argv[1], &joe_String_Class)) {
+            name = argv[1];
+         } else if (joe_Object_instanceOf(argv[1], &joe_Bang_Class)) {
+            bang = argv[1];
+            if (argc == 3) {
+              if (joe_Object_instanceOf(argv[2], &joe_String_Class)) {
+                  name = argv[2];
+               } else {
+                  syntaxError = JOE_TRUE;
+               }
+            } else if (argc > 3) {
+               syntaxError = JOE_TRUE;
+            }
+         } else {
+            syntaxError = JOE_TRUE;
+         }
+      }
+   }
+   if (syntaxError) {
       joe_Object_assign(retval,
                         joe_Exception_New ("execute ctor: invalid argument"));
       return JOE_FAILURE;
    }
+   if (name == 0)
+      return init (self, block, joe_String_New ("<execute>"), bang);
+   else
+      return init (self, block, name, bang);
 }
 
 
@@ -123,8 +151,22 @@ exec (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    joe_String name = *JOE_AT(self, NAME);
 
    if (!exec->compiled) {
+      int rc;
       JoeParser parser = JoeParser_new (joe_String_getCharStar(name));
-      int rc = JoeParser_compile (parser, block, exec->tokens);
+      int tklen = JoeArray_length(exec->tokens);
+      if (tklen > 0 &&
+          ((struct t_Token*) JoeArray_get(exec->tokens, 0))->type == _COLON_) {
+
+         joe_Object_assign(retval,
+                      joe_Exception_New ("execute exec: syntax not permitted"));
+         return JOE_FAILURE;
+      } else if (tklen > 1 &&
+          ((struct t_Token*) JoeArray_get(exec->tokens, 1))->type == _COLON_) {
+         joe_Object_assign(retval,
+                      joe_Exception_New ("execute exec: syntax not permitted"));
+         return JOE_FAILURE;
+      }
+      rc = JoeParser_compile (parser, block, exec->tokens);
       if (rc != JOE_SUCCESS) {
          joe_Object_assign (retval, JoeParser_getException (parser));
          JoeParser_delete (parser);
@@ -164,9 +206,9 @@ joe_Execute_New (joe_Block parent, char *name)
 
    self = joe_Object_New (&joe_Execute_Class, 0);
    if (name)
-      init (self, parent, joe_String_New (name));
+      init (self, parent, joe_String_New (name), 0);
    else
-      init (self, parent, joe_String_New ("<Execute>"));
+      init (self, parent, joe_String_New ("<Execute>"), 0);
 
    return self;
 }

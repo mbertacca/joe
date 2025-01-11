@@ -27,7 +27,7 @@ typedef joe_Object joe_Block;
 extern joe_Class joe_Block_Class;
 extern joe_Class joe_JOEObject_Class;
 JOEOBJ_API void joe_Block_Init (joe_Block self, joe_Block parent, joe_Bang bang);
-JOEOBJ_API joe_Block joe_Block_New (joe_Block parent);
+JOEOBJ_API joe_Block joe_Block_New (joe_Block parent, joe_Bang bang);
 JOEOBJ_API joe_String joe_Block_getName (joe_Block self);
 JOEOBJ_API void joe_Block_addMessage (joe_Block self, joe_Message msg);
 JOEOBJ_API joe_Block joe_Block_clone (joe_Block self, joe_Block parent);

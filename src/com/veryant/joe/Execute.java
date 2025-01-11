@@ -36,11 +36,19 @@ public class Execute {
       }
    };
    public Execute (Block block, CommandBase cb, String fname) {
-      this.block = block;
+      if (block == null)
+         this.block = new Block(new StandardExecutor(), null);
+      else
+         this.block = new Block(block.executor, block);
       if (cb != null)
          this.command = cb;
-      else
-         this.command = new DefaultCommand();
+      else {
+         new ScriptManager(
+             new java.io.File (System.getProperty("user.dir")),
+             this.block.executor,
+             this.command = new DefaultCommand(),
+             new BasicLineReader());
+      }
       if (fname != null)
          this.fileName = fname;
       else
@@ -62,20 +70,42 @@ public class Execute {
       return this;
    }
    public Object exec (Object argv[]) throws JOEException {
+      Object Return = null;
       ArrayDeque<Token> tokens = new ArrayDeque<Token>();
       Tokenizer tkzer = new Tokenizer();
       for (String line : pgmLines) {
          lineNum++;
          tkzer.tokenize (line.toCharArray(), tokens, fileInfo);
       }
-      Parser prg = new Parser(command, new Block(block.executor,block), fileInfo);
-      Block b = prg.compile (tokens);
-      if (tokens.size() > 0) {
-         Token tk = tokens.pop();
-         throw new JOEException (
+      Token tk = tokens.peek();
+      if (tk != null) {
+         if (tk.type == TokenType._COLON_) {
+               throw new JOEException (
+                   "Not permitted syntax `:`", tk);
+         } else if (tk.type == TokenType._WORD) {
+            tk = tokens.pop();
+            Token tkp = tokens.peek();
+            if (tkp != null && tkp.type == TokenType._COLON_) {
+               throw new JOEException (
+                   "Not permitrted syntax `" + tk.word + ":`", tk);
+            } else {
+               tokens.push(tk);
+            }
+         }
+         Parser prg = new Parser(command, block, fileInfo);
+         Block b = prg.compile (tokens);
+         if (tokens.size() > 0) {
+            tk = tokens.pop();
+            throw new JOEException (
                 "Token(s) external to any block `" + tk.word + "`", tk);
+         }
+         try {
+            Return = block.executor.run(b);
+         } finally {
+            b.clear();
+         }
       }
-      return b.init(new Object[] { argv });
+      return Return;
    }
    public Object exec () throws JOEException {
       return exec (null);

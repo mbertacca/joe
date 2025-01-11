@@ -222,7 +222,7 @@ static void compile (JoeParser self, joe_Block block, JoeArrayScan tokens);
 static void
 newBlock (JoeParser self, JoeArrayScan tokens, joe_Block parent, joe_Block *block)
 {
-   joe_Object_assign(block, joe_Block_New (parent));
+   joe_Object_assign(block, joe_Block_New (parent, 0));
    compile (self, *block, tokens);
 }
 

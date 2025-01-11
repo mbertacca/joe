@@ -595,11 +595,11 @@ joe_Block_Init (joe_Block self, joe_Block parent, joe_Bang bang)
 }
 
 joe_Block
-joe_Block_New (joe_Block parent)
+joe_Block_New (joe_Block parent, joe_Bang bang)
 {
    joe_Object self;
    self = joe_Object_New (&joe_Block_Class, 0);
-   joe_Block_Init (self, parent, 0);
+   joe_Block_Init (self, parent, bang);
    return self;
 }
 
