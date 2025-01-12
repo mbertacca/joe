@@ -60,11 +60,11 @@ public class JavaObjectsExecutor {
       int Return = 0;
       Console cons;
       String line;
-      Executor exec = executor;
       DefaultCommand defCmd = command;
       LineReader lr = lineReader;
       if (argv.length > 0) {
          ScriptManager sm;
+         Executor exec = executor;
          try {
             final File f = new File (argv[0]).getCanonicalFile();
             sm = new ScriptManager(f.getParentFile(), exec, defCmd, lr);
@@ -94,14 +94,10 @@ public class JavaObjectsExecutor {
          }
       } else {
          Return = 0;
-         File cwd = new java.io.File (System.getProperty("user.dir"));
-         ScriptManager sm = new ScriptManager(cwd, exec, defCmd, lr);
+         Execute exec = new Execute (null,defCmd,"<ijoe>");
 
-         Object cmd = defCmd;
          line = "";
          defCmd.println (version);
-         defCmd.println ();
-         Parser prg = new Parser(cmd, exec, lr);
          Block b = null;
 
          for ( ; ; ) {
@@ -114,20 +110,16 @@ public class JavaObjectsExecutor {
             }
             if (line == null || "exit".equals (line))
                break;
-            ArrayDeque<Token> tokens = new ArrayDeque<Token>();
-            Tokenizer tkzer = new Tokenizer();
-            tkzer.tokenize (line.toCharArray(), tokens, lineReader);
+            exec.add(line);
             try {
-               b = prg.compile (tokens);
                try {
-                  defCmd.println ("---> ",executor.run(b));
-                  cmd = prg.getCommand();
+                  defCmd.println ("---> ",exec.exec());
                } catch (ExecException ex) {
                   throw ex;
                } catch (JOEException ex) {
                   showException(defCmd, ex);
                } finally {
-                  b.clear();
+                  exec.clear();
                }
             } catch (JOEException ex) {
                showException(defCmd, ex);

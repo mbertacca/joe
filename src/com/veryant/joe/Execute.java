@@ -40,9 +40,16 @@ public class Execute {
          this.block = new Block(new StandardExecutor(), null);
       else
          this.block = new Block(block.executor, block);
-      if (cb != null)
+      if (cb != null) {
          this.command = cb;
-      else {
+         if (ScriptManager.get(this.command) == null) {
+            new ScriptManager(
+               new java.io.File (System.getProperty("user.dir")),
+               this.block.executor,
+               this.command,
+               new BasicLineReader());
+         }
+      } else {
          new ScriptManager(
              new java.io.File (System.getProperty("user.dir")),
              this.block.executor,
@@ -87,7 +94,7 @@ public class Execute {
             Token tkp = tokens.peek();
             if (tkp != null && tkp.type == TokenType._COLON_) {
                throw new JOEException (
-                   "Not permitrted syntax `" + tk.word + ":`", tk);
+                   "Not permitted syntax `" + tk.word + ":`", tk);
             } else {
                tokens.push(tk);
             }
