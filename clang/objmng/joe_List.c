@@ -245,6 +245,7 @@ foreach (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 
+   joe_Object_assign(retval, joe_Null_value);
    for (item = *joe_Object_at (self, FIRST), cnt = 0; item != 0;
         item = *joe_Object_at (item, NEXT), cnt++) {
       obj = joe_Object_at (item, OBJ);

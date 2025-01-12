@@ -24,6 +24,7 @@
 # include "joe_Boolean.h"
 # include "joe_Block.h"
 # include "joe_BreakLoopException.h"
+# include "joe_Null.h"
 # include "joestrct.h"
 
 # define ARRAY 0
@@ -175,6 +176,7 @@ foreach (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 
+   joe_Object_assign(retval, joe_Null_value);
    for (i = 0; i < len; i++) {
       if (i >= start) {
          if ((rc=joe_Object_invoke(blk,"exec",
