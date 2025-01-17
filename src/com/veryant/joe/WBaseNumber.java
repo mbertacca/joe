@@ -80,4 +80,7 @@ public abstract class WBaseNumber extends Wrapper implements WNumber {
       return bigDecimalValue().compareTo(n.bigDecimalValue()) >= 0 ?
              WBoolean.TRUE : WBoolean.FALSE;
    }
+   public WString toChar() {
+      return new WString(new String (new char[] {charValue()}));
+   }
 }

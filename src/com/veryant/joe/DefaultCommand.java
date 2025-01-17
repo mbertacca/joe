@@ -587,6 +587,29 @@ public class DefaultCommand extends CommandBase {
       return execFromDir (new File (dir), cmds);
    }
    /**
+    * Executes the specified command from the standard shell when possible
+    */
+   private String shell;
+   private String opt;
+   public int system (String cmd) throws Exception {
+      if (shell == null) {
+         if (System.getProperty("os.name")
+                   .toLowerCase()
+                   .startsWith("windows")) {
+            shell = System.getenv ("ComSpec");
+            if (shell == null)
+               shell = "cmd";
+            opt = "/c";
+         } else {
+            shell = System.getenv ("SHELL");
+            if (shell == null)
+               shell = "sh";
+            opt = "-c";
+         }
+      }
+      return exec (new Object[] {shell, opt, cmd});
+   }
+   /**
     * Executes the specified command and returns its standard output
     * as a string.
     */

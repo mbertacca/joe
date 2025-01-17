@@ -416,6 +416,42 @@ substring (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 static int
+at (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc==1 && JOE_ISCLASS(argv[0], &joe_Integer_Class)) {
+      unsigned int selfLen = joe_String_length (self);
+      int index = joe_Integer_value (argv[0]);
+      if (index >= 0 && index < selfLen) {
+         joe_Object_assign (retval, joe_String_New_len(
+                             &joe_String_getCharStar (self)[index], 1));
+         return JOE_SUCCESS;
+      }
+   }
+
+   joe_Object_assign(retval, joe_Exception_New (
+                             "joe_String at: invalid argument"));
+   return JOE_FAILURE;
+}
+
+static int
+charCodeAt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc==0 || (argc==1 && JOE_ISCLASS(argv[0], &joe_Integer_Class))) {
+      unsigned int selfLen = joe_String_length (self);
+      int index = argc == 0 ? 0 :joe_Integer_value (argv[0]);
+      if (index >= 0 && index < selfLen) {
+         joe_Object_assign(retval, joe_Integer_New (
+                        joe_String_getCharStar (self)[index]));
+         return JOE_SUCCESS;
+      }
+   }
+
+   joe_Object_assign(retval, joe_Exception_New (
+                             "joe_String charCodeAt: invalid argument"));
+   return JOE_FAILURE;
+}
+
+static int
 trim(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 {
    if (argc == 0) {
@@ -940,6 +976,8 @@ static joe_Method mthds[] = {
   {"indexOf", indexOf},
   {"lastIndexOf", lastIndexOf},
   {"substring", substring},
+  {"at", at},
+  {"charCodeAt", charCodeAt},
   {"trim", trim},
   {"charAt", charAt},
   {"startsWith", startsWith},

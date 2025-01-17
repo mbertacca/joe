@@ -542,6 +542,20 @@ signum (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 static int
+toChar (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      char buff = (char) JOE_INTEGER (self);
+      joe_Object_assign(retval, joe_String_New_len (&buff,1));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                   joe_Exception_New("toChar: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
+static int
 toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
@@ -579,6 +593,7 @@ static joe_Method mthds[] = {
    {"bigDecimalValue", bigDecimalValue },
    {"toHexString", toHexString },
    {"signum", signum },
+   {"toChar", toChar },
    {"toString", toString },
   {(void *) 0, (void *) 0}
 };

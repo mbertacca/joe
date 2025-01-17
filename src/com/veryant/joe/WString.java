@@ -172,4 +172,15 @@ public class WString extends Wrapper {
          return null;
       }
    }
+   public String at (WNumber index) {
+      int idx = index.intValue();
+      return value.substring (idx, idx + 1);
+   }
+   public WInteger charCodeAt (WNumber index) {
+      int idx = index.intValue();
+      return new WInteger (value.charAt(idx));
+   }
+   public WInteger charCodeAt () {
+      return new WInteger (value.charAt(0));
+   }
 }
