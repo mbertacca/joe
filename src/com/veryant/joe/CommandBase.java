@@ -371,8 +371,8 @@ public class CommandBase {
     * Returns a char representing the codepoint corresponding
     * to the first letter in a string.
     */
-   public char asc (String a) {
-      return a.charAt (0);
+   public int asc (String a) {
+      return (int) a.charAt (0);
    }
    /**
     * Makes the child inheriting from parent.

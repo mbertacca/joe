@@ -64,9 +64,9 @@ public abstract class Wrapper implements InternalObject {
                return ((Boolean) obj).booleanValue() ?
                                        WBoolean.TRUE : WBoolean.FALSE;
             case BYTE:
-               return new WLong (((Byte) obj).longValue());
+               return new WInteger (((Byte) obj).longValue());
             case CHAR:
-               return new WLong (((Character) obj).charValue());
+               return new WCharacter (((Character) obj).charValue());
             case SHORT:
                return new WShort (((Short) obj).shortValue());
             case INT:
