@@ -331,7 +331,7 @@ joe_Block_while (joe_Block cond, joe_Block code,
    joe_Object bol = 0;
    if (checkBefore) {
       if (my_exec (cond, 0, 0, &bol) != JOE_SUCCESS) {
-         joe_Object_assign (&bol,0);
+         joe_Object_transfer (retval,&bol);
          return JOE_FAILURE;
       }
    } else {
@@ -355,7 +355,7 @@ joe_Block_while (joe_Block cond, joe_Block code,
          return JOE_SUCCESS;
       }
       if (my_exec (cond, 0, 0, &bol) != JOE_SUCCESS) {
-         joe_Object_assign (&bol,0);
+         joe_Object_transfer (retval,&bol);
          return JOE_FAILURE;
       }
    }
