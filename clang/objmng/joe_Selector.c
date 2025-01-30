@@ -148,6 +148,9 @@ joe_Selector_invoke (joe_Object self, joe_Object receiver,
                       selName, clazz->name);
          }
          joe_Object_assign (retval, joe_Exception_New (buffer));
+         selector->argRcvr = 0;
+         selector->actualRcvr = 0;
+         selector->argClazz = 0;
          return JOE_FAILURE;
       }
    }

@@ -393,6 +393,12 @@ public class CommandBase {
       return Revision.id;
    }
    /**
+    * Returns the current directory.
+    */
+   public String getcwd () {
+      return System.getProperty ("user.dir");
+   }
+   /**
     * Turns on the debugger.
     */
    public String debug () throws JOEException {

@@ -1086,7 +1086,7 @@ joe_Class joe_Null_Class = {
    0
 };
 
-static struct s_joe_Object obj_null = { 0, 1, 0, 1, 0, &joe_Null_Class, {0} };
+static struct s_joe_Object obj_null = {0,1,0,1,0,&joe_Null_Class, {.str="()"} };
 joe_Null joe_Null_value = &obj_null;
 
 /* test */

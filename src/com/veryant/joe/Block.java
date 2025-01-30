@@ -276,6 +276,8 @@ public class Block extends ArrayList<Message>
             if (joeToString  != null)
                try {
                   Return = joeToString.exec().toString();
+               } catch (NullPointerException _ex) {
+                  Return = "()";
                } catch (JOEException _ex) {
                   Return = _ex.toString();
                }

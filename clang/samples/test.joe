@@ -1,0 +1,29 @@
+:args.
+!foreach args,{:i. !println "[",i,"]"}.
+!foreach args,3,{:i. !println "{",i,"}"}.
+
+files := !newInstance "joe_Files".
+list := files listDirectory ".".
+!foreach list,{:i. !println "[",i,"]".!if (i = "lib"),{ !breakLoop}}.
+!foreach list,3,{:i. !println "{",i,"}"}.
+
+
+
+!println !.
+a:= "Ciaone".
+e := !newInstance "joe_Execute",!!.
+
+e + "!println a.".
+e + "!println ""Eppoi""".
+e exec.
+e exec.
+e clear.
+e + "!println ""Eppoi"". a:= "">"" + a + ""<""".
+e exec.
+!println "...", a.
+
+!println "1".
+obj:={toString<-{}}new.
+!println "2".
+!for 1,2,{ !try { obj missing }}.
+!println "3".

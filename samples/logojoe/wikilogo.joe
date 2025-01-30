@@ -1,0 +1,10 @@
+:args.
+logo :=!newInstance "Logo"  
+       setbackground 72,12,1
+       setpencolor 202,38,4.
+logo   setTitle (args get 0).
+
+           
+/* repeat 36[repeat 90 [forward 6 right 4] right 10] */
+
+logo repeat 36, {logo repeat 90,{logo forward 6 right 4} right 10 }.
