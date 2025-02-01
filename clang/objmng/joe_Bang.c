@@ -520,7 +520,7 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_StringBuilder msg = 0;
    joe_Object_assign (&msg, joe_StringBuilder_New ());
-   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.62 ");
+   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.63 ");
    joe_StringBuilder_appendCharStar (msg, __DATE__);
 #ifdef WIN32
    joe_StringBuilder_appendCharStar (msg, " Windows");
@@ -1378,6 +1378,30 @@ getCwd (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+static
+int joe_sleep(joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_Integer_Class)) {
+      struct timespec ts;
+      int msec = joe_Integer_value (argv[0]);
+      int rc;
+      if (msec >= 0) {
+         ts.tv_sec = msec / 1000;
+         ts.tv_nsec = (msec % 1000) * 1000000;
+         rc = nanosleep(&ts, &ts);
+         if (rc) {
+            joe_Object_assign(retval,joe_String_New2("sleep: ", strerror(errno)));
+            return JOE_FAILURE;
+         } else {
+            joe_Object_assign(retval, joe_Null_value);
+            return JOE_SUCCESS;
+         }
+      }
+   }
+   joe_Object_assign(retval,joe_Exception_New("sleep: invalid argument(s)"));
+   return JOE_FAILURE;
+}
+
 extern int joe_BangSO_New(joe_String soName, joe_Object* obj);
 
 static int
@@ -1447,6 +1471,7 @@ static joe_Method mthds[] = {
   {"loadSO", loadSO},
   {"toString", toString},
   {"getcwd", getCwd},
+  {"sleep", joe_sleep},
   {"random", random_},
   {"debug", debug},
   {(void *) 0, (void *) 0}

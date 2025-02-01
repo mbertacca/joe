@@ -727,6 +727,12 @@ public class DefaultCommand extends CommandBase {
    public Object random () {
       return Math.random();
    }
+   /**
+    * Suspends execution for the specified number of milliseconds
+    */
+   public void sleep (int millis) throws Exception {
+      Thread.sleep (millis);
+   }
 
    /**
     * Returns a Glob object that performs match operations on paths
