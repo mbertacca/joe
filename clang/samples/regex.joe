@@ -437,3 +437,5 @@ tre exec "a (a) c".
 
 re:=".*.?".
 tre exec "".
+
+!println ("_T_T+" replaceAll "^_*T","").

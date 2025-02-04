@@ -147,7 +147,7 @@ r_matches (char **s, char*  m, int ic)
             } else {
                *s = fx;
             }
-            if (!ismatch (*s, lm, ic)) {
+            if (!ismatch (fx, lm, ic)) {
                break;
             }
             if (!**s)
