@@ -81,11 +81,9 @@ struct s_ObjectList {
    struct s_ObjectList * prev;
 };
 
-# define MAX_CACHE 65536
-static joe_Object st_roots[128];
-static joe_Object *roots = st_roots;
+# define MAX_CACHE 128
+static joe_Object roots[MAX_CACHE];
 static int rootsCnt = 0;
-static int maxRoots = sizeof(st_roots) / sizeof(joe_Object);
 
 # define NUM_CACHE 32
 static joe_Object numCache[NUM_CACHE];
@@ -557,6 +555,9 @@ joe_Object_gc ()
       scan = next;
    }
    rootsCnt = 0;
+   for (int i = 0; i < numCacheCnt; i++)
+      free (numCache[i]);
+   numCacheCnt = 0;
 }
 
 void
@@ -585,15 +586,8 @@ joe_Object_unassign (joe_Object self)
          if (!self->buffered) {
             self->buffered = 1;
             roots[rootsCnt++] = self;
-            if (rootsCnt == maxRoots) {
+            if (rootsCnt == MAX_CACHE) {
                joe_Object_gc ();
-               if (maxRoots < MAX_CACHE) {
-                  maxRoots <<= 1;
-                  if (roots == st_roots)
-                     roots = calloc (maxRoots, sizeof(joe_Object));
-                  else
-                     roots = realloc (roots, maxRoots * sizeof(joe_Object));
-               }
             }
          }
       }
