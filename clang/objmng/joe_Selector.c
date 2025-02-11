@@ -27,7 +27,6 @@
 
 typedef struct s_Selector {
    int (*method)(JOE_METHOD_ARGS);
-   joe_Object argRcvr;
    joe_Object actualRcvr;
    joe_Class *argClazz;
    int argc;
@@ -96,23 +95,13 @@ joe_Selector_invoke (joe_Object self, joe_Object receiver,
    joe_Memory mem = *JOE_AT(self, 0);
    Selector *selector = (Selector*) JOE_MEM (mem);
 
-   if (selector->argRcvr == receiver) {
-      if (selector->argRcvr) {
-         return selector->method (selector->actualRcvr, argc, argv, retval);
-      } else {
-         joe_Object_assign (retval, joe_Exception_New ("Void receiver"));
-         return JOE_FAILURE;
-      }
-   } else if (selector->argClazz == receiver->clazz) {
-      selector->argRcvr = receiver;
+   if (selector->argClazz == receiver->clazz) {
       selector->actualRcvr = receiver;
       return selector->method (selector->actualRcvr, argc, argv, retval);
    } else {
       joe_Class *clazz = joe_Object_getClass (receiver);
       char *selName;
       joe_Method *mthd;
-
-      selector->argRcvr = receiver;
 
       if (clazz == &joe_WeakReference_Class) {
          receiver = joe_WeakReference_get(receiver);
@@ -148,7 +137,6 @@ joe_Selector_invoke (joe_Object self, joe_Object receiver,
                       selName, clazz->name);
          }
          joe_Object_assign (retval, joe_Exception_New (buffer));
-         selector->argRcvr = 0;
          selector->actualRcvr = 0;
          selector->argClazz = 0;
          return JOE_FAILURE;
