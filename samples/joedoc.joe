@@ -1,0 +1,110 @@
+:args.
+/**
+# joedoc.joe
+## Synopsis:
+   joe [ options ] [ src1 ... srcN ]
+## Description: 
+This script scans the given sources looking for lines that start with '/**': 
+when this sequence is found, all the following lines are extracted until
+a line starting with '*\/'.
+
+The text is supposed to be in Markdown format.
+*/
+
+Files <- !version; indexOf "native" < 0 ifTrue {
+   {
+      myPaths <- !getClassRef "java.nio.file.Paths".
+      myFiles <- !getClassRef "java.nio.file.Files".
+      cs <- !getClassRef "java.nio.charset.Charset" defaultCharset.
+      readAllLines <- {:f.
+         path <- myPaths get f,"".
+         myFiles readAllLines path,cs.
+      }.
+   } new.
+},{
+   !newInstance "joe_Files".
+}.
+ArrayList <- !version; indexOf "native" < 0 ifTrue {
+   "java.util.ArrayList".
+},{
+   "joe_ArrayList".
+}.
+
+scriptName <- args get 0.
+args := args shift.
+sort := <0>.
+
+doWork <- {
+   NL <- !nl.
+
+   !foreach args,{:file.
+      lines <- Files readAllLines file.
+      out := !newInstance ArrayList.
+      paragraph := .
+      !foreach lines,{:line.
+         () = paragraph ifTrue {
+            line trim; startsWith "/**" ifTrue {
+               paragraph := "".
+            }.
+         },{
+            line trim; startsWith "*/" ifTrue {
+               out + paragraph.
+               paragraph := .
+            },{
+               line matches " *\*" ifTrue {
+                  star <- line indexOf "*".
+                  line := line substring star.
+               }.
+               paragraph := paragraph + line + NL.
+            }.
+         }.
+      }.
+      sort ifTrue {
+         out := !arraySort (out toArray),{:s1,s2. s1 compareTo s2}.
+      },{
+         out := out toArray.
+      }.
+      !foreach out,{:i.
+         !println i.
+      }.
+   }.
+}.
+
+/**
+## Option -sort
+The blocks of comments are alphabetically sorted before being showed 
+*/
+
+/**
+## Option -help
+Prints a short help message with the available options
+*/
+
+@help <- {
+   !println "Usage: joe [ options ] [ src1 ... srcN ]".
+   !println "Available options:".
+   !foreach (!! getVariablesNames), {:tag.
+      !if (tag startsWith "@"),{
+         !println "   ",(tag replaceFirst "@","-").
+      }.
+   }.
+   args := !newArray 0.
+}.
+
+@sort <- {
+   sort := <1>.
+   args := args shift.
+}.
+
+!while {args length; > 0 and { args get 0 startsWith "-"}},{
+   toExec := !!getVariable (args get 0 replaceFirst "-","@").
+   !if (() = toExec),{
+       !println "Option ",(args get 0), " is missing!".
+       @help exec.
+       !systemExit 2.
+   },{
+      toExec exec.
+   }.
+}.
+
+doWork exec.

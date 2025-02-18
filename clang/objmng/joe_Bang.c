@@ -45,6 +45,13 @@
 # include "joe_DoDebugException.h"
 # include "joestrct.h"
 
+/**
+# Object ! (joe_Bang) 
+
+ This object implements a set of methods useful for creating objects,
+ interacting with them and with the external environment.
+ It is automatically instantiated by the interpreter.
+*/
 # ifdef WIN32
 # include <windows.h>
 
@@ -202,6 +209,8 @@ Switch_New (joe_Object cfrt)
                                     joe_Boolean_New_false());
    joe_Object_assign (joe_Object_at (self,SW_ALREADY_DONE),
                                     joe_Boolean_New_false());
+   joe_Object_assign (joe_Object_at (self,SW_RETURN),
+                                    joe_Null_value);
    return self;
 }
 
@@ -418,6 +427,11 @@ args2String(int argc, joe_Object* argv, joe_Object* retval)
    joe_Object_assign(retval, joe_StringBuilder_toString(msg));
    joe_Object_assign(&msg, 0);
 }
+/**
+## exec _program_ [, _arg1_ ... ,_argN_ ]
+
+Executes _program_ with the arguments specified in a new process and waits for execution to terminate. Returns the return code of the execution.
+*/
 
 static int
 exec (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -433,6 +447,11 @@ exec (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+/**
+## system _program_ [, _arg1_ ... ,_argN_ ]
+
+Executes _program_ with the arguments specified in a new shell and waits for execution to terminate. Returns the return code of the execution.
+*/
 
 static int
 system_ (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -460,6 +479,13 @@ system_ (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## execGetOut _program_ [, _arg1_ ... ,_argN_ ]
+
+Executes _program_ with the arguments specified in a new process and returns the
+standard output of the runned process as a String.
+*/
+
 static int
 execGetOut (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -483,6 +509,13 @@ execGetOut (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+
+/**
+## execFromDir _directory_, _program_ [, _arg1_ ... ,_argN_ ]
+
+Executes _program_ from the specified _directory_ and waits for execution
+to terminate. Returns the return code of the execution..
+*/
 
 static int
 execFromDir (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -515,12 +548,18 @@ execFromDir (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## version
+
+Returns a String with informations about the current interpreter.
+*/
+
 static int
 version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_StringBuilder msg = 0;
    joe_Object_assign (&msg, joe_StringBuilder_New ());
-   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.66 ");
+   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.66a ");
    joe_StringBuilder_appendCharStar (msg, __DATE__);
 #ifdef WIN32
    joe_StringBuilder_appendCharStar (msg, " Windows");
@@ -532,6 +571,12 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_SUCCESS;
 }
 
+/**
+## nl
+
+Returns a String with the current end-of-line sequence.
+*/
+
 static int
 nl (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -542,6 +587,11 @@ nl (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 #endif
    return JOE_SUCCESS;
 }
+/**
+## getOSType
+
+Returns a String with information about the underlying operating system.
+*/
 
 static int
 getOSType (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -557,6 +607,13 @@ getOSType (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 # endif
    return JOE_SUCCESS;
 }
+
+/**
+## systemGetenv _variableName_
+
+Returns a String with the content of the specified environment variable.
+If the variable doesn't exist it returns Null.
+*/
 
 static int
 systemGetenv (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -575,7 +632,14 @@ systemGetenv (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+/**
+## chr _aInteger_
 
+Returns a String with an ASCII character whose code has been specified.
+
+__deprecated__ the same result can be obtained using the expression
+`aInteger toChar`
+*/
 static int
 chr (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -592,6 +656,12 @@ chr (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+/**
+## getErrno
+
+Returns a Integer with the errno code of the last operation on the standard
+C library.
+*/
 
 static int
 getErrno (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -605,6 +675,15 @@ getErrno (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## asc _aString_
+
+Returns a Integer with the ASCII code of the first character in the specified
+String.
+
+__deprecated__ the same result can be obtained using the expression
+`aString charCodeAt`
+*/
 
 static int
 asc (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -618,6 +697,14 @@ asc (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+/**
+## isNull _aObject_
+
+Returns Boolean <1> if the specified argument is Null, Boolean <0> otherwise.
+
+__deprecated__ the same result can be obtained using the expression
+`() = aObject`
+*/
 
 static int
 isNull (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -633,6 +720,12 @@ isNull (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_FAILURE;
 }
 
+/**
+## print [, _arg1_ ... ,_argN_ ]
+
+Displays the arguments on the standard output. Returns the Bang object itself.
+*/
+
 static int
 print (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
@@ -646,6 +739,13 @@ print (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
    return JOE_SUCCESS;
 }
 
+/**
+## println [, _arg1_ ... ,_argN_ ]
+
+Displays the arguments on the standard output with a linefeed at the end.
+Returns the Bang object itself.
+*/
+
 static int
 println (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -656,6 +756,12 @@ println (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
    return rc;
 }
+/**
+## eprint [, _arg1_ ... ,_argN_ ]
+
+Displays the arguments on the standard error.
+Returns the Bang object itself.
+*/
 
 static int
 eprint (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
@@ -670,6 +776,13 @@ eprint (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
    return JOE_SUCCESS;
 }
 
+/**
+## eprintln [, _arg1_ ... ,_argN_ ]
+
+Displays the arguments on the standard error with a linefeed at the end.
+Returns the Bang object itself.
+*/
+
 static int
 eprintln (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -680,6 +793,12 @@ eprintln (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
    return rc;
 }
+
+/**
+## readLine
+
+Reads a line from standard input and returns a String containing it.
+*/
 
 static char* inbuff = 0;
 static ssize_t inbufflen = 0;
@@ -699,6 +818,14 @@ readLine (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_SUCCESS;
 }
 
+/**
+## while _aBlock1_,_aBlock2_
+
+Executes _aBlock1_ and if it returns Boolean <1> executes _aBlock2_.
+Repeats until _aBlock1_ returns Boolean <0>.
+Returns the result of the last execution of _aBlock2_.
+*/
+
 static int
 _while (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -711,6 +838,14 @@ _while (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## doWhile _aBlock1_,_aBlock2_
+
+Executes _aBlock1_ then executes _aBlock2_: if _aBlock2_ returns Boolean <1>
+then executes _aBlock1_ again.
+Repeats until _aBlock2_ returns Boolean <0>.
+Returns the result of the last execution of _aBlock1_.
+*/
 static int
 doWhile (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -722,7 +857,14 @@ doWhile (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+/**
+## for _start_, _end_ [,_increment_], _aBlock_.
 
+Executes aBlock passing _start_ as argument then increments _start_ by _increment_
+ (default is 1) and repeats until the argument passed to _aBlock_ is > _end_.
+
+Returns the result of the last execution of _aBlock_.
+*/
 static int
 _for(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 {
@@ -789,7 +931,10 @@ _for(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 */
    return JOE_SUCCESS;
 }
-
+/**
+## systemExit [ _aInteger_ ]
+Causes the execution stop with the return code specified as argument (default 0).
+*/
 static int
 systemExit (joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 {
@@ -805,7 +950,11 @@ systemExit (joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
    exit (exitCode);
    return JOE_SUCCESS;
 }
+/**
+## unixTime
 
+Returns the number of second from the epoch in Unix mode
+*/
 static int
 unixTime (joe_Object self, int argc, joe_Object* argv, joe_Object* retval){
    if (argc == 0) {
@@ -816,7 +965,12 @@ unixTime (joe_Object self, int argc, joe_Object* argv, joe_Object* retval){
       return JOE_FAILURE;
    }
 }
-
+/**
+## foreach _aCollection_,_aBlock_.
+For each item in _aCollection_ (it can be an Array, an ArrayList or a List)
+executes _aBlock_ passing it as argument.
+Returns the result of the last execution of _aBlock_.
+*/
 static int
 foreach (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -831,7 +985,12 @@ foreach (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
-
+/**
+## if _aBoolean_,_aBlockTrue_[,_aBlockElse_]
+If _aBoolean_ = <1> then executes _aBlockTrue_
+else it executes _aBlockElse_ when specified.
+Returns the result of the last execution.
+*/
 static int
 _if (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -883,7 +1042,14 @@ _if (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    joe_Object_assign(retval, joe_Exception_New ("if: missing argument"));
    return JOE_FAILURE;
 }
+/**
+## try _aBlock1_[,_aBlock2_]
 
+Executes _aBlock1_ and if some instruction raises an exception
+executes _aBlock2_, if specified, passing the Exception object as argument.
+
+Returns the result of the last execution.
+*/
 static int
 TRY(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 {
@@ -911,6 +1077,37 @@ TRY(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
    joe_Object_assign(retval, joe_Exception_New("try: invalid or missing argument(s)"));
    return JOE_FAILURE;
 }
+/**
+## switch _aObject_
+Returns a Switch object. This new object has 3 methods
+  1) **case _anotherObject_ [,_aBlock_]** compares _anotherObject_ with _aObject_
+  and if the result is Boolean <1> then executes _aBlock_;
+  if _aBlock_ is not specified then any following execution of a **case** method
+  with a _aBlock_ specified on this same object causes the
+  execution of _aBlock_ regardless;
+  only 1 Block is executed for any Switch object;
+  this method returns the Switch object itself
+2) **default _aBlock_** executes the specified _aBlock_ if no Block has been
+  executed on this Switch object;
+3) **endSwitch** returns the return code of the only Block executed by
+  this Switch Object.
+"
+This method allows to do multichoice statement like the following:
+```
+   !switch aNum
+   case 1
+   case 2,{
+      !println aNum, " is 1 or 2".
+   }
+   case 3,{
+      !println aNum, " is 3".
+   }
+   default {
+      !println aNum, " is not handled".
+   }
+   endSwitch.
+```
+*/
 
 static int
 _switch (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -923,7 +1120,11 @@ _switch (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+/**
+## newInstance _aString_ [ ,_arg1_ ... ,_argn_ ]
 
+Instantiates a new object whose name is in _aString_.
+*/
 static int
 newInstance (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
@@ -946,6 +1147,12 @@ newInstance (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+/**
+## throw _aString_
+
+Throws an exception whose description is in _aString_.
+*/
+
 static int
 _throw (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
@@ -957,6 +1164,13 @@ _throw (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 
    return JOE_FAILURE;
 }
+
+/**
+## break [ _aString_ ]
+
+Exits from the Block whose name is _aString_ (default is the current block).
+Leaves in the stack the result of the last execution.
+*/
 
 static int
 _break (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
@@ -971,6 +1185,13 @@ _break (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
    }
    return JOE_FAILURE;
 }
+
+/**
+## breakLoop
+
+Exits from the current loop.
+Leaves in the stack the result of the last execution.
+*/
 
 static int
 breakLoop (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
@@ -991,6 +1212,11 @@ _goto (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
    return JOE_FAILURE;
 }
 
+/**
+## debug
+
+Activates the debugger on the next instruction
+*/
 static int
 debug (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
@@ -1028,6 +1254,11 @@ loadScript (joe_Bang self, joe_String scriptName, joe_Object *retval)
    return joe_Class_newInstance(loadScriptClass, 3, args, retval);
 }
 
+/**
+## new _aJoeObjectScript_ [ ,_arg1_ ... ,_argn_ ]
+
+Loads the specified _aJoeObjectScript_ as an Object.
+*/
 static int
 _new (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
@@ -1047,6 +1278,11 @@ _new (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
    return JOE_FAILURE;
 }
 
+/**
+## typename _aObject_
+
+Returns the name of the class of _aObject_.
+*/
 static int
 typename (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
@@ -1063,6 +1299,16 @@ typename (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
    return JOE_FAILURE;
 }
 
+/**
+## joe _aJoeScript_ [ ,_arg1_ ... ,_argN_ ]
+## joe _anArray_
+
+Loads and executes _aJoeScript_ with the specified arguments.
+
+When _anArray_ is passed the name of the script is the item at index 0
+of _anArray_ while the following items contain the arguments if any.
+Returns whatever the script returns.
+*/
 
 static int
 joe (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
@@ -1100,7 +1346,13 @@ joe (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
       joe_Object_assign(&argArray, 0);
    return rc;
 }
+/**
+## runJoe _aJoeScript_ [ ,_arg1_ ... ,_argN_ ]
+## runJoe _anArray_
 
+__deprecated__ same as `joe`
+
+*/
 static int
 runJoe (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
@@ -1111,7 +1363,13 @@ runJoe (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
    }
    return JOE_FAILURE;
 }
+/**
+## runAsBlock _aBlock_, _aJoeScript_ [ ,_arg1_ ... ,_argN_ ]
 
+Loads and executes _aJoeScript_ as if were a block executed from _aBlock_.
+This gives to _aJoeScript_ the visibility of the variables in _aBlock_.
+Return whatever the block returns.
+*/
 static int
 runAsBlock (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
@@ -1167,6 +1425,12 @@ runAsBlock (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
    }
 }
 
+/**
+## newArray _aInteger_
+
+Creates an array whose size is _aInteger_. Each item contains Null.
+
+*/
 static int
 newArray (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
@@ -1182,7 +1446,13 @@ newArray (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+/**
+## array [_arg1_ [, _arg2_ ... ,_argN_ ]]
 
+Creates an array whose elements are reference id of the objects specified
+as arguments.
+
+*/
 static int
 array (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
@@ -1192,6 +1462,24 @@ array (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
       joe_Object_assign (joe_Object_at (*retval, i), args[i]);
    return JOE_SUCCESS;
 }
+
+/**
+## arraySort _anArray, _aBlock_
+## arraySort _aArrayList_ , _aBlock_
+
+Sorts the specified array according to the rules specified in _aBlock_.
+_aBlock_ is invoked by the sort method passing 2 items of the array;
+it must return an Integer: 0 means that the 2 items are equal,
+a value greater than 0 means that the 1st argument is greater then
+the 2nd argument an a value  less then 0 viceversa.
+Returns the array passed as argument sorted.
+
+For example the following invocation sorts the array of integers `a`
+in ascending order.
+```
+   !arraySort a,{:o1,o2. o1 - o2}.
+```
+*/
 
 static int
 arraySort (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
@@ -1266,7 +1554,26 @@ bsearch_ (joe_Array v, int n, joe_Object cfrt,
    joe_Object_assign (retval, joe_Integer_New (-1));
    return JOE_SUCCESS;
 }
+/**
+## binarySearch _anArray_, _aObject_,_aBlock_
+## binarySearch _aArrayList_, _aObject_,_aBlock_
 
+Searches the specified array for the _aObject_ using
+the binary search algorithm. _anArray_ (or _aArrayList_ ) must be sorted
+according to the rules specified in _aBlock_.
+Returns the index of the item corresponding to _aObject_ or -1 if
+no object in the array is = _aObject_.
+_aBlock_ is invoked by the method passing 2 items of the array;
+it must return an Integer: 0 means that the 2 items are equal,
+a value greater than 0 means that the 1st argument is greater then
+the 2nd argument an a value  less then 0 viceversa.
+For example:
+```
+   a:=!array 0,2,3,7,8,9.
+   !binarySearch a,3,{:o1,o2.o1 - o2}.
+```
+returns `2`
+*/
 static int
 binarySearch (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
@@ -1287,6 +1594,10 @@ binarySearch (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
    return JOE_SUCCESS;
 }
 
+/**
+## random
+Returns a random Float >= 0 and < 1
+*/
 static int initRand;
  
 static int
@@ -1307,13 +1618,25 @@ random_ (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
    }
    return JOE_SUCCESS;
 }
-
+/**
+## getGlob _wildcards_ [, _aBoolean_]
+Returns a Glob Object; this is a convenience method equivalent to
+`!newInstance "joe_Glob",wildcards [,aBoolean]`
+*/
 static int
 getGlob (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
    return joe_Class_newInstance (&joe_Glob_Class, argc, args, retval);
 }
 
+/**
+## addPath _aPath_
+
+Adds _aPath_ to the list of paths where the interpreter looks for scripts
+when the `joe` and `new` methods are called.
+The first path is always the path where the first script is loaded.
+Returns the Bang object itself.
+*/
 static int
 addPath (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
@@ -1333,6 +1656,12 @@ addPath (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
    return JOE_SUCCESS;
 }
 
+/**
+## getPath
+Returns an array with the list of paths where the interpreter looks for scripts
+when the `joe` and `new` methods are called.
+The first path is always the path where the first script is loaded.
+*/
 static int
 getPath (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
@@ -1358,7 +1687,10 @@ getPath (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
    }
    return JOE_SUCCESS;
 }
-
+/**
+## getcwd
+Returns the current working directory.
+*/
 static int
 getCwd (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -1378,6 +1710,11 @@ getCwd (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## sleep _aInteger_
+Stops the execution for _aInteger_ milliseconds.
+Returns _aInteger_.
+*/
 static
 int joe_sleep(joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -1393,7 +1730,7 @@ int joe_sleep(joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
             joe_Object_assign(retval,joe_String_New2("sleep: ", strerror(errno)));
             return JOE_FAILURE;
          } else {
-            joe_Object_assign(retval, joe_Null_value);
+            joe_Object_assign(retval, argv[0]);
             return JOE_SUCCESS;
          }
       }
@@ -1402,6 +1739,20 @@ int joe_sleep(joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_FAILURE;
 }
 
+/**
+## loadSO _aString_
+Loads a shared object whose name is _aString. 
+Returns a BangSO object that can be used to call C functions
+in the loaded library via its `call` method which returns a Pointer object.
+Example:
+```
+   lib:=!loadSO"".
+   lib call "printf",("%s"+(!nl)),"Hello, World!".
+```
+
+If the library contains a well-formed class/classes then those classes
+become available to the interpreter thru `newInstance` method.
+*/
 extern int joe_BangSO_New(joe_String soName, joe_Object* obj);
 
 static int
@@ -1415,7 +1766,11 @@ loadSO(joe_Object self, int argc, joe_Object* args, joe_Object* retval)
       return JOE_FAILURE;
    }
 }
+/**
+## toString
 
+Returns "!"
+*/
 static int
 toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {

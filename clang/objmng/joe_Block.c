@@ -490,12 +490,8 @@ getVariable(joe_JOEObject self, int argc, joe_Object* argv, joe_Object* retval)
       joe_Object_assign(&var,
                        joe_Block_getVar(self, joe_String_getCharStar(argv[0])));
       if (var == 0) {
-         char *error = calloc (1, 32 + joe_String_length(argv[0]));
-         strcpy (error, "variable not found: ");
-         strcat (error, joe_String_getCharStar(argv[0]));
-         joe_Object_assign(retval, joe_Exception_New(error));
-         rc = JOE_FAILURE;
-         free (error);
+          joe_Object_assign(retval, joe_Null_value);
+          rc = JOE_SUCCESS;
       } else {
          rc = joe_Block_getVarValue(self, var, retval);
          joe_Object_assign(&var, 0);
