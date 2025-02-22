@@ -20,7 +20,7 @@ now <- !version; indexOf "native" < 0 ifTrue { !newInstance "java.util.Date"},
 !println "".
 !println "".
 !println "".
-!println "_automatically generated on ",(!newInstance "joe_Date"),"_".
+!println "_automatically generated on ",now,"_".
 !println "***".
 SRC <- "../clang/objmng/".
 !joe "joedoc.joe","-sort"

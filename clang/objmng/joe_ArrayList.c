@@ -28,7 +28,7 @@
 # include "joestrct.h"
 
 /**
-# Class joe_ArrayList ù
+# Class joe_ArrayList
 ### extends joe_Object
 
 This implements a dynamic array.

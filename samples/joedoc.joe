@@ -66,9 +66,9 @@ doWork <- {
       }.
       out length; > 0 ifTrue {
          !foreach out,{:i.
-            !println i.
+            !print i.
          }.
-         !println "---".
+         !println "***".
       }.
    }.
 }.
