@@ -21,6 +21,63 @@
 
 # include <stdio.h>
 
+/**
+# Class joe_Boolean
+### extends joe_Object
+
+This class implements a boolean type.
+*/
+
+/* the implementation of the following methods are in joe_Object.c */
+/**
+## and _aBoolean_
+
+AND boolean operation
+*/
+
+/**
+## or _aBoolean_
+
+OR boolean operation
+*/
+
+/**
+## xor _aBoolean_
+
+XOR boolean operation
+*/
+
+/**
+## not
+
+NOT operation
+*/
+
+/**
+## iif _aObject1_, _aObject2_
+
+If this boolean is <1> then this method return _aObject1_ else _aObject2_.
+*/
+
+/**
+## ifTrue _aBlock1_ [, _aBlock2_]
+
+If this boolean is <1> then this method executes _aBlock1_
+else _aBlock2_ when supplied.
+*/
+
+/**
+## ifFalse  _aBlock1_ [, _aBlock2_]
+
+If this boolean is <0> then this method executes _aBlock1_
+else _aBlock2_ when supplied.
+*/
+
+/**
+## toString
+Returns the string representation of this boolean.
+*/
+
 joe_Object
 joe_Boolean_New_true ()
 {

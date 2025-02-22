@@ -27,6 +27,20 @@
 # include "joe_Null.h"
 # include "joestrct.h"
 
+/**
+# Class joe_ArrayList ù
+### extends joe_Object
+
+This implements a dynamic array.
+
+An ArrayList can be created using the following method:
+```
+aArrayList := !newInstance "joe_ArrayList" [, aSize ]
+```
+
+_aSize_ is the initial size of the new array list
+*/
+
 # define ARRAY 0
 # define LENGTH 1
 # define MAXLENGTH 2
@@ -49,6 +63,14 @@ ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## length
+## size
+
+Returns the length of this list.
+
+*/
+
 static int
 length (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -63,6 +85,13 @@ length (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_SUCCESS;
 }
 
+/**
+## add _aObject_
+
+Adds _aObject_ at the end of this list.
+
+*/
+
 static int
 add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -76,6 +105,12 @@ add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
    return JOE_SUCCESS;
 }
+
+/**
+## get _aIndex_
+
+Returns the _aIndex th_ element of this list.
+*/
 
 static int
 get (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -98,6 +133,12 @@ get (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
    return JOE_SUCCESS;
 }
+
+/**
+## pop
+
+Returns the last element of this list and removes it from this list
+*/
 
 static int
 pop (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -125,6 +166,13 @@ pop (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
    return JOE_SUCCESS;
 }
+
+/**
+## peek
+
+Returns the last element of this list without removing it
+*/
+
 static int
 peek (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -151,6 +199,13 @@ peek (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_SUCCESS;
 }
 
+/**
+## foreach [_aFirstIndex_,] _aBlock_
+
+For each element of this list, _aBlock_ is executed passing the index
+as argument. If _aFirstIndex_ is specified then only the items with an
+index >= of  _aFirstIndex_ will be scanned.
+*/
 
 static int
 foreach (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -197,6 +252,13 @@ foreach (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_SUCCESS;
 }
 
+/**
+## set _aIndex_, _aObject_
+
+Replaces the element at _aIndex_ position in this array
+with _aObject_.
+*/
+
 static int
 set (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -219,6 +281,12 @@ set (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## toArray
+
+Returns a new Array containing all the elements of this list
+*/
+
 static int
 toArray (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -239,6 +307,12 @@ toArray (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## isEmpty
+
+Returns Boolean <1> if this list contains no elements, <0> othewise
+*/
+
 static int
 isEmpty (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -255,6 +329,17 @@ isEmpty (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+
+/**
+## iterator
+
+Returns a ArrayIterator for this array.
+
+It is equivalent to:
+```
+thisList toArray; iterator
+```
+*/
 
 static int
 iterator (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)

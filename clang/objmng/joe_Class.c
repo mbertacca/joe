@@ -26,6 +26,13 @@
 
 # include <stdio.h>
 
+/**
+# Class joe_Class
+### extends joe_Object
+
+This class implements a JOE basic class. An instance of this class
+can be obtained from any object thru the method `getClass`.
+*/
 static char *variables[] = { "clazz", 0 };
 
 static int
@@ -43,6 +50,11 @@ ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## getName
+
+Returns the name of this class.
+*/
 static int
 getName (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {  
@@ -51,6 +63,14 @@ getName (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    joe_Object_assign(retval,  joe_String_New ((*clazz)->name));
    return JOE_SUCCESS;
 }
+/**
+## getMethods
+
+Returns an array with the name of the methods of this class.
+In the current implementation it works only for basic class,
+i.e. JOEObjects will return only the basic methods, not the methods
+defined as blocks.
+*/
 
 static int
 getMethods (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -78,6 +98,12 @@ getMethods (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 
    return JOE_SUCCESS;
 }
+
+/**
+## toString
+
+Returns a string representation of this class.
+*/
 
 static int
 toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)

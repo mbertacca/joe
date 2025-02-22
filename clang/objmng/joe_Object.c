@@ -45,6 +45,13 @@
 # include "joe_Class.h"
 # include "joestrct.h"
 
+/**
+# Class joe_Object 
+
+This is the base class of all the JOE classes, hence its methods
+can be used with every object.
+*/
+
 /*
 A Pure Reference Counting Garbage Collector
 DAVID F. BACON, CLEMENT R. ATTANASIO, V.T. RAJAN, STEPHEN E. SMITH
@@ -755,6 +762,14 @@ joe_Object_invokeSuper (joe_Object self, const char *name,
    return invoke (self, self->clazz->extends, name, argc, argv, retval);
 }
 
+/**
+## toString
+
+Returns a String representation of this object.
+
+Usually this method is overridden in subclasses
+*/
+
 static int
 toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -762,11 +777,26 @@ toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_SUCCESS;
 }
 
+/**
+## getClass
+
+Returns the Class of this object.
+*/
+
 static int
 getClass (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    return joe_Class_newInstance (&joe_Class_Class, 1, &self, retval);
 }
+
+/**
+## equals _aObject_
+## = _aObject_
+
+Returns Boolean <1> if _aObject_ is the same as this object, <0> otherwise.
+
+Usually this method is overridden in subclasses
+*/
 
 static int
 equals (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -777,6 +807,12 @@ equals (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       joe_Object_assign(retval, joe_Boolean_New_false());
    return JOE_SUCCESS;
 }
+
+/**
+## clone
+
+Returns a clone of this object.
+*/
 
 int
 clone (joe_Object self,int argc,joe_Object *argv,joe_Object *retval)

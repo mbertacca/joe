@@ -23,6 +23,25 @@
 # include "joe_Exception.h"
 # include <stdio.h>
 
+/**
+# Class joe_Date
+### extends joe_Object
+
+This class implements a timestamp for the Gregorian calendar.
+It can be obtained with the following invocation:
+```
+!newInstance "joe_Date" [ , aInteger ]
+```
+When _aInteger_ is specified it is interpreted as the number of millisecond
+passed from 0001-01-01T00:00:00 plus 518400000: this correction number has
+been used because 0001-01-01 was a Saturday so you can get the day of
+the week with the following operation: t / 86400000 % 7 which will
+return 0 = Sunday, 1 = Monday etc.
+
+With no argument, the Date will contain the time
+in which it has been instantiated.
+*/
+
 struct s_Timestamp {
    long julian;
    unsigned int year;
@@ -218,6 +237,13 @@ ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_FAILURE;
 }
 
+/**
+## equals _aDate_
+## = _aDate_
+
+Returns Boolean <1> if this date is equal to _aDate_, <0> otherwise
+*/
+
 static int
 equals (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -234,6 +260,13 @@ equals (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_FAILURE;
 }
 
+/**
+## lt _aDate_
+## < _aDate_
+
+Returns Boolean <1> if this date is before _aDate_, <0> otherwise
+*/
+
 static int
 lt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -249,6 +282,13 @@ lt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_FAILURE;
 }
 
+/**
+## gt _aDate_
+## > _aDate_
+
+Returns Boolean <1> if this date is after _aDate_, <0> otherwise
+*/
+
 static int
 gt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -263,6 +303,12 @@ gt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    joe_Object_assign(retval, joe_Exception_New ("joe_Date equals: invalid argument"));
    return JOE_FAILURE;
 }
+
+/**
+## toString
+
+Returns a string representation of this date
+*/
 
 static int
 toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -280,6 +326,12 @@ toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## getDate
+
+Returns an Integer containing the day of month of this date
+*/
+
 static int
 getDate (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -294,6 +346,13 @@ getDate (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
                    joe_Exception_New("joe_Date getDate: invalid argument(s)"));
    return JOE_FAILURE;
 }
+
+/**
+## getDay
+
+Returns an Integer containing the day of the week of this date
+(0 = Sunday, 1 = Monday etc.)
+*/
 
 static int
 getDay (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -310,6 +369,12 @@ getDay (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_FAILURE;
 }
 
+/**
+## getHours
+
+Returns an Integer containing the hours of this date
+*/
+
 static int
 getHours (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -324,6 +389,12 @@ getHours (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
                    joe_Exception_New("joe_Date getHours: invalid argument(s)"));
    return JOE_FAILURE;
 }
+
+/**
+## getMinutes
+
+Returns an Integer containing the minutes of this date
+*/
 
 static int
 getMinutes (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -340,6 +411,13 @@ getMinutes (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_FAILURE;
 }
 
+/**
+## getMonth
+
+Returns an Integer containing the month of this date
+(1 = January, 2 = February etc)
+*/
+
 static int
 getMonth (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -354,6 +432,12 @@ getMonth (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
                    joe_Exception_New("joe_Date getMonth: invalid argument(s)"));
    return JOE_FAILURE;
 }
+
+/**
+## getSeconds
+
+Returns an Integer containing the seconds of this date
+*/
 
 static int
 getSeconds (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -370,6 +454,14 @@ getSeconds (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_FAILURE;
 }
 
+/**
+## getTime
+
+Returns an Integer containing the milliseconds of this date counted
+starting from 0001-01-01T00:00:00 plus 518400000
+
+*/
+
 static int
 getTime (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -383,6 +475,14 @@ getTime (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_FAILURE;
 }
 
+/**
+## getEpochMillis
+
+Returns an Integer containing the milliseconds of this date counted
+starting from 1970-01-01T00:00:00 (Unix fashion)
+
+*/
+
 static int
 getEpochMillis (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -394,6 +494,12 @@ getEpochMillis (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
             joe_Exception_New("joe_Date getEpochMillis: invalid argument(s)"));
    return JOE_FAILURE;
 }
+
+/**
+## getYear
+
+Returns an Integer containing the year of this date
+*/
 
 static int
 getYear (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -409,6 +515,12 @@ getYear (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
                    joe_Exception_New("joe_Date getYear: invalid argument(s)"));
    return JOE_FAILURE;
 }
+
+/**
+## setDate _aInteger_
+
+Sets _aInteger_ as day of the month of this date
+*/
 
 static int
 setDate (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -430,6 +542,12 @@ setDate (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_FAILURE;
 }
 
+/**
+## setHours _aInteger_
+
+Sets _aInteger_ as hours of this date
+*/
+
 static int
 setHours (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -449,6 +567,12 @@ setHours (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
                    joe_Exception_New("joe_Date setHours: invalid argument(s)"));
    return JOE_FAILURE;
 }
+
+/**
+## setMinutes _aInteger_
+
+Sets _aInteger_ as minutes of this date
+*/
 
 static int
 setMinutes (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -470,6 +594,12 @@ setMinutes (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_FAILURE;
 }
 
+/**
+## setMonth _aInteger_
+
+Sets _aInteger_ as month of this date (1 = Janaury, 2 = February etc)
+*/
+
 static int
 setMonth (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -489,6 +619,12 @@ setMonth (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
                    joe_Exception_New("joe_Date setMonth: invalid argument(s)"));
    return JOE_FAILURE;
 }
+
+/**
+## setSeconds _aInteger_
+
+Sets _aInteger_ as seconds of this date 
+*/
 
 static int
 setSeconds (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -510,6 +646,13 @@ setSeconds (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_FAILURE;
 }
 
+/**
+## setTime _aInteger_
+
+Sets _aInteger_ as milliseconds of this date; the milliseconds are conted
+from 0001-01-01T00:00:00 plus 518400000 
+*/
+
 static int
 setTime (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -527,6 +670,12 @@ setTime (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
                    joe_Exception_New("joe_Date setTime: invalid argument(s)"));
    return JOE_FAILURE;
 }
+
+/**
+## setYear _aInteger_
+
+Sets _aInteger_ as year of this date 
+*/
 
 static int
 setYear (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -548,6 +697,12 @@ setYear (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_FAILURE;
 }
 
+/**
+## addDays _aInteger_
+
+Returns a new Date calculated adding _aInteger_ to this date
+*/
+
 static int
 addDays (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -568,6 +723,13 @@ addDays (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
                    joe_Exception_New("joe_Date addDays: invalid argument(s)"));
    return JOE_FAILURE;
 }
+
+/**
+## diffDays _aDate_
+
+Returns an Integer containing the number of days intercoursed between
+this date and _aDate_
+*/
 
 static int
 diffDays (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)

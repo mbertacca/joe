@@ -28,6 +28,19 @@
 
 # include <stdlib.h>
 
+/**
+# Class joe_Execute
+### extends joe_Object
+
+An instance of this class allows the execution of arbitrary code contained
+in strings.. An instance of thi class can be obtained with the following call:
+```
+   !newInstance "joe_Execute" [ , aBlock ]
+```
+_aBlock_ is the block from which the calls are executed; if not specified
+a new block is used.
+*/
+
 typedef struct s_Execute {
    JoeArray tokens;
    Tokenizer tokenizer;
@@ -99,7 +112,11 @@ ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return init (self, block, name, bang);
 }
 
+/**
+## add _aString_
 
+Adds _aString_ to the list of calls to execute.
+*/
 static int
 add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -121,6 +138,12 @@ add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## clear
+
+Clears the list of calls to execute.
+*/
+
 static int
 clear (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -141,6 +164,13 @@ clear (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    joe_Object_assign(retval, self);
    return JOE_SUCCESS;
 }
+
+/**
+## exec
+
+Executes the list of calls previously load with `add`.
+Returns the result of the last call.
+*/
 
 static int
 exec (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)

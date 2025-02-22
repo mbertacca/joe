@@ -22,6 +22,19 @@
 # include "joe_Boolean.h"
 # include "joestrct.h"
 
+/**
+# Class joe_ArrayIterator
+### extends joe_Object
+
+This class allows the scan of an Array.
+
+An array can be created using the following methods:
+```
+aArrayIterator := !newInstance "joe_ArrayIterator", aArray
+aArrayIterator := aArray iterator
+```
+*/
+
 # define ARRAY 0
 # define CURIDX 1
 
@@ -41,6 +54,12 @@ ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## hasNext 
+
+Returns Boolean <1> if this iterator has more elements to scan, <0> otherwise.
+*/
+
 static int
 hasNext (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -58,6 +77,12 @@ hasNext (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+
+/**
+## next 
+
+Returns the next element.
+*/
 
 static int
 next (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)

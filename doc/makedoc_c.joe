@@ -1,0 +1,53 @@
+/**
+  This script generates the JOE native reference manual starting from
+  the remarks in the source files. The result, in markdown format,
+  is displayed on standard output.
+  It must be run from the `doc` directory.
+*/
+!addPath "../samples".
+now <- !version; indexOf "native" < 0 ifTrue { !newInstance "java.util.Date"},
+                                             { !newInstance "joe_Date"}.
+
+!println "# JOE native reference manual".
+!println "".
+!println "This document describes the basic classes in JOE native.".
+!println "".
+!println "These classes are written in C language following a particular".
+!println "convention and are embedded in the interpreter.".
+!println "New classes can be written in this way, put in shared libraries".
+!println "and made available to the interpreter".
+!println "".
+!println "".
+!println "".
+!println "".
+!println "_automatically generated on ",(!newInstance "joe_Date"),"_".
+!println "***".
+SRC <- "../clang/objmng/".
+!joe "joedoc.joe","-sort"
+                 ,(SRC+"joe_Bang.c")
+                 ,(SRC+"joe_Array.c")
+                 ,(SRC+"joe_ArrayIterator.c")
+                 ,(SRC+"joe_ArrayIterator.c")
+                 ,(SRC+"joe_ArrayList.c")
+                 ,(SRC+"joe_BangSO.c")
+                 ,(SRC+"joe_BigDecimal.c")
+                 ,(SRC+"joe_Block.c")
+                 ,(SRC+"joe_Boolean.c")
+                 ,(SRC+"joe_ByteArray.c")
+                 ,(SRC+"joe_Class.c")
+                 ,(SRC+"joe_Date.c")
+                 ,(SRC+"joe_Exception.c")
+                 ,(SRC+"joe_Execute.c")
+                 ,(SRC+"joe_Files.c")
+                 ,(SRC+"joe_Float.c")
+                 ,(SRC+"joe_Glob.c")
+                 ,(SRC+"joe_HashMap.c")
+                 ,(SRC+"joe_Integer.c")
+                 ,(SRC+"joe_List.c")
+                 ,(SRC+"joe_LoadScript.c")
+                 ,(SRC+"joe_Memory.c")
+                 ,(SRC+"joe_Object.c")
+                 ,(SRC+"joe_Pointer.c")
+                 ,(SRC+"joe_StringBuilder.c")
+                 ,(SRC+"joe_String.c")
+                 .

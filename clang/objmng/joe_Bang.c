@@ -46,11 +46,13 @@
 # include "joestrct.h"
 
 /**
-# Object ! (joe_Bang) 
+# Class joe_Bang (the ! object) 
+### extends joe_Object
 
  This object implements a set of methods useful for creating objects,
  interacting with them and with the external environment.
- It is automatically instantiated by the interpreter.
+ There is only 1 instance of this class and it is automatically
+ instantiated by the interpreter.
 */
 # ifdef WIN32
 # include <windows.h>
@@ -559,7 +561,7 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_StringBuilder msg = 0;
    joe_Object_assign (&msg, joe_StringBuilder_New ());
-   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.66a ");
+   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.67 ");
    joe_StringBuilder_appendCharStar (msg, __DATE__);
 #ifdef WIN32
    joe_StringBuilder_appendCharStar (msg, " Windows");

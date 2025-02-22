@@ -24,7 +24,13 @@
 
 # include <stdlib.h>
 # include <string.h>
+/**
+# Class joe_BangSO
+### extends joe_Object
 
+This class allows to call C function in a shared library loaded using the
+`!loadSO` method.
+*/
 # ifdef WIN32
 # include "windows.h"
 
@@ -63,7 +69,22 @@ struct LibData {
    DLOPEN_RETURN_TYPE pnt;
    int dllConv;
 };
+/**
+## call _aString_ [,arg1 ... ,argN ] 
 
+This method calls a C function in this shared object. It returns a
+Pointer object that can be interpreted either a C string or an integer
+or an address. The arguments can be Strings, Integers or an instance
+of ByteBuffer in order to pass complex data structures.
+
+Example
+```
+lib := !loadSO"".
+lib call "printf",("%s length =%d" + (!nl)),"string",("string" length).
+```
+**Be careful in using this methods** since an incorrect use can cause
+a memory corruption.
+*/
 static int
 call (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {

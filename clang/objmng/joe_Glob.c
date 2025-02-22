@@ -28,6 +28,33 @@
 
 static char *variables[] = { "regex", 0 };
 
+/**
+# Class joe_Glob
+### extends joe_Object
+
+This implements a glob pattern.
+
+An ArrayList can be created using the following methods:
+```
+ !newInstance "joe_Glob" wildCards [, caseInsensitive ]
+ !getGlob" wildCards [, caseInsensitive ]
+```
+where _wildCards_ is a String containing wildcards and _caseInsensitive_
+is a Boolean.
+
+Wildcards supported are 
+
+- ? matches any character exactly once.
+- \* matches a string of zero or more characters.
+- [...], where the first character within the brackets is not '^',
+  matches any single character among the characters specified in the brackets.
+  If the first character within brackets is '^', then the [^...]
+  matches any single character that is not among the characters
+  specified in the brackets.
+
+A backslash (\\) before a wildcard removes its special meaning.
+*/
+
 static int
 ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -81,6 +108,12 @@ ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_FAILURE;
 }
 
+/**
+## matches _aString_
+
+Returns Boolean <1> if _aString_ is a match for this glob, <0> otherwise.
+
+*/
 static int
 matches (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {

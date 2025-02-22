@@ -23,12 +23,32 @@
 # include "joe_Boolean.h"
 # include "joe_Exception.h"
 
+/**
+# Class joe_Pointer
+### extends joe_Object
+
+This class implements the functionality of an immutable C pointer
+
+It can be created using the following method:
+```
+!newInstance "joe_Pointer"
+```
+however, the usual way of getting one of them is thru  the
+`call` method of `joe_BangSO`
+*/
 static int
 ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    *((void **) joe_Object_getMem(self)) = (void *) 0;
    return JOE_SUCCESS;
 }
+
+/**
+## toString
+
+Returns the String representation of this pointer,
+usually the hexadecimal value.
+*/
 
 static int
 toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -39,6 +59,14 @@ toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_SUCCESS;
 }
 
+/**
+## stringValue
+
+Interprets this pointer as an address to a C string
+and returns a String containing that string.
+
+**Beware** if used on a bad pointer this method can cause a memory corruption.
+*/
 
 static int
 stringValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -48,6 +76,13 @@ stringValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_SUCCESS;
 }
 
+/**
+## intValue
+
+Interprets this pointer as an native int
+and returns a Integer containing that number.
+
+*/
 
 static int
 intValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -57,6 +92,14 @@ intValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_SUCCESS;
 }
 
+/**
+## longValue
+
+Interprets this pointer as an native long
+and returns a Integer containing that number.
+
+*/
+
 static int
 longValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -65,6 +108,14 @@ longValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_SUCCESS;
 }
 
+/**
+## shortValue
+
+Interprets this pointer as an native short
+and returns a Integer containing that number.
+
+*/
+
 static int
 shortValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -72,6 +123,12 @@ shortValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
                      joe_Integer_New (*((short *) joe_Object_getMem(self))));
    return JOE_SUCCESS;
 }
+
+/**
+## isNull
+
+Returns Boolean <1> if this is a null pointer, <0> otherwise
+*/
 
 static int
 isNull (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -82,6 +139,12 @@ isNull (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       joe_Object_assign(retval, joe_Boolean_New_false());
    return JOE_SUCCESS;
 }
+
+/**
+## displace _aInteger_
+
+Returns a new pointer obtained adding _aInteger_ to this pointer
+*/
 
 static int
 displace (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)

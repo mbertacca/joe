@@ -384,8 +384,12 @@ Tokenizer_tokenize (Tokenizer self, char *line)
          if (self->status == _INTEGER || self->status == _FLOAT) {
             if (*c == 'e' || *c == 'E') {
                char *cp1 = c + 1;
-               if (*cp1 >= '0' && *cp1 <= '9') {
+               if ((*cp1 >= '0' && *cp1 <= '9') || *cp1 == '+' || *cp1 == '-' ) {
                   JoeStrBuild_appendChr(self->word, 'e');
+                  if (*cp1 == '+' || *cp1 == '-') {
+                     JoeStrBuild_appendChr(self->word, *cp1);
+                     c++;
+                  }
                   self->status = _FLOAT;
                   break;
                }

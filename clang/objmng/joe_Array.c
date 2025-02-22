@@ -25,6 +25,20 @@
 # include "joe_Null.h"
 # include "joestrct.h"
 
+/**
+# Class joe_Array
+### extends joe_Object
+
+This class represents an array.
+
+An array can be created using the following methods:
+```
+aArray := !newInstance "joe_Object", aSize
+aArray := !newArray aSize
+aArray := !array [ e1  ... ,eN]
+```
+*/
+
 static int
 ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -39,12 +53,26 @@ ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## length
+## size
+
+Returns the length of this array.
+
+*/
+
 static int
 length (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_Object_assign (retval, joe_Integer_New (joe_Array_length (self)));
    return JOE_SUCCESS;
 }
+
+/**
+## get _aIndex_
+
+Returns the _aIndex th_ element of this array.
+*/
 
 static int
 get (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -63,6 +91,13 @@ get (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+
+/**
+## set _aIndex_, _aObject_
+
+Replaces the element at _aIndex_ position in this array
+with _aObject_.
+*/
 
 static int
 set (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -83,6 +118,12 @@ set (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## clean
+
+Replaces all the elements with ()
+*/
+
 static int
 clean(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 {
@@ -94,6 +135,12 @@ clean(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
       return JOE_FAILURE;
    }
 }
+
+/**
+## shift
+
+Returns a new Array like this array without the first element
+*/
 
 static int
 shift (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -116,6 +163,13 @@ shift (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## unshift _aObject_
+
+Returns a new Array like this array with the addition of _aObject_
+as first element
+*/
+
 static int
 unshift (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -135,6 +189,14 @@ unshift (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+
+/**
+## slice _fromIndex_, _toIndex_
+
+Returns the specified range of this array as a new array.
+The value at _fromIndex_ is placed into the initial element of the new array.
+The length of the returned array will be _toIndex_ - _fromIndex_. 
+*/
 
 static int
 slice (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -165,6 +227,12 @@ slice (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## add _aObject_
+
+Returns a new Array like this array with the addition of _aObject_
+as last element 
+*/
 
 static int
 add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -183,6 +251,14 @@ add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+
+/**
+## foreach [_aFirstIndex_,] _aBlock_
+
+For each element of this array, _aBlock_ is executed passing the index
+as argument. If _aFirstIndex_ is specified then only the items with an
+index >= of  _aFirstIndex_ will be scanned.
+*/
 
 static int
 foreach (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -227,6 +303,12 @@ foreach (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
    return JOE_SUCCESS;
 }
+
+/**
+## iterator
+
+Returns a ArrayIterator for this array
+*/	
 
 static int
 iterator (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -286,7 +368,7 @@ joe_Array_clean(joe_Object self)
    int len = (int)joe_Array_length(self);
    int i;
    for (i = 0; i < len; i++)
-      joe_Object_assign(JOE_AT(self, i), 0);
+      joe_Object_assign(JOE_AT(self, i), joe_Null_value);
    return self;
 }
 

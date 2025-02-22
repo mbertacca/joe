@@ -26,6 +26,26 @@
 
 # include <stdio.h>
 
+/**
+# Class joe_Float
+### extends joe_Object
+
+This class implements a immutable, double-precision floating-point number.
+
+Every literal number that contains a dot (.) and 
+is **not** followed by the letter `m` is an instance of this class.
+The E notation is supported as well. 
+
+e.g.: `-123.456`,`-1.23456e02`
+
+All the methods accept any kind of number as argument,
+i.e. Float, Integers, or BigDecimal, and returns a different type of
+object depending on the argument:
+an operation with a Float or Integer argument returns a Float,
+an operation with a BigDecimal argument returns a BigDecimal.
+*/
+
+
 static int
 operation (joe_Integer self, int argc, joe_Object *argv,
            joe_Object *retval, enum joe_BigDecimal_ops op)
@@ -37,6 +57,12 @@ operation (joe_Integer self, int argc, joe_Object *argv,
    joe_Object_assign (&bd, 0);
    return Return;
 }
+
+/**
+## add _aNumber_
+## + _aNumber_
+Returns a new number whose value is the sum of this number + _aNumber_.
+*/
 
 static int
 add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -58,6 +84,13 @@ add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_FAILURE;
 }
 
+/**
+## subtract _aNumber_
+## - _aNumber_
+Returns a new number whose value is the difference of
+this number - _aNumber_.
+*/
+
 static int
 subtract (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -78,6 +111,13 @@ subtract (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_FAILURE;
 }
 
+/**
+## multiply _aNumber_
+## * _aNumber_
+Returns a new number whose value is the product of
+this number * _aNumber_.
+*/
+
 static int
 multiply (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -97,6 +137,13 @@ multiply (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    joe_Object_assign(retval, joe_Exception_New ("joe_Float multiply: invalid argument"));
    return JOE_FAILURE;
 }
+
+/**
+## divide _aNumber_
+## / _aNumber_
+Returns a new number whose value is the quotient of
+this number / _aNumber_.
+*/
 
 static int
 divide (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -124,12 +171,26 @@ divide (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_FAILURE;
 }
 
+/**
+## remainder _aNumber_
+## % _aNumber_
+In the current version just raises an exception.
+*/
+
 static int
 _remainder (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_Object_assign(retval, joe_Exception_New ("joe_Float remainder: operation not implemented"));
    return JOE_FAILURE;
 }
+
+/**
+## equals _aNumber_
+## = _aNumber_
+
+Compares this number with _aNumber_ and
+returns <1> if they are equal, <0> otherwise.
+*/
 
 static int
 equals (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -154,6 +215,14 @@ equals (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    joe_Object_assign(retval, joe_Exception_New ("joe_Float =: invalid argument"));
    return JOE_FAILURE;
 }
+
+/**
+## ne _aNumber_
+## <> _aNumber_
+
+Compares this number with _aNumber_ and
+returns <0> if they are equal, <1> otherwise.
+*/
 
 static int
 ne (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -183,6 +252,14 @@ ne (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## ge _aNumber_
+## >= _aNumber_
+
+Compares this number with _aNumber_ and
+returns <1> if this number is greater or equal to _aNumber_, <0> otherwise.
+*/
+
 static int
 ge (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -210,6 +287,14 @@ ge (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+
+/**
+## gt _aNumber_
+## > _aNumber_
+
+Compares this number with _aNumber_ and
+returns <1> if this number is greater than _aNumber_, <0> otherwise.
+*/
 
 static int
 gt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -239,6 +324,14 @@ gt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## le _aNumber_
+## <= _aNumber_
+
+Compares this number with _aNumber_ and
+returns <1> if this number is less or equal to _aNumber_, <0> otherwise.
+*/
+
 static int
 le (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -266,6 +359,14 @@ le (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+
+/**
+## lt _aNumber_
+## < _aNumber_
+
+Compares this number with _aNumber_ and
+returns <1> if this number is less than _aNumber_, <0> otherwise.
+*/
 
 static int
 lt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -295,6 +396,14 @@ lt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## intValue
+
+Returns an Integer containing this number.
+If this number has a decimal part it is removed.
+If the number exceeds the Integer precision the result is undefined.
+*/
+
 static int
 intValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -307,6 +416,12 @@ intValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+
+/**
+## floatValue
+
+Returns this number.
+*/
 
 static int
 floatValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -321,6 +436,12 @@ floatValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## bigDecimalValue
+
+Returns a BigDecimal containing this number.
+*/
+
 static int
 bigDecimalValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -334,6 +455,13 @@ bigDecimalValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval
    }
 }
 
+/**
+## signum
+
+Returns an Integer = 1 if  this number is positive,
+ -1 if it is negative an 0 if it is 0.
+*/
+
 static int
 signum (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -346,6 +474,13 @@ signum (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+
+/**
+## toString
+
+Returns a string representation of this number.
+*/
+
 static int
 toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {

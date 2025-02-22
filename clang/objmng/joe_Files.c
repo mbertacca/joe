@@ -32,6 +32,17 @@
 # include "joe_Exception.h"
 # include "joe_Null.h"
 
+/**
+# Class joe_Files
+### extends joe_Object
+
+An instance of this class makes available some useful methods for handling files.
+You can get an instance with the following call:
+```
+   !newInstance "joe_Files"
+```
+*/
+
 static void
 getErrno (char *filename, joe_Object *retval)
 {
@@ -47,6 +58,13 @@ getErrno (char *filename, joe_Object *retval)
                  joe_Exception_New_string (joe_StringBuilder_toString(msg)));
    joe_Object_assign(&msg, 0);
 }
+
+/**
+## readAllLines _aString_
+
+Returns a string array containing all the lines
+in the file whose path is _aString_
+*/
 
 static int
 readAllLines (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -79,6 +97,12 @@ readAllLines (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## exists _aString_
+
+Returns Boolean <1> if the file _aString_ exists, <0> otherwise
+*/
+
 static int
 exists (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -93,7 +117,12 @@ exists (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
    return JOE_SUCCESS;
 }
+/**
+## deleteIfExists _aString_
 
+Deletes the file _aString_ if exists:
+Returns Boolean <1> if the file has been deleted, <0> otherwise
+*/
 static int
 deleteIfExists (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -108,6 +137,15 @@ deleteIfExists (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
    return JOE_SUCCESS;
 }
+
+/**
+## write _aString_,_aArray_ [ , _aOpenMode_ ]
+
+Writes the representation string of all the objects in _aArray_ in the
+file _aString_. 
+If _aOpenMode_ is specified it must be a String containing the open
+mode as in the fopen C call ("w", "w+","a","a+").
+*/
 
 static int
 files_write (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -162,6 +200,12 @@ files_write (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## listDirectory _aString_
+
+Returns a String ArrayList containing the list of the file in
+the directory specified by _aString_
+*/
 static int
 listDirectory (joe_Object self,
                     int argc, joe_Object *argv, joe_Object *retval)
@@ -190,6 +234,12 @@ listDirectory (joe_Object self,
       return JOE_FAILURE;
    }
 }
+/**
+## isDirectory _aString_
+
+Returns Boolean <1> if the file specified by _aString_ is a directory,
+<0> otherwise.
+*/
 
 static int
 isDirectory (joe_Object self,
@@ -214,6 +264,26 @@ isDirectory (joe_Object self,
       return JOE_FAILURE;
    }
 }
+
+/**
+## getAttribute _aString_,_aAttribute_
+
+Gets information about the file _aString_.
+This method returns different object depending on the attribute
+specified in the string _aAttribute_, i.e.;
+
+| _aAttribute_    | Object returned                                         |
+| --------------- | ------------------------------------------------------- |
+| "isRegularFile" | Boolean <1> if _aString_ is a regular file <0>, otherwise|
+| "isDirectory"   | Boolean <1> if _aString_ is a directory file <0>, otherwise|
+| "isOther"   | Boolean <1> if _aString_ is neither a directory nor a file, <0> otherwise |
+| "fileKey" | String that is unique for each file in the system (eg (dev=2049,ino=3282325)|
+| "lastModifiedTime" | aDate object with the time of last modification |
+| "lastAccessTime" | aDate object with the time of last access |
+| "creationTime" |  aDate object with the time of creation  |
+
+These attributes depend from the underlying filesystem so the results can be inaccurate.
+*/
 
 static int
 getAttribute (joe_Object self,
@@ -295,7 +365,12 @@ getAttribute (joe_Object self,
       return JOE_FAILURE;
    }
 }
+/**
+## isAbsolute _aString_
 
+Returns Boolean <1> if the path specified by _aString_ is absolute,
+<0> otherwise.
+*/
 static int
 isAbsolute (joe_Object self,
                     int argc, joe_Object *argv, joe_Object *retval)

@@ -25,6 +25,18 @@
 # include "joe_Pointer.h"
 # include "joestrct.h"
 
+/**
+# joe_ByteArray
+### extends joe_Object
+
+This class implements a byte array to be used in interfacing C functions.
+
+You must specify the size when you instance an object, e.g.:
+
+`   ba := !newInstance"joe_ByteArray",128.`
+*/
+
+
 # define MEMORY 0
 # define OFFSET 1
 # define LENGTH 2
@@ -54,6 +66,13 @@ ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## length
+## size
+
+Returns the number of bytes allocated by this object
+*/
+
 static int
 length (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -66,6 +85,13 @@ length (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
    return JOE_SUCCESS;
 }
+
+/**
+## init [ _aString_ ]
+
+Fills the content of this object with byte 0 or
+the first character of _aString_ when supplied
+*/
 
 static int
 _init (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -95,6 +121,11 @@ _init (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+/**
+## set [ _aObject_ ]
+Sets the content of _aObject_ into this byte array:
+_aObject_can be a String, an Integer or another ByteArray.
+*/
 
 static int
 set (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -151,6 +182,11 @@ set (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+/**
+## setByte _aInteger_
+
+Sets a byte number in machine format into this byte array.
+*/
 
 static int
 setByte (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -180,6 +216,12 @@ setByte (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## setShort _aInteger_
+
+Sets a short number in machine format into this byte array.
+*/
+
 static int
 setShort (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -207,6 +249,12 @@ setShort (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+
+/**
+## setInt _aInteger_
+
+Sets a int number in machine format into this byte array.
+*/
 
 static int
 setInt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -236,6 +284,12 @@ setInt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## setLong _aInteger_
+
+Sets a long number in machine format into this byte array.
+*/
+
 static int
 setLong (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -264,6 +318,15 @@ setLong (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## child _startIndex_, _length_
+
+Returns a new ByteArray whose memory is the same of this array
+starting from _startIndex_ for _length_ bytes.
+Modifying the memory of this array the content of the new
+object is modifyed as well.
+*/
+
 static int
 child (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -287,6 +350,13 @@ child (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## shortValue
+
+Returns an Integer whose value is obtained interpreting the
+memory of this array as if were a machine short
+*/
+
 static int
 shortValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -306,6 +376,13 @@ shortValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## byteValue
+
+Returns an Integer whose value is obtained interpreting the
+memory of this array as if were a machine byte
+*/
+
 static int
 byteValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -318,6 +395,13 @@ byteValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
          joe_Integer_New (*(char*)&(*(char **) joe_Object_getMem(mem))[offset]));
    return JOE_SUCCESS;
 }
+
+/**
+## intValue
+
+Returns an Integer whose value is obtained interpreting the
+memory of this array as if were a machine int
+*/
 
 static int
 intValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -338,6 +422,13 @@ intValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## longValue
+
+Returns an Integer whose value is obtained interpreting the
+memory of this array as if were a machine long
+*/
+
 static int
 longValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -356,6 +447,13 @@ longValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+
+/**
+## pointerValue
+
+Returns an Pointer whose value is obtained interpreting the
+memory of this array as if were a machine pointer
+*/
 
 static int
 pointerValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -376,6 +474,12 @@ pointerValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## toString
+
+Returns a String whose value is obtained interpreting the
+memory of this array as if were a C string
+*/
 static int
 toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -410,6 +514,7 @@ static joe_Method mthds[] = {
    {"setInt", setInt },
    {"setLong", setLong },
    {"length", length },
+   {"size", length },
    {"child", child },
    {(void *) 0, (void *) 0}
 };

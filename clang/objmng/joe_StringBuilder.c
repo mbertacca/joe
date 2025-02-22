@@ -27,6 +27,20 @@
 # include "joe_String.h"
 # include "joestrct.h"
 
+/**
+# Class joe_StringBuilder
+### extends joe_Object
+
+This class is useful for building strings
+
+It can be created using the following method:
+```
+!newInstance "joe_StringBuilder" [ _aString ]
+```
+
+where _aString_ is the initial value of this object when specified
+*/
+
 # define DEFMAXLENGTH 16
 
 typedef struct s_StrBuild {
@@ -65,6 +79,13 @@ ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## add _aObject_
+## + _aObject_
+
+Appends the string representation of _aObject_ at the end of this object 
+*/
+
 static int
 add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -78,6 +99,13 @@ add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+
+/**
+## insert _aInteger_,_aObject_
+
+Inserts the string representation of _aObject_ in this object after the
+_aInteger th_ character.
+*/
 
 static int
 insert (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -93,6 +121,15 @@ insert (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+
+/**
+## delete _aFirst_,_aLast_
+
+Delete the substring delimited by _aFirst_ _aLast_ from this object
+The first character has index 0 and _aLast_ is the index of the first
+character that isn't included in the deletion.
+*/
+
 static int
 delete (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -109,12 +146,24 @@ delete (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## length
+
+Return the length of this object.
+*/
+
 static int
 length (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_Object_assign(retval, joe_Integer_New (joe_StringBuilder_length(self)));
    return JOE_SUCCESS;
 }
+
+/**
+## toString
+
+Return a String contaning the content of this object.
+*/
 
 static int
 toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)

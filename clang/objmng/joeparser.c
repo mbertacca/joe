@@ -330,27 +330,31 @@ parseReceiver (JoeParser self, joe_Block block, JoeArray rpn, JoeArrayScan token
    joe_Object receiver = 0;
    joe_Block blockRcvr = 0;
 
-   if ((receiver = getValue(self, block, tk)) == 0) {
-     switch (tk->type) {
-      case _PAR_OPEN_:
-         parseReceiver (self, block, rpn, tokens);
-         parClose(self, tokens);
-         parseSelector (self, block, rpn, tokens);
-         return;
-      case _BRACE_OPEN_:
-         newBlock (self, tokens, block, &blockRcvr);
-         braceClose(self, tokens);
-         break;
-      case _DOT_:
-         push (tokens);
-         receiver = joe_Null_value;
-         break;
-      case _WORD:
-         variableNotFound (self, tokens, tk);
-         break;
-      default:
-         unexpectedToken (self, tokens, tk);
-         break;
+   if (!tk) {
+      receiver = joe_Null_value;
+   } else {
+      if ((receiver = getValue(self, block, tk)) == 0) {
+        switch (tk->type) {
+         case _PAR_OPEN_:
+            parseReceiver (self, block, rpn, tokens);
+            parClose(self, tokens);
+            parseSelector (self, block, rpn, tokens);
+            return;
+         case _BRACE_OPEN_:
+            newBlock (self, tokens, block, &blockRcvr);
+            braceClose(self, tokens);
+            break;
+         case _DOT_:
+            push (tokens);
+            receiver = joe_Null_value;
+            break;
+         case _WORD:
+            variableNotFound (self, tokens, tk);
+            break;
+         default:
+            unexpectedToken (self, tokens, tk);
+            break;
+         }
       }
    }
    if (blockRcvr) {

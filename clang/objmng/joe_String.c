@@ -30,6 +30,17 @@
 # include "joe_Exception.h"
 # include "joestrct.h"
 
+/**
+# Class joe_String 
+### extends joe_Object
+
+This class represents character strings. All string literals, such as "Abc",
+are implemented as instances of this class.
+
+Strings are constant; their values cannot be changed after they are created.
+*/
+
+
 /* Basic regex matcher
    supported character: * ? + [ ^ ] .
    regex starting with (?i) makes the matching case-insensitive
@@ -220,6 +231,11 @@ r_matches (char **s, char*  m, int ic)
 }
 
 /* */
+/**
+## add _aString_
+## + _aString_
+Concatenates the _aString_ to the end of this string. 
+*/
 
 static int
 add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -255,6 +271,11 @@ add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## length
+Returns the length of this string. 
+*/
+
 static int
 length (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -266,6 +287,14 @@ length (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+
+/**
+## indexOf _aString_ [, _aIndex_ ] 
+Returns the index within this string of the first occurrence of the specified
+substring, starting at _aIndex_ (default is 0).
+If there isn't any occurence of _aString_ in this string then the method
+returns -1.
+*/
 
 static int
 indexOf (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -318,6 +347,14 @@ strrstr (char *haystack, const char *needle)
    return Return;
 }
 
+/**
+## lastIndexOf _aString_ [, _aIndex_ ] 
+Returns the index within this string of the last occurrence of the specified
+substring, starting at _aIndex_ (default is 0).
+If there isn't any occurence of _aString_ in this string then the method
+returns -1.
+*/
+
 static int
 lastIndexOf (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -347,6 +384,10 @@ lastIndexOf (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## toLowerCase 
+Returns a new String like this string converted in lower case.
+*/
 
 static int
 toLowerCase (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -365,6 +406,11 @@ toLowerCase (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## toUpperCase 
+Returns a new String like this string converted in upper case.
+*/
+
 static int
 toUpperCase (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -382,15 +428,24 @@ toUpperCase (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## substring _aIndex1_ [, _aIndex2_ ] 
+Returns a new String that is a substring of this string starting from the
+_aIndex1 th_ character (first character has 0 index) till the end of this string.
+When _aIndex2_ is specified, it represents the index of the first character
+not included in the substring.
+If an index is < 0 then it is equivalent to __string length; + index__
+*/
+
 static int
 substring (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc>0 && argc<3 && JOE_ISCLASS(argv[0], &joe_Integer_Class)) {
       unsigned int selfLen = joe_String_length (self);
       int beginIndex = joe_Integer_value (argv[0]);
+      if (beginIndex < 0)
+         beginIndex += selfLen;
       if (argc == 1) {
-         if (beginIndex < 0)
-            beginIndex += selfLen;
          if (beginIndex < selfLen) {
             joe_Object_assign(retval, joe_String_New(
                               &joe_String_getCharStar (self)[beginIndex]));
@@ -399,7 +454,10 @@ substring (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
          }
          return JOE_SUCCESS;
       } else if (argc==2 && JOE_ISCLASS(argv[1],&joe_Integer_Class)) {
-         int newLen = joe_Integer_value (argv[1]) - beginIndex;
+         int endIndex = joe_Integer_value (argv[1]);
+         if (endIndex < 0)
+            endIndex += selfLen;
+         int newLen = endIndex - beginIndex;
          if (beginIndex < selfLen && newLen > 0) {
             joe_Object_assign(retval, joe_String_New_len(
                               &joe_String_getCharStar (self)[beginIndex],newLen));
@@ -415,6 +473,10 @@ substring (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_FAILURE;
 }
 
+/**
+## at _aIndex_
+Convenience method for _substring aIndex,(aIndex + 1)_
+*/
 static int
 at (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -432,7 +494,12 @@ at (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
                              "joe_String at: invalid argument"));
    return JOE_FAILURE;
 }
+/**
+## charCodeAt [ _aIndex_ ]
+Returns a Integer with the ASCII code of the _aIndex th_ character (default is 0)
+of this string.
 
+*/
 static int
 charCodeAt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -450,7 +517,11 @@ charCodeAt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
                              "joe_String charCodeAt: invalid argument"));
    return JOE_FAILURE;
 }
-
+/**
+## trim 
+Returns a new String like this string without spaces at the beginning
+and/or at the end.
+*/
 static int
 trim(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 {
@@ -476,8 +547,6 @@ trim(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
    }
 }
 
-
-
 static int
 charAt(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 {
@@ -498,6 +567,11 @@ charAt(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
    }
 }
 
+/**
+## startsWith _aString_
+Returns Boolean <1> if this string first part is = _aString_,
+Boolean <0> otherwise.
+*/
 static int
 startsWith(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 {
@@ -520,6 +594,11 @@ startsWith(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
          return JOE_FAILURE;
    }
 }
+/**
+## endsWith _aString_
+Returns Boolean <1> if this string last part is = _aString_,
+Boolean <0> otherwise.
+*/
 
 static int
 endsWith(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
@@ -543,6 +622,10 @@ endsWith(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
          return JOE_FAILURE;
    }
 }
+/**
+## toString
+Returns this string.
+*/
 
 static int
 toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -551,6 +634,12 @@ toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_SUCCESS;
 }
 
+/**
+## equals _aString_
+## = _aString_
+Returns Boolean <1> if this string is = _aString_,
+Boolean <0> otherwise.
+*/
 static int
 equals (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -561,6 +650,11 @@ equals (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       joe_Object_assign(retval, joe_Boolean_New_false());
    return JOE_SUCCESS;
 }
+/**
+## equalsIgnoreCase _aString_
+Returns Boolean <1> if this string is = _aString_ ignoring case considerations,
+Boolean <0> otherwise.
+*/
 
 static int
 equalsIgnoreCase (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -581,7 +675,12 @@ equalsIgnoreCase (joe_Object self, int argc, joe_Object *argv, joe_Object *retva
       joe_Object_assign(retval, joe_Boolean_New_false());
    return JOE_SUCCESS;
 }
-
+/**
+## ne _aString_
+## <> _aString_
+Returns Boolean <1> if this string is not = _aString_,
+Boolean <0> otherwise.
+*/
 
 static int
 ne (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -598,6 +697,13 @@ ne (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## ge _aString_
+## >= _aString_
+Returns Boolean <1> if this string is > or =  _aString_,
+Boolean <0> otherwise.
+*/
+
 static int
 ge (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -613,6 +719,12 @@ ge (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## gt _aString_
+## > _aString_
+Returns Boolean <1> if this string is > _aString_,
+Boolean <0> otherwise.
+*/
 static int
 gt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -628,6 +740,12 @@ gt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## le _aString_
+## <= _aString_
+Returns Boolean <1> if this string is < or = _aString_,
+Boolean <0> otherwise.
+*/
 static int
 le (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -643,6 +761,12 @@ le (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## lt _aString_
+## < _aString_
+Returns Boolean <1> if this string is < _aString_,
+Boolean <0> otherwise.
+*/
 static int
 lt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -657,6 +781,12 @@ lt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+/**
+## compareTo _aString_
+Returns 0 if this string is = _aString_,
+ an integer greater than 0 if this string is > _aString_,
+ an integer less than 0 if this string is < _aString_
+*/
 
 static int
 compareTo (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -671,6 +801,18 @@ compareTo (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+/**
+## matches _aRegex_
+Returns Boolean <1> if this string matches the regular expressio _aRegex_,
+Boolean <0> otherwise.
+Special characters in the regular expression are 
+```
+* ? + [ ^ ] .
+```
+regex starting with `(?i)` makes the matching case-insensitive
+
+_split_, _replaceFirst_ and _replaceAll_ support also anchors `^` and `$`
+*/
 
 static int
 matches (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -697,6 +839,12 @@ matches (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+
+/**
+## split _aRegex_
+Splits this string around matches of the given regular expression
+(see `matches` for regex)
+*/
 
 static int
 split (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -816,6 +964,12 @@ re_replace (joe_String self, char *are, char *rplcmnt, int firstOnly)
    return Return;
 }
 
+/**
+## replace _aString1_, _aString2_
+Returns a new String like this string in which any occurrence of _aString1_
+is replaced by _aString2_.
+*/
+
 static int
 replace (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -862,6 +1016,12 @@ replace (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## replaceAll _aRegex_, _aString_
+Returns a new String like this string in which any substring matching _aRegex_
+is replaced by _aString_. (see `matches` for regex).
+*/
+
 static int
 replaceAll (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -878,7 +1038,11 @@ replaceAll (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
-
+/**
+## replaceFirst _aRegex_, _aString_
+Returns a new String like this string in which the first substring matching
+_aRegex_ is replaced by _aString_. (see `matches` for regex).
+*/
 static int
 replaceFirst (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -895,33 +1059,45 @@ replaceFirst (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
-
+static
+int isValidInt (char *str)
+{
+   if (*str == '-' || *str == '+')
+      str++;
+   while (*str) {
+      if (*str < '0' || *str > '9')
+         return 0;
+      str++;
+   }
+   return 1;
+}
+/**
+## intValue
+## longValue 
+Returns an Integer if the content of this string is a valid decimal number,
+`()` otherwise.
+*/
 static int
 intValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
       char * const str = joe_String_getCharStar (self);
-      int64_t val = joe_Integer_fromAscii(str);
-      if (val == 0) {
-         int len = joe_String_length (self);
-         if (len == 0) {
-             joe_Object_assign(retval, joe_Null_value);
-         } else {
-            if (str[0] != '0')
-               joe_Object_assign(retval, joe_Null_value);
-            else
-               joe_Object_assign(retval, joe_Integer_New (val));
-         }
-      } else {
-         joe_Object_assign(retval, joe_Integer_New (val));
-      }
+      if (isValidInt (str))
+         joe_Object_assign(retval, joe_Integer_New (atoll(str)));
+      else
+         joe_Object_assign(retval, joe_Null_value);
       return JOE_SUCCESS;
    } else {
       joe_Object_assign(retval, joe_Exception_New ("intValue: invalid argument"));
       return JOE_FAILURE;
    }
 }
-
+/**
+## floatValue 
+## doubleValue 
+Returns a Float if the content of this string is a valid floating-point number,
+`()` otherwise.
+*/
 static int
 floatValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -948,6 +1124,11 @@ floatValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+/**
+## bigDecimalValue 
+Returns a BigDecimal if the content of this string is a valid  number,
+`()` otherwise.
+*/
 
 static int
 bigDecimalValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)

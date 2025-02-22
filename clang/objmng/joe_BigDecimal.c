@@ -27,7 +27,18 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <string.h>
+/**
+# Class joe_BigDecimal
+### extends joe_Object
 
+This class implements a immutable, arbitrary-precision signed decimal number.
+
+Every literal number followed by the letter `m` is an instance of this class,
+e.g.: `-123.456m`
+
+All the methods accept any kind of number as argument,
+i.e. BigDecimal, Integers or Float.
+*/
 static char *variables[] = { "data", 0 };
 
 static void
@@ -74,17 +85,36 @@ ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return init_str (self, joe_String_getCharStar(argv[0]), retval);
 }
 
+/**
+## add _aNumber_
+## + _aNumber_
+Returns a new BigDecimal whose value is the sum of this number + _aNumber_.
+*/
+
 static int
 add(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 {
    return joe_BigDecimal_oper(self, argc, argv, retval, ADD);
 }
 
+/**
+## subtract _aNumber_
+## - _aNumber_
+Returns a new BigDecimal whose value is the difference of
+this number - _aNumber_.
+*/
+
 static int
 subtract(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 {
    return joe_BigDecimal_oper(self, argc, argv, retval, SUBTRACT);
 }
+/**
+## multiply _aNumber_
+## * _aNumber_
+Returns a new BigDecimal whose value is the product of
+this number * _aNumber_.
+*/
 
 static int
 multiply(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
@@ -92,11 +122,25 @@ multiply(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
    return joe_BigDecimal_oper(self, argc, argv, retval, MULTIPLY);
 }
 
+/**
+## divide _aNumber_
+## / _aNumber_
+Returns a new BigDecimal whose value is the quotient of
+this number / _aNumber_.
+*/
+
 static int
 divide (joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
 {
    return joe_BigDecimal_oper(self, argc, argv, retval, DIVIDE);
 }
+
+/**
+## remainder _aNumber_
+## % _aNumber_
+Returns a new BigDecimal whose value is the remainder of the division of
+this number / _aNumber_.
+*/
 
 static int
 _remainder (joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
@@ -104,11 +148,27 @@ _remainder (joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
    return joe_BigDecimal_oper(self, argc, argv, retval, REMAINDER);
 }
 
+/**
+## equals _aNumber_
+## = _aNumber_
+
+Compares this number with _aNumber_ and
+returns <1> if they are equal, <0> otherwise.
+*/
+
 static int
 equals (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    return joe_BigDecimal_oper(self, argc, argv, retval, EQUALS);
 }
+
+/**
+## ne _aNumber_
+## <> _aNumber_
+
+Compares this number with _aNumber_ and
+returns <0> if they are equal, <1> otherwise.
+*/
 
 static int
 ne (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -116,11 +176,27 @@ ne (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return joe_BigDecimal_oper(self, argc, argv, retval, NE);
 }
 
+/**
+## ge _aNumber_
+## >= _aNumber_
+
+Compares this number with _aNumber_ and
+returns <1> if this number is greater or equal to _aNumber_, <0> otherwise.
+*/
+
 static int
 ge (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    return joe_BigDecimal_oper(self, argc, argv, retval, GE);
 }
+
+/**
+## le _aNumber_
+## <= _aNumber_
+
+Compares this number with _aNumber_ and
+returns <1> if this number is less or equal to _aNumber_, <0> otherwise.
+*/
 
 static int
 le (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -128,17 +204,41 @@ le (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return joe_BigDecimal_oper(self, argc, argv, retval, LE);
 }
 
+/**
+## gt _aNumber_
+## > _aNumber_
+
+Compares this number with _aNumber_ and
+returns <1> if this number is greater than _aNumber_, <0> otherwise.
+*/
+
 static int
 gt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    return joe_BigDecimal_oper(self, argc, argv, retval, GT);
 }
 
+/**
+## lt _aNumber_
+## < _aNumber_
+
+Compares this number with _aNumber_ and
+returns <1> if this number is less than _aNumber_, <0> otherwise.
+*/
+
 static int
 lt (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    return joe_BigDecimal_oper(self, argc, argv, retval, LT);
 }
+
+/**
+## intValue
+
+Returns an Integer containing this number.
+If this number has a decimal part it is removed.
+If the number exceeds the Integer precision the result is undefined.
+*/
 
 static int
 intValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -147,6 +247,9 @@ intValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       joe_Memory mem = *joe_Object_at (self, 0);
       nDecimal num = (nDecimal) joe_Object_getMem (mem);
       char* strNum = nDecimal_toString(num);
+      char *dot = strchr (strNum,'.');
+      if (dot)
+         *dot = 0;
       joe_Object_assign (retval, joe_Integer_New(joe_Integer_fromAscii(strNum)));
       free(strNum);
       return JOE_SUCCESS;
@@ -156,6 +259,13 @@ intValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+
+/**
+## floatValue
+
+Returns a Float containing this number.
+If the number exceeds the Float precision the result is undefined.
+*/
 
 static int
 floatValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -174,6 +284,12 @@ floatValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## bigDecimalValue
+
+Returns this number.
+*/
+
 static int
 bigDecimalValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -186,6 +302,13 @@ bigDecimalValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval
       return JOE_FAILURE;
    }
 }
+
+/**
+## signum
+
+Returns an Integer = 1 if  this number is positive,
+ -1 if it is negative an 0 if it is 0.
+*/
 
 static int
 signum (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -200,6 +323,11 @@ signum (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## toString
+
+Returns a string representation of this number.
+*/
 
 static int
 toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -208,7 +336,7 @@ toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       joe_Memory mem = *joe_Object_at (self, 0);
       nDecimal num = (nDecimal) joe_Object_getMem (mem);
       char* strNum = nDecimal_toString(num);
-      joe_Object_assign (retval, joe_String_New (nDecimal_toString (num)));
+      joe_Object_assign (retval, joe_String_New (strNum));
       free(strNum);
       return JOE_SUCCESS;
    } else {
@@ -261,13 +389,19 @@ joe_BigDecimal_New (nDecimal bd)
 joe_Object
 joe_BigDecimal_New_str(char* num)
 {
-    return joe_BigDecimal_New(nDecimal_new_str(num));
+   nDecimal bd = nDecimal_new_str(num);
+   joe_Object Return = joe_BigDecimal_New(bd);
+   nDecimal_delete (bd);
+   return Return; 
 }
 
 joe_Object
 joe_BigDecimal_New_dbl(double num)
 {
-    return joe_BigDecimal_New(nDecimal_new_dbl(num));
+   nDecimal bd = nDecimal_new_dbl(num);
+   joe_Object Return = joe_BigDecimal_New(bd);
+   nDecimal_delete (bd);
+   return Return;
 }
 
 nDecimal

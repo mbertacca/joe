@@ -26,6 +26,23 @@
 # include "joe_Null.h"
 # include "joestrct.h"
 
+/**
+# Class joe_HashMap 
+### extends joe_Object
+
+This implements a an hash table.
+
+An HashMap can be created using the following method:
+```
+aHashMap := !newInstance "joe_HashMap" [, aSize ]
+```
+
+_aSize_ is the initial size of the new hash table.
+
+In this hash table you can use any kind of object as key, however its
+String representation is stored, hence for example the key 1 is equivalent to the key "1"  
+*/
+
 # define KEY 0
 # define VALUE 1
 # define SIBLING 2
@@ -441,6 +458,14 @@ ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_SUCCESS;
 }
 
+/**
+## length
+## size
+
+Returns the length of this hash table.
+
+*/
+
 static int
 length (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -453,6 +478,19 @@ length (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
    return JOE_SUCCESS;
 }
+
+/**
+## put _aKey_, _aValue_
+
+Insert _aValue_ in this hash table with key _aKey_.
+
+Both _aKey_ and _aValue_ can be any kind of object, however for _aKey_
+its String representation is used.
+
+If no item with the specified key is in the table then the couple is added to
+the table and the method returns () otherwise _aValue_ is substituted
+to the previous value and the method returns the previous value.
+*/
 
 static int
 put (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -472,6 +510,16 @@ put (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_SUCCESS;
 }
 
+/**
+## get _aKey_
+
+Look in this hash table for _aKey_.
+
+If the key is found then the associated value is returned otherwise
+ () is returned
+
+*/
+
 static int
 get (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -489,6 +537,13 @@ get (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## keys
+## getKeys
+
+Returns a String array containing all the keys in this hash table.
+*/
+
 static int
 keys (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -502,6 +557,12 @@ keys (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## values
+
+Returns an array containing all the values in this hash table.
+*/
+
 static int
 values (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -514,6 +575,15 @@ values (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+
+/**
+## containsKey _aKey_
+
+Look in this hash table for _aKey_.
+
+If the key is found then Boolean <1> is returned otherwise <0> is returned.
+
+*/
 
 static int
 containsKey (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -531,6 +601,15 @@ containsKey (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## containsValue _aValue_
+
+Look in this hash table for _aValue_.
+
+If the value is found then Boolean <1> is returned otherwise <0> is returned.
+
+*/
+
 static int
 containsValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -546,6 +625,7 @@ containsValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+
 static joe_Method mthds[] = {
   {"containsValue", containsValue },
   {"containsKey",   containsKey },
@@ -554,6 +634,7 @@ static joe_Method mthds[] = {
   {"values",values },
   {"put",   put },
   {"get",   get },
+  {"length",length },
   {"size",  length },
   {(void *) 0, (void *) 0}
 };

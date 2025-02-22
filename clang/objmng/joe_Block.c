@@ -35,6 +35,20 @@
 # include "joestrct.h"
 # include "joearray.h"
 
+/**
+# Class joe_Block
+### extends joe_Object
+# Class joe_JOEObject
+### extends joe_Block
+
+joe_Block implements a Block. All the blocks in a script are instances 
+of  this class.
+The current block is referenced by `!!`, 
+The method **new** on a Block object returns a new JOEbject object
+(see `new`) .
+*/
+
+
 # define MESSAGES 0
 # define PARENT 1
 # define NAME 2
@@ -297,6 +311,13 @@ joe_Block_outer_exec (joe_Object self, int argc, joe_Object *args, joe_Object *r
    return rc;
 }
 
+/**
+## new [ _arg1_ [ ... , _argN_ ]]
+Returns a JOEOBject obtained by cloning this block.
+The block is executed and every variable assigned to a block will be
+treated as a method of the JOEObject object.
+*/
+
 int
 joe_Block_new (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
@@ -314,6 +335,13 @@ joe_Block_new (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 
    return rc;
 }
+
+/**
+## exec [ _arg1_ [ ... , _argN_ ]]
+Executes the statements contained in this block.
+
+Returns the result of the last execution.
+*/
 
 int
 joe_Block_exec (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
@@ -361,6 +389,14 @@ joe_Block_while (joe_Block cond, joe_Block code,
    }
 }
 
+/**
+## whileTrue _aBlock_
+Executes this block and if its result is Boolean <1> then executes _aBlock_.
+Repeats until this block returns an object not equal to <1> 
+
+Returns the result of _aBlock_ last execution.
+*/
+
 static int
 whileTrue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -371,6 +407,14 @@ whileTrue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+
+/**
+## whileFalse _aBlock_
+Executes this block and if its result is Boolean <0> then executes _aBlock_.
+Repeats until this block returns an object not equal to <0> 
+
+Returns the result of _aBlock_ last execution.
+*/
 
 static int
 whileFalse (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
@@ -383,6 +427,15 @@ whileFalse (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## doWhileTrue _aBlock_
+Executes this block and then executes _aBlock_:
+if the result of _aBlock_ execution is Boolean <1> then executes itself again.
+Repeats until _aBlock_ returns an object not equal to <1> 
+
+Returns the result of this block last execution.
+*/
+
 static int
 doWhileTrue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -394,6 +447,14 @@ doWhileTrue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## doWhileFalse _aBlock_
+Executes this block and then executes _aBlock_:
+if the result of _aBlock_ execution is Boolean <0> then executes itself again.
+Repeats until _aBlock_ returns an object not equal to <0> 
+
+Returns the result of this block last execution.
+*/
 static int
 doWhileFalse (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -433,6 +494,17 @@ joe_Block_clone (joe_Block self, joe_Block parent)
    return Return;
 }
 
+/**
+## getName
+
+Returns the name of this block.
+For example
+```
+{foo:. !println (!! getName)} exec.
+```
+will print "foo"
+*/
+
 static int
 getName(joe_JOEObject self, int argc, joe_Object* argv, joe_Object* retval)
 {
@@ -466,6 +538,12 @@ getAllVars (joe_JOEObject blk, joe_HashMap hashvars)
    if (parent)
       getAllVars(parent, hashvars);
 }
+/**
+## getVariablesNames
+
+Returns an Array containing all the variables names that
+can be accessed by this block.
+*/
 
 static int
 getVariablesNames(joe_JOEObject self, int argc, joe_Object* argv, joe_Object* retval)
@@ -480,6 +558,11 @@ getVariablesNames(joe_JOEObject self, int argc, joe_Object* argv, joe_Object* re
    joe_Object_assign(&hashvars, 0);
    return JOE_SUCCESS;
 }
+/**
+## getVariable _aString_
+
+Returns the content of a variable whose name is _aString_.
+*/
 
 static int
 getVariable(joe_JOEObject self, int argc, joe_Object* argv, joe_Object* retval)
@@ -783,6 +866,13 @@ joe_Block_removeMessages (joe_Block self)
 /* JOEObject */
 
 static char *JOEObject_variables[] = { 0 };
+/**
+## extends _aJOEObject_
+
+This method only applies to JOEOBjects. It causes that, when a method is
+called on this object and it is not found the method is searched in
+_aJOEObject_ too.
+*/
 
 static int extends (joe_JOEObject self,
                    int argc, joe_Object *argv, joe_Object *retval)

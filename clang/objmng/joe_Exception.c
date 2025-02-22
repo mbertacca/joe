@@ -23,6 +23,18 @@
 # include "joe_String.h"
 # include "joe_ArrayList.h"
 
+/**
+# Class joe_Exception
+### extends joe_Object
+
+This class implements a JOE Exception. An instance of thi class can
+be obtained with the following call:
+```
+   !newInstance "joe_Exception" [ ,aString ]
+```
+where _aString_ is the exception message when specified.
+*/
+
 # define MESSAGE 0
 # define STACK 1
 # define CAUSED_BY 2
@@ -42,6 +54,11 @@ ctor (joe_Exception self, int argc, joe_Object *argv, joe_Object *retval)
    return JOE_SUCCESS;
 }
 
+/**
+## toString
+
+Returns a string representation of this exception
+*/
 int
 joe_Exception_toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
@@ -71,6 +88,12 @@ joe_Exception_toString (joe_Object self, int argc, joe_Object *argv, joe_Object 
    return JOE_SUCCESS;
 }
 
+/**
+## getMessage
+
+Returns a string with the message associated to this exception
+*/
+
 int
 joe_Exception_getMessage (joe_Object self,
                           int argc, joe_Object *argv, joe_Object *retval)
@@ -78,6 +101,12 @@ joe_Exception_getMessage (joe_Object self,
    joe_Object_assign(retval, *joe_Object_at (self,MESSAGE));
    return JOE_SUCCESS;
 }
+
+/**
+## throw
+
+Raises this exception
+*/
 
 static int
 _throw (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)

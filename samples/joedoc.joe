@@ -64,8 +64,11 @@ doWork <- {
       },{
          out := out toArray.
       }.
-      !foreach out,{:i.
-         !println i.
+      out length; > 0 ifTrue {
+         !foreach out,{:i.
+            !println i.
+         }.
+         !println "---".
       }.
    }.
 }.
