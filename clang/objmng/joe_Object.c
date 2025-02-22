@@ -562,7 +562,7 @@ joe_Object_gc ()
       scan = next;
    }
    rootsCnt = 0;
-   for (int i = 0; i < numCacheCnt; i++)
+   for (i = 0; i < numCacheCnt; i++)
       free (numCache[i]);
    numCacheCnt = 0;
 }
