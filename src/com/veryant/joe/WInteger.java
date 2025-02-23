@@ -47,6 +47,24 @@ public class WInteger extends WLong {
    public WInteger remainder (WInteger n) {
       return new WInteger (value % n.intValue());
    }
+   public WLong and (WLong n) {
+      return new WLong (longValue() & n.value);
+   }
+   public WInteger and (WInteger n) {
+      return new WInteger (value & n.value);
+   }
+   public WLong or (WLong n) {
+      return new WLong (longValue() | n.value);
+   }
+   public WLong or (WInteger n) {
+      return new WLong (value | n.value);
+   }
+   public WLong xor (WLong n) {
+      return new WLong (longValue() ^ n.value);
+   }
+   public WLong xor (WInteger n) {
+      return new WLong (value ^ n.value);
+   }
    public String toHexString () {
       return Integer.toHexString ((int) value);
    }
