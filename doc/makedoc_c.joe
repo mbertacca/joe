@@ -27,7 +27,6 @@ SRC <- "../clang/objmng/".
                  ,(SRC+"joe_Bang.c")
                  ,(SRC+"joe_Array.c")
                  ,(SRC+"joe_ArrayIterator.c")
-                 ,(SRC+"joe_ArrayIterator.c")
                  ,(SRC+"joe_ArrayList.c")
                  ,(SRC+"joe_BangSO.c")
                  ,(SRC+"joe_BigDecimal.c")

@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+# include <string.h>
 # include "joe_ArrayList.h"
 # include "joe_Array.h"
 # include "joe_ArrayIterator.h"
@@ -87,6 +88,7 @@ length (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 
 /**
 ## add _aObject_
+## push _aObject_
 
 Adds _aObject_ at the end of this list.
 
@@ -166,6 +168,46 @@ pop (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
    return JOE_SUCCESS;
 }
+
+
+/**
+## remove _aInteger_
+
+Removes the element at _aInteger_ in this list.
+Shifts any subsequent elements to the left (subtracts one from their indices).
+Returns the removed element.
+*/
+
+static int
+remove (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_Integer_Class)) {
+      joe_Object *selfVars = joe_Object_array (self);
+      joe_int objLen = selfVars[LENGTH];
+      joe_Array array = selfVars[ARRAY];
+      unsigned int *len = (unsigned int *) JOE_INT_STAR (objLen);
+      int idx = joe_Integer_value (argv[0]);
+
+      if (idx >= 0 && idx < *len) {
+         (*len)--;
+         joe_Object_transfer (retval, JOE_AT (array, idx));
+         memmove (JOE_AT (array, idx),JOE_AT (array, idx + 1),
+                 ((*len - idx) * sizeof (joe_Object)));
+         *JOE_AT (array, *len) = 0;
+         return JOE_SUCCESS;
+      } else {
+         joe_Object_assign(retval,
+                   joe_Exception_New ("ArrayList remove: index out of bounds"));
+         return JOE_FAILURE;
+      }
+   } else {
+      joe_Object_assign(retval,
+                     joe_Exception_New ("ArrayList remove: invalid argument"));
+      return JOE_FAILURE;
+   }
+   return JOE_SUCCESS;
+}
+
 
 /**
 ## peek
@@ -362,6 +404,7 @@ static joe_Method mthds[] = {
    {"add", add },
    {"push", add },
    {"pop", pop },
+   {"remove", remove },
    {"peek", peek },
    {"get", get },
    {"set", set },
