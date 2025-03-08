@@ -18,6 +18,7 @@
 
 # ifndef joe_Object_h
 # define joe_Object_h  "$Id$";
+# include <stdlib.h>
 
 #ifdef WIN32
 #define JOEOBJ_API __declspec(dllexport)
@@ -73,7 +74,7 @@ JOEOBJ_API void joe_Class_registerClass (joe_Class *c);
 JOEOBJ_API joe_Class *joe_Class_getClass (char *name);
 JOEOBJ_API int joe_Class_newInstance (joe_Class *cls,
                            int argc, joe_Object *args, joe_Object *retval);
-JOEOBJ_API joe_Object joe_Object_New (joe_Class *clazz, unsigned int size);
+JOEOBJ_API joe_Object joe_Object_New (joe_Class *clazz, size_t size);
 JOEOBJ_API int joe_Object_getVarIdx (joe_Object self, char *name);
 JOEOBJ_API joe_Object *joe_Object_getVar (joe_Object self, char *name);
 JOEOBJ_API unsigned int joe_Object_length (joe_Object self);

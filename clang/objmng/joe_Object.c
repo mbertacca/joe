@@ -96,17 +96,30 @@ static int rootsCnt = 0;
 static joe_Object numCache[NUM_CACHE];
 static int numCacheCnt = 0;
 
+
+static void *
+xalloc (size_t nmemb, size_t size)
+{
+   void *Return = calloc(nmemb, size);
+   if (!Return) {
+      fputs ("\nJOE: Out of memory!!\n\n", stderr);
+      exit(11);
+   }
+   return Return;
+}
+
+
 # ifdef JOE_MEM_DEBUG
 void
 traceMemory (joe_Object obj)
 {
    if (allObjects == 0) {
-      allObjects = calloc (1, sizeof (struct s_ObjectList));
+      allObjects = xalloc (1, sizeof (struct s_ObjectList));
       allObjects->prev = 0;
       allObjects->next = 0;
       allObjects->obj = obj;
    } else {
-      allObjects->prev = calloc (1, sizeof (struct s_ObjectList));
+      allObjects->prev = xalloc (1, sizeof (struct s_ObjectList));
       allObjects->prev->obj = obj;
       allObjects->prev->next = allObjects;
       allObjects->prev->prev = 0;
@@ -124,7 +137,7 @@ joe_Class_registerClass (joe_Class *c)
    if (registeredClasses == 0) {
       init ();
    }
-   newClass = calloc (1, sizeof (struct s_ClassList));
+   newClass = xalloc (1, sizeof (struct s_ClassList));
    newClass->clazz = c;
    newClass->next = registeredClasses;
    registeredClasses = newClass;
@@ -134,7 +147,7 @@ static void
 init ()
 {
    if (registeredClasses == 0) {
-      registeredClasses = calloc (1, sizeof (struct s_ClassList));
+      registeredClasses = xalloc (1, sizeof (struct s_ClassList));
       registeredClasses->clazz = &joe_Object_Class;
       registeredClasses->next = 0;
       joe_Class_registerClass (&joe_Array_Class);
@@ -186,14 +199,14 @@ joe_Class_newInstance (joe_Class *cls,
 }
 
 joe_Object
-joe_Object_New (joe_Class *clazz, unsigned int size)
+joe_Object_New (joe_Class *clazz, size_t size)
 {
    joe_Object Return = 0;
    if (clazz->varNames == 0) { /* primitive */
       if (clazz->nativeNum && numCacheCnt > 0) {
          Return = numCache[--numCacheCnt];
       } else {
-         Return = calloc (1, sizeof (struct s_joe_Object) + size);
+         Return = xalloc (1, sizeof (struct s_joe_Object) + size);
          Return->data.mem = (char *) Return + sizeof (struct s_joe_Object);
          Return->acyclic = 1;
       }
@@ -210,7 +223,7 @@ joe_Object_New (joe_Class *clazz, unsigned int size)
             cls = cls->extends;
          }
       }
-      Return = calloc (1,sizeof(struct s_joe_Object)+(size*(sizeof(void*))));
+      Return = xalloc (1,sizeof(struct s_joe_Object)+(size*(sizeof(void*))));
       Return->data.mem = (char *) Return + sizeof (struct s_joe_Object);
    }
    Return->nItems = size;
@@ -224,7 +237,7 @@ joe_Object_New (joe_Class *clazz, unsigned int size)
 joe_int
 joe_int_New0 ()
 {
-   joe_int Return = calloc(1, sizeof(struct s_joe_Object));
+   joe_int Return = xalloc(1, sizeof(struct s_joe_Object));
    Return->nItems = 0;
    Return->acyclic = 1;
    Return->clazz = &joe_int_Class;

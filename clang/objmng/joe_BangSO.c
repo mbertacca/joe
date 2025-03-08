@@ -75,7 +75,7 @@ struct LibData {
 This method calls a C function in this shared object. It returns a
 Pointer object that can be interpreted either a C string or an integer
 or an address. The arguments can be Strings, Integers or an instance
-of ByteBuffer in order to pass complex data structures.
+of ByteArray in order to pass complex data structures.
 
 Example
 ```

@@ -98,8 +98,8 @@ _init (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0 ||
        (argc == 1 && joe_Object_instanceOf (argv[0],&joe_String_Class))) {
-      int offset = joe_Integer_value(*JOE_AT (self, OFFSET));
-      int length = joe_Integer_value(*JOE_AT (self, LENGTH));
+      size_t offset = joe_Integer_value(*JOE_AT (self, OFFSET));
+      size_t length = joe_Integer_value(*JOE_AT (self, LENGTH));
       joe_Object mem = *JOE_AT (self, MEMORY);
       int slen = argc == 1 ? joe_String_length (argv[0]) : 0;
       int i, end = offset + length;
@@ -530,7 +530,7 @@ joe_Class joe_ByteArray_Class = {
 };
 
 joe_Object
-joe_ByteArray_New (joe_Object par, int offset, int length) {
+joe_ByteArray_New (joe_Object par, size_t offset, size_t length) {
    joe_ByteArray self = (void *) 0;
    if (par == (void *) 0) {
       if (offset >= 0 && length > 0) {

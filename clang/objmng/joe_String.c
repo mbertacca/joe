@@ -1191,7 +1191,7 @@ joe_Class joe_String_Class = {
 };
 
 joe_Object
-joe_String_New_len (const char *c, unsigned int len) {
+joe_String_New_len (const char *c, size_t len) {
    joe_Object self;
 
    self = joe_Object_New (&joe_String_Class, len + 1);
@@ -1210,7 +1210,7 @@ joe_String_New (const char *c)
 
 joe_Object
 joe_String_New2 (const char *c1, const char *c2) {
-   int len = strlen (c1) + strlen (c2);
+   size_t len = strlen (c1) + strlen (c2);
    joe_Object self;
 
    self = joe_Object_New (&joe_String_Class, len + 1);
@@ -1221,7 +1221,7 @@ joe_String_New2 (const char *c1, const char *c2) {
 
 joe_Object
 joe_String_New3 (const char *c1, const char *c2, const char *c3) {
-   int len = strlen (c1) + strlen (c2) + strlen(c3);
+   size_t len = strlen (c1) + strlen (c2) + strlen(c3);
    joe_Object self;
 
    self = joe_Object_New (&joe_String_Class, len + 1);
@@ -1233,7 +1233,7 @@ joe_String_New3 (const char *c1, const char *c2, const char *c3) {
 
 joe_Object
 joe_String_New4(const char *c1,const char *c2,const char *c3,const char *c4) {
-   int len = strlen (c1) + strlen (c2) + strlen(c3) + strlen (c4);
+   size_t len = strlen (c1) + strlen (c2) + strlen(c3) + strlen (c4);
    joe_Object self;
 
    self = joe_Object_New (&joe_String_Class, len + 1);

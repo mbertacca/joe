@@ -22,7 +22,8 @@
 
 typedef joe_Object joe_ByteArray;
 extern joe_Class joe_ByteArray_Class;
-JOEOBJ_API joe_Object joe_ByteArray_New (joe_ByteArray par, int offset, int length);
+JOEOBJ_API joe_Object joe_ByteArray_New (joe_ByteArray par,
+                                         size_t offset, size_t length);
 char * joe_ByteArray_getCharStar (joe_ByteArray self);
 
 # endif

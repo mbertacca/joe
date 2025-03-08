@@ -63,14 +63,14 @@ int
 joe_Exception_toString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_ArrayList arList = *joe_Object_at (self,STACK);
-   unsigned int arListLen = joe_ArrayList_length (arList);
+   size_t arListLen = joe_ArrayList_length (arList);
    joe_String tmp = 0;
 
    joe_Object_assign (retval, joe_String_New3 (joe_Object_getClassName(self),
                ": ", joe_String_getCharStar(*joe_Object_at (self,MESSAGE))));
 
    if (arListLen > 0) {
-      unsigned int i;
+      size_t i;
       joe_String newLine = joe_String_New ("\r\n");
 
       joe_Object_invoke (*retval, "add", 1, &newLine, &tmp);

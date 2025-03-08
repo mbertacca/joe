@@ -33,7 +33,7 @@ joe_Class joe_Memory_Class = {
 };
 
 joe_Object
-joe_Memory_New (unsigned int size) {
+joe_Memory_New (size_t size) {
    joe_Object self;
 
    self = joe_Object_New (&joe_Memory_Class, size);

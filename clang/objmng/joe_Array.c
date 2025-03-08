@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+# include <stdlib.h>
 # include "joe_Array.h"
 # include "joe_ArrayIterator.h"
 # include "joe_Integer.h"
@@ -146,9 +147,9 @@ static int
 shift (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
-      int length = (int) joe_Array_length (self);
+      size_t length = joe_Array_length (self);
       if (--length >= 0) {
-         int idx;
+         size_t idx;
          joe_Object_assign (retval, joe_Object_New(&joe_Array_Class, length));
          for (idx = 0; idx < length; idx++) {
             joe_Object_assign (JOE_AT(*retval, idx), *JOE_AT(self, idx + 1));
@@ -174,8 +175,8 @@ static int
 unshift (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1) {
-      int idx0, idx1;
-      int length = (int) joe_Array_length (self);
+      size_t idx0, idx1;
+      size_t length = joe_Array_length (self);
       joe_Object_assign (retval, joe_Object_New(&joe_Array_Class, length + 1));
       joe_Object_assign (JOE_AT(*retval, 0), argv[0]);
  
@@ -203,12 +204,12 @@ slice (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 2 && joe_Object_instanceOf (argv[0], &joe_Integer_Class)
                  && joe_Object_instanceOf (argv[1], &joe_Integer_Class)) {
-      int from = joe_Integer_value (argv[0]);
-      int to = joe_Integer_value (argv[1]);
+      int64_t from = joe_Integer_value (argv[0]);
+      int64_t to = joe_Integer_value (argv[1]);
       if (from >= 0 && to >= from) {
          int idx0, idx1;
-         int newlen = to - from;
-         int length = (int) joe_Array_length (self);
+         size_t newlen = to - from;
+         size_t length = joe_Array_length (self);
          joe_Object_assign (retval, joe_Object_New(&joe_Array_Class, newlen));
          for (idx0=0, idx1=from; idx0 < newlen && idx1 < length; idx0++,idx1++)
             joe_Object_assign (JOE_AT(*retval,idx0), *JOE_AT(self,idx1));
@@ -238,8 +239,8 @@ static int
 add (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 1) {
-      int length = (int) joe_Array_length (self);
-      int idx;
+      size_t length = joe_Array_length (self);
+      size_t idx;
       joe_Object_assign (retval, joe_Object_New(&joe_Array_Class, length+1));
       for (idx = 0; idx < length; idx++) {
           joe_Object_assign (JOE_AT(*retval, idx), *JOE_AT(self, idx));
@@ -351,12 +352,12 @@ joe_Class joe_Array_Class = {
 };
 
 joe_Object
-joe_Array_New(unsigned int length)
+joe_Array_New(size_t length)
 {
    return joe_Object_New(&joe_Array_Class, length);
 }
 
-unsigned int
+size_t
 joe_Array_length (joe_Object self)
 {
    return joe_Object_length (self);
