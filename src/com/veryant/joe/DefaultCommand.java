@@ -591,7 +591,7 @@ public class DefaultCommand extends CommandBase {
     */
    private String shell;
    private String opt;
-   public int system (String cmd) throws Exception {
+   public int system (String...cmd) throws Exception {
       if (shell == null) {
          if (System.getProperty("os.name")
                    .toLowerCase()
@@ -607,7 +607,10 @@ public class DefaultCommand extends CommandBase {
             opt = "-c";
          }
       }
-      return exec (new Object[] {shell, opt, cmd});
+      String cmdline = "";
+      for (String s : cmd)
+         cmdline = cmdline + s + " ";
+      return exec (new Object[] {shell, opt, cmdline});
    }
    /**
     * Executes the specified command and returns its standard output
