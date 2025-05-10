@@ -701,9 +701,14 @@ public class DefaultCommand extends CommandBase {
          this.blk = blk;
       }
       public int compare (Object o1, Object o2) {
+         Object intObj1 = Wrapper.newInstance(o1);
+         Object intObj2 = Wrapper.newInstance(o2);
+         if (intObj1 == null)
+            intObj1 = o1;
+         if (intObj2 == null)
+            intObj2 = o2;
          try {
-            Object obj = blk.exec (Wrapper.newInstance(o1),
-                                   Wrapper.newInstance(o2));
+            Object obj = blk.exec (intObj1, intObj2);
             return ((WInteger) obj).intValue();
          } catch (JOEException ex) {
             throw new RuntimeException (ex);
