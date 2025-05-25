@@ -38,16 +38,18 @@
 /**
 # Class joe_Block
 ### extends joe_Object
-# Class joe_JOEObject
-### extends joe_Block
 
 joe_Block implements a Block. All the blocks in a script are instances 
 of  this class.
 The current block is referenced by `!!`, 
-The method **new** on a Block object returns a new JOEbject object
-(see `new`) .
+The method **new** on a Block object returns a new JOEbject object (see `new`) .
+Any object created using JOE is a JOEObject that extends Block.
 */
 
+struct s_argv {
+   int argc;
+   joe_Object *argv;
+};
 
 # define MESSAGES 0
 # define PARENT 1
@@ -57,10 +59,11 @@ The method **new** on a Block object returns a new JOEbject object
 # define BANG 5
 # define VARIABLES 6
 # define VARCONTENT 7
+# define ARGS 8
 
 static char *varvalues[] = { "messages", "parent", "name",
                              "argsNames", "super", "bang",
-                             "variables", "varContent", 0};
+                             "variables", "varContent", "args", 0};
 
 void joe_Block_setVarValue(joe_Block self, joe_Variable var, joe_Object value);
 
@@ -245,7 +248,14 @@ my_exec (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
    int rc = JOE_SUCCESS;
    joe_Array varcontent = *JOE_AT(self, VARCONTENT);
    int varcontentlen = joe_Array_length(varcontent);
+   struct s_argv saveArgs;
+   struct s_argv *lastArgs = (struct s_argv *) *JOE_MEM(*JOE_AT(self,ARGS));
    joe_Array savevar =  0;
+
+   saveArgs.argc = lastArgs->argc;
+   saveArgs.argv = lastArgs->argv;
+   lastArgs->argc = argc;
+   lastArgs->argv = args;
 
    if (varcontentlen) {
       joe_Array argsNames = *JOE_AT(self, ARGS_NAMES);
@@ -275,6 +285,8 @@ my_exec (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
       }
       joe_Object_assign (&savevar, 0);
    }
+   lastArgs->argc = saveArgs.argc;
+   lastArgs->argv = saveArgs.argv;
 
    return rc;
 }
@@ -604,6 +616,27 @@ setVariable(joe_JOEObject self, int argc, joe_Object* argv, joe_Object* retval)
    return JOE_SUCCESS;
 }
 
+/**
+## getArgv
+
+Returns an Array containing all the variables actually
+passed to this block as arguments.
+*/
+
+static int
+getArgv(joe_JOEObject self, int argc, joe_Object* argv, joe_Object* retval)
+{
+   struct s_argv *lastArgs = (struct s_argv *) *JOE_MEM(*JOE_AT(self,ARGS));
+   int i;
+
+   joe_Object_assign(retval, joe_Array_New (lastArgs->argc));
+   for (i = 0; i < lastArgs->argc; i++)
+      joe_Object_assign (JOE_AT(*retval, i), lastArgs->argv[i]);
+
+   return JOE_SUCCESS;
+}
+
+
 static joe_Method mthds[] = {
   {"init",     init },
   {"exec",     joe_Block_exec },
@@ -619,6 +652,7 @@ static joe_Method mthds[] = {
   {"setVariable", setVariable },
   {"getVariable", getVariable },
   {"getVariablesNames", getVariablesNames },
+  {"getArgv", getArgv },
   {(void *) 0, (void *) 0}
 };
 
@@ -671,6 +705,7 @@ joe_Block_Init (joe_Block self, joe_Block parent, joe_Bang bang)
    joe_Object_assign(&bangBang, joe_String_New ("!!"));
    joe_Block_setVar (self,  bangBang);
    joe_Object_assign(&bangBang, 0);
+   joe_Object_assign(&thisVars[ARGS], joe_Memory_New(sizeof(struct s_argv)));
 }
 
 joe_Block

@@ -65,6 +65,8 @@ public class Block extends ArrayList<Message>
    public final Object exec (Object vars[], Object...argv)
                                                           throws JOEException {
       Object Return;
+      Object[] saveArgs = lastArgs;
+
       lastArgs = argv;
       if (varValues != null) {
          Object saveData[] = vars != null ? vars : varValues.clone();
@@ -83,6 +85,7 @@ public class Block extends ArrayList<Message>
       } else {
          Return = executor.run (this);
       }
+      lastArgs = saveArgs;
       return Return;
    }
    private final Object whileTF (Block b, WBoolean tf, boolean checkBefore)
