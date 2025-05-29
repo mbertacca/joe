@@ -325,6 +325,31 @@ indexOf (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    }
 }
 
+/**
+## contains _aString_
+
+Returns Boolean <1> if this string contains _aString_ as a substring,
+Boolean <0> otherwise.
+*/
+
+static int
+contains (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && JOE_ISCLASS(argv[0], &joe_String_Class)) {
+      char *hs = joe_String_getCharStar (self);
+      char *delta = strstr (hs, joe_String_getCharStar (argv[0]));
+      if (delta) {
+         joe_Object_assign(retval, joe_Boolean_New_true());
+      } else {
+         joe_Object_assign(retval, joe_Boolean_New_false());
+      }
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("contains: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
 static char *
 strrstr (char *haystack, const char *needle)
 {
@@ -379,7 +404,7 @@ lastIndexOf (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       }
       return JOE_SUCCESS;
    } else {
-      joe_Object_assign(retval, joe_Exception_New ("indexOf: invalid argument"));
+      joe_Object_assign(retval, joe_Exception_New ("lastIndexOf: invalid argument"));
       return JOE_FAILURE;
    }
 }
@@ -1156,6 +1181,7 @@ static joe_Method mthds[] = {
   {"length", length},
   {"indexOf", indexOf},
   {"lastIndexOf", lastIndexOf},
+  {"contains", contains},
   {"substring", substring},
   {"at", at},
   {"charCodeAt", charCodeAt},
