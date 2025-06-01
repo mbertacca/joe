@@ -374,6 +374,20 @@ public class DefaultCommand extends CommandBase {
       return foreach (it, 0, code);
    }
    /**
+    * This method implements a 'for each'. The code block is executed for
+    * each object passed in the Iterable.iterator starting from n,
+    * each object is passed to the block as argument.
+    */
+   public Object foreach(Iterable it, int n, Block code) throws JOEException {
+      return foreach (it.iterator(), n, code);
+   }
+   /**
+    * This is a convenience method for foreach (list, 0, code).
+    */
+   public Object foreach (Iterable it, Block code) throws JOEException {
+      return foreach (it, 0, code);
+   }
+   /**
     * Causes the exit from a loop.
     */
    public void breakLoop() throws BreakLoopException {
