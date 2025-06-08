@@ -1,0 +1,17 @@
+dir:args.
+
+so <- !getOSType; startsWith "Win" ifTrue {!loadSO "msvcrt.dll"},{!loadSO ""}.
+
+dirent <- !newInstance "joe_ByteArray",(256 + 1).
+dirp := .
+
+dir := so call "opendir","/".
+dir isNull; ifFalse {
+   !while { dirp := so call "readdir",dir. dirp isNull; not},{
+      
+      !println "[",((dirp displace 19) stringValue),"]".
+   }.
+   so call "closedir",dir.
+}.
+
+dir := so call "opendir",".".

@@ -71,6 +71,10 @@ public class StandardExecutor implements Executor {
             if (ex.hasReturnObject())
                Return = ex.getReturnObject();
          }
+      } catch (JOEException ex) {
+         Message msg = blk.get(i); 
+         ex.addStack (msg.getFileName(), msg.getRow(), msg.getCol());
+         throw ex;
       }
       return Return;
    }

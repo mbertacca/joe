@@ -18,9 +18,11 @@
  */
 
 package com.veryant.joe;
+import java.util.ArrayList;
 
 public class JOEException extends Exception {
    private final String info;
+   private final ArrayList<String> stack = new ArrayList<String>();
    private String buildInfo(String fName, int r, int c) {
       StringBuilder sb = new StringBuilder ("JOEException");
       if (fName != null) {
@@ -54,7 +56,14 @@ public class JOEException extends Exception {
       else
          info = "";
    }
+   @Override
    public String getMessage () {
       return info + super.getMessage();
+   }
+   void addStack (String fName, int row, int col) {
+      stack.add (" ->file=" + fName + ", row=" + row + ", col=" + col);
+   }
+   public ArrayList<String> getJOEStack() {
+      return stack;
    }
 }

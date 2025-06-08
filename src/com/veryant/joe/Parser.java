@@ -138,6 +138,9 @@ public class Parser {
             public int getCol() {
                return col;
             }
+            public String getFileName() {
+               return info.getName();
+            }
             public String toString () {
                return var.getName() + ":={"+ val + "}";
             }
@@ -152,6 +155,9 @@ public class Parser {
             }
             public int getCol() {
                return col;
+            }
+            public String getFileName() {
+               return info.getName();
             }
             public String toString () {
                return var.getName() + ":=" + val;
@@ -207,6 +213,9 @@ public class Parser {
             public int getCol() {
                return col;
             }
+            public String getFileName() {
+               return info.getName();
+            }
             public String getName () {
                return val.toString();
             }
@@ -229,6 +238,9 @@ public class Parser {
                }
                public int getCol() {
                   return col;
+               }
+               public String getFileName() {
+                  return info.getName();
                }
                public String toString () {
                   return val.toString();
@@ -290,6 +302,9 @@ public class Parser {
          }
          public int getCol() {
             return tk.col;
+         }
+         public String getFileName() {
+            return info.getName();
          }
          public String toString () {
             return newBlock.toString();
@@ -381,6 +396,9 @@ public class Parser {
                public int getCol() {
                   return tk.col;
                }
+               public String getFileName() {
+                  return info.getName();
+               }
                public String getName () {
                   return tk.word;
                }
@@ -418,6 +436,9 @@ public class Parser {
                }
                public int getCol() {
                   return tk.col;
+               }
+               public String getFileName() {
+                  return info.getName();
                }
                public String getName () {
                   return tk.word;

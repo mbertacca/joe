@@ -42,6 +42,10 @@ public class JavaObjectsExecutor {
       while ((cause = cause.getCause()) != null) {
          cmd.eprintln ("Caused by: " + cause.toString());
       }
+      if (ex instanceof JOEException) {
+         for (String line : ((JOEException) ex).getJOEStack())
+            cmd.eprintln(line);
+      }
    }
    public static void main (String argv[]) {
       int rc = imain (argv);
