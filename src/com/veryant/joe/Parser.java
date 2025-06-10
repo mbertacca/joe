@@ -57,6 +57,16 @@ public class Parser {
          return tokens.toString();
       }
    }
+   static class MyFileInfo implements FileInfo {
+      final String name;
+      final int lineNumber;
+      MyFileInfo (FileInfo info) {
+         name = info.getName();
+         lineNumber = info.getLineNumber();
+      }
+      public String getName() { return name; }
+      public int getLineNumber() { return lineNumber; }
+   }
 
    private Object command;
    final Block block;
@@ -65,13 +75,13 @@ public class Parser {
    public Parser (Object cmds, Block blk, FileInfo fi) {
       command = cmds;
       block = blk;
-      info = fi;
+      info = new MyFileInfo(fi);
       block.setName (info.getName());
    }
    public Parser (Object cmds, Executor exec, FileInfo fi) {
       command = cmds;
       block = new OuterBlock (exec);
-      info = fi;
+      info = new MyFileInfo(fi);
       block.setName (info.getName());
    }
    private Parser (Parser parent) {
