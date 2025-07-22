@@ -16,7 +16,7 @@ So you can find useful to have a script language whose features are:
 The Java Objects Executor (JOE for short) can be the answer to the above requests.
 
 JOE only task is to execute methods of Java objects in sequence on the fly, however it can be used to mimic any scripting language,
-with encapsulation, inheritance, higher drder functions and closures.
+with encapsulation, inheritance, higher order functions and closures.
 
 The syntax can be summarized in the following 2 lines:
 
