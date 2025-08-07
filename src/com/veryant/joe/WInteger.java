@@ -65,8 +65,23 @@ public class WInteger extends WLong {
    public WLong xor (WInteger n) {
       return new WInteger (value ^ n.value);
    }
+   public WInteger not () {
+      return new WInteger (~value);
+   }
+   public WLong shiftl (WInteger n) {
+      return new WInteger (value << n.value);
+   }
+   public WLong shiftr (WInteger n) {
+      return new WInteger (value >>> n.value);
+   }
+   public WLong shifta (WInteger n) {
+      return new WInteger (value >> n.value);
+   }
    public String toHexString () {
       return Integer.toHexString ((int) value);
+   }
+   public String toBinaryString () {
+      return Integer.toBinaryString ((int) value);
    }
 }
 

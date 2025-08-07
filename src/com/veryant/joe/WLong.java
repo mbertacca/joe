@@ -190,10 +190,25 @@ public class WLong extends WBaseNumber {
    public WLong xor (WInteger n) {
       return new WLong (value ^ n.longValue());
    }
+   public WLong not () {
+      return new WLong (~value);
+   }
+   public WLong shiftl (WInteger n) {
+      return new WLong (value << n.value);
+   }
+   public WLong shiftr (WInteger n) {
+      return new WLong (value >>> n.value);
+   }
+   public WLong shifta (WInteger n) {
+      return new WLong (value >> n.value);
+   }
    public String toString() {
       return Long.toString (value);
    }
    public String toHexString () {
       return Long.toHexString (value);
+   }
+   public String toBinaryString () {
+      return Long.toBinaryString (value);
    }
 }

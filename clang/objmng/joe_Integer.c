@@ -75,9 +75,9 @@ joe_Integer_toAscii (int64_t n, char *out) {
 
 static char xdigits[] = "0123456789abcdef";
 
-void
-joe_Integer_toHexAscii (int64_t sn, char *out) {
-   char asc[32];
+static void
+joe_Integer_toPow2Ascii (int64_t sn, int mask, int shift,char *out) {
+   char asc[sizeof(int64_t) * 8 + 1];
    char *p = asc + sizeof (asc) - 1;
    uint64_t n = sn;
 
@@ -87,8 +87,8 @@ joe_Integer_toHexAscii (int64_t sn, char *out) {
      *out = 0;
    } else {
       for (*(p--) = 0; n != 0; p--) {
-         *p = xdigits[n & 0x0F];
-         n >>= 4;
+         *p = xdigits[n & mask];
+         n >>= shift;
       }
       p++;
       while (*p) 
@@ -539,7 +539,7 @@ and (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 /**
-## and _aInteger_
+## or _aInteger_
 
 Returns the results of a bitwise OR between this number and _aInteger_ 
 */
@@ -558,7 +558,7 @@ or (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 /**
-## and _aInteger_
+## xor _aInteger_
 
 Returns the results of a bitwise XOR between this number and _aInteger_ 
 */
@@ -577,6 +577,65 @@ xor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 /**
+## shiftl _aInteger_
+
+Return a number equal to this number left shifted by _aInteger_ bits
+*/
+
+static int
+shiftl (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && JOE_ISCLASS(argv[0], &joe_Integer_Class)) {
+       joe_Object_assign(retval, 
+                joe_Integer_New(JOE_INTEGER (self) << JOE_INTEGER (argv[0])));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("shiftl: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+/**
+## shiftr _aInteger_
+
+Return a number equal to this number right shifted by _aInteger_ bits
+*/
+
+static int
+shiftr (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && JOE_ISCLASS(argv[0], &joe_Integer_Class)) {
+       joe_Object_assign(retval, 
+                joe_Integer_New((uint64_t)JOE_INTEGER (self) >>
+                                JOE_INTEGER (argv[0])));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("shiftr: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+/**
+## shifta _aInteger_
+
+Returns a number equal to this number arithmetically shifted to the right
+by _aInteger_ bits
+*/
+
+static int
+shifta (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && JOE_ISCLASS(argv[0], &joe_Integer_Class)) {
+       joe_Object_assign(retval, 
+                joe_Integer_New(JOE_INTEGER (self) >> JOE_INTEGER (argv[0])));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("shifta: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+/**
 ## not
 
 Returns the results of a bitwise NOT on this number 
@@ -589,7 +648,7 @@ not (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
        joe_Object_assign(retval, joe_Integer_New(~JOE_INTEGER (self)));
       return JOE_SUCCESS;
    } else {
-      joe_Object_assign(retval, joe_Exception_New ("xor: invalid argument"));
+      joe_Object_assign(retval, joe_Exception_New ("not: invalid argument"));
       return JOE_FAILURE;
    }
 }
@@ -665,8 +724,8 @@ static int
 toHexString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
-      char buff[32];
-      joe_Integer_toHexAscii (JOE_INTEGER (self), buff);
+      char buff[sizeof(int64_t) * 2 + 1];
+      joe_Integer_toPow2Ascii (JOE_INTEGER (self), 0x0F, 4, buff);
       joe_Object_assign(retval, joe_String_New (buff));
       return JOE_SUCCESS;
    } else {
@@ -675,6 +734,28 @@ toHexString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       return JOE_FAILURE;
    }
 }
+
+/**
+## toBinaryString
+
+Returns a String containing the binary representation of this number.
+*/
+
+static int
+toBinaryString (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      char buff[sizeof(int64_t) * 8 + 1];
+      joe_Integer_toPow2Ascii (JOE_INTEGER (self), 1, 1, buff);
+      joe_Object_assign(retval, joe_String_New (buff));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                   joe_Exception_New("toBinaryString: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
 
 /**
 ## signum
@@ -754,12 +835,16 @@ static joe_Method mthds[] = {
    {"or", or },
    {"xor", xor },
    {"not", not },
+   {"shiftl", shiftl },
+   {"shiftr", shiftr },
+   {"shifta", shifta },
    {"intValue", intValue },
    {"longValue", intValue },
    {"floatValue", floatValue },
    {"doubleValue", floatValue },
    {"bigDecimalValue", bigDecimalValue },
    {"toHexString", toHexString },
+   {"toBinaryString", toBinaryString },
    {"signum", signum },
    {"toChar", toChar },
    {"toString", toString },
