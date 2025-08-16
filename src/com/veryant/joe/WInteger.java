@@ -83,5 +83,26 @@ public class WInteger extends WLong {
    public String toBinaryString () {
       return Integer.toBinaryString ((int) value);
    }
+   public int signum() {
+      return Integer.signum ((int) value);
+   }
+   public WInteger abs() {
+      return value < 0 ? new WInteger(-value) : this;
+   }
+   public WInteger negate() {
+      return new WInteger(-value);
+   }
+   public WInteger pow(WInteger e) {
+      if (e.value < 0)
+         throw new ArithmeticException ("Invalid exponent " + e);
+      else if (e.value == 0)
+         return new WInteger(1);
+      else {
+         long Return = value;
+         for  (int i = (int) e.value - 1; i > 0; i--)
+            Return *= value;
+         return new WInteger(Return);
+      }
+   }
 }
 

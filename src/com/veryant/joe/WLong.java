@@ -61,7 +61,24 @@ public class WLong extends WBaseNumber {
    public int signum() {
       return Long.signum (value);
    }
-
+   public WLong abs() {
+      return value < 0 ? new WLong(-value) : this;
+   }
+   public WLong negate() {
+      return new WLong(-value);
+   }
+   public WLong pow(WInteger e) {
+      if (e.value < 0)
+         throw new ArithmeticException ("Invalid exponent " + e);
+      else if (e.value == 0)
+         return new WLong(1);
+      else {
+         long Return = value;
+         for  (int i = (int) e.value - 1; i > 0; i--)
+            Return *= value;
+         return new WLong(Return);
+      }
+   }
    public WLong add (WLong n) {
       return new WLong (value + n.value);
    }

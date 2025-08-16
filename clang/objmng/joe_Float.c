@@ -476,6 +476,77 @@ signum (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 /**
+## negate
+
+Returns a Float whose value is  -this number.
+*/
+
+static int
+negate (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      joe_Object_assign (retval, joe_Float_New (-(JOE_FLOAT (self))));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                        joe_Exception_New("negate: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
+/**
+## abs
+
+Returns a Float whose value is  the absolute value of this number.
+*/
+
+static int
+abs_ (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      double value = JOE_FLOAT (self);
+      if (value < 0) {
+         joe_Object_assign (retval, joe_Float_New (-value));
+      } else {
+         joe_Object_assign (retval, self);
+      }
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                        joe_Exception_New("abs: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
+/**
+## pow _aInteger_
+
+Returns a Float whose value is this number to the power of _aInteger_
+*/
+
+static int
+pow_ (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   int64_t exp = 0;
+   if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_Integer_Class) &&
+                (exp = JOE_INTEGER (argv[0])) >= 0) {
+      if (exp == 0) {
+         joe_Object_assign(retval, joe_Float_New(1));
+      } else {
+         joe_Object_assign(retval, self);
+         while (--exp > 0) {
+            multiply (self, 1, retval, retval);
+         }
+      }
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                        joe_Exception_New("pow: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
+/**
 ## toString
 
 Returns a string representation of this number.
@@ -514,6 +585,9 @@ static joe_Method mthds[] = {
    {"doubleValue", floatValue },
    {"bigDecimalValue", bigDecimalValue },
    {"signum", signum },
+   {"negate", negate },
+   {"abs", abs_ },
+   {"pow", pow_ },
    {"toString", toString },
   {(void *) 0, (void *) 0}
 };

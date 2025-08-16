@@ -43,4 +43,5 @@ extern nDecimal nDecimal_divideToInteger (nDecimal op1, nDecimal op2);
 extern nDecimal nDecimal_remainder (nDecimal op1, nDecimal op2);
 extern int nDecimal_memsize (nDecimal num);
 extern int nDecimal_signum (nDecimal self);
+extern nDecimal nDecimal_negate (nDecimal self);
 # endif

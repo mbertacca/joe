@@ -64,7 +64,24 @@ public class WDouble extends WBaseNumber implements WNumber {
    public int signum() {
       return (int) Math.signum (value);
    }
-
+   public WDouble abs() {
+      return value < 0 ? new WDouble(-value) : this;
+   }
+   public WDouble negate() {
+      return new WDouble(-value);
+   }
+   public WDouble pow(WInteger e) {
+      if (e.value < 0)
+         throw new ArithmeticException ("Invalid exponent " + e);
+      else if (e.value == 0)
+         return new WDouble(1);
+      else {
+         double Return = value;
+         for  (int i = (int) e.value - 1; i > 0; i--)
+            Return *= value;
+         return new WDouble(Return);
+      }
+   }
    public WDouble add (WDouble n) {
       return new WDouble (value + n.value);
    }

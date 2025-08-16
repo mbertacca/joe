@@ -809,6 +809,14 @@ nDecimal_signum (nDecimal self)
    else
       return 1;
 }
+
+nDecimal
+nDecimal_negate (nDecimal self)
+{
+   nDecimal Return = nDecimal_clone (self);
+   Return->negative = !self->negative;
+   return Return;
+}
 /*
 int
 main (int argc, char *argv[])
