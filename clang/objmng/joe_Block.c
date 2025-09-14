@@ -43,7 +43,7 @@ joe_Block implements a Block. All the blocks in a script are instances
 of  this class.
 The current block is referenced by `!!`, 
 The method **new** on a Block object returns a new JOEbject object (see `new`) .
-Any object created using JOE is a JOEObject that extends Block.
+Any object created using JOE is a JOEObject that extends Object.
 */
 
 struct s_argv {
@@ -328,6 +328,8 @@ joe_Block_outer_exec (joe_Object self, int argc, joe_Object *args, joe_Object *r
 Returns a JOEOBject obtained by cloning this block.
 The block is executed and every variable assigned to a block will be
 treated as a method of the JOEObject object.
+
+This method can be invoked on a JOEObject too.
 */
 
 int
@@ -507,14 +509,16 @@ joe_Block_clone (joe_Block self, joe_Block parent)
 }
 
 /**
-## getName
+## name
 
 Returns the name of this block.
 For example
 ```
-{foo:. !println (!! getName)} exec.
+{foo:. !println (!! name)} exec.
 ```
-will print "foo"
+will print "foo".
+
+This method can be invoked on a JOEObject too.
 */
 
 static int
@@ -648,7 +652,6 @@ static joe_Method mthds[] = {
   {"doWhileTrue",doWhileTrue},
   {"doWhileFalse",doWhileFalse},
   {"name", getName },
-  {"getName", getName },
   {"setVariable", setVariable },
   {"getVariable", getVariable },
   {"getVariablesNames", getVariablesNames },
@@ -925,6 +928,8 @@ static int extends (joe_JOEObject self,
 
 static joe_Method JOEObject_mthds[] = {
   {"extends", extends },
+  {"new", joe_Block_new },
+  {"name", getName },
   {(void *) 0, (void *) 0}
 };
 
@@ -945,8 +950,7 @@ joe_JOEObject_New (joe_Block block, joe_Block parent)
    joe_Object self;
 
    self = joe_Block_clone (block, parent);
-   if (!joe_Object_instanceOf (block, &joe_JOEObject_Class))
-      joe_Object_extends (self, &joe_JOEObject_Class);
+   self->clazz = &joe_JOEObject_Class;
 
    return self;
 }

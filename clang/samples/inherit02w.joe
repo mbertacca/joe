@@ -1,5 +1,8 @@
-/* Windows only version */
-!loadSO "timeobjs.dll".
+!version; contains "Windows" ifTrue {
+   !loadSO "timeobjs.dll".
+},{
+   !loadSO "libtimeobjs.so".
+}.
 
 aTime := !newInstance "example_Time".
 aTime setHour 16 setMin 23 setSec 45.

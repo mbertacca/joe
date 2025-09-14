@@ -3,7 +3,8 @@
  */
 exit:args.
 
-list := !newInstance "joe_List".
+list <- !version; contains "native" ifTrue { !newInstance "joe_List"},
+                                           { !newInstance "java.util.LinkedList"}.
 !foreach args,{:itm.
     !println itm.
     list push itm.
@@ -11,7 +12,7 @@ list := !newInstance "joe_List".
 
 !println "-----".
 
-args foreach {:itm.
+! foreach list,{:itm.
     !println itm.
 }.
 
@@ -24,7 +25,7 @@ i := -1.
     !println (args get i toUpperCase).
 }.
 !println "----- reverse". 
-!while {list empty; not},{
+!while {list isEmpty; not},{
     !println (list pop).
 }.
 
