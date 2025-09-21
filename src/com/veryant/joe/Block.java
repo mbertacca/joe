@@ -24,6 +24,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
+/**
+ * This class implements a JOE block.
+ */
+
 public class Block extends ArrayList<Message>
                 implements InternalObject {
    static final Object[] voidArgs = {};
@@ -43,15 +47,27 @@ public class Block extends ArrayList<Message>
       if (parent != null)
          parent.children.add (this);
    }
+/**
+ * Executes the chains of methods of this block.
+ */ 
    public final Object exec () throws JOEException {
       return exec (null, voidArgs);
    }
+/**
+ * @see #exec().
+ */ 
    public final Object multiply () throws JOEException {
       return exec ();
    }
+/**
+ * Executes the chains of methods of this block with the supplied arguments.
+ */ 
    public final Object exec (Object...argv) throws JOEException {
       return exec (null, argv);
    }
+/**
+ * @see #exec (Object...argv).
+ */ 
    public final Object multiply (Object...argv) throws JOEException {
       return exec (argv);
    }
@@ -119,19 +135,46 @@ public class Block extends ArrayList<Message>
       }
       return Return;
    }
+/**
+ * Executes this block and if its result is <code>true</code>
+ * then executes <i>b</i>.
+ * Repeats until this block returns an object not equal to <code>true</code>.
+ * Returns the result of <i>b</i> last execution.
+ */
    public final Object whileTrue (Block b) throws JOEException {
       return whileTF (b, WBoolean.TRUE, true);
    }
+/**
+ * Executes this block and if its result is <code>false</code>
+ * then executes <i>b</i>.
+ * Repeats until this block returns an object not equal to <code>false</code>.
+ * Returns the result of <i>b</i> last execution.
+ */
    public final Object whileFalse (Block b) throws JOEException {
       return whileTF (b, WBoolean.FALSE, true);
    }
+/**
+ * Executes this block and then executes <i>b</i>:
+ * if the result of <i>b</i> execution is <code>true</code>
+ * then executes itself again.
+ * Repeats until <i>b</i> returns an object not equal to <code>true</code>
+ */
    public final Object doWhileTrue (Block b) throws JOEException {
       return whileTF (b, WBoolean.TRUE, false);
    }
+/**
+ * Executes this block and then executes <i>b</i>:
+ * if the result of <i>b</i> execution is <code>false</code>
+ * then executes itself again.
+ * Repeats until <i>b</i> returns an object not equal to <code>falses</code>
+ */
    public final Object doWhileFalse (Block b) throws JOEException {
       return whileTF (b, WBoolean.FALSE, false);
    }
-
+/**
+ * Assignes or create a variable whose name is <i>name</i>
+ * whith the value <i>val</i>.
+ */
    public Object setVariable (WString name, Object val)throws JOEException {
       Variable var = getSetVariable (name.value);
       return setVariable (var, val);
@@ -147,7 +190,9 @@ public class Block extends ArrayList<Message>
 
       return val;
    }
-
+/**
+ * Returns the value of the a variable whose name is <i>name</i>.
+ */
    public Object getVariable (WString name) {
       Variable var = lookForVariable (name.value);
       if (var == null) {
@@ -172,12 +217,20 @@ public class Block extends ArrayList<Message>
       if (parent != null)
          parent. getVariablesNames(list);
    }
+/**
+ * Returns an array containing all the variables names that can be accessed
+ * by this block.
+ */
    public String[] getVariablesNames() {
       ArrayList<String> list = new ArrayList<String>();
       getVariablesNames(list);
       String Return[] = new String[list.size()];
       return list.toArray (Return);
    }
+/**
+  * Returns an array containing all the variables values actually passed
+  * to this block as arguments.
+  */
    public Object[] getArgv() {
       Object[] Return = lastArgs;
       if (Return == null) {
@@ -207,6 +260,9 @@ public class Block extends ArrayList<Message>
       }
       return Return;
    }
+/**
+ * Returns a clone of this object.
+ */
    public Object clone() {
       Block Return = (Block) super.clone();
       Return.blockName = name();
@@ -218,18 +274,34 @@ public class Block extends ArrayList<Message>
          Return.children.add(((Block)children.get(i).clone()).setParent(Return));
       return Return;
    }
+/**
+ * Returns a JOE OBject obtained by cloning this block.
+ * The block is executed and every variable assigned to a block
+ * will be treated as a method of the JOE Object object.
+ * This method can be invoked on a JOE Object too.
+ */
    public Block $new() throws JOEException {
       return $new (voidArgs);
    }
+/**
+ * @see #$new()
+ */
    public Block add() throws JOEException {
       return $new ();
    }
+/**
+ * same as $new() with parameters
+ * @see #$new()
+ */
    public Block $new(Object...args) throws JOEException {
       Block Return = (Block) clone();
       Return.execAsJoe = true;
       Return.init (args);
       return Return;
    }
+/**
+ * @see #$new (Object...args)
+ */
    public Block add(Object...args) throws JOEException {
       return $new(args);
    }
@@ -240,6 +312,9 @@ public class Block extends ArrayList<Message>
       final Block Return = children.get(n);
       return Return;
    }
+/**
+ * Returns the name of the block
+ */
    public String name() {
       if (blockName == null)
          blockName = "block-" + System.identityHashCode(this);

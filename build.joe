@@ -39,11 +39,11 @@ compileJoe := {
 
 makeJoeJar := {
    build depends compileJoe.
-   thisJar := build file "jar/joe.jar".
+   thisJar := build file "bin/joe.jar".
 
    !if (thisJar olderThanAny "src/com/veryant/joe",".class"),{
       thisJar delete.
-      rc := build system ("jar cvfm "+thisJar+" jar/Manifest.txt -C src dummy"
+      rc := build system ("jar cvfm "+thisJar+" bin/Manifest.txt -C src dummy"
                         + " src/com/veryant/joe/*.class").
    }.
 }.
@@ -55,7 +55,7 @@ makeJoeJar := {
 compileIn := {:dir.
    build depends makeJoeJar.
    !if (build anythingNew dir,".java",dir,".class"), {
-      rc := build system ("javac -cp ""jar/joe.jar"+pathSep+dir+""" "+dir+"/*.java").
+      rc := build system ("javac -cp ""bin/joe.jar"+pathSep+dir+""" "+dir+"/*.java").
       !if (rc <> 0), {
          !throw ("Compilation in "+ dir + " failed!").
       }.
@@ -76,8 +76,8 @@ makeLogoJar := {
 
    thisJar := build file "samples/logojoe/logojoe.jar".
 
-   !if ( thisJar olderThan "jar/joe.jar" or (thisJar olderThanAny "samples/logojoe",".class")),{
-      build copy "jar/joe.jar", (thisJar toString).
+   !if ( thisJar olderThan "bin/joe.jar" or (thisJar olderThanAny "samples/logojoe",".class")),{
+      build copy "bin/joe.jar", (thisJar toString).
       rc := build system ("jar uvf " + thisJar + " -C samples/logojoe dummy samples/logojoe/Logo*.class samples/logojoe/joe.png").
    }.
 }.
@@ -92,9 +92,9 @@ makeFormJar := {
 
    thisJar := build file "samples/form/formjoe.jar".
 
-   !if ( thisJar olderThan "jar/joe.jar" or
+   !if ( thisJar olderThan "bin/joe.jar" or
         (thisJar olderThanAny "samples/form",".class")),{
-      build copy "jar/joe.jar",(thisJar toString).
+      build copy "bin/joe.jar",(thisJar toString).
       rc := build system ("jar uvf " + thisJar +" -C samples/form dummy samples/form/*.class samples/form/joe.png").
    }.
 }.

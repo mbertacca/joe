@@ -38,8 +38,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 
 /**
- * This class contains methods that makes tha flavor of JOE
- * similar to the Java language
+ * This class contains methods of <b>!</b> standard.
  */
 
 public class DefaultCommand extends CommandBase {
@@ -397,7 +396,7 @@ public class DefaultCommand extends CommandBase {
     * This class is used in order to implement a behaviour similar
     * to the Java switch.
     */
-   protected static class Switch {
+   public static class Switch {
       private final Object cfrt1;
       private boolean alreadyDone;
       private boolean prevCondition;
@@ -447,6 +446,11 @@ public class DefaultCommand extends CommandBase {
          }
          return this;
       }
+      /**
+       * This method is similar to $case (Object cfrt2, Block block)
+       * The <i>block</i> is supposed to returns a boolean and it is
+       * executed only if no block in the switch has been executed yet.
+       */  
       public Object $case (Block blk2, Block block) throws JOEException {
          if (!(alreadyDone || prevCondition)) {
             Object cfrt2 =  blk2.exec();

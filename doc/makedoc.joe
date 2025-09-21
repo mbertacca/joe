@@ -6,7 +6,7 @@ system <- !getClassRef "java.lang.System"
            iif {:cmd. !println cmd. rc:=!exec "cmd","/c",cmd. },
                {:cmd. !println cmd. rc:=!exec "sh", "-c",cmd. }.
 
-BASEDIR <- !newInstance "java.io.File",(args get 0) getParentFile; getAbsoluteFile.
+BASEDIR <- !newInstance "java.io.File",(args get 0) getAbsoluteFile; getParentFile.
 SRCDIR  <- BASEDIR getParent; + "/src/com/veryant/joe".
 DESTDIR <- !newInstance "java.io.File",(BASEDIR getPath),"javadoc".
 DESTDIR mkdir.

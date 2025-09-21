@@ -22,6 +22,25 @@ package com.veryant.joe;
 import java.math.BigDecimal;
 import java.math.MathContext;
 
+/**
+ * This class defines the methods that are common to all the numbers
+ * i.e int, short, long, double and BigDecimal.. Consider that in JOE
+ * some operators symbols are equivalent to methods names, i.e.
+ * <table>
+ * <tr><th> add </th><th>+</th></tr>
+ * <tr><th> subtract </th><th>-</th></tr>
+ * <tr><th> multiply </th><th>*</th></tr>
+ * <tr><th> divide </th><th>/</th></tr>
+ * <tr><th> remainder </th><th>%</th></tr>
+ * <tr><th> equals </th><th>=</th></tr>
+ * <tr><th> gt </th><th>&gt;</th></tr>
+ * <tr><th> lt </th><th>&lt;</th></tr>
+ * <tr><th> ge </th><th>&gt;=</th></tr>
+ * <tr><th> le </th><th>&lt;=</th></tr>
+ * <tr><th> ne </th><th>&lt;&gt;</th></tr>
+ * </table>
+ */
+
 public abstract class WBaseNumber extends Wrapper implements WNumber {
    public BigDecimal add (WNumber n) {
       return bigDecimalValue().add(n.bigDecimalValue());

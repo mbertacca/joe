@@ -18,6 +18,26 @@
  */
 
 package com.veryant.joe;
+import java.math.BigDecimal;
+
+/**
+ * This class implements a JOE string. It implements most of the 
+ * java.lang.String methods and has few more methods in order to
+ * simplify the comparison between strings, i.e.
+ * <code> gt, ge, lt, le, ne</code>, and other methods. Consider that in JOE
+ * some operators symbols are equivalent to methods names, i.e.
+ * <table>
+ * <tr><th> add </th><th>+</th></tr>
+ * <tr><th> equals </th><th>=</th></tr>
+ * <tr><th> gt </th><th>&gt;</th></tr>
+ * <tr><th> lt </th><th>&lt;</th></tr>
+ * <tr><th> ge </th><th>&gt;=</th></tr>
+ * <tr><th> le </th><th>&lt;=</th></tr>
+ * <tr><th> ne </th><th>&lt;&gt;</th></tr>
+ * </table>
+ * When a Java method outside the JOE interpreter is invoked, the instance of
+ * this object is converted in a java.lang.String.
+ */
 
 public class WString extends Wrapper {
    public final String value;
@@ -55,9 +75,17 @@ public class WString extends Wrapper {
    public WString concat (WString str) {
       return new WString (value.concat(str.value));
    }
+/**
+ * Returns a new string that concatenates the specified string
+ * to the end of this string.
+ */
    public WString add (WString str) {
       return new WString (value.concat(str.value));
    }
+/**
+ * Returns a new string that concatenates the string representation of the
+ * specified object to the end of this string.
+ */
    public WString add (Object obj) {
       return new WString (value.concat(obj.toString()));
    }
@@ -156,6 +184,10 @@ public class WString extends Wrapper {
    public String toString() {
       return value;
    }
+/**
+ * Returns an integer if this string contains a valid representation,
+ * null otherwise.
+ */
    public Integer intValue() {
       try {
          return new Integer (value);
@@ -163,6 +195,10 @@ public class WString extends Wrapper {
          return null;
       }
    }
+/**
+ * Returns a long integer if this string contains a valid representation,
+ * null otherwise.
+ */
    public Long longValue() {
       try {
          return new Long (value);
@@ -170,6 +206,10 @@ public class WString extends Wrapper {
          return null;
       }
    }
+/**
+ * Returns a double if this string contains a valid representation,
+ * null otherwise.
+ */
    public Double doubleValue() {
       try {
          return new Double (value);
@@ -177,14 +217,34 @@ public class WString extends Wrapper {
          return null;
       }
    }
+/**
+ * Returns a BigDecimal if this string contains a valid representation,
+ * null otherwise.
+ */
+   public BigDecimal bigDecimalValue() {
+      try {
+         return new BigDecimal (value);
+      } catch (NumberFormatException _ex) {
+         return null;
+      }
+   }
+/**
+ * Returns a new string containing the character at <i>index</i> position.
+ */
    public String at (WNumber index) {
       int idx = index.intValue();
       return value.substring (idx, idx + 1);
    }
+/**
+ * Returns a integer with the codepoint of the character at <i>index</i> position.
+ */
    public WInteger charCodeAt (WNumber index) {
       int idx = index.intValue();
       return new WInteger (value.charAt(idx));
    }
+/**
+ * Returns a integer with the codepoint of the first character of this string.
+ */
    public WInteger charCodeAt () {
       return new WInteger (value.charAt(0));
    }
