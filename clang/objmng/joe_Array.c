@@ -360,7 +360,7 @@ joe_Array_New(size_t length)
 size_t
 joe_Array_length (joe_Object self)
 {
-   return joe_Object_length (self);
+   return JOE_LEN (self);
 }
 
 joe_Array

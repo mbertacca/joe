@@ -360,9 +360,7 @@ Returns the result of the last execution.
 int
 joe_Block_exec (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
-   int rc;
-   rc = my_exec (self, argc, args, retval);
-   return rc;
+   return my_exec (self, argc, args, retval);
 }
 
 int
@@ -748,16 +746,14 @@ joe_Block_varValue(joe_Object self, joe_Variable var)
    if (index == 0) {
       return self;
    } else {
-      joe_Array varcontent;
       int depth = joe_Variable_getDepth(var);
       joe_Block block = self;
 
       for ( ;depth > 0; depth--) {
          block = *JOE_AT(block, PARENT);
       }
-      varcontent = *JOE_AT(block, VARCONTENT);
 
-      return *JOE_AT(varcontent, index);
+      return *JOE_AT( *JOE_AT(block, VARCONTENT), index);
    }
 } 
 

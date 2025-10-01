@@ -151,8 +151,7 @@ joe_Selector_invoke (joe_Object self, joe_Object receiver,
    if (clazz == &joe_JOEObject_Class) {
       joe_Block receiver = joe_JOEObject_getReceiver (self, name);
       if (receiver != 0) {
-         mthd = joe_Object_getMethod (&joe_Block_Class, "exec");
-         return mthd->mthd (receiver, argc, argv, retval);
+         return blkExecMthd->mthd (receiver, argc, argv, retval);
       }
    }
 

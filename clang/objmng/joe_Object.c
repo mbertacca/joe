@@ -744,8 +744,7 @@ invoke (joe_Object self, joe_Class *clazz, const char *name,
    if (clazz == &joe_JOEObject_Class) {
       joe_Block receiver = joe_JOEObject_getReceiver (self, name);
       if (receiver != 0) {
-         mthd = joe_Object_getMethod (&joe_Block_Class, "exec");
-         return mthd->mthd (receiver, argc, argv, retval);
+         return joe_Block_exec (receiver, argc, argv, retval);
       }
    }
 
@@ -901,8 +900,7 @@ and (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       } else if (argv[0]->clazz == &joe_Block_Class) {
          if (self == joe_Boolean_True) {
             joe_Object lretval = 0;
-            joe_Method *mthd = joe_Object_getMethod (&joe_Block_Class, "exec");
-            int rc = mthd->mthd (argv[0], 0, NULL, &lretval);
+            int rc = joe_Block_exec (argv[0], 0, NULL, &lretval);
             if (rc == JOE_SUCCESS) {
                if (lretval == joe_Boolean_False)
                   joe_Object_assign(retval, joe_Boolean_False);
@@ -940,8 +938,7 @@ or (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       } else if (argv[0]->clazz == &joe_Block_Class) {
          if (self == joe_Boolean_False) {
             joe_Object lretval = 0;
-            joe_Method *mthd = joe_Object_getMethod (&joe_Block_Class, "exec");
-            int rc = mthd->mthd (argv[0], 0, NULL, &lretval);
+            int rc = joe_Block_exec (argv[0], 0, NULL, &lretval);
             if (rc == JOE_SUCCESS) {
                if (lretval == joe_Boolean_True)
                   joe_Object_assign(retval, joe_Boolean_True);
@@ -1013,11 +1010,10 @@ ifTrue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    if ((argc == 1 && argv[0]->clazz == &joe_Block_Class) ||
        (argc == 2 && argv[0]->clazz == &joe_Block_Class
                   && argv[1]->clazz == &joe_Block_Class)) {
-      joe_Method *mthd = joe_Object_getMethod (&joe_Block_Class, "exec");
       if (self == joe_Boolean_True) {
-         return mthd->mthd (argv[0], 0, NULL, retval);
+         return joe_Block_exec (argv[0], 0, NULL, retval);
       } else if (argc == 2) {
-         return mthd->mthd (argv[1], 0, NULL, retval);
+         return joe_Block_exec (argv[1], 0, NULL, retval);
       } else {
          joe_Object_assign(retval, joe_Null_value);
          return JOE_SUCCESS;
