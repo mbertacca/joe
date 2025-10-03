@@ -47,6 +47,7 @@ Any object created using JOE is a JOEObject that extends Object.
 */
 
 struct s_argv {
+   int recursion;
    int argc;
    joe_Object *argv;
 };
@@ -82,7 +83,7 @@ findLabel (joe_Block *blk, joe_String name) {
    }
 
    messages = *JOE_AT(*blk, MESSAGES);
-   len = joe_Array_length (messages);
+   len = JOE_LEN (messages);
    for (i = 0; i < len; i++) {
       obj = *JOE_AT (messages,i);
       if (joe_Message_isLabel (obj, name)) {
@@ -157,7 +158,7 @@ my_exec_sub (joe_Object self, int startMsg, joe_Object *retval)
    joe_Object lretval;
    int rc = JOE_SUCCESS;
    joe_Array messages = *JOE_AT(self,MESSAGES);
-   unsigned int len = joe_Array_length (messages);
+   unsigned int len = JOE_LEN (messages);
 
    joe_Object_assign(retval, joe_Null_value);
    lretval = 0;
@@ -222,13 +223,11 @@ my_exec_sub (joe_Object self, int startMsg, joe_Object *retval)
 static int
 init (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
-   unsigned int i;
-   int rc = JOE_SUCCESS;
-   joe_Array argsNames = *JOE_AT(self, ARGS_NAMES);
-   unsigned int argsNamesLen = joe_Array_length (argsNames);
-   unsigned int validArgsLen = argsNamesLen < argc ? argsNamesLen : argc;
+   int argsNamesLen = JOE_LEN (*JOE_AT(self, ARGS_NAMES));
 
    if (argsNamesLen) {
+      int i;
+      int validArgsLen = argsNamesLen < argc ? argsNamesLen : argc;
       joe_Array varcontent = *JOE_AT(self, VARCONTENT);
       for (i = 0; i < validArgsLen; i++) {
          joe_Object_assign (JOE_AT(varcontent, i+1), args[i]);
@@ -237,19 +236,18 @@ init (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
          joe_Object_assign (JOE_AT(varcontent, i+1), joe_Null_value);
       }
    }
-   rc = my_exec_sub (self, 0, retval);
-   return rc;
+   return my_exec_sub (self, 0, retval);
 }
 
 static int
-my_exec (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
+recur_exec (joe_Object self, int argc, joe_Object *args, struct s_argv *lastArgs,
+            joe_Object *retval)
 {
    unsigned int i;
    int rc = JOE_SUCCESS;
    joe_Array varcontent = *JOE_AT(self, VARCONTENT);
-   int varcontentlen = joe_Array_length(varcontent);
+   int varcontentlen = JOE_LEN(varcontent);
    struct s_argv saveArgs;
-   struct s_argv *lastArgs = (struct s_argv *) *JOE_MEM(*JOE_AT(self,ARGS));
    joe_Array savevar =  0;
 
    saveArgs.argc = lastArgs->argc;
@@ -259,7 +257,7 @@ my_exec (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 
    if (varcontentlen) {
       joe_Array argsNames = *JOE_AT(self, ARGS_NAMES);
-      unsigned int argsNamesLen = joe_Array_length (argsNames);
+      unsigned int argsNamesLen = JOE_LEN (argsNames);
       unsigned int validArgsLen = argsNamesLen < argc ? argsNamesLen : argc;
 
       joe_Object_assign (&savevar, joe_Array_New(varcontentlen));
@@ -297,7 +295,7 @@ joe_Block_outer_exec (joe_Object self, int argc, joe_Object *args, joe_Object *r
    unsigned int i;
    int rc = JOE_SUCCESS;
    joe_Array argsNames = *JOE_AT(self, ARGS_NAMES);
-   unsigned int argsNamesLen = joe_Array_length (argsNames);
+   unsigned int argsNamesLen = JOE_LEN (argsNames);
    unsigned int validArgsLen = argsNamesLen < argc ? argsNamesLen : argc;
 
    if (argsNamesLen) {
@@ -360,7 +358,17 @@ Returns the result of the last execution.
 int
 joe_Block_exec (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
-   return my_exec (self, argc, args, retval);
+   struct s_argv *lastArgs = (struct s_argv *) *JOE_MEM(*JOE_AT(self,ARGS));
+   if (lastArgs->recursion) {
+      return recur_exec (self, argc, args, lastArgs, retval);
+   } else {
+      int rc;
+      lastArgs->recursion = 1;
+      rc = init(self, argc, args, retval);
+      lastArgs->recursion = 0;
+
+      return rc;
+   }
 }
 
 int
@@ -370,7 +378,7 @@ joe_Block_while (joe_Block cond, joe_Block code,
    joe_Object_assign(retval, joe_Null_value);
    joe_Object bol = 0;
    if (checkBefore) {
-      if (my_exec (cond, 0, 0, &bol) != JOE_SUCCESS) {
+      if (joe_Block_exec (cond, 0, 0, &bol) != JOE_SUCCESS) {
          joe_Object_transfer (retval,&bol);
          return JOE_FAILURE;
       }
@@ -379,7 +387,7 @@ joe_Block_while (joe_Block cond, joe_Block code,
    }
    for ( ; ; ) {
       if (bol == tf) {
-         if (my_exec (code,0,0,retval) != JOE_SUCCESS) {
+         if (joe_Block_exec (code,0,0,retval) != JOE_SUCCESS) {
             joe_Object_assign(&bol, 0);
             if (joe_Object_instanceOf (*retval,
                                             &joe_BreakLoopException_Class)) {
@@ -394,7 +402,7 @@ joe_Block_while (joe_Block cond, joe_Block code,
          joe_Object_assign(&bol, 0);
          return JOE_SUCCESS;
       }
-      if (my_exec (cond, 0, 0, &bol) != JOE_SUCCESS) {
+      if (joe_Block_exec (cond, 0, 0, &bol) != JOE_SUCCESS) {
          joe_Object_transfer (retval,&bol);
          return JOE_FAILURE;
       }
@@ -486,7 +494,7 @@ joe_Block_clone (joe_Block self, joe_Block parent)
    unsigned int len;
    int i;
    joe_Array newcontent;
-   int contentlen = joe_Array_length(*JOE_AT(self, VARCONTENT));
+   int contentlen = JOE_LEN(*JOE_AT(self, VARCONTENT));
    if (parent == 0)
       parent = self;
 
@@ -496,7 +504,7 @@ joe_Block_clone (joe_Block self, joe_Block parent)
    joe_Object_assign(JOE_AT(Return, VARCONTENT), newcontent);
 
    messOld = *JOE_AT(self, MESSAGES);
-   len = joe_Array_length (messOld);   
+   len = JOE_LEN (messOld);   
    joe_Object_assign (JOE_AT(Return, MESSAGES),
                        messNew = joe_Array_New(len));
    for (i = 0; i < len; i++) {
@@ -539,7 +547,7 @@ getAllVars (joe_JOEObject blk, joe_HashMap hashvars)
       joe_String name;
       joe_Array varArray = 0;
       joe_Object_assign(&varArray, joe_HashMap_keys (vars));
-      len = joe_Array_length(varArray);
+      len = JOE_LEN(varArray);
       for (i = 0; i < len; i++) {
          name = *JOE_AT(varArray, i);
          if (strcmp(joe_String_getCharStar(name),"!!")) {
@@ -839,7 +847,7 @@ joe_Block_setVar (joe_Block self,  joe_String name)
 {
    joe_Variable Return;
    joe_Array newArray = 0;
-   unsigned int index = joe_Array_length(*JOE_AT(self,VARCONTENT));
+   unsigned int index = JOE_LEN(*JOE_AT(self,VARCONTENT));
 
    Return = joe_Block_setVarDepthIndex (self, name, 0, index);
    joe_Array_add (*JOE_AT(self,VARCONTENT), joe_Null_value, &newArray);
