@@ -30,8 +30,11 @@ joe_Object joe_HashMap_New_size(unsigned int len);
 void joe_HashMap_put (joe_HashMap self, joe_Object key,
                       joe_Object value,  joe_Object *oldValue);
 int joe_HashMap_get (joe_HashMap self, joe_Object key, joe_Object *retval);
+int joe_HashMap_getCS (joe_HashMap self, const char *csKey, joe_Object *retval);
 int joe_HashMap_getHash (joe_HashMap self, unsigned int hash,
                          joe_Object key, joe_Object *retval);
+int joe_HashMap_getHashCS (joe_HashMap self, unsigned int hash,
+                         const char *csKey, joe_Object *retval);
 joe_Array joe_HashMap_keys (joe_HashMap self);
 joe_Array joe_HashMap_values (joe_HashMap self);
 int joe_HashMap_containsHashKey (joe_HashMap self, unsigned int hash, joe_Object key);

@@ -17,6 +17,7 @@
  */
 
 # include <stdio.h>
+# include <string.h>
 # include "joe_HashMap.h"
 # include "joe_Array.h"
 # include "joe_Boolean.h"
@@ -162,16 +163,21 @@ joe_HashMap_New ()
 }
 
 unsigned int
-joe_HashMap_hash(joe_String strKey)
+joe_HashMap_hashUCS(const unsigned char * str)
 {
    unsigned long hash = 5381;
-   unsigned char *str = (unsigned char *) joe_String_getCharStar(strKey);
    int c;
 
    while ((c = *(str++)))
       hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
 
    return hash;
+}
+
+unsigned int
+joe_HashMap_hash(joe_String strKey)
+{
+   return joe_HashMap_hashUCS((unsigned char *) joe_String_getCharStar(strKey));
 }
 /*
 static unsigned int
@@ -193,14 +199,14 @@ hash (joe_String strKey)
 }
 */
 static joe_Object
-checkKey (joe_Object item, joe_Object theArray, joe_String strKey)
+checkKeyCS (joe_Object item, joe_Object theArray, const char * csKey)
 {
    joe_String itmKey;
    unsigned int sibling;
 
    for ( ; ; ) {
       itmKey = *JOE_AT(item, KEY);
-      if (!joe_String_compare (itmKey, strKey))
+      if (!strcmp(joe_String_getCharStar (itmKey), csKey))
          return item;
       sibling = JOE_INT(*JOE_AT(item, SIBLING));
       if (sibling)
@@ -208,6 +214,12 @@ checkKey (joe_Object item, joe_Object theArray, joe_String strKey)
       else
          return 0;
    }
+}
+
+static joe_Object
+checkKey (joe_Object item, joe_Object theArray, joe_String strKey)
+{
+   return checkKeyCS (item, theArray,joe_String_getCharStar (strKey));
 }
 
 static void
@@ -307,8 +319,8 @@ joe_HashMap_put (joe_HashMap self, joe_Object key, joe_Object value,
 }
 
 int
-joe_HashMap_getHash (joe_HashMap self, unsigned int hash,
-                     joe_String strKey, joe_Object *retval)
+joe_HashMap_getHashCS (joe_HashMap self, unsigned int hash,
+                       const char* csKey, joe_Object *retval)
 {
    if (self) {
       int len = JOE_INT (*JOE_AT(self, LEN));
@@ -316,7 +328,7 @@ joe_HashMap_getHash (joe_HashMap self, unsigned int hash,
       unsigned int idx = hash % len;
       joe_Object item = *JOE_AT(theArray, idx);
       if (item) {
-         item = checkKey (item, theArray, strKey);
+         item = checkKeyCS (item, theArray, csKey);
          if (item) {
             *retval = *JOE_AT(item, VALUE);
             return JOE_TRUE;
@@ -324,6 +336,25 @@ joe_HashMap_getHash (joe_HashMap self, unsigned int hash,
       }
    }
    return JOE_FALSE;
+}
+
+int
+joe_HashMap_getHash (joe_HashMap self, unsigned int hash,
+                     joe_String strKey, joe_Object *retval)
+{
+   return joe_HashMap_getHashCS(self,hash,joe_String_getCharStar(strKey),retval);
+}
+
+int
+joe_HashMap_getCS (joe_HashMap self, const char * csKey, joe_Object *retval)
+{
+   int Return = JOE_FALSE;
+   if (self) {
+      Return = joe_HashMap_getHashCS (self,
+                                 joe_HashMap_hashUCS ((unsigned char *)csKey),
+                                 csKey, retval);
+   }
+   return Return;
 }
 
 int

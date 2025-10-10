@@ -164,7 +164,7 @@ my_exec_sub (joe_Object self, int startMsg, joe_Object *retval)
    lretval = 0;
    for (i = startMsg; i < len; i++) {
       obj = *JOE_AT(messages,i);
-      if (joe_Object_instanceOf (obj, &joe_Message_Class)) {
+      if (JOE_ISCLASS (obj, &joe_Message_Class)) {
          lretval = 0;
          if (debug)
             rc = joe_Message_debug (obj, &debug, self, &lretval);
@@ -211,7 +211,7 @@ my_exec_sub (joe_Object self, int startMsg, joe_Object *retval)
          } else {
             joe_Object_transfer(retval, &lretval);
          }
-      } else if (joe_Object_instanceOf (obj, &joe_Variable_Class)) {
+      } else if (JOE_ISCLASS (obj, &joe_Variable_Class)) {
          rc = joe_Block_getVarValue(self, obj, retval);
       } else {
          joe_Object_assign (retval, obj);
@@ -963,13 +963,10 @@ joe_Block
 joe_JOEObject_getReceiver (joe_JOEObject self, const char *selector)
 {
    joe_JOEObject super;
-   joe_String sel = 0;
    joe_Variable var = 0;
    joe_HashMap variables = *JOE_AT(self,VARIABLES);
 
-   joe_Object_assign (&sel, joe_String_New(selector));
-   joe_HashMap_get (variables, sel, &var);
-   joe_Object_assign (&sel, 0);
+   joe_HashMap_getCS (variables, selector, &var);
 
    if (var != 0) {
       joe_Object receiver = joe_Block_varValue (self,var);
