@@ -35,8 +35,9 @@ typedef struct s_Selector {
 static joe_Method *blkExecMthd;
 
 #define SELECTOR 0
+#define LASTRCVR 1
 
-static char *variables[] = { "selector", 0 };
+static char *variables[] = { "selector", "lastRcvr", 0 };
 
 
 static int
@@ -73,6 +74,7 @@ joe_Selector_New (char *name, int argc)
    strcpy (mname, name);
    selector->argc = argc;
    joe_Object_assign (JOE_AT(self, SELECTOR), mem);
+   joe_Object_assign (JOE_AT(self, LASTRCVR), 0);
    blkExecMthd = joe_Object_getMethod (&joe_Block_Class, "exec");
 
    return self;
@@ -81,27 +83,26 @@ joe_Selector_New (char *name, int argc)
 int
 joe_Selector_getArgc (joe_Selector self)
 {
-   joe_Memory mem = *JOE_AT(self, 0);
-   Selector *selector = (Selector*) JOE_MEM (mem) ;
-
-   return selector->argc;
+   return ((Selector*) JOE_MEM (*JOE_AT(self, SELECTOR)))->argc;
 }
-
 
 int
 joe_Selector_invoke (joe_Object self, joe_Object receiver,
                      int argc, joe_Object *argv, joe_Object *retval)
 {
-   joe_Memory mem = *JOE_AT(self, 0);
-   Selector *selector = (Selector*) JOE_MEM (mem);
+   Selector *selector = (Selector*) JOE_MEM (*JOE_AT(self, SELECTOR));
 
    if (selector->argClazz == receiver->clazz) {
       selector->actualRcvr = receiver;
       return selector->method (selector->actualRcvr, argc, argv, retval);
+   } else if (*JOE_AT(self, LASTRCVR) == receiver) {
+      return selector->method (selector->actualRcvr, argc, argv, retval);
    } else {
-      joe_Class *clazz = joe_Object_getClass (receiver);
+      joe_Class *clazz = receiver->clazz;
       char *selName;
       joe_Method *mthd;
+
+      joe_Object_assign(JOE_AT(self, LASTRCVR),receiver);
 
       if (clazz == &joe_WeakReference_Class) {
          receiver = joe_WeakReference_get(receiver);
@@ -137,6 +138,7 @@ joe_Selector_invoke (joe_Object self, joe_Object receiver,
                       selName, clazz->name);
          }
          joe_Object_assign (retval, joe_Exception_New (buffer));
+         joe_Object_assign(JOE_AT(self, LASTRCVR), 0);
          selector->actualRcvr = 0;
          selector->argClazz = 0;
          return JOE_FAILURE;
@@ -170,7 +172,7 @@ joe_Selector_invoke (joe_Object self, joe_Object receiver,
 char *
 joe_Selector_name (joe_Object self)
 {
-   joe_Memory mem = *JOE_AT(self, 0);
+   joe_Memory mem = *JOE_AT(self, SELECTOR);
    Selector *selector = (Selector*) JOE_MEM (mem) ;
    return ((char *) selector) + sizeof(Selector);
 }
@@ -180,7 +182,7 @@ static char buffer[128];
 char *
 joe_Selector_toString (joe_Object self)
 {
-   joe_Memory mem = *JOE_AT(self, 0);
+   joe_Memory mem = *JOE_AT(self, SELECTOR);
    Selector *selector = (Selector*) JOE_MEM (mem);
 
    snprintf (buffer, sizeof(buffer), "%s#%d",

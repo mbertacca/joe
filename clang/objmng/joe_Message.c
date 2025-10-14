@@ -59,7 +59,7 @@ joe_Message_clone (joe_Message self, joe_Block parent)
 {
    joe_Message Return = Return = joe_Object_clone (self);
    joe_Array rpnOld = *JOE_AT(self, RPN), rpnNew;
-   int rpnc = joe_Array_length (rpnOld);
+   int rpnc = JOE_LEN (rpnOld);
    joe_Object *rpnItOld;
    int i;
 
@@ -79,7 +79,7 @@ int
 joe_Message_exec (joe_Object self, joe_Block block, joe_Object *retval)
 {
    joe_Array rpn = *JOE_AT(self, RPN);
-   int rpnc = joe_Array_length (rpn);
+   int rpnc = JOE_LEN (rpn);
    int i;
    int rc = JOE_SUCCESS;
    joe_Object rpnItem;
@@ -109,17 +109,28 @@ joe_Message_exec (joe_Object self, joe_Block block, joe_Object *retval)
          receiver = execStack[topIdx];
          lretval = 0;
          rc = joe_Selector_invoke (rpnItem, receiver, argc, argv, &lretval);
-         for ( ;topIdx < execIdx; execIdx--)
-             joe_Object_assign (&execStack[execIdx], 0);
-         joe_Object_transfer (&execStack[execIdx++], &lretval);
+         for ( --execIdx; topIdx < execIdx; execIdx--) {
+             if (execStack[execIdx]->refcount < 2)
+                joe_Object_assign (&execStack[execIdx], 0);
+             else
+                execStack[execIdx]->refcount--;
+         }
+         if (execStack[execIdx]->refcount < 2)
+            joe_Object_transfer (&execStack[execIdx++], &lretval);
+         else {
+            execStack[execIdx]->refcount--;
+            execStack[execIdx++] = lretval;
+         }
       } else if (JOE_ISCLASS (rpnItem, &joe_Variable_Class)) {
-         joe_Object_assign (&execStack[execIdx++],
-                            joe_Block_varValue(block, rpnItem));
+         execStack[execIdx] = joe_Block_varValue(block, rpnItem);
+         execStack[execIdx++]->refcount++;
       } else {
-         joe_Object_assign (&execStack[execIdx++], rpnItem);
+         rpnItem->refcount++;
+         execStack[execIdx++] = rpnItem;
       }
    }
-   joe_Object_transfer (retval, &execStack[--execIdx]);
+   *retval = execStack[--execIdx];
+   execStack[execIdx] = 0;
    if (rc == JOE_SUCCESS) {
       if (assignee) {
          joe_Block_setVarValue (block, assignee, *retval);
@@ -230,7 +241,7 @@ joe_Message_isLabel (joe_Message self, joe_String name)
 {
    joe_Array rpn = *JOE_AT(self, RPN);
 
-   if (joe_Array_length (rpn) == 1) {
+   if (JOE_LEN (rpn) == 1) {
        joe_Object obj = *JOE_AT(rpn, 0);
        if (JOE_ISCLASS (obj, &joe_String_Class) &&
            joe_String_compare (obj, name) == 0)
@@ -288,7 +299,7 @@ joe_Message_toString(joe_Message self, joe_String *retval)
 {
    joe_Array rpn = *JOE_AT(self, RPN);
    joe_Variable assignee = *JOE_AT(self,ASSIGNEE);
-   int rpnc = joe_Array_length (rpn);
+   int rpnc = JOE_LEN (rpn);
    joe_Object obj;
    int i;
    struct s_srcInfo *srcInfo = (struct s_srcInfo *)

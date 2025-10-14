@@ -65,7 +65,7 @@ hasNext (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    if (argc == 0) {
       int64_t curidx = joe_Integer_value(*joe_Object_at(self, CURIDX));
-      int64_t arsize =  joe_Array_length (*joe_Object_at(self, ARRAY));
+      int64_t arsize =  JOE_LEN (*joe_Object_at(self, ARRAY));
       if (curidx < arsize)
          joe_Object_assign(retval, joe_Boolean_New_true());
       else
@@ -90,7 +90,7 @@ next (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    if (argc == 0) {
       int64_t curidx = joe_Integer_value(*JOE_AT(self, CURIDX));
       joe_Array array = *JOE_AT(self, ARRAY);
-      int64_t arsize =  joe_Array_length (array);
+      int64_t arsize =  JOE_LEN (array);
 
       if (curidx < arsize) {
          joe_Object_assign (retval, *JOE_AT (array, curidx));

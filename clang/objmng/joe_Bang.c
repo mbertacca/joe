@@ -231,9 +231,9 @@ Switch_case (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
          rc = JOE_SUCCESS;
          if (cfrt1 == 0)
             if (cfrt2 == 0)
-               or = joe_Boolean_New_true();
+               joe_Object_assign (&or, joe_Boolean_New_true());
             else
-               or = joe_Boolean_New_false();
+               joe_Object_assign (&or, joe_Boolean_New_false());
          else {
             joe_Object_assign (&or,*joe_Object_at (self,SW_PREV_COND));
             if (joe_Boolean_isFalse (or)) {
@@ -256,6 +256,7 @@ Switch_case (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
                   joe_Object_assign (joe_Object_at (self,SW_PREV_COND), or);
                }
                joe_Object_assign(retval, self);
+               joe_Object_assign(&or, 0);
                return JOE_SUCCESS;
             } else {
                if (joe_Object_instanceOf (argv[1], &joe_Block_Class)) {
@@ -269,18 +270,22 @@ Switch_case (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
                                            Return);
                         joe_Object_assign(retval, self);
                         joe_Object_assign(&Return, 0);
+                        joe_Object_assign(&or, 0);
                         return JOE_SUCCESS;
                      } else {
                         joe_Object_assign(retval, Return);
                         joe_Object_assign(&Return, 0);
+                        joe_Object_assign(&or, 0);
                         return JOE_FAILURE;
                      }
                   } else {
                      joe_Object_assign(retval, self);
+                     joe_Object_assign(&or, 0);
                      return JOE_SUCCESS;
                   }
                } else {
                   joe_Object_assign(retval, joe_Exception_New ("case: invalid block"));
+                  joe_Object_assign(&or, 0);
                   return JOE_FAILURE;
                }
             }
@@ -561,7 +566,7 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_StringBuilder msg = 0;
    joe_Object_assign (&msg, joe_StringBuilder_New ());
-   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.77 ");
+   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.78 ");
    joe_StringBuilder_appendCharStar (msg, __DATE__);
 #ifdef WIN32
    joe_StringBuilder_appendCharStar (msg, " Windows");
