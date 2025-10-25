@@ -39,6 +39,13 @@ struct s_joe_Object {
    union ptr data;
 };
 
+# define CLS_SELECTOR 1
+# define CLS_VARIABLE 2
+# define VAR_DEPTH 2
+# define VAR_INDEX 3
+# define BLK_PARENT 1
+# define BLK_VARVAL 7
+# define SEL_ARGC 2
 
 #define JOE_ISCLASS(self,clzz) ((self)->clazz==clzz)
 #define JOE_AT(self,index) (&(self)->data.obj[index])

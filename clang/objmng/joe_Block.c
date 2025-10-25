@@ -53,13 +53,13 @@ struct s_argv {
 };
 
 # define MESSAGES 0
-# define PARENT 1
+# define PARENT BLK_PARENT
 # define NAME 2
 # define ARGS_NAMES 3
 # define SUPER 4
 # define BANG 5
 # define VARIABLES 6
-# define VARCONTENT 7
+# define VARCONTENT BLK_VARVAL
 # define ARGS 8
 
 static char *varvalues[] = { "messages", "parent", "name",
@@ -205,12 +205,11 @@ my_exec_sub (joe_Object self, int startMsg, joe_Object *retval)
                joe_Object_transfer(retval, &lretval);
             }
             break;
-         } else if (joe_Object_instanceOf (lretval, &joe_Gosub_Class)) {
-             if ((rc = gosub (self, lretval, retval)) != JOE_SUCCESS)
-                break;
-         } else {
+         } else if (JOE_ISCLASS (lretval, &joe_Gosub_Class)) {
+            if ((rc = gosub (self, lretval, retval)) != JOE_SUCCESS)
+               break;
+         } else
             joe_Object_transfer(retval, &lretval);
-         }
       } else if (JOE_ISCLASS (obj, &joe_Variable_Class)) {
          rc = joe_Block_getVarValue(self, obj, retval);
       } else {

@@ -26,8 +26,8 @@
 
 # define NAME    0
 # define STATUS  1
-# define DEPTH   2
-# define INDEX   3
+# define DEPTH   VAR_DEPTH
+# define INDEX   VAR_INDEX
 static char *item_vars[] = { "name", "status","depth", "index",  0 };
 
 static joe_Method mthds[] = {
@@ -57,7 +57,6 @@ joe_Variable_New_String (joe_String name, int depth, int index) {
    joe_Object_assign (JOE_AT(self, STATUS), joe_int_New(ST_NEW));
    joe_Object_assign (JOE_AT(self, DEPTH), joe_int_New(depth));
    joe_Object_assign (JOE_AT(self, INDEX), joe_int_New(index));
-
    return self;
 }
 /*

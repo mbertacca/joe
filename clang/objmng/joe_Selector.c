@@ -29,15 +29,15 @@ typedef struct s_Selector {
    int (*method)(JOE_METHOD_ARGS);
    joe_Object actualRcvr;
    joe_Class *argClazz;
-   int argc;
 } Selector;
 
 static joe_Method *blkExecMthd;
 
 #define SELECTOR 0
 #define LASTRCVR 1
+#define ARGC SEL_ARGC
 
-static char *variables[] = { "selector", "lastRcvr", 0 };
+static char *variables[] = { "selector", "lastRcvr", "argc", 0 };
 
 
 static int
@@ -72,9 +72,9 @@ joe_Selector_New (char *name, int argc)
    Selector *selector = (Selector*) joe_Object_getMem (mem);
    char *mname = ((char *) selector) + sizeof(Selector);
    strcpy (mname, name);
-   selector->argc = argc;
    joe_Object_assign (JOE_AT(self, SELECTOR), mem);
    joe_Object_assign (JOE_AT(self, LASTRCVR), 0);
+   joe_Object_assign (JOE_AT(self, ARGC), joe_int_New(argc));
    blkExecMthd = joe_Object_getMethod (&joe_Block_Class, "exec");
 
    return self;
@@ -83,7 +83,7 @@ joe_Selector_New (char *name, int argc)
 int
 joe_Selector_getArgc (joe_Selector self)
 {
-   return ((Selector*) JOE_MEM (*JOE_AT(self, SELECTOR)))->argc;
+   return JOE_INT(*JOE_AT(self, ARGC));
 }
 
 int
@@ -187,6 +187,6 @@ joe_Selector_toString (joe_Object self)
 
    snprintf (buffer, sizeof(buffer), "%s#%d",
             ((char *) selector) + sizeof(Selector),
-            selector->argc);
+            JOE_INT(*JOE_AT(self, ARGC)));
    return buffer;
 }

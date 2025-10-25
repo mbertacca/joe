@@ -47,8 +47,8 @@ struct s_srcInfo {
 # define RPN       2
 
 static joe_Object execStack[4096];
-static int execIdx = 0;
-static int execSize = sizeof (execStack) / sizeof(execStack[0]);
+static joe_Object *execPnt = execStack;
+static joe_Object *execMax = execStack + 4096;
 
 static char *variables[] = {"srcInfo", "assignee", "rpn", 0};
 
@@ -81,10 +81,11 @@ joe_Message_exec (joe_Object self, joe_Block block, joe_Object *retval)
    joe_Array rpn = *JOE_AT(self, RPN);
    int rpnc = JOE_LEN (rpn);
    int i;
+   int varIndex, varDepth;
    int rc = JOE_SUCCESS;
    joe_Object rpnItem;
-   int idx0 = execIdx;
-   int topIdx = 0;
+   joe_Object *pnt0 = execPnt;
+   joe_Object *topPnt = 0;
    joe_Object receiver;
    int argc;
    joe_Object *argv;
@@ -93,7 +94,7 @@ joe_Message_exec (joe_Object self, joe_Block block, joe_Object *retval)
 
     /* joe_Message_toString(self); */
 
-   if (execIdx + rpnc > execSize) {
+   if (execPnt + rpnc > execMax) {
       joe_Object_assign(retval, joe_Exception_New ("Stack Overflow Error"));
       return JOE_FAILURE;
    }
@@ -101,44 +102,69 @@ joe_Message_exec (joe_Object self, joe_Block block, joe_Object *retval)
    for (i = 0; i < rpnc && rc == JOE_SUCCESS; i++) {
       rpnItem = *JOE_AT(rpn, i);
       if (JOE_ISCLASS (rpnItem, &joe_Selector_Class)) {
-         argc = joe_Selector_getArgc (rpnItem);
-         topIdx = execIdx;
-         topIdx -= argc;
-         argv = &execStack[topIdx];
-         topIdx --;
-         receiver = execStack[topIdx];
+         argc = JOE_INT(*JOE_AT(rpnItem,SEL_ARGC));
+         topPnt = execPnt;
+         topPnt -= argc;
+         argv = topPnt;
+         topPnt--;
+         receiver = *topPnt;
          lretval = 0;
          rc = joe_Selector_invoke (rpnItem, receiver, argc, argv, &lretval);
-         for ( --execIdx; topIdx < execIdx; execIdx--) {
-             if (execStack[execIdx]->refcount < 2)
-                joe_Object_assign (&execStack[execIdx], 0);
+         for ( --execPnt; topPnt < execPnt; execPnt--)
+             if ((*execPnt)->refcount < 2)
+                joe_Object_assign (execPnt, 0);
              else
-                execStack[execIdx]->refcount--;
-         }
-         if (execStack[execIdx]->refcount < 2)
-            joe_Object_transfer (&execStack[execIdx++], &lretval);
+                (*execPnt)->refcount--;
+         if ((*execPnt)->refcount < 2)
+            joe_Object_transfer (execPnt++, &lretval);
          else {
-            execStack[execIdx]->refcount--;
-            execStack[execIdx++] = lretval;
+            (*execPnt)->refcount--;
+            *execPnt = lretval;
+            execPnt++;
          }
       } else if (JOE_ISCLASS (rpnItem, &joe_Variable_Class)) {
-         execStack[execIdx] = joe_Block_varValue(block, rpnItem);
-         execStack[execIdx++]->refcount++;
+/*
+         *execPnt = joe_Block_varValue(block, rpnItem);
+         (*execPnt)->refcount++;
+         execPnt++;
+*/
+         varIndex = JOE_INT(*JOE_AT(rpnItem, VAR_INDEX));
+         if (varIndex == 0)
+            *execPnt = block;
+         else {
+            varDepth = JOE_INT(*JOE_AT(rpnItem, VAR_DEPTH));
+            joe_Block block0 = block;
+            for ( ;varDepth > 0; varDepth--)
+               block0 = *JOE_AT(block0, BLK_PARENT);
+            *execPnt = *JOE_AT( *JOE_AT(block0, BLK_VARVAL), varIndex);
+         }
+         (*execPnt)->refcount++;
+         execPnt++;
       } else {
          rpnItem->refcount++;
-         execStack[execIdx++] = rpnItem;
+         *execPnt = rpnItem;
+         execPnt++;
       }
    }
-   *retval = execStack[--execIdx];
-   execStack[execIdx] = 0;
+   execPnt--;
+   *retval = *execPnt;
+   *execPnt = 0;
    if (rc == JOE_SUCCESS) {
       if (assignee) {
+/*
          joe_Block_setVarValue (block, assignee, *retval);
+*/
+         varIndex = JOE_INT(*JOE_AT(assignee, VAR_INDEX));
+         varDepth = JOE_INT(*JOE_AT(assignee, VAR_DEPTH));
+         joe_Block block0 = block;
+         for ( ; varDepth > 0; varDepth--)
+            block0 = *JOE_AT(block0, BLK_PARENT);
+         joe_Object_assign (JOE_AT(*JOE_AT(block0,BLK_VARVAL),varIndex),*retval);
       }
    } else {
-      for ( ; execIdx >= idx0; execIdx--)
-          joe_Object_assign (&execStack[execIdx], 0);
-      execIdx++;
+      for ( ; execPnt >= pnt0; execPnt--)
+          joe_Object_assign (execPnt, 0);
+      execPnt++;
       if (!joe_Object_instanceOf(*retval, &joe_BreakBlockException_Class)) {
          struct s_srcInfo *srcInfo;
          srcInfo = (struct s_srcInfo *)
@@ -147,12 +173,14 @@ joe_Message_exec (joe_Object self, joe_Block block, joe_Object *retval)
                               srcInfo->fileName, srcInfo->row, srcInfo->col);
       }
    }
-   if (idx0 != execIdx) { printf ("\nErrore Stack %d != %d\n", idx0, execIdx); }
+/*
+   if (pnt0 != execPnt) { printf ("\nErrore Stack!!!\n"); }
    if (*retval && JOE_ISCLASS ((*retval), &joe_WeakReference_Class)) {
       lretval = 0;
       joe_Object_assign (&lretval, joe_WeakReference_get (*retval));
       joe_Object_transfer (retval, &lretval);
    }
+*/
    return rc;
 }
 

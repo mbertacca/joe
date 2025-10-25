@@ -566,7 +566,7 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_StringBuilder msg = 0;
    joe_Object_assign (&msg, joe_StringBuilder_New ());
-   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.78 ");
+   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.79 ");
    joe_StringBuilder_appendCharStar (msg, __DATE__);
 #ifdef WIN32
    joe_StringBuilder_appendCharStar (msg, " Windows");
@@ -925,9 +925,11 @@ _for(joe_Object self, int argc, joe_Object* argv, joe_Object* retval)
             joe_Object_assign(&lretval, 0);
             return JOE_FAILURE;
          }
-      } else {
-         joe_Object_assign (&arg, joe_Integer_add(arg, step));
-      }
+      } else
+         if (arg->refcount == 1)
+            JOE_INTEGER(arg) += step;
+         else
+            joe_Object_assign (&arg, joe_Integer_add(arg, step));
    }
    joe_Object_assign(&arg, 0);
    joe_Object_assign(retval, 0);
