@@ -1,0 +1,7 @@
+lib <- !getOSType; startsWith "Win" ifTrue {!loadSO "msvcrt.dll"},{!loadSO ""}.
+str <- "ABCDEFG".
+a := lib call "strlen",str.
+!println "--->",a," ",(a intValue).
+a := lib call "strstr",str,"D".
+!println "--->",a," ",(a stringValue)," ",(a intValue; toHexString).
+

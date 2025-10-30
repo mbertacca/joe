@@ -79,8 +79,7 @@ stringValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 /**
 ## intValue
 
-Interprets this pointer as an native int
-and returns a Integer containing that number.
+Interprets this pointer as an Integer containing that number.
 
 */
 
@@ -88,41 +87,17 @@ static int
 intValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_Object_assign(retval,
-                     joe_Integer_New (*((int *) joe_Object_getMem(self))));
+                joe_Integer_New ((int64_t)*((void **) joe_Object_getMem(self))));
    return JOE_SUCCESS;
 }
 
 /**
 ## longValue
 
-Interprets this pointer as an native long
-and returns a Integer containing that number.
+Interprets this pointer as an Integer containing that number.
 
 */
 
-static int
-longValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
-{
-   joe_Object_assign(retval,
-                     joe_Integer_New (*((long *) joe_Object_getMem(self))));
-   return JOE_SUCCESS;
-}
-
-/**
-## shortValue
-
-Interprets this pointer as an native short
-and returns a Integer containing that number.
-
-*/
-
-static int
-shortValue (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
-{
-   joe_Object_assign(retval,
-                     joe_Integer_New (*((short *) joe_Object_getMem(self))));
-   return JOE_SUCCESS;
-}
 
 /**
 ## isNull
@@ -163,9 +138,8 @@ displace (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 
 static joe_Method mthds[] = {
    {"isNull", isNull },
-   {"shortValue", shortValue },
    {"intValue", intValue },
-   {"longValue", longValue },
+   {"longValue", intValue },
    {"stringValue", stringValue },
    {"toString", toString },
    {"displace", displace },
