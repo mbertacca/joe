@@ -25,6 +25,19 @@ The syntax can be summarized in the following 2 lines:
 
 *block* is an object itself therefore it can be put wherever an object can. Parenthesis can be used to alter the default left-to-right evaluation  order.
 
+As an example the following script prints the factorial of 6:
+```
+fact <- {:n.
+   n > 1 ifTrue {
+      n * (fact exec (n - 1)).
+   },{
+      1.
+   }.
+}.
+             
+!println (fact exec 6).
+```
+
 I also developed a C language version that could be used in small devices (automation, robotics, Internet of Things) in order to allow the use of an object oriented interpreter with garbage collection and a small memory footprint. It retains almost all the features of the Java version however it miss the Java objects library. It is compiled on Linux and Windows, but it should be easy to compile on any other platform.
 
 Java and all Java-based trademarks and logos are trademarks or registered trademarks of Oracle and/or its affiliates.
