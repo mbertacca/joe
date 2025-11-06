@@ -1,0 +1,10 @@
+cat:args.
+
+args length; > 1 ifTrue {
+   Paths <- !getClassRef"java.nio.file.Paths".
+   Files <- !getClassRef"java.nio.file.Files".
+   cs <- !getClassRef "java.nio.charset.Charset" defaultCharset.
+   !foreach (Files readAllLines (Paths get (args get 1),""),cs),{:line.
+      !println line.
+   }.
+}.
