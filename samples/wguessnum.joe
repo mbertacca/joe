@@ -1,29 +1,33 @@
-answer := "".
+title <- "Think of a number".
+answer := 0.
 high := 1023.
 low := 1.
 ntry := 1.
 
-!showMessageDialog "Think to a number between ",low," and ",high,
-                                    ": I can guess it using 10 tries at most".
+OptionPane <- !getClassRef "javax.swing.JOptionPane".
+OptionPane showMessageDialog (),("Think of a number between "+low+" and "+high+
+                                 ": I can guess it using 10 tries at most"),
+                                 title, -1.
 
-!while { answer <> "c" },
+options <- !array "High","Low","Correct".
+!while { answer <> 2 },
 {
    try := ((high - low) / 2 + low).
-   answer := !showInputDialog "My guess is ", try, (!chr(10)),
-                            "Is the guess (c)orrect, too (h)igh or too (l)ow?".
-   !if (answer = "c"), {
-      !showMessageDialog "I guessed the number using ",ntry," guesses".
-   } , {
-      !if (answer = "h"), {
-         high := try.
-         ntry := (ntry + 1).
-      } , {
-         !if (answer = "l"), {
-            low := try.
-            ntry := (ntry + 1).
-         } , {
-            !showMessageDialog "Answer with 'c', 'h' or 'l' please".
-         } 
-      }
+   answer := OptionPane showOptionDialog (), ("My guess is " + try),
+                                             title, 
+                                             0, 3, (), options, (options get 0).
+   !switch answer
+   case 0,{
+      high := try.
+      ntry := (ntry + 1).
    }
+   case 1,{
+      low := try.
+      ntry := (ntry + 1).
+   }
+   default {
+      OptionPane showMessageDialog (),
+                 ("I guessed the number using "+ntry+" guess(es)"),
+                                 title, -1.
+   }.
 }.
