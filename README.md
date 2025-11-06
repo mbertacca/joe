@@ -54,6 +54,43 @@ args length; > 1 ifTrue {
    }.
 }.
 ```
+The last example uses a simple Swing GUI
+```
+title <- "Think of a number".
+answer := 0.
+high := 1023.
+low := 1.
+ntry := 1.
+
+PLAIN_MESSAGE <- !getStaticField "javax.swing.JOptionPane","PLAIN_MESSAGE".
+QUESTION_MESSAGE <- !getStaticField "javax.swing.JOptionPane","QUESTION_MESSAGE".
+OptionPane <- !getClassRef "javax.swing.JOptionPane".
+OptionPane showMessageDialog (),("Think of a number between "+low+" and "+high+
+                                 ": I can guess it using 10 tries at most"),
+                                 title, PLAIN_MESSAGE.
+
+options <- !array "High","Low","Correct".
+!while { answer <> 2 },
+{
+   try := ((high - low) / 2 + low).
+   answer := OptionPane showOptionDialog (), ("My guess is " + try), title, 
+                          0, QUESTION_MESSAGE, (), options, (options get 0).
+   !switch answer
+   case 0,{
+      high := try.
+      ntry := (ntry + 1).
+   }
+   case 1,{
+      low := try.
+      ntry := (ntry + 1).
+   }
+   default {
+      OptionPane showMessageDialog (),
+                 ("I guessed the number using "+ntry+" guess(es)"),
+                                 title, PLAIN_MESSAGE.
+   }.
+}.
+```
 You can find the tutorial [here](https://github.com/mbertacca/joe/blob/master/doc/JOE%20basic%20tutorial.pdf)
 
 I also developed a C language version that could be used in small devices (automation, robotics, Internet of Things) in order to allow the use of an object oriented interpreter with garbage collection and a small memory footprint. It retains almost all the features of the Java version however it miss the Java objects library. It is compiled on Linux and Windows, but it should be easy to compile on any other platform.
