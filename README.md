@@ -37,6 +37,20 @@ fact <- {:n.
              
 !println (fact exec 6).
 ```
+The following script prints the contents of the file given as an argument using Java classes.
+```
+:args.
+
+args length; > 1 ifTrue {
+   Paths <- !getClassRef"java.nio.file.Paths".
+   Files <- !getClassRef"java.nio.file.Files".
+   cs <- !getClassRef "java.nio.charset.Charset" defaultCharset.
+   !foreach (Files readAllLines (Paths get (args get 1),""),cs),{:line.
+      !println line.
+   }.
+}.
+```
+You can find the tutorial [here](https://github.com/mbertacca/joe/blob/master/doc/JOE%20basic%20tutorial.pdf)
 
 I also developed a C language version that could be used in small devices (automation, robotics, Internet of Things) in order to allow the use of an object oriented interpreter with garbage collection and a small memory footprint. It retains almost all the features of the Java version however it miss the Java objects library. It is compiled on Linux and Windows, but it should be easy to compile on any other platform.
 
