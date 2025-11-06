@@ -15,9 +15,8 @@ options <- !array "High","Low","Correct".
 !while { answer <> 2 },
 {
    try := ((high - low) / 2 + low).
-   answer := OptionPane showOptionDialog (), ("My guess is " + try),
-                                             title, 
-                                             0, 3, (), options, (options get 0).
+   answer := OptionPane showOptionDialog (), ("My guess is " + try), title, 
+                          0, QUESTION_MESSAGE, (), options, (options get 0).
    !switch answer
    case 0,{
       high := try.
