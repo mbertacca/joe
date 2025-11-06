@@ -25,7 +25,11 @@ The syntax can be summarized in the following 2 lines:
 
 *block* is an object itself therefore it can be put wherever an object can. Parenthesis can be used to alter the default left-to-right evaluation  order.
 
-As an example the following script prints the factorial of 6:
+This is an example of an arithmetic expression.
+```
+result := 2 * (3 + 4).
+```
+The following script prints the factorial of 6:
 ```
 fact <- {:n.
    n > 1 ifTrue {
