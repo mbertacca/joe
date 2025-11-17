@@ -1,0 +1,302 @@
+/*
+ joestone benchmark brogram
+
+  a translation in JOE of the Dhrystone benchmark by
+  Reinhold P. Weicker,  CACM Vol 27, No 10, 10/84 pg. 1013.
+
+*/
+
+:args.
+
+DEFULT_LOOPS <- 100000.
+
+Number_Of_Runs <- args length; > 1 and { () <> (args get 1 intValue)} ifTrue {
+  args get 1 intValue.
+},{
+  DEFULT_LOOPS.
+}.
+
+!println (!version).
+
+System <- !version; indexOf "native" > 0 ifTrue {
+   {
+      currentTimeMillis <- { !newInstance"joe_Date" getTime }.
+   }.
+},{.
+   {
+      currentTimeMillis <- { !getClassRef "java.lang.System" currentTimeMillis }.
+   }.
+} new.
+
+Ident_1 <- 0.
+Ident_2 <- 1.
+Ident_3 <- 2.
+Ident_4 <- 3.
+Ident_5 <- 4.
+
+Record_Type := {
+   Record_Comp   := .
+   Discr         := 0.
+   Enum_Comp     := 0.
+   Int_Comp      := 0.
+   String_Comp   := "".
+   Enum_Comp_2   := 0.
+   String_Comp_2 := "".
+   Char_Comp_1   := "".
+   Char_Comp_2   := "".
+
+   set_Record_Comp <- {:aVal. Record_Comp := aVal }.
+   set_Discr       <- {:aVal. Discr       := aVal }.
+   set_Enum_Comp   <- {:aVal. Enum_Comp   := aVal }.
+   set_Int_Comp    <- {:aVal. Int_Comp    := aVal }.
+   set_String_Comp <- {:aVal. String_Comp := aVal }.
+
+   get_Record_Comp <- { Record_Comp }.
+   get_Int_Comp    <- { Int_Comp }.
+   get_Discr       <- { Discr }.
+   get_Enum_Comp   <- { Enum_Comp }.
+}.
+
+Record_Glob := .
+Next_Record_Glob := .
+Int_Glob   := .
+Bool_Glob   := .
+Char_Glob_1 := .
+Char_Glob_2 := .
+Array_Glob_1 <- !newArray 128.
+Array_Glob_2 <- !newArray 128.
+!for 0,(Array_Glob_2 length; - 1),{:i.
+   Array_Glob_2 set i,(!newArray 128).
+   !for 0,(Array_Glob_2 get i length; - 1),{:j.
+      Array_Glob_2 get i set j, 0.
+   }.
+}.
+
+First_Record  <- Record_Type new.
+Second_Record <- Record_Type new.
+
+Func_3 <-{:Enum_Par_Val.
+   Enum_Loc := Enum_Par_Val.
+   Enum_Loc = Ident_3.
+}.
+
+Proc_6 <- {:Enum_Par_Val, Enum_Par_Ref.
+
+   Enum_Par_Ref set 0,Enum_Par_Val.
+
+   Func_3 exec Enum_Par_Val ifFalse {
+      Enum_Par_Ref set 0,Ident_4.
+   }.
+   !switch Enum_Par_Val
+   case Ident_1,{
+      Enum_Par_Ref set 0, Ident_1.
+   }
+   case Ident_2,{
+      Int_Glob > 100 ifTrue {
+         Enum_Par_Ref set 0, Ident_1.
+      },{
+         Enum_Par_Ref set 0, Ident_4.
+      }.
+   }
+   case Ident_3,{
+      Enum_Par_Ref set 0, Ident_2.
+   }
+   case Ident_4,{
+   }
+   case Ident_5,{
+      Enum_Par_Ref set 0,Ident_3.
+   }.
+}.
+
+Proc_7 <- {:Int_Par_Val1, Int_Par_Val2, Int_Par_Ref.
+    Int_Loc       := Int_Par_Val1 + 2.
+    Int_Par_Ref set 0,(Int_Par_Val2 + Int_Loc).
+}.
+
+Proc_3 <- {:Pointer_Par_Ref.
+   () <> Record_Glob ifTrue {
+      Pointer_Par_Ref := Record_Glob get_Record_Comp.
+   },{
+      Int_Glob := 100.
+   }.
+   Int_Comp_Ref := !array (Record_Glob get_Int_Comp).
+   Proc_7 exec 10, Int_Glob, Int_Comp_Ref.
+   Record_Glob set_Int_Comp (Int_Comp_Ref get 0).
+}.
+
+Proc_1 <- {:Pointer_Par_Val.
+   Next_Record := Pointer_Par_Val get_Record_Comp.
+
+   Pointer_Par_Val set_Record_Comp Record_Glob.
+
+   Pointer_Par_Val set_Int_Comp 5.
+
+   Next_Record set_Int_Comp  (Pointer_Par_Val get_Int_Comp).
+   Next_Record set_Record_Comp (Pointer_Par_Val get_Record_Comp).
+   Proc_3 exec (Next_Record get_Record_Comp).
+
+   Int_Ref := !array 0.
+
+   Next_Record get_Discr; = Ident_1 ifTrue {
+      Next_Record set_Int_Comp 6.
+      Int_Ref set 0,(Next_Record get_Enum_Comp).
+      Proc_6 exec (Pointer_Par_Val get_Enum_Comp), Int_Ref.
+      Next_Record set_Enum_Comp (Int_Ref get 0).
+      Next_Record set_Record_Comp (Record_Glob get_Record_Comp).
+      Int_Ref set 0,(Next_Record get_Int_Comp).
+      Proc_7 exec (Next_Record get_Int_Comp), 10, Int_Ref.
+      Next_Record set_Int_Comp (Int_Ref get 0).
+   },{
+      Pointer_Par_Val := Pointer_Par_Val getRecord_Comp.
+   }.
+}.
+
+Proc_4 <- {
+   Bool_Loc    :=  (Char_Glob_1 = "A").
+   Bool_Loc    := Bool_Loc or Bool_Glob.
+   Char_Glob_2 := "B".
+}.
+
+Proc_5 <- {
+   Char_Glob_1 := "A".
+   Bool_Glob   := <0>.
+}.
+
+
+Proc_8 <- {:Array_Par_1_Ref, Array_Par_2_Ref, Int_Par_Val_1, Int_Par_Val_2.
+   Int_Loc := .
+
+   Int_Loc := Int_Par_Val_1 + 5.
+   Array_Par_1_Ref set Int_Loc, Int_Par_Val_2.
+   Array_Par_1_Ref set (Int_Loc+1), (Array_Par_1_Ref get Int_Loc).
+   Array_Par_1_Ref set (Int_Loc+30), Int_Loc.
+
+   !for Int_Loc,(Int_Loc+1),{:Int_Index.
+       Array_Par_2_Ref get (Int_Loc) set (Int_Index),Int_Loc.
+   }.
+
+   Array_Par_2_Ref get (Int_Loc) set (Int_Loc - 1), 
+                    (Array_Par_2_Ref get (Int_Loc) get (Int_Loc - 1) + 1).
+   Array_Par_2_Ref get (Int_Loc+20) set (Int_Loc),
+                                        (Array_Par_1_Ref get Int_Loc).
+   Int_Glob := 5.
+}.
+
+Func_1 <- {:Char_Par_1_Val,Char_Par_2_Val.
+   Char_Loc_1 := Char_Par_1_Val.
+   Char_Loc_2 := Char_Loc_1.
+
+   Char_Loc_2 <> Char_Par_2_Val ifTrue {
+        Ident_1.
+   },{
+        Ident_2.
+   }.
+}.
+
+Func_2 <- {Func_2:String_Par_1_Ref,String_Par_2_Ref.
+    Char_Loc := "".
+
+   Int_Loc := 2.
+   !while {Int_Loc <= 2},{
+      Func_1 exec (String_Par_1_Ref at Int_Loc),
+                       (String_Par_2_Ref at (Int_Loc + 1)) = Ident_1 ifTrue {
+         Char_Loc := "A".
+         Int_Loc := Int_Loc + 1.
+      }.
+      Char_Loc >= "W" and (Char_Loc < "Z") ifTrue {
+         Int_Loc := 7.
+      }.
+      Char_Loc = "X" ifTrue {
+         <1>.
+         !break "Func_2".
+      }, {
+         String_Par_1_Ref > String_Par_2_Ref ifTrue {
+            Int_Loc := 7.
+            <1>.
+            !break "Func_2".
+         },{
+           <0>.
+           !break "Func_2".
+         }.
+      }.
+   }.
+}.
+
+Proc_2 <- {:Int_Par_Ref.
+   Int_Loc := Int_Par_Ref get 0 + 10.
+   Enum_Loc := 0.
+   {
+       Char_Glob_1 = "A" ifTrue {
+          Int_Loc := Int_Loc - 1.
+          Int_Par_Ref set 0,(Int_Loc - Int_Glob).
+          Enum_Loc := Ident_1.
+       }.
+    } doWhileTrue {Enum_Loc <> Ident_1}.
+}.
+
+execute <- {
+   Int_Loc_1 := 0.
+   Int_Loc_2 := 0.
+   Int_Loc_3 := 0.
+   Int_Loc_3_Ref := !array 0.
+   Int_Loc_1_Ref := !array 0.
+   Enum_Loc := !newArray 1.
+   String_Loc_1 := "".
+   String_Loc_2 := "".
+   begin_time := 0.
+   end_time := 0.
+   total_time := 0.
+   Run_Index := 0.
+   Meas_Index := 0.
+
+   Next_Record_Glob := Second_Record.
+   Record_Glob      := First_Record.
+   Record_Glob set_Record_Comp Next_Record_Glob.
+   Record_Glob set_Discr        Ident_1.
+   Record_Glob set_Enum_Comp    Ident_3.
+   Record_Glob set_Int_Comp     40.
+   Record_Glob set_String_Comp  "DHRYSTONE PROGRAM, SOME STRING".
+   String_Loc_1 := "DHRYSTONE PROGRAM, 1'ST STRING".
+
+   begin_time := System currentTimeMillis.
+
+   !for 1, Number_Of_Runs, {
+      Proc_5 exec.
+      Proc_4 exec.
+      Int_Loc_1 := 2.
+      Int_Loc_2 := 3.
+      String_Loc_2 := "DHRYSTONE PROGRAM, 2'ND STRING".
+
+      Enum_Loc set 0,Ident_2.
+      Bool_Glob := Func_2 exec String_Loc_1,String_Loc_2  not.
+
+      { Int_Loc_1 < Int_Loc_2 } whileTrue {
+         Int_Loc_3_Ref set 0,(5 * Int_Loc_1 - Int_Loc_2).
+         Proc_7 exec Int_Loc_1, Int_Loc_2, Int_Loc_3_Ref.
+         Int_Loc_1 := Int_Loc_1 + 1;
+      }.
+      Int_Loc_3 := Int_Loc_3_Ref get 0.
+      Proc_8 exec Array_Glob_1, Array_Glob_2, Int_Loc_1, Int_Loc_3.
+      Proc_1 exec Record_Glob.
+      !for ("A" charCodeAt),(Char_Glob_2 charCodeAt),{:Char_Index.
+         Enum_Loc get 0 = (Func_1 exec (Char_Index toChar), "C") ifTrue {
+            Proc_6 exec Ident_1, Enum_Loc.
+         }.
+      }.
+      Int_Loc_3 := Int_Loc_2 * Int_Loc_1.
+      Int_Loc_2 := Int_Loc_3 / Int_Loc_1.
+      Int_Loc_2 := 7 * (Int_Loc_3 - Int_Loc_2) - Int_Loc_1.
+
+      Int_Loc_1_Ref set 0,Int_Loc_1.
+      Proc_2 exec Int_Loc_1_Ref.
+      Int_Loc_1 := Int_Loc_1_Ref get 0.
+   }.
+
+   end_time := System currentTimeMillis.
+   total_time := end_time - begin_time.
+
+   !println "Runs=",Number_Of_Runs,", total time: ",total_time,"ms".
+   !println "Result: ", (Number_Of_Runs * 1000.0 / total_time)," dhrystone/sec.".
+}.
+
+execute exec.
