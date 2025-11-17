@@ -248,4 +248,10 @@ public class WString extends Wrapper {
    public WInteger charCodeAt () {
       return new WInteger (value.charAt(0));
    }
+/**
+ * Returns a char[] with the contents of this string
+ */
+   public char[] toCharArray () {
+      return value.toCharArray();
+   }
 }
