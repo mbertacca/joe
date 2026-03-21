@@ -184,6 +184,20 @@ public class WString extends Wrapper {
    public String toString() {
       return value;
    }
+   public byte[] getBytes() {
+      return value.getBytes();
+   }
+   public byte[] getBytes(java.nio.charset.Charset charset) {
+      return value.getBytes(charset);
+   }
+   public byte[] getBytes(String charsetName) throws Exception {
+      return value.getBytes(charsetName);
+   }
+   public void getChars(WInteger srcBegin, WInteger srcEnd,
+                        WCharArray dst, WInteger dstBegin) {
+      value.getChars (srcBegin.intValue(), srcEnd.intValue(),
+                      dst.getWrapped(), dstBegin.intValue());
+   }
 /**
  * Returns an integer if this string contains a valid representation,
  * null otherwise.

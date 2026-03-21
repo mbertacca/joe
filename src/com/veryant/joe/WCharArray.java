@@ -21,28 +21,28 @@ package com.veryant.joe;
 import java.util.Arrays;
 
 /**
- * This class implements a JOE array ans it is a wrapper of a Java byte array.
+ * This class implements a JOE array ans it is a wrapper of a Java char array.
 */
 
-public class WByteArray extends Wrapper {
-   private byte[] value;
+public class WCharArray extends Wrapper {
+   private char[] value;
 
-   public WByteArray (byte[] array) {
+   public WCharArray (char[] array) {
       value = array;
    }
-   public WByteArray (WNumber len) {
-      value = new byte[len.intValue()];
+   public WCharArray (WNumber len) {
+      value = new char[len.intValue()];
    }
-   public WByteArray (int len) {
-      value = new byte[len];
+   public WCharArray (int len) {
+      value = new char[len];
    }
    public Type type() {
-      return Type.BYTE_ARRAY;
+      return Type.CHAR_ARRAY;
    }
 /**
  * This is for internal use only 
  */
-   public byte[] getWrapped () {
+   public char[] getWrapped () {
       return value;
    }
 /**
@@ -62,13 +62,13 @@ public class WByteArray extends Wrapper {
  * Returns the object at position <i>idx</i>.
  */
    public Object get(WNumber idx) {
-      return new WInteger(value[idx.intValue()]);
+      return new WCharacter(value[idx.intValue()]);
    }
 /**
  * Sets the object <i>obj</i> at position <i>idx</i>.
  */
    public Object set(int idx, WNumber obj) {
-         return value[idx] = obj.byteValue();
+         return value[idx] = obj.charValue();
    }
 /**
  * @see #set(int idx, Object obj)
@@ -82,7 +82,7 @@ public class WByteArray extends Wrapper {
  */
    public Object add(WNumber obj) {
       final int i = value.length;
-      WByteArray Return = new WByteArray(Arrays.copyOf (value, i + 1));
+      WCharArray Return = new WCharArray(Arrays.copyOf (value, i + 1));
       Return.set (i, obj);
       return Return;
    }
@@ -91,7 +91,7 @@ public class WByteArray extends Wrapper {
  * without <i>shft</i> objects at the beginning.
  */
    public Object shift(final int shft) {
-      return new WByteArray(Arrays.copyOfRange (value, shft, value.length));
+      return new WCharArray(Arrays.copyOfRange (value, shft, value.length));
    }
 /**
  * @see #shift(int shft)
@@ -111,10 +111,10 @@ public class WByteArray extends Wrapper {
  * with <i>obj</i> in the first position.
  */
    public Object unshift (WNumber obj) {
-      byte Return[] = new byte[value.length + 1];
-      Return[0] = obj.byteValue();
+      char Return[] = new char[value.length + 1];
+      Return[0] = obj.charValue();
       System.arraycopy(value, 0, Return, 1, value.length);
-      return new WByteArray(Return);
+      return new WCharArray(Return);
    }
 /**
  * Returns the specified range of this array as a new array.
@@ -122,8 +122,11 @@ public class WByteArray extends Wrapper {
  * The length of the returned array will be <i>to</i> - <i>from</i>.
  */
    public Object slice (WNumber from, WNumber to) {
-      return new WByteArray(Arrays.copyOfRange (value,
+      return new WCharArray(Arrays.copyOfRange (value,
                                           from.intValue(), to.intValue()));
+   }
+   public String toString () {
+      return new String(value);
    }
 /**
  * Returns a copy of this array

@@ -37,7 +37,8 @@ public abstract class Wrapper implements InternalObject {
       DECIMAL,
       STRING,
       OBJECT_ARRAY,
-      BYTE_ARRAY
+      BYTE_ARRAY,
+      CHAR_ARRAY
    }
    private final static HashMap<Class,Type> mapping;
    static {
@@ -54,6 +55,7 @@ public abstract class Wrapper implements InternalObject {
       mapping.put (String.class, Type.STRING);
       mapping.put (Object[].class, Type.OBJECT_ARRAY);
       mapping.put (byte[].class, Type.BYTE_ARRAY);
+      mapping.put (char[].class, Type.CHAR_ARRAY);
    }
 
    public static Wrapper newInstance (Object obj) {
@@ -87,6 +89,8 @@ public abstract class Wrapper implements InternalObject {
                return new WArray ((Object[]) obj);
             case BYTE_ARRAY:
                return new WByteArray ((byte[]) obj);
+            case CHAR_ARRAY:
+               return new WCharArray ((char[]) obj);
             }
          } else if (clazz.isArray()) {
             final Class compClazz = clazz.getComponentType();
@@ -94,7 +98,7 @@ public abstract class Wrapper implements InternalObject {
                if (byte.class.equals (compClazz)) {
                   return new WByteArray ((byte[]) obj);
                } else if (char.class.equals (compClazz)) {
-                  return null;
+                  return new WCharArray ((char[]) obj);
                } else {
                   final int len = Array.getLength(obj);
 

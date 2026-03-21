@@ -402,6 +402,22 @@ public class DefaultCommand extends CommandBase {
    public Object foreach(byte list[], Block code) throws JOEException {
       return foreach (list, 0, code);
    }
+   public Object foreach(char list[], int n, Block code) throws JOEException {
+      Object Return = null;
+      for (int i = n; i < list.length; i++) {
+         try {
+            Return = code.exec(new WInteger(list[i]));
+         } catch (BreakLoopException _ex) {
+            if (_ex.hasReturnObject())
+               Return = _ex.getReturnObject();
+            break;
+         }
+      }
+      return Return;
+   }
+   public Object foreach(char list[], Block code) throws JOEException {
+      return foreach (list, 0, code);
+   }
    /**
     * Causes the exit from a loop.
     */
