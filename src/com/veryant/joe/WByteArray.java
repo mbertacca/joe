@@ -71,7 +71,7 @@ public class WByteArray extends Wrapper {
          return value[idx] = obj.byteValue();
    }
 /**
- * @see #set(int idx, Object obj)
+ * @see #set(int idx, WNumber obj)
  */
    public Object set(WNumber idx, WNumber obj) {
       return set (idx.intValue(), obj);

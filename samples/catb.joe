@@ -1,10 +1,12 @@
 catb:args.
 
 args length; > 1 ifTrue {
+   out <- !getStaticField "java.lang.System","out".
    file <- !newInstance "java.io.FileInputStream",(args get 1).
    buff <- !newArray "byte",16.
    cnt := 0.
    !while { cnt := file read buff. cnt > 0 },{
-      !print (!newInstance "java.lang.String",(buff slice 0,cnt)).
+      out write buff, 0, cnt.
    }.
+   out close.
 }.
