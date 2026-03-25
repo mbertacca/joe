@@ -104,13 +104,18 @@ public class WString extends Wrapper {
          return new WString (value.substring(idx));
    }
    public WString substring (WNumber beginIndex, WNumber endIndex) {
-      int idx = endIndex.intValue();
-      if (idx < 0)
-         return new WString (value.substring(beginIndex.intValue(),
-                                             value.length() + idx));
+      int bidx = beginIndex.intValue();
+      int eidx = endIndex.intValue();
+      if (eidx < 0)
+         if (bidx < 0) {
+            int len = value.length();
+            return new WString (value.substring(bidx + len, eidx + len));
+         } else
+            return new WString (value.substring(bidx, eidx + value.length()));
+      else if (bidx < 0)
+         return new WString (value.substring(bidx + value.length(), eidx));
       else
-         return new WString (value.substring(beginIndex.intValue(),
-                                             idx));
+         return new WString (value.substring(bidx, eidx));
    }
    public WCharacter charAt (WNumber index) {
       return new WCharacter (value.charAt(index.intValue()));
