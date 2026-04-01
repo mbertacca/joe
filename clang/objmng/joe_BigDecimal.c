@@ -396,6 +396,70 @@ pow_ (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 /**
+## setScale
+
+Returns a BigDecimal whose scale is _aScale_.
+*/
+
+static int
+setScale (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   int64_t newScale = 0;
+   if (argc == 1 && joe_Object_instanceOf(argv[0], &joe_Integer_Class) &&
+                (newScale = JOE_INTEGER (argv[0])) >= 0) {
+      nDecimal Return = nDecimal_setScale (
+             (nDecimal) joe_Object_getMem (*joe_Object_at (self, 0)), newScale);
+      joe_Object_assign (retval, joe_BigDecimal_New(Return));
+      nDecimal_delete (Return);
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                        joe_Exception_New("setScale: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
+/**
+## scale
+
+Returns an Integer with the scale of this number.
+*/
+
+static int
+scale (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{	
+   if (argc == 0) {
+      joe_Object_assign (retval, joe_Integer_New (nDecimal_getScale (
+             (nDecimal) joe_Object_getMem (*joe_Object_at (self, 0)))));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                        joe_Exception_New("scale: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
+/**
+## precision
+
+Returns an Integer with the precision of this number.
+*/
+
+static int
+precision (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{	
+   if (argc == 0) {
+      joe_Object_assign (retval, joe_Integer_New (nDecimal_getPrecision (
+             (nDecimal) joe_Object_getMem (*joe_Object_at (self, 0)))));
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval,
+                        joe_Exception_New("precision: invalid argument(s)"));
+      return JOE_FAILURE;
+   }
+}
+
+/**
 ## toString
 
 Returns a string representation of this number.
@@ -439,6 +503,9 @@ static joe_Method mthds[] = {
    {"negate", negate },
    {"abs", abs_ },
    {"pow", pow_ },
+   {"setScale", setScale },
+   {"precision", precision },
+   {"scale", scale },
    {"toString", toString },
   {(void *) 0, (void *) 0}
 };

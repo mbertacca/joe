@@ -292,16 +292,13 @@ nDecimal_assign_lng (nDecimal self, long lng)
 }
 
 static nDecimal
-minimize (nDecimal aNum)
+removeLeadingZeroes (nDecimal aNum)
 {
    char *data = GETDATA(aNum);
    int intPart = aNum->precision - aNum->scale;
    int izeros = 0;
    char *c;
 
-   for (c = &data[aNum->precision - 1]; aNum->scale > 0 && *c == '0';
-        c--, aNum->scale--, aNum->precision--)
-      *c = '\0';
    for (c = data; intPart > 1 && *c == '0';
         c++, intPart--, aNum->precision--)
       izeros++;
@@ -309,6 +306,20 @@ minimize (nDecimal aNum)
       memcpy (data, data + izeros, aNum->precision);
       data[aNum->precision] = 0;
    }
+
+   return aNum;
+}
+
+static nDecimal
+minimize (nDecimal aNum)
+{
+   char *data = GETDATA(aNum);
+   char *c;
+
+   for (c = &data[aNum->precision - 1]; aNum->scale > 0 && *c == '0';
+        c--, aNum->scale--, aNum->precision--)
+      *c = '\0';
+   removeLeadingZeroes (aNum);
 
    return aNum;
 }
@@ -426,7 +437,7 @@ unsignedSubtract (nDecimal add1, nDecimal add2)
          self_data[is] = c;
       }
    }
-   return minimize(self);
+   return self;
 }
 
 static nDecimal
@@ -494,7 +505,7 @@ unsignedAdd (nDecimal add1, nDecimal add2)
      self_data[is] = '1';
    else
      self_data[is] = '0';
-   return minimize(self);
+   return self;
 }
 
 static nDecimal
@@ -516,6 +527,7 @@ addSub (nDecimal op1, int isneg1, nDecimal op2, int isneg2)
          Return = nDecimal_new (1, 0);
       }
    }
+   minimize(Return);
    return Return;
 }
 
@@ -817,17 +829,64 @@ nDecimal_negate (nDecimal self)
    Return->negative = !self->negative;
    return Return;
 }
-/*
+
+int
+nDecimal_getScale (nDecimal self)
+{
+   return self->scale;
+}
+
+int
+nDecimal_getPrecision (nDecimal self)
+{
+   return self->precision;
+}
+
+nDecimal
+nDecimal_setScale (nDecimal self, int newScale)
+{
+   int newPrecision = self->precision + (newScale - self->scale);
+   nDecimal Return = nDecimal_new (newPrecision, newScale);
+   if (newPrecision < self->precision) {
+      char x0 = GETDATA(self)[newPrecision];
+      char x1 = newPrecision + 1 < self->precision ?
+                      GETDATA(self)[newPrecision + 1] : '0';
+      memcpy (GETDATA(Return),GETDATA(self), newPrecision);
+      if (x0 > '5' || (x0 == '5' && (x1 > '0' || GETDATA(Return)[Return->precision-1] & 1))) {
+         nDecimal rounded;
+         nDecimal inc = nDecimal_new (newPrecision, newScale);
+         GETDATA(inc)[inc->precision - 1] = '1';
+         rounded = unsignedAdd (Return, inc);
+         removeLeadingZeroes (rounded);
+         free (inc);
+         free (Return);
+         Return = rounded;
+      }
+   } else {
+      memcpy (GETDATA(Return),GETDATA(self), self->precision);
+   }
+   if (!nDecimal_isZero (Return))
+      Return->negative = self->negative;
+   return Return;
+}
+
 int
 main (int argc, char *argv[])
 {
    char *str;
    nDecimal num = nDecimal_new (10, 2);
    nDecimal num2 = nDecimal_new_str (argv[1]);
-   nDecimal num3;
+   nDecimal num3 = nDecimal_setScale(num2, 1);
 
+   str = nDecimal_toString (num3);
+   printf ("%s\n", str); 
+   free (str);
+   free (num);
+   free (num2);
+   free (num3);
+/*
+   str = nDecimal_toString (num);
    nDecimal_assign_str (num, "9999999999.999999999");
-
    nDecimal_assign (num, num2);
    str = nDecimal_toString (num);
    printf ("%s\n", str);
@@ -857,6 +916,6 @@ main (int argc, char *argv[])
    free (num2);
    free (num3);
    free (str);
+*/
    return 0;
 }
-*/

@@ -44,4 +44,7 @@ extern nDecimal nDecimal_remainder (nDecimal op1, nDecimal op2);
 extern int nDecimal_memsize (nDecimal num);
 extern int nDecimal_signum (nDecimal self);
 extern nDecimal nDecimal_negate (nDecimal self);
+extern nDecimal nDecimal_setScale (nDecimal self, int scale);
+extern int nDecimal_getScale (nDecimal self);
+extern int nDecimal_getPrecision (nDecimal self);
 # endif
