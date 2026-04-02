@@ -848,11 +848,12 @@ nDecimal_setScale (nDecimal self, int newScale)
    int newPrecision = self->precision + (newScale - self->scale);
    nDecimal Return = nDecimal_new (newPrecision, newScale);
    if (newPrecision < self->precision) {
-      char x0 = GETDATA(self)[newPrecision];
-      char x1 = newPrecision + 1 < self->precision ?
-                      GETDATA(self)[newPrecision + 1] : '0';
+      nDecimal minmzd = minimize(nDecimal_clone(self));
+      char x0 = GETDATA(minmzd)[newPrecision];
       memcpy (GETDATA(Return),GETDATA(self), newPrecision);
-      if (x0 > '5' || (x0 == '5' && (x1 > '0' || GETDATA(Return)[Return->precision-1] & 1))) {
+      if (x0 > '5' || (x0 == '5' && 
+            (newPrecision + 1 < minmzd->precision ||
+             GETDATA(Return)[Return->precision-1] & 1))) {
          nDecimal rounded;
          nDecimal inc = nDecimal_new (newPrecision, newScale);
          GETDATA(inc)[inc->precision - 1] = '1';
@@ -862,6 +863,7 @@ nDecimal_setScale (nDecimal self, int newScale)
          free (Return);
          Return = rounded;
       }
+      free (minmzd);
    } else {
       memcpy (GETDATA(Return),GETDATA(self), self->precision);
    }

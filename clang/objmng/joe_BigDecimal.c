@@ -396,9 +396,10 @@ pow_ (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 }
 
 /**
-## setScale
+## setScale _aInteger_
 
-Returns a BigDecimal whose scale is _aScale_.
+Returns a copy of this number with scale _aInteger_.
+If some rounding is needed then the rounding mode is half to even.
 */
 
 static int
