@@ -2,7 +2,7 @@
  * This source file is part of the "Joe Objects Executor" open source project
  *
  * Copyright 2017 Marco Bertacca (www.bertacca.eu)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -102,14 +102,15 @@ main (int argc, char *argv[])
    joe_Object retval = 0;
    int i;
 
-   if (argc > 1) {
+   if (argc > 1 || isatty (fileno(stdin)) == 0) {
       joe_Array argArray = 0;
       joe_String scriptName = 0;
       joe_Block block = 0;
       joe_Class* loadScriptClass = joe_Class_getClass("joe_LoadScript");
       joe_Class* integerClass = joe_Class_getClass("joe_Integer");
 
-      joe_Object_assign (&scriptName, joe_String_New (argv[1]));
+      if (argc > 1)
+         joe_Object_assign (&scriptName, joe_String_New (argv[1]));
       rc=joe_Class_newInstance(loadScriptClass, 1, &scriptName, &retval);
       if (rc != JOE_SUCCESS) {
          showError (retval);

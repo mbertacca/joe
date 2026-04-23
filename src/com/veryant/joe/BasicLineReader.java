@@ -31,7 +31,7 @@ public class BasicLineReader implements LineReader {
    protected int lineCount;
 
    public void open (String name, Reader reader) {
-      this.file = new File (name);
+      this.file = name != null ? new File (name) : new File ("(stdin)");
       this.reader = new BufferedReader (reader);
       lineCount = 0;
    }

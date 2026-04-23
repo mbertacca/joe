@@ -66,14 +66,22 @@ public class JavaObjectsExecutor {
       String line;
       DefaultCommand defCmd = command;
       LineReader lr = lineReader;
-      if (argv.length > 0) {
+      if (argv.length > 0 || !defCmd.isConsole() ) {
          ScriptManager sm;
          Executor exec = executor;
          try {
-            final File f = new File (argv[0]).getCanonicalFile();
-            sm = new ScriptManager(f.getParentFile(), exec, defCmd, lr);
-            Object[] jarg = new Object [] {new WArray (argv)};
-            Block blk = sm.load (f.getName(), jarg, new String[0]);
+            Object[] jarg;
+            Block blk;
+            if (argv.length > 0) {
+               final File f = new File (argv[0]).getCanonicalFile();
+               sm = new ScriptManager(f.getParentFile(), exec, defCmd, lr);
+               jarg = new Object [] {new WArray (argv)};
+               blk = sm.load (f.getName(), jarg, new String[0]);
+            } else {
+               sm = new ScriptManager(new File ("."), exec, defCmd, lr);
+               jarg = new Object [] {};
+               blk = sm.load (null, jarg, new String[0]);
+            }
             Object rc  = blk.init (jarg);
             if (rc instanceof WNumber) {
                Return = ((WNumber) rc).intValue();
@@ -133,7 +141,7 @@ public class JavaObjectsExecutor {
       return Return;
    }
    static String readLine (DefaultCommand defCmd) throws IOException {
-      boolean isConsole = defCmd.isConsole();
+      boolean isConsole = System.console() != null;
       StringBuilder buffer = new StringBuilder();
       String line = null;
       int braces = 0;

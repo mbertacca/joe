@@ -49,7 +49,7 @@ ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    joe_Block bang = 0;
    switch (argc) {
    case 1:
-      if (!joe_Object_instanceOf (argv[0], &joe_String_Class)) {
+      if (argv[0] && !joe_Object_instanceOf (argv[0], &joe_String_Class)) {
          joe_Object_assign(retval, 
                      joe_Exception_New ("LoadScript: invalid 1st argument"));
          return JOE_FAILURE;
@@ -71,9 +71,11 @@ ctor (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
       joe_Object_assign(retval, joe_Exception_New ("LoadScript: invalid argument number"));
       return JOE_FAILURE;
    }
-
-   joe_Object_assign(retval, joe_LoadScript_New (self, 
-                      joe_String_getCharStar(argv[0]), path, bang));
+   if (argv[0])
+      joe_Object_assign(retval, joe_LoadScript_New (self, 
+                        joe_String_getCharStar(argv[0]), path, bang));
+   else
+      joe_Object_assign(retval, joe_LoadScript_New (self, 0, 0, 0));
 
    if (joe_Object_instanceOf (*retval, &joe_Exception_Class))
       return JOE_FAILURE;
@@ -114,7 +116,10 @@ joe_LoadScript_getFile (char *scriptName, joe_Array path, joe_Bang bang)
 {
    FILE *Return;
 
-   if (dirname == 0) {
+   if (scriptName == 0) {
+      dirname = strdup (".");
+      Return = stdin;
+   } else if (dirname == 0) {
       Return = fopen (scriptName, "r");
       if (Return != NULL) {
          char *c;
@@ -162,7 +167,8 @@ joe_LoadScript_New (joe_Block self, char *scriptName, joe_Array path, joe_Bang b
    ssize_t lineLen = 0;
    JoeArray tokens = JoeArray_new (sizeof (struct t_Token), 256);
    Tokenizer tokenizer = Tokenizer_new (tokens);
-   JoeParser parser = JoeParser_new (scriptName);
+   JoeParser parser = scriptName ? JoeParser_new (scriptName) :
+                                   JoeParser_new ("(stdin)");
 
    scriptFile = joe_LoadScript_getFile (scriptName, path, bang);
 

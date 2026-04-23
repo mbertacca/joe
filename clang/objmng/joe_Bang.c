@@ -566,7 +566,7 @@ version (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 {
    joe_StringBuilder msg = 0;
    joe_Object_assign (&msg, joe_StringBuilder_New ());
-   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.83 ");
+   joe_StringBuilder_appendCharStar (msg, "JOE (native) Revision 1.84 ");
    joe_StringBuilder_appendCharStar (msg, __DATE__);
 #ifdef WIN32
    joe_StringBuilder_appendCharStar (msg, " Windows");
@@ -1775,6 +1775,28 @@ loadSO(joe_Object self, int argc, joe_Object* args, joe_Object* retval)
       return JOE_FAILURE;
    }
 }
+
+/**
+## isConsole
+
+Returns Boolean <1> if the standard input is associated to a terminal
+        Boolean <0> otherwise.
+*/
+
+static int
+isConsole (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 0) {
+      if (isatty (fileno(stdin)))
+         joe_Object_assign(retval, joe_Boolean_New_true());
+      else
+         joe_Object_assign(retval, joe_Boolean_New_false());
+      return JOE_SUCCESS;
+   }
+   joe_Object_assign(retval, joe_Exception_New ("isatty: invalid argument number"));
+   return JOE_FAILURE;
+}
+
 /**
 ## toString
 
@@ -1833,6 +1855,7 @@ static joe_Method mthds[] = {
   {"systemExit", systemExit},
   {"getGlob", getGlob},
   {"loadSO", loadSO},
+  {"isConsole", isConsole},
   {"toString", toString},
   {"getcwd", getCwd},
   {"sleep", joe_sleep},

@@ -103,7 +103,9 @@ public class ScriptManager {
       } catch (URISyntaxException _ex) {
          throw new FileNotFoundException (entryPoint.getFile());
       }
-      if (f.isDirectory()) {
+      if (name == null) {
+         Return = System.in;
+      } else if (f.isDirectory()) {
          File dir;
          File fp = new File (f, name);
          for (int i = 0; i < path.length && !fp.exists(); i++) {
