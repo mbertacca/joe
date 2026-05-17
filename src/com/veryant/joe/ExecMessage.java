@@ -49,7 +49,25 @@ public class ExecMessage implements Message {
          if (_block != null) {
             return _block.exec (null, _args);
          } else {
-            _method.setAccessible (true);
+            try {
+               _method.setAccessible (true);
+            } catch (RuntimeException _ex) {
+               String msg = _ex.toString();
+               if (msg.startsWith(
+                       "java.lang.reflect.InaccessibleObjectException:") &&
+                        msg.matches(".*: module .*\"opens .*")) {
+                   String exp = msg +
+       ". If you are using java9+ try to run java with the option --add-opens=" + 
+                      msg.replaceFirst(".*: module ","")
+                         .replaceFirst(" .*","") +
+                      "/" +
+                      msg.replaceFirst(".*opens ","")
+                         .replaceFirst("\".*","")+
+                      "=ALL-UNNAMED";
+                   throw new JOEException (exp);
+               } else
+                  throw _ex;
+            }
             return _method.invoke (obj, _args);
          }
       }
