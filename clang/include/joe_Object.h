@@ -81,6 +81,7 @@ JOEOBJ_API unsigned int joe_Object_length (joe_Object self);
 JOEOBJ_API joe_Object* joe_Object_array(joe_Object self);
 JOEOBJ_API joe_Object* joe_Object_at(joe_Object self, unsigned int idx);
 JOEOBJ_API void joe_Object_assign(joe_Object* self, joe_Object value);
+JOEOBJ_API void joe_Object_unassign(joe_Object self);
 JOEOBJ_API void joe_Object_transfer(joe_Object* self, joe_Object *value);
 JOEOBJ_API char* joe_Object_toString(joe_Object self);
 JOEOBJ_API void joe_Object_delIfUnassigned (joe_Object *self);

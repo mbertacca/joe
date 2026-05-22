@@ -92,19 +92,20 @@ EXPORTS
     joe_Object_showLiveObjects @91
     joe_Object_toString @92
     joe_Object_transfer @93
-    joe_Pointer_New @94
-    joe_Pointer_value @95
-    joe_String_New @96
-    joe_String_New2 @97
-    joe_String_New3 @98
-    joe_String_New4 @99
-    joe_String_New_len @100
-    joe_String_compare @101
-    joe_String_getCharStar @102
-    joe_String_length @103
-    joe_WeakReference_New @104
-    joe_WeakReference_get @105
-    joe_int_New @106
-    joe_int_New0 @107
-    joe_int_starValue @108
-    joe_int_value @109
+    joe_Object_unassign @94
+    joe_Pointer_New @95
+    joe_Pointer_value @96
+    joe_String_New @97
+    joe_String_New2 @98
+    joe_String_New3 @99
+    joe_String_New4 @100
+    joe_String_New_len @101
+    joe_String_compare @102
+    joe_String_getCharStar @103
+    joe_String_length @104
+    joe_WeakReference_New @105
+    joe_WeakReference_get @106
+    joe_int_New @107
+    joe_int_New0 @108
+    joe_int_starValue @109
+    joe_int_value @110

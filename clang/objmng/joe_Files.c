@@ -281,6 +281,7 @@ specified in the string _aAttribute_, i.e.;
 | "lastModifiedTime" | aDate object with the time of last modification |
 | "lastAccessTime" | aDate object with the time of last access |
 | "creationTime" |  aDate object with the time of creation  |
+| "size"         |  aInteger object with the size of the file  |
 
 These attributes depend from the underlying filesystem so the results can be inaccurate.
 */
@@ -296,9 +297,7 @@ getAttribute (joe_Object self,
       struct stat sb;
       int rc = stat(filename, &sb);
       if (rc != 0) {
-         joe_Object_assign(retval,
-            joe_Exception_New_string (
-                  joe_String_New2("getAttribute: cannot access file ",filename)));
+         getErrno (filename, retval);
          return JOE_FAILURE;
       }
       if (!strcmp("size",attr)) {

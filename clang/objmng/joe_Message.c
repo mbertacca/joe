@@ -111,17 +111,8 @@ joe_Message_exec (joe_Object self, joe_Block block, joe_Object *retval)
          lretval = 0;
          rc = joe_Selector_invoke (rpnItem, receiver, argc, argv, &lretval);
          for ( --execPnt; topPnt < execPnt; execPnt--)
-             if ((*execPnt)->refcount < 2)
-                joe_Object_assign (execPnt, 0);
-             else
-                (*execPnt)->refcount--;
-         if ((*execPnt)->refcount < 2)
-            joe_Object_transfer (execPnt++, &lretval);
-         else {
-            (*execPnt)->refcount--;
-            *execPnt = lretval;
-            execPnt++;
-         }
+            joe_Object_unassign (*execPnt);
+         joe_Object_transfer (execPnt++, &lretval);
       } else if (JOE_ISCLASS (rpnItem, &joe_Variable_Class)) {
 /*
          *execPnt = joe_Block_varValue(block, rpnItem);
