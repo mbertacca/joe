@@ -88,7 +88,7 @@ struct s_ObjectList {
    struct s_ObjectList * prev;
 };
 
-# define MAX_CACHE 128
+# define MAX_CACHE 1024
 static joe_Object roots[MAX_CACHE];
 static int rootsCnt = 0;
 
@@ -651,16 +651,6 @@ joe_Object_assign (joe_Object *self, joe_Object value)
       value->refcount++;
    if (obj != 0)
       joe_Object_unassign (obj);
-}
-
-void
-joe_Object_transfer(joe_Object* self, joe_Object* value)
-{
-   joe_Object obj = *self;
-   *self = *value;
-   *value = 0;
-   if (obj != 0)
-      joe_Object_unassign(obj);
 }
 
 joe_Class *

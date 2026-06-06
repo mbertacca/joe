@@ -58,5 +58,24 @@ struct s_joe_Object {
 #define JOE_FLOAT(self) ((self)->data.dbl)
 #define JOE_CHAR_STAR(self) ((self)->data.str)
 
+inline void
+joe_Object_transfer(joe_Object* self, joe_Object* value)
+{
+   joe_Object obj = *self;
+   *self = *value;
+   *value = 0;
+   if (obj != 0)
+      joe_Object_unassign(obj);
+}
 
+inline void
+joe_Object_i_assign (joe_Object *self, joe_Object value)
+{
+   joe_Object obj = *self;
+   *self = value;
+   if (value)
+      value->refcount++;
+   if (obj != 0)
+      joe_Object_unassign (obj);
+}
 # endif
