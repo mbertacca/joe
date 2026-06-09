@@ -21,8 +21,17 @@ package com.veryant.joe;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.math.RoundingMode;
 
 public class WBigDecimal extends WBaseNumber implements WNumber {
+   public static final int UP = 0;
+   public static final int DOWN = 1;
+   public static final int CEILING = 2;
+   public static final int FLOOR = 3;
+   public static final int HALF_UP = 4;
+   public static final int HALF_DOWN = 5;
+   public static final int HALF_EVEN = 6;
+   public static final int UNNECESSARY = 7;
    final BigDecimal value;
 
    public WBigDecimal (BigDecimal n) {
@@ -92,10 +101,51 @@ public class WBigDecimal extends WBaseNumber implements WNumber {
       return value.movePointRight (newScale.intValue());
    }
    public BigDecimal setScale(WInteger newScale) {
-      return value.setScale (newScale.intValue(), BigDecimal.ROUND_HALF_EVEN);
+      return value.setScale (newScale.intValue(), RoundingMode.HALF_EVEN);
+   }
+   public BigDecimal setScale(WInteger newScale, WString roundingMode) {
+      switch (roundingMode.toString()) {
+      case "CEILING":
+         return value.setScale (newScale.intValue(),RoundingMode.CEILING);
+      case "DOWN":
+         return value.setScale (newScale.intValue(),RoundingMode.DOWN);
+      case "FLOOR":
+         return value.setScale (newScale.intValue(),RoundingMode.FLOOR);
+      case "HALF_DOWN":
+         return value.setScale (newScale.intValue(),RoundingMode.HALF_DOWN);
+      case "HALF_EVEN":
+         return value.setScale (newScale.intValue(),RoundingMode.HALF_EVEN);
+      case "HALF_UP":
+         return value.setScale (newScale.intValue(),RoundingMode.HALF_UP);
+      case "UNNECESSARY":
+         return value.setScale (newScale.intValue(),RoundingMode.UNNECESSARY);
+      case "UP":
+         return value.setScale (newScale.intValue(),RoundingMode.UP);
+      default:
+         throw new RuntimeException ("Unknown rounding mode " + roundingMode);
+      }
    }
    public BigDecimal setScale(WInteger newScale, WInteger roundingMode) {
-      return value.setScale (newScale.intValue(), roundingMode.intValue());
+      switch (roundingMode.intValue()) {
+      case CEILING:
+         return value.setScale (newScale.intValue(),RoundingMode.CEILING);
+      case DOWN:
+         return value.setScale (newScale.intValue(),RoundingMode.DOWN);
+      case FLOOR:
+         return value.setScale (newScale.intValue(),RoundingMode.FLOOR);
+      case HALF_DOWN:
+         return value.setScale (newScale.intValue(),RoundingMode.HALF_DOWN);
+      case HALF_EVEN:
+         return value.setScale (newScale.intValue(),RoundingMode.HALF_EVEN);
+      case HALF_UP:
+         return value.setScale (newScale.intValue(),RoundingMode.HALF_UP);
+      case UNNECESSARY:
+         return value.setScale (newScale.intValue(),RoundingMode.UNNECESSARY);
+      case UP:
+         return value.setScale (newScale.intValue(),RoundingMode.UP);
+      default:
+         throw new RuntimeException ("Unknown rounding mode " + roundingMode);
+      }
    }
    public int signum() {
       return value.signum ();

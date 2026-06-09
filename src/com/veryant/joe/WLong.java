@@ -32,7 +32,7 @@ public class WLong extends WBaseNumber {
       return Type.LONG;
    }
    public Object getWrapped () {
-      return new Long (value);
+      return Long.valueOf (value);
    }
    public byte byteValue() {
       return (byte) value;

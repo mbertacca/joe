@@ -30,7 +30,7 @@ public class WInteger extends WLong {
       return Type.INT;
    }
    public Object getWrapped () {
-      return new Integer ((int) value);
+      return Integer.valueOf ((int) value);
    }
    public WInteger add (WInteger n) {
       return new WInteger (value + n.intValue());

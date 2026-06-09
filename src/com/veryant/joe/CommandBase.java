@@ -80,7 +80,7 @@ public class CommandBase {
     * Returns a new instance of the specified class.
     */
    public Object newInstance (Class clazz) throws Exception {
-      return clazz.newInstance();
+      return clazz.getDeclaredConstructor().newInstance();
    }
    /**
     * This is a convenience method for newInstance (getClass (className)).
@@ -383,7 +383,7 @@ public class CommandBase {
    /**
     * Returns an URL based on the base URL of the first script run.
     */
-   public URL getURL (String spec) throws MalformedURLException {
+   public URL getURL (String spec) throws Exception {
       return ScriptManager.get (this).getURL (spec);
    }
    /**

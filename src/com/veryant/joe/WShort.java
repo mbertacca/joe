@@ -30,7 +30,7 @@ public class WShort extends WLong {
       return Type.SHORT;
    }
    public Object getWrapped () {
-      return new Short ((short) value);
+      return Short.valueOf((short) value);
    }
    public String toHexString () {
       return Integer.toHexString ((int) value);

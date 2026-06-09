@@ -35,7 +35,7 @@ public class WDouble extends WBaseNumber implements WNumber {
       return Type.DOUBLE;
    }
    public Object getWrapped () {
-      return new Double (value);
+      return Double.valueOf (value);
    }
    public byte byteValue() {
       return (byte) value;

@@ -88,9 +88,10 @@ public class ScriptManager {
    public URL getEntryPoint () {
       return entryPoint;
    }
-   public URL getURL (String spec) throws MalformedURLException {
-      return new URL (entryPoint, spec);
+   public URL getURL (String spec) throws Exception {
+      return entryPoint.toURI().resolve(spec).toURL();
    }
+
    public LineReader getLineReader () {
       return lineReader;
    }

@@ -30,7 +30,7 @@ public class WCharacter extends WLong {
       return Type.CHAR;
    }
    public Object getWrapped () {
-      return new Character ((char) value);
+      return Character.valueOf ((char) value);
    }
    public String add (WString s) {
       return toString().concat (s.value);
@@ -39,6 +39,6 @@ public class WCharacter extends WLong {
       return toString().concat (s.toString());
    }
    public String toString () {
-      return new Character ((char) value).toString();
+      return Character.valueOf ((char) value).toString();
    }
 }

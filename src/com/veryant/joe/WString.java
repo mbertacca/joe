@@ -209,7 +209,7 @@ public class WString extends Wrapper {
  */
    public Integer intValue() {
       try {
-         return new Integer (value);
+         return Integer.valueOf (value);
       } catch (NumberFormatException _ex) {
          return null;
       }
@@ -220,7 +220,7 @@ public class WString extends Wrapper {
  */
    public Long longValue() {
       try {
-         return new Long (value);
+         return Long.valueOf (value);
       } catch (NumberFormatException _ex) {
          return null;
       }
@@ -231,7 +231,7 @@ public class WString extends Wrapper {
  */
    public Double doubleValue() {
       try {
-         return new Double (value);
+         return Double.valueOf (value);
       } catch (NumberFormatException _ex) {
          return null;
       }
