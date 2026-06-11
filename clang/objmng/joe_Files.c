@@ -22,6 +22,7 @@
 # include <sys/stat.h>
 # include <errno.h>
 # include <unistd.h>
+# include <time.h>
 # include "joe_Integer.h"
 # include "joe_String.h"
 # include "joe_StringBuilder.h"
@@ -31,6 +32,35 @@
 # include "joe_Boolean.h"
 # include "joe_Exception.h"
 # include "joe_Null.h"
+
+static time_t
+gmt2Local(time_t t) {
+   struct tm local;
+   struct tm utc;
+   struct tm *tm_pnt;
+   time_t Return;
+
+   tm_pnt = localtime(&t);
+   if (!tm_pnt) return 0L;
+   local = *tm_pnt;
+   tm_pnt = gmtime(&t);
+   if (!tm_pnt) return 0L;
+   utc = *tm_pnt;
+
+   Return = (local.tm_hour - utc.tm_hour) * 60 + (local.tm_min - utc.tm_min);
+
+   if (local.tm_mday != utc.tm_mday) {
+      int diffday = local.tm_mday - utc.tm_mday;
+      if (diffday == 1 || diffday < -1)
+         Return += 1440;
+      else
+         Return -= 1440;
+   }
+   Return *= 60;
+   Return += t;
+   return Return;
+}
+
 
 /**
 # Class joe_Files
@@ -333,21 +363,21 @@ getAttribute (joe_Object self,
       } else if (!strcmp("lastModifiedTime",attr)) {
          joe_Integer millis = 0;
          joe_Object_assign(&millis,
-            joe_Integer_New (((int64_t)sb.st_mtime * 1000) +
+            joe_Integer_New (((int64_t)gmt2Local(sb.st_mtime) * 1000) +
                               joe_Date_getEpochMillis()));
          joe_Class_newInstance (&joe_Date_Class, 1, &millis, retval);
          joe_Object_assign(&millis, 0);
       } else if (!strcmp("lastAccessTime",attr)) {
          joe_Integer millis = 0;
          joe_Object_assign(&millis,
-            joe_Integer_New (((int64_t)sb.st_atime * 1000) +
+            joe_Integer_New (((int64_t)gmt2Local(sb.st_atime) * 1000) +
                               joe_Date_getEpochMillis()));
          joe_Class_newInstance (&joe_Date_Class, 1, &millis, retval);
          joe_Object_assign(&millis, 0);
       } else if (!strcmp("creationTime",attr)) {
          joe_Integer millis = 0;
          joe_Object_assign(&millis,
-            joe_Integer_New (((int64_t)sb.st_mtime * 1000) +
+            joe_Integer_New (((int64_t)gmt2Local(sb.st_mtime) * 1000) +
                               joe_Date_getEpochMillis()));
          joe_Class_newInstance (&joe_Date_Class, 1, &millis, retval);
          joe_Object_assign(&millis, 0);

@@ -390,7 +390,7 @@ public class CommandBase {
     * Returns the version.
     */
    public String version () {
-      return Revision.id;
+      return Revision.id + " " + System.getProperty ("os.name");
    }
    /**
     * Returns the current directory.
