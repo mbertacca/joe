@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-O2 -fPIC -Wall -pedantic
+CFLAGS=-O2 -fPIC -Wall -pedantic -D_FILE_OFFSET_BITS=64
 TARGET=joeobj
 LIB=../lib
 BIN=../bin

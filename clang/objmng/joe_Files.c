@@ -33,6 +33,61 @@
 # include "joe_Exception.h"
 # include "joe_Null.h"
 
+#ifdef WIN32
+#include <windows.h>
+
+#ifndef PATH_MAX
+#define PATH_MAX _MAX_PATH
+#endif
+
+static char*
+realpath(const char* path, char* resolved_path) {
+   HANDLE hFile;
+   int len;
+   char final_path[PATH_MAX + 5];
+
+   if (path == NULL) {
+      errno = EINVAL;
+      return NULL;
+   }
+
+    hFile=CreateFileA(path,0,FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,
+                      NULL,OPEN_EXISTING,FILE_FLAG_BACKUP_SEMANTICS,NULL);
+    if (hFile == INVALID_HANDLE_VALUE) {
+        errno = ENOENT;
+        return NULL;
+    }
+    len = GetFinalPathNameByHandleA(hFile, final_path,
+                                        PATH_MAX, FILE_NAME_NORMALIZED);
+    CloseHandle(hFile);
+    if (len == 0 || len >= PATH_MAX) {
+        errno = EIO;
+        return NULL;
+    }
+    strcpy (resolved_path,
+       (strncmp(final_path, "\\\\?\\", 4) == 0) ? final_path + 4 : final_path);
+    return resolved_path;
+}
+
+static int
+isSymLink(char *path) {
+   int attrs = GetFileAttributesA(path);
+   if (attrs == INVALID_FILE_ATTRIBUTES)
+      return 0;
+   else
+      return attrs & FILE_ATTRIBUTE_REPARSE_POINT;
+}
+#else
+static int
+isSymLink(char *path) {
+   struct stat sb;
+   if (lstat(path, &sb) == -1)
+      return 0;
+   else
+      return S_ISLNK(sb.st_mode);
+}
+#endif /* WIN32 */
+
 static time_t
 gmt2Local(time_t t) {
    struct tm local;
@@ -284,16 +339,67 @@ isDirectory (joe_Object self,
          } else {
             joe_Object_assign (retval, joe_Boolean_New_false());
          }
+      } else {
+         joe_Object_assign (retval, joe_Boolean_New_false());
+      }
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("isDirectory: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+
+/**
+## isSymbolicLink _aString_
+
+Returns Boolean <1> if the file specified by _aString_ is a symbolic link,
+<0> otherwise.
+*/
+
+static int
+isSymbolicLink (joe_Object self,
+                int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_String_Class)) {
+      char *filename = joe_String_getCharStar (argv[0]);
+      if (isSymLink(filename)) {
+         joe_Object_assign (retval, joe_Boolean_New_true());
+      } else {
+         joe_Object_assign (retval, joe_Boolean_New_false());
+      }
+      return JOE_SUCCESS;
+   } else {
+      joe_Object_assign(retval, joe_Exception_New ("isSymbolicLink: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
+/**
+## toRealPath _aString_
+
+Returns a String with the canonicalized absolute pathname
+*/
+static int
+toRealPath (joe_Object self,
+                    int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_String_Class)) {
+      char *filename = joe_String_getCharStar (argv[0]);
+      char resolved_path[PATH_MAX];
+      if (realpath (filename, resolved_path)) {
+         joe_Object_assign (retval, joe_String_New(resolved_path));
          return JOE_SUCCESS;
       } else {
          getErrno (filename, retval);
          return JOE_FAILURE;
       }
    } else {
-      joe_Object_assign(retval, joe_Exception_New ("isDirectory: invalid argument"));
+      joe_Object_assign(retval, joe_Exception_New ("toRealPath: invalid argument"));
       return JOE_FAILURE;
    }
 }
+
 
 /**
 ## getAttribute _aString_,_aAttribute_
@@ -303,9 +409,10 @@ This method returns different object depending on the attribute
 specified in the string _aAttribute_, i.e.;
 
 | _aAttribute_    | Object returned                                         |
-| --------------- | ------------------------------------------------------- |
-| "isRegularFile" | Boolean <1> if _aString_ is a regular file <0>, otherwise|
-| "isDirectory"   | Boolean <1> if _aString_ is a directory file <0>, otherwise|
+| --------------- | -------------------------------------------------------- |
+| "isRegularFile" | Boolean <1> if _aString_ is a regular file, <0> otherwise|
+| "isDirectory"   | Boolean <1> if _aString_ is a directory, <0> otherwise|
+| "isSymbolicLink"| Boolean <1> if _aString_ is a symbolic link, <0> otherwise|
 | "isOther"   | Boolean <1> if _aString_ is neither a directory nor a file, <0> otherwise |
 | "fileKey" | String that is unique for each file in the system (eg (dev=2049,ino=3282325)|
 | "lastModifiedTime" | aDate object with the time of last modification |
@@ -340,6 +447,12 @@ getAttribute (joe_Object self,
          }
       } else if (!strcmp("isDirectory",attr)) {
          if ((sb.st_mode & S_IFMT) == S_IFDIR) {
+            joe_Object_assign (retval, joe_Boolean_New_true());
+         } else {
+            joe_Object_assign (retval, joe_Boolean_New_false());
+         }
+      } else if (!strcmp("isSymbolicLink",attr)) {
+         if (isSymLink(filename)) {
             joe_Object_assign (retval, joe_Boolean_New_true());
          } else {
             joe_Object_assign (retval, joe_Boolean_New_false());
@@ -422,10 +535,12 @@ static joe_Method filesMthds[] = {
    {"listDirectory", listDirectory },
    {"newDirectoryStream", listDirectory },
    {"isDirectory", isDirectory },
+   {"isSymbolicLink", isSymbolicLink },
    {"getAttribute", getAttribute },
    {"exists", exists },
    {"deleteIfExists", deleteIfExists },
    {"isAbsolute", isAbsolute },
+   {"toRealPath", toRealPath },
    {(void *) 0, (void *) 0}
 };
 
