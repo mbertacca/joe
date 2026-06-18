@@ -36,37 +36,39 @@
 #ifdef WIN32
 #include <windows.h>
 
-#ifndef PATH_MAX
-#define PATH_MAX _MAX_PATH
-#endif
-
 static char*
 realpath(const char* path, char* resolved_path) {
    HANDLE hFile;
-   int len;
-   char final_path[PATH_MAX + 5];
+   DWORD pathlen;
+   char *final_path;
 
-   if (path == NULL) {
-      errno = EINVAL;
-      return NULL;
+   hFile=CreateFileA(path,0,FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,
+                     NULL,OPEN_EXISTING,FILE_FLAG_BACKUP_SEMANTICS,NULL);
+   if (hFile == INVALID_HANDLE_VALUE) {
+       errno = ENOENT;
+       return NULL;
    }
-
-    hFile=CreateFileA(path,0,FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,
-                      NULL,OPEN_EXISTING,FILE_FLAG_BACKUP_SEMANTICS,NULL);
-    if (hFile == INVALID_HANDLE_VALUE) {
-        errno = ENOENT;
-        return NULL;
-    }
-    len = GetFinalPathNameByHandleA(hFile, final_path,
-                                        PATH_MAX, FILE_NAME_NORMALIZED);
-    CloseHandle(hFile);
-    if (len == 0 || len >= PATH_MAX) {
-        errno = EIO;
-        return NULL;
-    }
-    strcpy (resolved_path,
-       (strncmp(final_path, "\\\\?\\", 4) == 0) ? final_path + 4 : final_path);
-    return resolved_path;
+   pathlen = GetFinalPathNameByHandleA(hFile, NULL, 0, VOLUME_NAME_DOS);
+   if (pathlen == 0) {
+       errno = EIO;
+       return NULL;
+   }
+   final_path = malloc (pathlen + 1);
+   pathlen = GetFinalPathNameByHandleA(hFile,final_path,pathlen + 1,VOLUME_NAME_DOS);
+   CloseHandle(hFile);
+   if (resolved_path) {
+      strcpy (resolved_path,
+         (strncmp(final_path, "\\\\?\\", 4) == 0) ? final_path + 4 : final_path);
+      free (final_path);
+   } else {
+      if (!strncmp(final_path, "\\\\?\\", 4)) {
+         resolved_path = strdup (final_path + 4);
+         free (final_path);
+      } else {
+         resolved_path = final_path;
+      }
+   }
+   return resolved_path;
 }
 
 static int
@@ -386,9 +388,10 @@ toRealPath (joe_Object self,
 {
    if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_String_Class)) {
       char *filename = joe_String_getCharStar (argv[0]);
-      char resolved_path[PATH_MAX];
-      if (realpath (filename, resolved_path)) {
+      char *resolved_path = realpath(filename, NULL);
+      if (resolved_path) {
          joe_Object_assign (retval, joe_String_New(resolved_path));
+         free (resolved_path);
          return JOE_SUCCESS;
       } else {
          getErrno (filename, retval);

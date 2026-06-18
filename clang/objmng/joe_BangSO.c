@@ -40,8 +40,6 @@ This class allows to call C function in a shared library loaded using the
 # define DLSYM GetProcAddress
 # define DLSYM_TYPE(x) FARPROC x
 # define DLCLOSE FreeLibrary
-# define STDCALL_FUNC(fPnt) ((long(__stdcall*)())fPnt)
-# define CDECL_FUNC(fPnt) ((long(__cdecl*)())fPnt)
 # define STRLEN _strlen
 
 # else /* WIN32 */
@@ -59,12 +57,11 @@ This class allows to call C function in a shared library loaded using the
 # define DLSYM dlsym
 # define DLSYM_TYPE(x) void* (*x)()
 # define DLCLOSE dlclose
-# define STDCALL_FUNC(fPnt) ((long(*)())fPnt)
-# define CDECL_FUNC(fPnt) ((long(*)())fPnt)
 # define STRLEN strlen
 
 # endif /* ! WIN32 */
-
+typedef void* (*vfunc0)();
+typedef void* (*vfunc)(void*,...);
 
 struct LibData {
    DLOPEN_RETURN_TYPE pnt;
@@ -120,35 +117,35 @@ call (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
 
          switch (argc) {
          case 1:
-            joe_Object_assign(retval, joe_Pointer_New ((void*)pnt ()));
+            joe_Object_assign(retval, joe_Pointer_New (((vfunc0)pnt) ()));
             break;
          case 2:
-            joe_Object_assign(retval, joe_Pointer_New ((void*)pnt (funcArg[0])));
+            joe_Object_assign(retval, joe_Pointer_New (((vfunc)pnt) (funcArg[0])));
             break;
          case 3:
-            joe_Object_assign(retval,joe_Pointer_New ((void*)pnt (funcArg[0],
+            joe_Object_assign(retval,joe_Pointer_New (((vfunc)pnt) (funcArg[0],
                                                            funcArg[1])));
             break;
          case 4:
-            joe_Object_assign(retval,joe_Pointer_New ((void*)pnt (funcArg[0],
+            joe_Object_assign(retval,joe_Pointer_New (((vfunc)pnt) (funcArg[0],
                                                            funcArg[1],
                                                            funcArg[2])));
             break;
          case 5:
-            joe_Object_assign(retval,joe_Pointer_New ((void*)pnt (funcArg[0],
+            joe_Object_assign(retval,joe_Pointer_New (((vfunc)pnt) (funcArg[0],
                                                            funcArg[1],
                                                            funcArg[2],
                                                            funcArg[3])));
             break;
          case 6:
-            joe_Object_assign(retval,joe_Pointer_New ((void*)pnt (funcArg[0],
+            joe_Object_assign(retval,joe_Pointer_New (((vfunc)pnt) (funcArg[0],
                                                            funcArg[1],
                                                            funcArg[2],
                                                            funcArg[3],
                                                            funcArg[4])));
             break;
          case 7:
-            joe_Object_assign(retval,joe_Pointer_New ((void*)pnt (funcArg[0],
+            joe_Object_assign(retval,joe_Pointer_New (((vfunc)pnt) (funcArg[0],
                                                            funcArg[1],
                                                            funcArg[2],
                                                            funcArg[3],
@@ -156,7 +153,7 @@ call (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
                                                            funcArg[5])));
             break;
          case 8:
-            joe_Object_assign(retval,joe_Pointer_New ((void*)pnt (funcArg[0],
+            joe_Object_assign(retval,joe_Pointer_New (((vfunc)pnt) (funcArg[0],
                                                            funcArg[1],
                                                            funcArg[2],
                                                            funcArg[3],
@@ -165,7 +162,7 @@ call (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
                                                            funcArg[6])));
             break;
          case 9:
-            joe_Object_assign(retval,joe_Pointer_New ((void*)pnt (funcArg[0],
+            joe_Object_assign(retval,joe_Pointer_New (((vfunc)pnt) (funcArg[0],
                                                            funcArg[1],
                                                            funcArg[2],
                                                            funcArg[3],

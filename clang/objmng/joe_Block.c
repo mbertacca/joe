@@ -571,7 +571,7 @@ getVariablesNames(joe_JOEObject self, int argc, joe_Object* argv, joe_Object* re
 {
    joe_HashMap hashvars = 0;
 
-   joe_Object_assign(&hashvars, joe_HashMap_New(8));
+   joe_Object_assign(&hashvars, joe_HashMap_New());
 
    getAllVars (self, hashvars);
 
@@ -691,7 +691,7 @@ void
 joe_Block_Init (joe_Block self, joe_Block parent, joe_Bang bang)
 {
    joe_Object* thisVars = joe_Object_array(self);
-   joe_HashMap hashvars = joe_HashMap_New(8);
+   joe_HashMap hashvars = joe_HashMap_New();
    joe_String bangBang = 0;
 
    joe_Object_assign(&thisVars[MESSAGES], joe_Array_New(0));

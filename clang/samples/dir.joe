@@ -1,17 +1,67 @@
+/*
+ * example for native calls,
+ * for reading directories use the joe_Files object
+ */ 
 dir:args.
 
-so <- !getOSType; startsWith "Win" ifTrue {!loadSO "msvcrt.dll"},{!loadSO ""}.
-
-dirent <- !newInstance "joe_ByteArray",(256 + 1).
-dirp := .
-
-dir := so call "opendir","/".
-dir isNull; ifFalse {
-   !while { dirp := so call "readdir",dir. dirp isNull; not},{
-      
-      !println "[",((dirp displace 19) stringValue),"]".
+dirread <- !getOSType; startsWith "Win" ifTrue {
+   {dirread:.
+      so <- !loadSO "msvcrt.dll".
+      fileinfo <- !newInstance "joe_ByteArray",296.
+      hFind := .
+      firstItem := .
+      opendir <- {:path.
+         hFind := so call "_findfirst",(path + "\*"), fileinfo.
+         hFind longValue; >= 0 ifTrue {
+            firstItem := fileinfo child 36,260 toString.
+            <1>.
+         },{
+            <0>.
+         }.
+      }.
+      readdir <- {
+         Return := .
+         () <> firstItem ifTrue {
+             Return := firstItem.
+             firstItem := .
+         },{
+            rc := so call "_findnext",hFind, fileinfo.
+            rc longValue; = 0 ifTrue {
+               Return := fileinfo child 36,260 toString.
+            }.
+         }.
+         Return.
+      }.
+      closedir <- {
+         so call "_findclose",hFind.
+      }.
    }.
-   so call "closedir",dir.
-}.
+},{
+   {
+      so <- !loadSO "".
+      hDir := .
+      opendir <- {:path.
+        hDir := so call "opendir",path.
+        hDir longValue; <> 0.
+      }.
+      readdir <- {
+         item <- so call "readdir",hDir.
+         item longValue; <> 0 ifTrue {
+            (item displace 19) stringValue.
+         },{
+            ().
+         }.
+      }.
+      closedir <- {
+         so call "closedir",hDir.
+      }.
+   }.
+} new.
 
-dir := so call "opendir",".".
+dirread opendir "." ifTrue {
+   item := .
+   !while { item := dirread readdir. () <> item },{
+      !println item.
+   }.
+   dirread closedir.
+}.

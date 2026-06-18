@@ -83,7 +83,7 @@ getMethods (joe_Object self, int argc, joe_Object *argv, joe_Object *retval)
    joe_String key = 0;
    joe_Class *clz;
 
-   joe_Object_assign (&methods, joe_HashMap_New (0));
+   joe_Object_assign (&methods, joe_HashMap_New ());
    for (clz = *clazz; clz; clz = clz->extends) {
       if (clz->mthds) {
          for (mthd = clz->mthds; mthd->name != (void *) 0; mthd++) {

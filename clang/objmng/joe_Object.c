@@ -370,9 +370,8 @@ void
 joe_Object_showLiveObjects ()
 {
    if (allObjects) {
-      unsigned int Return;
       struct s_ObjectList *list;
-      for (Return = 0, list = allObjects; list; Return++) {
+      for (list = allObjects; list; ) {
           joe_Object_showLiveObject (list->obj, 0);
          list = list->next;
       }
