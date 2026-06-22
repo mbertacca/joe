@@ -40,35 +40,152 @@ static char*
 realpath(const char* path, char* resolved_path) {
    HANDLE hFile;
    DWORD pathlen;
-   char *final_path;
+   char *buf;
 
-   hFile=CreateFileA(path,0,FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,
+   hFile=CreateFileA(path,FILE_READ_ATTRIBUTES,
+                     FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,
                      NULL,OPEN_EXISTING,FILE_FLAG_BACKUP_SEMANTICS,NULL);
    if (hFile == INVALID_HANDLE_VALUE) {
-       errno = ENOENT;
-       return NULL;
+      hFile=CreateFileA(path,FILE_READ_ATTRIBUTES,
+                        FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,
+                        NULL,OPEN_EXISTING,
+                        FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS,
+                        NULL);
+      if (hFile == INVALID_HANDLE_VALUE) {
+          errno = ENOENT;
+          return NULL;
+      }
    }
    pathlen = GetFinalPathNameByHandleA(hFile, NULL, 0, VOLUME_NAME_DOS);
    if (pathlen == 0) {
        errno = EIO;
        return NULL;
    }
-   final_path = malloc (pathlen + 1);
-   pathlen = GetFinalPathNameByHandleA(hFile,final_path,pathlen + 1,VOLUME_NAME_DOS);
+   buf = malloc (pathlen + 1);
+   pathlen = GetFinalPathNameByHandleA(hFile,buf,pathlen + 1,VOLUME_NAME_DOS);
    CloseHandle(hFile);
-   if (resolved_path) {
-      strcpy (resolved_path,
-         (strncmp(final_path, "\\\\?\\", 4) == 0) ? final_path + 4 : final_path);
-      free (final_path);
+   if (resolved_path) {  
+      if (pathlen >= 4 && buf[0] == '\\' && (buf[1] == '\\' || buf[1] == '?')
+                       && buf[2] == '?' && buf[3] == '\\')
+         strcpy (resolved_path, buf + 4);
+      else
+         strcpy (resolved_path, buf);
+      free (buf);
    } else {
-      if (!strncmp(final_path, "\\\\?\\", 4)) {
-         resolved_path = strdup (final_path + 4);
-         free (final_path);
+      if (pathlen >= 4 && buf[0] == '\\' && (buf[1] == '\\' || buf[1] == '?')
+                       && buf[2] == '?' && buf[3] == '\\') {
+         resolved_path = strdup (buf + 4);
+         free (buf);
       } else {
-         resolved_path = final_path;
+         resolved_path = buf;
       }
    }
    return resolved_path;
+}
+
+typedef struct _REPARSE_DATA_BUFFER {
+    ULONG  ReparseTag;
+    USHORT ReparseDataLength;
+    USHORT Reserved;
+    union {
+        struct {
+            USHORT SubstituteNameOffset;
+            USHORT SubstituteNameLength;
+            USHORT PrintNameOffset;
+            USHORT PrintNameLength;
+            ULONG  Flags;
+            WCHAR  PathBuffer[1];
+        } SymbolicLinkReparseBuffer;
+        struct {
+            USHORT SubstituteNameOffset;
+            USHORT SubstituteNameLength;
+            USHORT PrintNameOffset;
+            USHORT PrintNameLength;
+            WCHAR  PathBuffer[1];
+        } MountPointReparseBuffer;
+        struct {
+            UCHAR DataBuffer[1];
+        } GenericReparseBuffer;
+    } DUMMYUNIONNAME;
+} REPARSE_DATA_BUFFER, *PREPARSE_DATA_BUFFER;
+
+static ssize_t
+readlink(const char *path, char *buf, size_t bufsiz) {
+   HANDLE hFile;
+   int result;
+   FILE_ATTRIBUTE_TAG_INFO attrTagInfo;
+
+   if (!path || !buf || bufsiz == 0) return -1;
+
+   hFile = CreateFileA(path, FILE_READ_ATTRIBUTES, FILE_SHARE_READ,
+                NULL, OPEN_EXISTING,
+                FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS, NULL);
+
+   if (hFile == INVALID_HANDLE_VALUE) {
+      errno = EIO;
+      errno = ENOENT;
+      return -1;
+   }
+   result = GetFileInformationByHandleEx( hFile,
+                                          FileAttributeTagInfo,
+                                          &attrTagInfo,
+                                          sizeof(attrTagInfo));
+   if (!result) {
+      errno = EIO;
+      CloseHandle(hFile);
+      return -1;
+   }
+   if (!(attrTagInfo.FileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)) {
+      errno = EIO;
+      CloseHandle(hFile);
+      return -1;
+   }
+   if (attrTagInfo.ReparseTag == IO_REPARSE_TAG_MOUNT_POINT) {
+      CloseHandle(hFile);
+      if (realpath (path, buf)) {
+         return (ssize_t) strlen(buf);
+      } else {
+         return -1;
+      }
+   } else if (attrTagInfo.ReparseTag == IO_REPARSE_TAG_APPEXECLINK) {
+      strncpy (buf, "<APPEXECLINK>", bufsiz - 1);
+      CloseHandle(hFile);
+      result = strlen(buf);
+   } else {
+      BYTE rawBuffer[16384];
+      DWORD bytesReturned;
+      REPARSE_DATA_BUFFER* rdb;
+      WCHAR* pName;
+      int len;
+      if (!DeviceIoControl(hFile, FSCTL_GET_REPARSE_POINT, NULL, 0,
+                          rawBuffer, sizeof(rawBuffer), &bytesReturned, NULL)) {
+         CloseHandle(hFile);
+         return -1;
+      }
+
+      CloseHandle(hFile);
+
+      rdb = (REPARSE_DATA_BUFFER*)rawBuffer;
+       
+      if (rdb->ReparseTag != IO_REPARSE_TAG_SYMLINK) {
+         return -1;
+      }
+
+      pName = (WCHAR*)((BYTE*)rdb->SymbolicLinkReparseBuffer.PathBuffer + rdb->SymbolicLinkReparseBuffer.SubstituteNameOffset);
+      len = rdb->SymbolicLinkReparseBuffer.SubstituteNameLength / sizeof(WCHAR);
+
+      result = WideCharToMultiByte(CP_UTF8, 0, pName, len, buf, (int)bufsiz - 1, NULL, NULL);
+   }
+   if (result > 0) {
+      buf[result] = '\0';
+      if (result >= 4 && buf[0] == '\\' && (buf[1] == '\\' || buf[1] == '?')
+                      && buf[2] == '?' && buf[3] == '\\') {
+          memmove(buf, buf + 4, result - 4 + 1);
+          result -= 4;
+      }
+      return (ssize_t)result;
+   }
+   return -1;
 }
 
 static int
@@ -377,6 +494,36 @@ isSymbolicLink (joe_Object self,
    }
 }
 
+
+/**
+## readSymbolicLink _aString_
+
+Returns a String with the target of a symbolic link
+*/
+
+static int
+readSymbolicLink (joe_Object self,
+                int argc, joe_Object *argv, joe_Object *retval)
+{
+   if (argc == 1 && joe_Object_instanceOf (argv[0], &joe_String_Class)) {
+      char buf[16384];
+      char *filename = joe_String_getCharStar (argv[0]);
+      ssize_t bufsize = readlink(filename, buf, sizeof(buf));
+      if (bufsize > 0) {
+         joe_Object_assign (retval, joe_String_New_len(buf,bufsize));
+         return JOE_SUCCESS;
+      } else {
+         joe_Object_assign(retval,
+               joe_Exception_New ("readSymbolicLink: not a symbolic link"));
+         return JOE_FAILURE;
+      }
+   } else {
+      joe_Object_assign(retval,
+                  joe_Exception_New ("readSymbolicLink: invalid argument"));
+      return JOE_FAILURE;
+   }
+}
+
 /**
 ## toRealPath _aString_
 
@@ -539,6 +686,7 @@ static joe_Method filesMthds[] = {
    {"newDirectoryStream", listDirectory },
    {"isDirectory", isDirectory },
    {"isSymbolicLink", isSymbolicLink },
+   {"readSymbolicLink", readSymbolicLink },
    {"getAttribute", getAttribute },
    {"exists", exists },
    {"deleteIfExists", deleteIfExists },
