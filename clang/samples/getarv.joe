@@ -1,0 +1,14 @@
+
+% <- {
+   args <- !! getArgv.
+   args length; > 1 ifTrue {
+      !foreach (args shift),{:i.
+         %exec i.
+      }.
+      !println (args get 0).
+   },{
+      !print (args get 0).
+   }.
+}.
+
+%exec 9,8,7,6. 

@@ -358,6 +358,8 @@ int
 joe_Block_exec (joe_Object self, int argc, joe_Object *args, joe_Object *retval)
 {
    struct s_argv *lastArgs = (struct s_argv *) *JOE_MEM(*JOE_AT(self,ARGS));
+   lastArgs->argc = argc;
+   lastArgs->argv = args;
    if (lastArgs->recursion) {
       return recur_exec (self, argc, args, lastArgs, retval);
    } else {
