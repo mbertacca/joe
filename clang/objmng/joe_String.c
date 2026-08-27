@@ -1218,10 +1218,18 @@ joe_Class joe_String_Class = {
 
 joe_Object
 joe_String_New_len (const char *c, size_t len) {
-   joe_Object self;
-
-   self = joe_Object_New (&joe_String_Class, len + 1);
-   memcpy (JOE_CHAR_STAR(self), c, len);
+   joe_Object self = joe_Object_New (&joe_String_Class, len + 1);
+   if (strnlen (c, len) < len) {
+      char *pnt;
+      for (pnt = JOE_CHAR_STAR(self); len != 0; len--)
+         if (*c)
+            *(pnt++) = *(c++);
+         else
+            c++;
+      *pnt = 0;
+   } else {
+      memcpy (JOE_CHAR_STAR(self), c, len);
+   }
    return self;
 }
 
