@@ -434,6 +434,10 @@ public class DefaultCommand extends CommandBase {
       private boolean prevCondition;
       private Object Return;
 
+      private final boolean compare (Object cfrt2) {
+         return cfrt1 == null ? cfrt1 == cfrt2 : cfrt1.equals(cfrt2);
+      }
+
       /**
        * Constructor, cfrt is the object to whom all the objects specified
        * in the following 'case' methods will be compared.
@@ -448,7 +452,7 @@ public class DefaultCommand extends CommandBase {
        * It returns this.
        */
       public Object $case (Object cfrt2) {
-         prevCondition |= cfrt1.equals (cfrt2);
+         prevCondition |= compare (cfrt2);
          return this;
       }
       public Object $case (Block blk2) throws JOEException {
@@ -470,7 +474,7 @@ public class DefaultCommand extends CommandBase {
        */
 
       public Object $case (Object cfrt2, Block block) throws JOEException {
-         if (!alreadyDone && (prevCondition || cfrt1.equals (cfrt2))) {
+         if (!alreadyDone && (prevCondition || compare (cfrt2))) {
             alreadyDone = true;
             Return = block.exec();
          } else {
@@ -484,6 +488,8 @@ public class DefaultCommand extends CommandBase {
        * executed only if no block in the switch has been executed yet.
        */  
       public Object $case (Block blk2, Block block) throws JOEException {
+         if (blk2 == null)
+            return $case ((Object) null, block);
          if (!(alreadyDone || prevCondition)) {
             Object cfrt2 =  blk2.exec();
             if (cfrt2 instanceof Wrapper)
