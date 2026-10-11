@@ -190,11 +190,13 @@ public class ExecMessage implements Message {
          argArray = argsExec(blk);
       Block b = ob.getMethod (selector.word);
       if (b == null) {
-         if ("toString".equals (selector.word) ||
-             "extends".equals (selector.word) ||
-             "new".equals (selector.word))
+         switch (selector.word) {
+         case "toString":
+         case "extends":
+         case "new":
+         case "equals":
             return check (ob, blk);
-         else if ("getClass".equals (selector.word)) {
+         case "getClass":
             selector=new Token ("getJoeClass",
                                 selector.type,
                                 selector.row,
