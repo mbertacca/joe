@@ -5,17 +5,22 @@ INCL=-I../include
 BIN=../bin
 LIB=../lib
 LIBS=-Wl,-rpath=\$$ORIGIN/. -L$(BIN) -ljoeobj
-EGLIB=timeobjs.dll # just an example
+EGLIB=timeobjs.dll
+PXLIB=proxy.dll
 
-all:$(BIN)/$(EGLIB)
+all:$(BIN)/$(EGLIB) $(BIN)/$(PXLIB)
 
 $(BIN)/$(EGLIB):timeobjs.c
 	$(CC) $(INCL) -fPIC -g -shared -o $(BIN)/$(EGLIB) -Wl,--output-def,$(LIB)/$(TARGET).def,--out-implib,$(LIB)/$(TARGET).lib,--add-stdcall-alias $(OBJS) timeobjs.c $(LIBS)
+
+$(BIN)/$(PXLIB):proxy.c
+	$(CC) $(INCL) -fPIC -g -shared -o $(BIN)/$(PXLIB) -Wl,--output-def,$(LIB)/$(TARGET).def,--out-implib,$(LIB)/$(TARGET).lib,--add-stdcall-alias $(OBJS) proxy.c $(LIBS)
 
 .c.o:
 	$(CC) $(INCL) -c $(CFLAGS) $(INCL) $<
 
 clean:
 	rm -f $(BIN)/$(EGLIB) $
+	rm -f $(BIN)/$(PXLIB) $
 
 eglib:

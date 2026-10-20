@@ -23,6 +23,7 @@
 # include "joe_Memory.h"
 # include "joe_JOEObject.h"
 # include "joe_Exception.h"
+# include "joe_Invocation.h"
 # include "joestrct.h"
 
 typedef struct s_Selector {
@@ -127,21 +128,22 @@ joe_Selector_invoke (joe_Object self, joe_Object receiver,
          selector->actualRcvr = receiver;
          return selector->method (selector->actualRcvr, argc, argv, retval);
       } else {
-         char buffer[512];
-         if (joe_Object_instanceOf (receiver,&joe_Block_Class)) {
-            snprintf (buffer, sizeof(buffer),
-                     "Method not found: %s in class %s, name=%s",
-                      selName, clazz->name,
-                     joe_String_getCharStar(joe_Block_getName(receiver)));
-         } else {
-            snprintf (buffer, sizeof(buffer), "Method not found: %s in class %s",
-                      selName, clazz->name);
-         }
-         joe_Object_assign (retval, joe_Exception_New (buffer));
-         joe_Object_assign(JOE_AT(self, LASTRCVR), 0);
-         selector->actualRcvr = 0;
-         selector->argClazz = 0;
-         return JOE_FAILURE;
+         int rc;
+         joe_Selector doesNotUnderstand = NULL;
+         joe_Invocation invocation = NULL;
+         selector->argClazz = NULL;
+
+         joe_Object_assign (&doesNotUnderstand,
+                            joe_Selector_New ("doesNotUnderstand", 1));
+
+         joe_Object_assign (&invocation,
+                            joe_Invocation_New (self, argc, argv));
+         rc = joe_Selector_invoke (doesNotUnderstand, receiver,
+                                   1, &invocation, retval);
+
+         joe_Object_assign (&doesNotUnderstand, NULL);
+         joe_Object_assign (&invocation, NULL);
+         return rc;
       }
    }
 /*

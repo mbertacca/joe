@@ -1,0 +1,53 @@
+JoeString <- {JoeString:arg.
+   object <- arg.
+   substring <- {:s0, s1,s2.
+      () <> s2 ifTrue {
+         !throw "Exception; too many arguments".
+      },{
+         arg substring s0, s1.
+      }.
+   }.
+   toString <- { arg toString }.
+}.
+
+proxyJOE <- {proxy:arg.
+   object <- arg.
+   test <- {:n1,n2. "<" + (n1+n2) + "><" + (arg toString) + ">" }.
+   doesNotUnderstand <- {:msg.
+      !println "###>",(msg selector).
+      msg sendTo object.
+   }.
+}.
+
+doTest <- {:proxy.
+   !println "---> ",(proxy get 1).
+   !try {
+      !println "OK:",(proxy get 0 substring 2,4).
+   },{:_ex.
+      !println "KO:",(_ex getMessage).
+   }.
+   !try {
+      !println "KO:",(proxy get 0 substring 2,4,5).
+   },{:_ex.
+      !println "OK:",(_ex getMessage).
+   }.
+   !try {
+      !println "OK:",(proxy get 0 toString).
+   },{:_ex.
+      !println "KO:",(_ex getMessage).
+   }.
+}.
+
+proxyType <- !array
+  (!array (proxyJOE new "ABCDEFGHIJ"),"JOE/Primitive")
+  ,(!array (proxyJOE new (JoeString new "KLMNOPQRST")),"JOE JOE")
+/*
+  ,(!array (!newInstance"Proxy", "abcdefghij"),"Java/Primitive")
+  ,(!array (!newInstance"Proxy", (JoeString new "klmnopqrst")),"Java/JOE")
+*/
+     .
+
+!foreach proxyType,{:i.
+   doTest exec i.
+}.
+

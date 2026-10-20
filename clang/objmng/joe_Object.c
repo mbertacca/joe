@@ -42,6 +42,7 @@
 # include "joe_ArrayList.h"
 # include "joe_Pointer.h"
 # include "joe_Date.h"
+# include "joe_Invocation.h"
 # include "joe_Class.h"
 # include "joestrct.h"
 
@@ -168,6 +169,7 @@ init ()
       joe_Class_registerClass (&joe_Exception_Class);
       joe_Class_registerClass (&joe_HashMap_Class);
       joe_Class_registerClass (&joe_ArrayList_Class);
+      joe_Class_registerClass (&joe_Invocation_Class);
    }
 }
 
@@ -196,6 +198,15 @@ joe_Class_newInstance (joe_Class *cls,
       Return = cls->ctor (*retval, argc, args, retval);
    }
    return Return;
+}
+
+inline void joe_Object_transfer(joe_Object* self, joe_Object* value)
+{
+   joe_Object obj = *self;
+   *self = *value;
+   *value = 0;
+   if (obj != 0)
+      joe_Object_unassign(obj);
 }
 
 joe_Object
@@ -832,11 +843,52 @@ clone (joe_Object self,int argc,joe_Object *argv,joe_Object *retval)
    }
 }
 
+/**
+## doesntUnderstand _aInvocation_
+
+This method acts as a fallback mechanism  when an invoked method cannot be found.
+It receives the reified invocation details and can handle or forward
+the message dynamically thru the argument _aInvocation_.
+
+This alwats throws an exception
+*/
+
+static int
+doesNotUnderstand (joe_Object self,
+                   int argc, joe_Object *argv, joe_Object *retval)
+{
+   char buffer[512];
+
+   if (argc == 1 && JOE_ISCLASS (argv[0], &joe_Invocation_Class)) {
+      joe_Selector selector = joe_Invocation_selector (argv[0]);
+      char *selName = joe_Selector_name (selector);
+
+      if (joe_Object_instanceOf (self,&joe_Block_Class) ||
+          joe_Object_instanceOf (self,&joe_JOEObject_Class)) {
+         snprintf (buffer, sizeof(buffer),
+                   "Method not found: %s in class %s, name=%s",
+                   selName, self->clazz->name,
+                   joe_String_getCharStar(joe_Block_getName(self)));
+      } else {
+         snprintf (buffer, sizeof(buffer),
+                     "Method not found: %s in class %s",
+                      selName, self->clazz->name);
+      }
+   } else {
+      snprintf (buffer, sizeof(buffer),
+                     "Method not found: doesNotUnderstand in class %s",
+                     joe_Object_getClassName (self));
+   }
+   joe_Object_assign(retval, joe_Exception_New (buffer));
+   return JOE_FAILURE;
+}
+
 static joe_Method mthds[] = {
   {"clone", clone},
   {"equals", equals},
   {"getClass", getClass},
   {"toString", toString},
+  {"doesNotUnderstand", doesNotUnderstand},
   {(void *) 0, (void *) 0}
 };
 
@@ -1116,6 +1168,12 @@ joe_Class joe_Null_Class = {
 
 static struct s_joe_Object obj_null = {0,1,0,1,0,&joe_Null_Class, {.str="()"} };
 joe_Null joe_Null_value = &obj_null;
+
+joe_Null
+joe_Null_get ()
+{
+   return joe_Null_value;
+}
 
 /* test */
 

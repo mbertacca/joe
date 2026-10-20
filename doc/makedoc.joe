@@ -13,5 +13,6 @@ DESTDIR mkdir.
 
 system exec ("javadoc -d " + (DESTDIR getPath) + " " +
                              SRCDIR + "/Block.java " + 
+                             SRCDIR + "/Invocation.java " + 
                              SRCDIR + "/W*.java " + 
                              SRCDIR + "/*Command*.java").

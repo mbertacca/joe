@@ -41,6 +41,7 @@ SRC <- "../clang/objmng/".
                  ,(SRC+"joe_Float.c")
                  ,(SRC+"joe_Glob.c")
                  ,(SRC+"joe_HashMap.c")
+                 ,(SRC+"joe_Invocation.c")
                  ,(SRC+"joe_Integer.c")
                  ,(SRC+"joe_List.c")
                  ,(SRC+"joe_LoadScript.c")

@@ -184,7 +184,8 @@ public class ExecMessage implements Message {
             Return[i] = origArgs[i];
       return Return;
    }
-   private MethodWArgs checkJO (Block ob, Block blk) throws JOEException {
+   private MethodWArgs checkJO (Block ob, Block blk)
+                                 throws JOEException,NoSuchMethodException {
       Object[] argArray = null;
       if (origArgs != null) 
          argArray = argsExec(blk);
@@ -204,14 +205,13 @@ public class ExecMessage implements Message {
                                 selector.fName);
             return check (ob, blk);
          }
-         throw new JOEException (
-            new NoSuchMethodException (selector.word+" in "+ob.name()),
-                                       selector);
+         throw new NoSuchMethodException (selector.word+" in "+ob.name());
       }
       return new MethodWArgs (b, argArray);
    }
  
-   private MethodWArgs check (Object actObj, Block blk) throws JOEException {
+   private MethodWArgs check (Object actObj, Block blk)
+                                 throws JOEException,NoSuchMethodException {
       MethodWArgs Return;
       Object[] argArray = null;
       if (actObj instanceof ClassReference)
@@ -232,17 +232,13 @@ public class ExecMessage implements Message {
                argClasses[i] = argArray[i].getClass();
          Return = getMethod(argClasses, argArray);
       }  else {
-         try {
-            Method m[] = methCache.get(clazz);
-            if (m == null) {
-               m = new Method[1];
-               m[0] = clazz.getMethod(jSelector);
-               methCache.put(clazz,m);
-            }
-            Return = new MethodWArgs (m[0], argArray);
-         } catch (NoSuchMethodException ex) {
-            throw new JOEException (ex, selector);
+         Method m[] = methCache.get(clazz);
+         if (m == null) {
+            m = new Method[1];
+            m[0] = clazz.getMethod(jSelector);
+            methCache.put(clazz,m);
          }
+         Return = new MethodWArgs (m[0], argArray);
       }
       return Return;
    }
@@ -264,7 +260,7 @@ public class ExecMessage implements Message {
    }
 
    private MethodWArgs getMethod(Class argClasses[], Object[] argArray)
-                                                     throws JOEException {
+                                                  throws NoSuchMethodException {
       Method method = null;
       MethodWArgs Return;
       int bestFit = -1;
@@ -345,8 +341,7 @@ public class ExecMessage implements Message {
             else
                sb.append("()");
          }
-         throw new JOEException (new NoSuchMethodException(sb.toString()),
-                                 selector);
+         throw new NoSuchMethodException(sb.toString());
       }
       if (bVarargs) {
          Object newArgs[] = new Object[bTypes.length];
@@ -364,8 +359,25 @@ public class ExecMessage implements Message {
 
       return new MethodWArgs (method, argArray);
    }
-
    public Object exec (Block blk) throws JOEException {
+      try {
+         return iExec (blk);
+      } catch (NoSuchMethodException ex) {
+         Object newArgs[] = new Object[] {new Invocation(blk,selector,origArgs)};
+         Object obj = receiver != null ? receiver : object;
+         Token notUndTk = new Token ("doesNotUnderstand", selector.type,
+                                    selector.row, selector.col, selector.fName);
+         ExecMessage notUndMsg = new ExecMessage (obj, notUndTk, newArgs);
+         try {
+            return notUndMsg.iExec(blk);
+         } catch (NoSuchMethodException exNotUnd) {
+            throw new JOEException (
+                 new NoSuchMethodException (ex.getMessage()),
+                                            selector);
+         }
+      }
+   }
+   private Object iExec (Block blk) throws JOEException, NoSuchMethodException {
       Object wobj;
       Object actObj;
       Object Return;

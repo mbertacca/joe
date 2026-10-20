@@ -23,5 +23,6 @@
 typedef joe_Object joe_Null;
 extern joe_Class joe_Null_Class;
 extern joe_Null joe_Null_value;
+JOEOBJ_API joe_Null joe_Null_get (); /* for shared libraries */
 
 # endif
